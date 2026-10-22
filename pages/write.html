@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>写文章 · 乘法</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="/style.css?v=23">
+<style>
+  .ed-card { padding: 24px; }
+  .ed-title {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 20px;
+    font-weight: 600;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+  }
+  .ed-title:focus { border-color: var(--primary); }
+
+  /* 工具栏 */
+  .ed-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+    margin: 12px 0 8px;
+    padding: 6px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+  }
+  .ed-bar .sep {
+    width: 1px; height: 20px;
+    margin: 0 4px;
+    background: var(--border);
+  }
+  .ed-btn {
+    min-width: 30px;
+    height: 30px;
+    padding: 0 8px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: none;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    line-height: 28px;
+  }
+  .ed-btn:hover { background: var(--primary-soft); border-color: var(--primary); color: var(--primary-deep); }
+  .ed-btn b { font-weight: 800; }
+  .ed-btn i { font-style: italic; }
+  .ed-btn u { text-decoration: underline; }
+  .ed-btn s { text-decoration: line-through; }
+  .ed-select {
+    height: 30px;
+    padding: 0 6px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--card);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .ed-color {
+    width: 30px; height: 30px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: none;
+    cursor: pointer;
+  }
+  /* 编辑器主体 */
+  .ed-body {
+    min-height: 380px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.8;
+    outline: none;
+    overflow-x: auto;
+  }
+  .ed-body:focus { border-color: var(--primary); }
+  .ed-body:empty::before {
+    content: attr(data-placeholder);
+    color: var(--text-light);
+  }
+  .ed-body img, .ed-body video { max-width: 100%; border-radius: 6px; }
+  .ed-body audio { width: 100%; margin: 6px 0; }
+  /* 点中图片/视频后右下角出现拖动手柄，拖一下就能改大小（改的是宽度，高度按比例） */
+  .ed-body img.ed-sel, .ed-body video.ed-sel { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .ed-handle {
+    position: fixed;
+    width: 14px; height: 14px;
+    margin: -7px 0 0 -7px;
+    border-radius: 3px;
+    background: var(--primary);
+    border: 2px solid #fff;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, .35);
+    cursor: nwse-resize;
+    z-index: 120;
+    display: none;
+  }
+  .ed-handle.on { display: block; }
+  .ed-body blockquote {
+    margin: 10px 0;
+    padding: 6px 14px;
+    border-left: 4px solid var(--primary);
+    background: var(--primary-soft);
+    color: var(--text-light);
+  }
+  .ed-body pre {
+    margin: 10px 0;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    font-family: Consolas, Menlo, monospace;
+    font-size: 14px;
+    white-space: pre-wrap;
+  }
+  .ed-body h1, .ed-body h2, .ed-body h3 { margin: 14px 0 8px; }
+
+  .ed-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--text-light);
+  }
+  .ed-foot .over { color: #c0392b; font-weight: 600; }
+  .ed-actions { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+  .ed-submit {
+    padding: 9px 26px;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary);
+    color: #fff;
+    font-family: inherit;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .ed-submit:hover { background: var(--primary-deep); }
+  .ed-submit:disabled { opacity: .6; cursor: not-allowed; }
+  .ed-msg { font-size: 14px; color: var(--text-light); }
+  .ed-msg.ok { color: #2e7d32; }
+  .ed-msg.err { color: #c0392b; }
+</style>
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <section style="margin-top:36px;">
+    <div class="card ed-card">
+      <h2 class="section-title" id="pageTitle">写文章</h2>
+
+      <input class="ed-title" id="title" maxlength="100" placeholder="标题（最多 100 字）">
+
+      <div class="ed-bar">
+        <button class="ed-btn" data-cmd="undo" title="撤销">↶</button>
+        <button class="ed-btn" data-cmd="redo" title="重做">↷</button>
+        <span class="sep"></span>
+
+        <select class="ed-select" id="blockSel" title="段落格式">
+          <option value="p">正文</option>
+          <option value="h1">一级标题</option>
+          <option value="h2">二级标题</option>
+          <option value="h3">三级标题</option>
+          <option value="blockquote">引用</option>
+          <option value="pre">代码块</option>
+        </select>
+        <span class="sep"></span>
+
+        <button class="ed-btn" data-cmd="bold" title="加粗"><b>B</b></button>
+        <button class="ed-btn" data-cmd="italic" title="斜体"><i>I</i></button>
+        <button class="ed-btn" data-cmd="underline" title="下划线"><u>U</u></button>
+        <button class="ed-btn" data-cmd="strikeThrough" title="删除线"><s>S</s></button>
+        <span class="sep"></span>
+
+        <select class="ed-select" id="sizeSel" title="字号">
+          <option value="2">小</option>
+          <option value="3" selected>正常</option>
+          <option value="5">大</option>
+          <option value="6">特大</option>
+        </select>
+
+        <input class="ed-color" type="color" id="foreColor" value="#e5534b" title="文字颜色">
+        <button class="ed-btn" data-cmd="foreColor" data-val="#e5534b" title="用左边选的颜色">A</button>
+        <button class="ed-btn" data-cmd="hiliteColor" data-val="#fff3a3" title="黄色高亮">🖍</button>
+        <span class="sep"></span>
+
+        <button class="ed-btn" data-cmd="insertUnorderedList" title="无序列表">• 列表</button>
+        <button class="ed-btn" data-cmd="insertOrderedList" title="有序列表">1. 列表</button>
+        <button class="ed-btn" data-cmd="formatBlock" data-val="blockquote" title="引用">❝</button>
+        <button class="ed-btn" data-cmd="formatBlock" data-val="pre" title="代码块">&lt;/&gt;</button>
+        <button class="ed-btn" data-cmd="insertHorizontalRule" title="分割线">—</button>
+        <button class="ed-btn" data-cmd="createLink" title="插入链接">🔗</button>
+        <button class="ed-btn" data-cmd="removeFormat" title="清除格式">🧹</button>
+        <span class="sep"></span>
+
+        <button class="ed-btn" data-act="img" title="插入图片">🖼 图片</button>
+        <button class="ed-btn" data-act="video" title="插入视频">🎬 视频</button>
+        <button class="ed-btn" data-act="audio" title="插入音频">🎵 音频</button>
+      </div>
+
+      <div class="ed-body" id="editor" contenteditable="true" data-placeholder="开始写吧…（最多 10000 字，可粘贴或拖入图片）"></div>
+
+      <div class="ed-foot">
+        <span>字数 <b id="chars">0</b> / 10000</span>
+        <span>素材空间 <span id="quota">—</span></span>
+        <span style="color:var(--text-light)">图片 ≤ 50MB，音频 ≤ 200MB，视频 ≤ 2GB</span>
+      </div>
+
+      <div class="ed-actions">
+        <button class="ed-submit" id="saveBtn">发布</button>
+        <span class="ed-msg" id="msg"></span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 CHENGFA</p>
+  </footer>
+
+  <div class="ed-handle" id="resizeHandle" title="拖我改大小，双击图片可恢复原始尺寸"></div>
+
+  <input type="file" id="fileImg"   accept="image/*" hidden>
+  <input type="file" id="fileVideo" accept="video/*,.mkv" hidden>
+  <input type="file" id="fileAudio" accept="audio/*" hidden>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/nav.js?v=23"></script>
+<script>
+const API = window.API_BASE || 'https://api.chengfa.dpdns.org';
+const MAX_CHARS = 10000;
+
+const editor  = document.getElementById('editor');
+const titleEl = document.getElementById('title');
+const charsEl = document.getElementById('chars');
+const msgEl   = document.getElementById('msg');
+
+const qs = new URLSearchParams(location.search);
+let articleId = parseInt(qs.get('id'), 10) || null;
+
+function escapeHTML(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function authHeaders() {
+  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') };
+}
+/* GET 只带 Authorization：不加 Content-Type，省掉一次预检请求（走隧道时那可是 1 秒） */
+function authOnly() {
+  const t = localStorage.getItem('token');
+  return t ? { Authorization: 'Bearer ' + t } : {};
+}
+function requireLogin() {
+  if (localStorage.getItem('token')) return true;
+  const m = document.getElementById('loginModal');
+  if (m) m.classList.add('show'); else alert('请先登录');
+  return false;
+}
+
+/* ===== 字数 ===== */
+function countChars() {
+  const plain = editor.innerText.replace(/\s+/g, ' ').trim();
+  charsEl.textContent = plain.length;
+  charsEl.parentElement.classList.toggle('over', plain.length > MAX_CHARS);
+  return plain.length;
+}
+editor.addEventListener('input', countChars);
+
+/* ===== 工具栏 ===== */
+/* 点工具栏按钮会抢走焦点，编辑器的选区就没了，execCommand 作用在空选区上等于没干。
+   所以：随时记下编辑器里最后的选区，点按钮时先把它恢复回来。 */
+let savedRange = null;
+function saveRange() {
+  const s = window.getSelection();
+  if (!s || !s.rangeCount) return;
+  const r = s.getRangeAt(0);
+  if (editor.contains(r.commonAncestorContainer)) savedRange = r.cloneRange();
+}
+function restoreRange() {
+  if (!savedRange) return false;
+  const s = window.getSelection();
+  s.removeAllRanges();
+  s.addRange(savedRange);
+  return true;
+}
+['keyup', 'mouseup', 'input', 'focus'].forEach(ev => editor.addEventListener(ev, saveRange));
+
+// 让颜色、高亮这些生成 <span style>，而不是被浏览器忽略的 <font>
+try { document.execCommand('styleWithCSS', false, true); } catch { /* 老浏览器没有就算了 */ }
+
+/* 这些命令不需要先选中文字（光标放在那儿就能用） */
+const NO_SELECTION_OK = ['insertHorizontalRule', 'undo', 'redo', 'formatBlock'];
+
+/* execCommand 万一没生效（有些浏览器/场景会），自己把选中的文字包一层 */
+function wrapSelection(tag, css) {
+  const s = window.getSelection();
+  if (!s || s.rangeCount === 0 || s.isCollapsed) return false;
+  const r = s.getRangeAt(0);
+  const el = document.createElement(tag);
+  if (css) el.setAttribute('style', css);
+  try {
+    el.appendChild(r.extractContents());
+    r.insertNode(el);
+    const nr = document.createRange();
+    nr.selectNodeContents(el);
+    s.removeAllRanges();
+    s.addRange(nr);
+    savedRange = nr.cloneRange();
+    return true;
+  } catch { return false; }
+}
+const FALLBACK = {
+  bold:         () => wrapSelection('strong', ''),
+  italic:       () => wrapSelection('em', ''),
+  underline:    () => wrapSelection('span', 'text-decoration:underline'),
+  strikeThrough:() => wrapSelection('span', 'text-decoration:line-through'),
+  foreColor:    v => wrapSelection('span', 'color:' + v),
+  hiliteColor:  v => wrapSelection('span', 'background:' + v)
+};
+
+function exec(cmd, val) {
+  editor.focus();
+  const has = restoreRange();
+  if (!has && NO_SELECTION_OK.indexOf(cmd) === -1) {
+    const s = window.getSelection();
+    if ((!s || s.isCollapsed) && !editor.contains(s && s.anchorNode)) {
+      setMsg('先在正文里点一下，选中要改的文字', 'err');
+      return false;
+    }
+  }
+  let ok = false;
+  try { ok = document.execCommand(cmd, false, val); } catch { ok = false; }
+  if (!ok && FALLBACK[cmd]) ok = FALLBACK[cmd](val);
+  saveRange();
+  countChars();
+  return ok;
+}
+
+document.querySelectorAll('.ed-btn[data-cmd]').forEach(btn => {
+  btn.addEventListener('mousedown', e => e.preventDefault());   // 别让按钮抢走选区
+  btn.addEventListener('click', () => {
+    const cmd = btn.dataset.cmd;
+    if (cmd === 'createLink') {
+      const url = prompt('链接地址（要带 http:// 或 https://）', 'https://');
+      if (!url) return;
+      if (!/^https?:\/\//i.test(url)) return alert('只支持 http/https 链接');
+      exec('createLink', url);
+      return;
+    }
+    let val = btn.dataset.val;
+    if (cmd === 'foreColor') val = document.getElementById('foreColor').value;
+    if (exec(cmd, val)) {                                        // 点到了就闪一下，给个反馈
+      btn.style.background = 'var(--primary)';
+      btn.style.color = '#fff';
+      setTimeout(() => { btn.style.background = ''; btn.style.color = ''; }, 180);
+    }
+  });
+});
+document.getElementById('blockSel').addEventListener('change', e => exec('formatBlock', e.target.value));
+document.getElementById('sizeSel').addEventListener('change', e => exec('fontSize', e.target.value));
+
+/* ===== 图片 / 视频拖动改大小 ===== */
+const handleEl = document.getElementById('resizeHandle');
+let resizing = null;
+
+function showHandle(el) {
+  hideHandle();
+  if (!el) return;
+  el.classList.add('ed-sel');
+  const r = el.getBoundingClientRect();
+  handleEl.style.left = r.right + 'px';
+  handleEl.style.top = r.bottom + 'px';
+  handleEl.classList.add('on');
+}
+function hideHandle() {
+  handleEl.classList.remove('on');
+  editor.querySelectorAll('.ed-sel').forEach(x => x.classList.remove('ed-sel'));
+}
+function selectedMedia() { return editor.querySelector('img.ed-sel, video.ed-sel'); }
+
+editor.addEventListener('click', e => {
+  const el = e.target.closest('img, video');
+  if (el) showHandle(el); else hideHandle();
+});
+// 双击恢复原始尺寸
+editor.addEventListener('dblclick', e => {
+  const el = e.target.closest('img, video');
+  if (!el) return;
+  el.style.width = '';
+  el.style.height = '';
+  showHandle(el);
+  setMsg('已恢复原始尺寸', 'ok');
+});
+editor.addEventListener('input', hideHandle);
+window.addEventListener('scroll', () => { const el = selectedMedia(); if (el) showHandle(el); }, true);
+document.addEventListener('click', e => {
+  if (!resizing && !e.target.closest('#resizeHandle') && !e.target.closest('#editor')) hideHandle();
+});
+
+handleEl.addEventListener('mousedown', e => {
+  const el = selectedMedia();
+  if (!el) return;
+  e.preventDefault();
+  resizing = { el, x: e.clientX, w: el.getBoundingClientRect().width };
+});
+window.addEventListener('mousemove', e => {
+  if (!resizing) return;
+  const max = editor.clientWidth;
+  const w = Math.max(60, Math.min(max, resizing.w + (e.clientX - resizing.x)));
+  resizing.el.style.width = Math.round(w) + 'px';
+  resizing.el.style.height = 'auto';
+  showHandle(resizing.el);
+});
+window.addEventListener('mouseup', () => {
+  if (!resizing) return;
+  resizing = null;
+  countChars();
+  setMsg('大小已调整', 'ok');
+});
+
+/* ===== 插入素材 ===== */
+const FILE_INPUT = { img: 'fileImg', video: 'fileVideo', audio: 'fileAudio' };
+document.querySelectorAll('.ed-btn[data-act]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (!requireLogin()) return;
+    document.getElementById(FILE_INPUT[btn.dataset.act]).click();
+  });
+});
+
+/* 上限（跟后端 UPLOAD_RULES 对齐）：图片 50MB、音频 200MB、视频 2GB */
+const LIMITS = { img: 50 * 1024 * 1024, audio: 200 * 1024 * 1024, video: 2 * 1024 * 1024 * 1024 };
+const CHUNK = 6 * 1024 * 1024;      // 和后端 CHUNK_MAX 一致
+const KIND_NAME = { img: 'image', audio: 'audio', video: 'video' };
+
+function sizeText(b) {
+  if (b >= 1024 * 1024 * 1024) return (b / 1024 / 1024 / 1024).toFixed(2) + 'GB';
+  if (b >= 1024 * 1024) return (b / 1024 / 1024).toFixed(1) + 'MB';
+  return Math.round(b / 1024) + 'KB';
+}
+function readAsDataURL(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(blob);
+  });
+}
+async function api(path, payload) {
+  const res = await fetch(API + path, { method: 'POST', headers: authHeaders(), body: JSON.stringify(payload || {}) });
+  return await res.json();
+}
+function progress(pct, text) {
+  setMsg(text + (pct ? ' ' + pct + '%' : ''), '');
+}
+
+/* 上传前先把大图片压一压。
+   经隧道上传一次往返就要 1 秒多，图越大越明显，所以在浏览器里先缩到 1600 宽、
+   转成质量 0.82 的 JPEG，几 MB 的照片能压到两三百 KB，上传快一大截。
+   GIF 不动（可能有动画），已经很小或压完反而更大的就用原图。 */
+async function compressImage(file) {
+  if (file.size <= 400 * 1024) return file;                       // 已经够小
+  if (!/^image\/(jpeg|jpg|png|webp|bmp)$/i.test(file.type)) return file;
+  try {
+    const url = URL.createObjectURL(file);
+    const img = await new Promise((res, rej) => {
+      const i = new Image();
+      i.onload = () => res(i);
+      i.onerror = rej;
+      i.src = url;
+    });
+    const scale = Math.min(1, 1600 / img.width);
+    const w = Math.max(1, Math.round(img.width * scale));
+    const h = Math.max(1, Math.round(img.height * scale));
+    const cv = document.createElement('canvas');
+    cv.width = w; cv.height = h;
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, w, h);          // PNG 的透明区域压成 JPEG 会变黑，先垫白底
+    ctx.drawImage(img, 0, 0, w, h);
+    URL.revokeObjectURL(url);
+    const out = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.82));
+    if (!out || out.size >= file.size) return file;                // 压完没变小就用原图
+    return out;
+  } catch {
+    return file;                                                   // 压失败就用原图，别拦着人发
+  }
+}
+
+/* 小文件一次传完；大文件切成 6MB 一片慢慢传，不然 2GB 直接把浏览器和内存干爆 */
+async function uploadFile(rawFile, kind) {
+  if (!rawFile) return;
+  let file = rawFile;
+  if (kind === 'img') {
+    progress(0, '压缩中…');
+    file = await compressImage(rawFile);
+    if (file !== rawFile) {
+      setMsg(`已压缩 ${sizeText(rawFile.size)} → ${sizeText(file.size)}`, '');
+    }
+  }
+  if (file.size > LIMITS[kind]) {
+    return alert(`这个文件 ${sizeText(file.size)}，超过${kind === 'img' ? '图片' : kind === 'video' ? '视频' : '音频'} ${sizeText(LIMITS[kind])} 的上限`);
+  }
+  const kindName = KIND_NAME[kind];
+  try {
+    if (file.size <= CHUNK) {
+      progress(0, '上传中…');
+      const d = await api('/article/upload', {
+        kind: kindName, articleId: articleId || 0, data: await readAsDataURL(file)
+      });
+      if (!d.ok) return setMsg(d.error || '上传失败', 'err');
+      return insertMedia(API + d.url, kind);
+    }
+
+    const start = await api('/article/upload/start', {
+      kind: kindName, articleId: articleId || 0,
+      name: file.name || ('upload.' + ((file.type || '').split('/')[1] || 'jpg')),
+      size: file.size, mime: file.type
+    });
+    if (!start.ok) return setMsg(start.error || '上传失败', 'err');
+
+    let done = 0;
+    while (done < file.size) {
+      const slice = file.slice(done, Math.min(done + CHUNK, file.size));
+      const c = await api('/article/upload/chunk', {
+        uploadId: start.uploadId, data: await readAsDataURL(slice)
+      });
+      if (!c.ok) {
+        await api('/article/upload/cancel', { uploadId: start.uploadId });
+        return setMsg(c.error || '上传中断', 'err');
+      }
+      done = c.got;
+      progress(Math.round(done / file.size * 100), `上传中 ${sizeText(done)} / ${sizeText(file.size)}`);
+    }
+
+    const fin = await api('/article/upload/finish', { uploadId: start.uploadId });
+    if (!fin.ok) return setMsg(fin.error || '收尾失败', 'err');
+    return insertMedia(API + fin.url, kind);
+  } catch (e) {
+    setMsg('上传失败，检查网络', 'err');
+  }
+}
+
+function insertMedia(src, kind) {
+  editor.focus();
+  restoreRange();
+  if (kind === 'img')        document.execCommand('insertHTML', false, `<img src="${src}" alt=""><br>`);
+  else if (kind === 'video') document.execCommand('insertHTML', false, `<video src="${src}" controls preload="metadata" style="max-width:100%"></video><br>`);
+  else                       document.execCommand('insertHTML', false, `<audio src="${src}" controls preload="metadata"></audio><br>`);
+  setMsg('已插入', 'ok');
+  countChars();
+  loadQuota();
+}
+['img', 'video', 'audio'].forEach(k => {
+  document.getElementById(FILE_INPUT[k]).addEventListener('change', e => {
+    uploadFile(e.target.files[0], k);
+    e.target.value = '';
+  });
+});
+
+// 粘贴 / 拖入图片直接上传
+editor.addEventListener('paste', e => {
+  const items = (e.clipboardData || {}).items || [];
+  for (const it of items) {
+    if (it.type && it.type.startsWith('image/')) {
+      e.preventDefault();
+      if (!requireLogin()) return;
+      uploadFile(it.getAsFile(), 'img');
+      return;
+    }
+  }
+});
+
+function setMsg(text, cls) {
+  msgEl.textContent = text;
+  msgEl.className = 'ed-msg' + (cls ? ' ' + cls : '');
+}
+
+/* ===== 素材空间 ===== */
+async function loadQuota() {
+  try {
+    const d = await (await fetch(API + '/article/quota')).json();
+    if (d.ok) document.getElementById('quota').textContent = d.usedMB + ' MB / ' + d.limitGB + ' GB';
+  } catch { /* 忽略 */ }
+}
+
+/* ===== 读取已有文章（编辑模式）===== */
+async function loadArticle() {
+  if (!articleId) return;
+  document.getElementById('pageTitle').textContent = '编辑文章';
+  try {
+    // 一定要带上 token，后端才知道「你就是作者」，否则 canEdit 是 false，内容也不给。
+    // noView=1：编辑时加载正文不算一次阅读，免得自己改文章把阅读数刷高。
+    const d = await (await fetch(API + '/article?id=' + articleId + '&noView=1', { headers: authOnly() })).json();
+    if (!d.ok) { setMsg(d.error || '加载失败', 'err'); return; }
+    if (!d.article.canEdit) {
+      setMsg('这不是你的文章', 'err');
+      document.getElementById('saveBtn').disabled = true;
+      return;
+    }
+    titleEl.value = d.article.title;
+    editor.innerHTML = d.article.content || '';
+    countChars();
+  } catch { setMsg('加载失败', 'err'); }
+}
+
+/* ===== 保存 ===== */
+document.getElementById('saveBtn').addEventListener('click', async () => {
+  if (!requireLogin()) return;
+  const title = titleEl.value.trim();
+  if (!title) return alert('先写个标题');
+  const n = countChars();
+  if (n > MAX_CHARS) return alert(`正文 ${n} 字，超过 ${MAX_CHARS} 字上限`);
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  setMsg('保存中…', '');
+  try {
+    const res = await fetch(API + '/article/save', {
+      method: 'POST', headers: authHeaders(),
+      body: JSON.stringify({ id: articleId, title, html: editor.innerHTML })
+    });
+    const d = await res.json();
+    if (!d.ok) { btn.disabled = false; return setMsg(d.error || '保存失败', 'err'); }
+    articleId = d.id;
+    setMsg('已发布，正在跳转…', 'ok');
+    setTimeout(() => { location.href = '/pages/article.html?id=' + d.id; }, 600);
+  } catch {
+    btn.disabled = false;
+    setMsg('保存失败，检查网络', 'err');
+  }
+});
+
+loadQuota();
+loadArticle();
+countChars();
+</script>
+</body>
+</html>

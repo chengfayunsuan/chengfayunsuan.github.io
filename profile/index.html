@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人主页 · 乘法</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="/style.css?v=23">
+<style>
+  /* 右栏下面：我点赞 / 收藏的文章 */
+  .acts-block { margin-bottom: 14px; }
+  .acts-block:last-child { margin-bottom: 0; }
+  .acts-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .acts-list { display: flex; flex-direction: column; gap: 6px; }
+  .acts-item {
+    display: block;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    text-decoration: none;
+    color: var(--text);
+    font-size: 14px;
+    transition: border-color .15s;
+  }
+  .acts-item:hover { border-color: var(--primary); }
+  .acts-item .t { font-weight: 600; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .acts-item .m { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+  .acts-empty { font-size: 13px; color: var(--text-light); padding: 4px 0; }
+</style>
+</head>
+<body>
+
+  <div id="navbar"></div>
+
+  <section style="margin-top:40px; margin-bottom:40px;">
+    <div class="profile-wrap">
+
+      <!-- 左栏 -->
+      <div class="profile-left">
+
+        <!-- 头部：头像 + 用户名（横排，靠左） -->
+        <div class="card profile-head">
+          <div class="profile-avatar-box">
+            <img class="profile-avatar" id="profileAvatarImg" src="/avatar-default.jpg" alt="头像">
+            <label class="avatar-upload" id="avatarUploadLabel" for="avatarInput" style="display:none;">
+              <span>更换头像</span>
+              <input type="file" id="avatarInput" accept="image/*" hidden>
+            </label>
+          </div>
+          <div class="profile-info">
+            <h1 class="profile-name" id="profileName">加载中…</h1>
+            <span class="role-tag" id="roleTag">用户</span>
+            <div class="profile-actions" id="profileActions" style="display:none;">
+              <button type="button" class="act-btn" id="followBtn">关注</button>
+              <button type="button" class="act-btn danger" id="blockBtn">拉黑</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 签名 -->
+        <div class="card profile-bio-card">
+          <h2 class="section-title">个性签名</h2>
+          <p class="profile-bio" id="bioText">这个人很懒，什么都没写。</p>
+          <textarea class="profile-bio-input" id="bioInput" maxlength="200" placeholder="写点什么…" style="display:none;"></textarea>
+        </div>
+
+        <!-- 我的文章（在留言之上） -->
+        <div class="card profile-feed">
+          <h2 class="section-title" id="artTitle">我的文章</h2>
+          <div id="myArticles">加载中…</div>
+        </div>
+
+        <!-- 我的留言 -->
+        <div class="card profile-feed">
+          <h2 class="section-title" id="msgTitle">我的留言</h2>
+          <div id="myMessages">加载中…</div>
+        </div>
+
+      </div>
+
+      <!-- 右栏 -->
+      <div class="profile-right">
+        <div class="card profile-side">
+
+          <div class="side-section">
+            <div class="profile-stat" data-type="following">
+              <span class="stat-label">关注</span>
+              <span class="stat-num" id="followingCount">0</span>
+            </div>
+            <div class="profile-stat" data-type="followers">
+              <span class="stat-label">粉丝</span>
+              <span class="stat-num" id="followersCount">0</span>
+            </div>
+            <div class="profile-stat" data-type="blocked">
+              <span class="stat-label">拉黑</span>
+              <span class="stat-num" id="blockedCount">0</span>
+            </div>
+          </div>
+
+          <div class="side-section">
+            <p class="profile-meta">UID: <span id="uid">—</span></p>
+            <p class="profile-meta">注册于 <span id="createdAt">—</span></p>
+          </div>
+
+        </div>
+
+        <!-- 右栏下面的小栏目：点赞 / 收藏的文章 + 视频 -->
+        <div class="card profile-acts" id="actsCard" style="display:none;">
+          <h2 class="section-title" id="actsTitle">我的互动</h2>
+          <div class="acts-block">
+            <div class="acts-label" id="likedLabel">我赞过的文章</div>
+            <div class="acts-list" id="likedList"><p class="empty-hint">加载中…</p></div>
+          </div>
+          <div class="acts-block">
+            <div class="acts-label" id="favedLabel">我收藏的文章</div>
+            <div class="acts-list" id="favedList"><p class="empty-hint">加载中…</p></div>
+          </div>
+          <div class="acts-block">
+            <div class="acts-label" id="myVideosLabel">我传的视频</div>
+            <div class="acts-list" id="myVideosList"><p class="empty-hint">加载中…</p></div>
+          </div>
+          <div class="acts-block">
+            <div class="acts-label" id="likedVideosLabel">我赞过的视频</div>
+            <div class="acts-list" id="likedVideosList"><p class="empty-hint">加载中…</p></div>
+          </div>
+          <div class="acts-block">
+            <div class="acts-label" id="favedVideosLabel">我收藏的视频</div>
+            <div class="acts-list" id="favedVideosList"><p class="empty-hint">加载中…</p></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <button class="edit-fab" id="editFab" aria-label="编辑">
+    <svg viewBox="0 0 24 24" id="editIcon">
+      <path d="M12 20h9"/>
+      <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+    </svg>
+  </button>
+
+  <div class="edit-actions" id="editActions" style="display:none;">
+    <button class="edit-save" id="saveBtn">保存</button>
+    <button class="edit-cancel" id="cancelBtn">取消</button>
+    <button class="edit-pwd" id="pwdBtn">修改密码</button>
+  </div>
+
+  <div class="generic-modal" id="genericModal">
+    <div class="generic-box">
+      <button class="generic-close" id="genericClose">×</button>
+      <h2 class="generic-title" id="genericTitle">标题</h2>
+      <div class="generic-body" id="genericBody"></div>
+    </div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/nav.js?v=23"></script>
+  <script>
+  (function () {
+    const API = window.API_BASE || 'https://api.chengfa.dpdns.org';
+    const token = localStorage.getItem('token');
+
+    /* 头像字段有两种可能：新后端给完整网址，旧后端只给文件名 uid1.jpg */
+    function fixAvatar(a) {
+      if (!a) return '/avatar-default.jpg';
+      let s = a;
+      if (!s.startsWith('data:') && !s.startsWith('/') && !/^https?:\/\//.test(s)) {
+        s = API.replace(/\/+$/, '') + '/avatar/' + s;
+      }
+      if (s.indexOf('"') !== -1 || s.indexOf('<') !== -1) return '/avatar-default.jpg';
+      return s;
+    }
+
+    // 从网址里读 uid： /profile/?uid=3   （没有就是看自己）
+    const wantedUid = parseInt(new URLSearchParams(location.search).get('uid'), 10) || null;
+
+    let editing = false;
+    let originalBio = '';
+    let originalAvatar = '';
+    let currentUsername = '';
+    let myUid = null;
+    let isSelf = false;
+    let viewUid = null;      // 当前看的这个主页是谁的
+    let rel = null;          // /relations 的结果
+    let usersCache = null;   // /users 的名单，点开列表时用
+
+    const el = {
+      avatarImg: document.getElementById('profileAvatarImg'),
+      avatarInput: document.getElementById('avatarInput'),
+      avatarLabel: document.getElementById('avatarUploadLabel'),
+      name: document.getElementById('profileName'),
+      roleTag: document.getElementById('roleTag'),
+      bioText: document.getElementById('bioText'),
+      bioInput: document.getElementById('bioInput'),
+      uid: document.getElementById('uid'),
+      createdAt: document.getElementById('createdAt'),
+      myMessages: document.getElementById('myMessages'),
+      msgTitle: document.getElementById('msgTitle'),
+      myArticles: document.getElementById('myArticles'),
+      artTitle: document.getElementById('artTitle'),
+      editFab: document.getElementById('editFab'),
+      editIcon: document.getElementById('editIcon'),
+      editActions: document.getElementById('editActions'),
+      saveBtn: document.getElementById('saveBtn'),
+      cancelBtn: document.getElementById('cancelBtn'),
+      pwdBtn: document.getElementById('pwdBtn'),
+      profileActions: document.getElementById('profileActions'),
+      followBtn: document.getElementById('followBtn'),
+      blockBtn: document.getElementById('blockBtn'),
+      genericModal: document.getElementById('genericModal'),
+      genericClose: document.getElementById('genericClose'),
+      genericTitle: document.getElementById('genericTitle'),
+      genericBody: document.getElementById('genericBody')
+    };
+
+    const pencilSVG = '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>';
+    const closeSVG  = '<path d="M18 6 6 18"/><path d="M6 6l12 12"/>';
+
+    /* ---------- 取数据 ---------- */
+
+    async function getMe() {
+      try {
+        const res = await fetch(API + '/me', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        return data.ok ? data : null;
+      } catch {
+        return null;
+      }
+    }
+
+    async function getUserByUid(uid) {
+      try {
+        const res = await fetch(API + '/user?uid=' + encodeURIComponent(uid));
+        const data = await res.json();
+        return data.ok ? data : null;
+      } catch {
+        return null;
+      }
+    }
+
+    /* ---------- 入口：决定看谁的主页 ---------- */
+
+    async function init() {
+      let me = null;
+      if (token) {
+        me = await getMe();
+        if (!me) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('username');
+        } else {
+          myUid = me.uid;
+        }
+      }
+
+      // 情况一：网址没写 uid → 看自己
+      if (!wantedUid) {
+        if (!me) {
+          alert('请先登录');
+          location.href = '/';
+          return;
+        }
+        isSelf = true;
+        // 把 uid 补进网址，方便复制给别人
+        if (me.uid) history.replaceState(null, '', '/profile/?uid=' + me.uid);
+        render(me);
+        return;
+      }
+
+      // 情况二：网址写的就是自己 → 看自己（可编辑）
+      if (me && me.uid === wantedUid) {
+        isSelf = true;
+        render(me);
+        return;
+      }
+
+      // 情况三：看别人的主页（不需要登录）
+      const other = await getUserByUid(wantedUid);
+      if (!other) {
+        el.name.textContent = '找不到这个用户';
+        el.roleTag.style.display = 'none';
+        el.uid.textContent = wantedUid;
+        el.createdAt.textContent = '—';
+        el.bioText.textContent = 'UID ' + wantedUid + ' 不存在，可能还没注册。';
+        el.myMessages.innerHTML = '<p class="empty-hint">—</p>';
+        el.myArticles.innerHTML = '<p class="empty-hint">—</p>';
+        el.editFab.style.display = 'none';
+        return;
+      }
+      isSelf = false;
+      render(other);
+    }
+
+    /* ---------- 渲染 ---------- */
+
+    function render(data) {
+      currentUsername = data.username;
+      el.name.textContent = data.username;
+      document.title = isSelf ? '个人主页 · 乘法' : (data.username + ' 的主页 · 乘法');
+      el.uid.textContent = data.uid || '—';
+      el.createdAt.textContent = data.createdAt || '—';
+
+      const role = data.role || 'user';
+      const bio = String(data.bio || '').trim();
+      el.roleTag.className = 'role-tag';
+      el.roleTag.removeAttribute('title');
+      if (bio) {
+        // 铭牌优先显示本人在 users.json 里写的签名，没写才退回身份标签
+        el.roleTag.textContent = bio.length > 20 ? bio.slice(0, 20) + '…' : bio;
+        el.roleTag.classList.add('role-bio');
+        el.roleTag.title = bio;
+      } else if (role === 'owner') {
+        el.roleTag.textContent = '站长';
+        el.roleTag.classList.add('role-owner');
+      } else if (role === 'admin') {
+        el.roleTag.textContent = '管理员';
+        el.roleTag.classList.add('role-admin');
+      } else if (role === 'owner') {
+        el.roleTag.textContent = '站长';
+        el.roleTag.classList.add('role-owner');
+      } else {
+        // 普通用户又没写签名 → 铭牌整个不显示
+        el.roleTag.style.display = 'none';
+      }
+
+      const avatarSrc = fixAvatar(data.avatar);
+      el.avatarImg.src = avatarSrc;
+      originalAvatar = avatarSrc;
+
+      if (data.bio && data.bio.trim()) {
+        el.bioText.textContent = data.bio;
+      } else {
+        el.bioText.textContent = '这个人很懒，什么都没写。';
+      }
+      el.bioInput.value = data.bio || '';
+      originalBio = data.bio || '';
+
+      // 不是自己 → 只读：藏掉编辑按钮和"更换头像"
+      if (isSelf) {
+        el.msgTitle.textContent = '我的留言';
+      } else {
+        el.editFab.style.display = 'none';
+        el.avatarLabel.style.display = 'none';
+        el.msgTitle.textContent = 'TA 的留言';
+      }
+
+      el.artTitle.textContent = isSelf ? '我的文章' : 'TA 的文章';
+
+      loadMessages(data.username);
+      loadArticles(data.uid);
+      loadRelations(data.uid);
+      loadUserActs(data.uid);
+      loadUserVideos(data.uid);
+    }
+
+    /* ---------- 关注 / 拉黑 ---------- */
+
+    async function loadRelations(uid) {
+      viewUid = uid;
+      rel = null;
+      try {
+        const res = await fetch(API + '/relations?uid=' + encodeURIComponent(uid), {
+          headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+        });
+        const d = await res.json();
+        if (d && d.ok) rel = d;
+      } catch { /* 拿不到就显示 0 */ }
+      paintRelations();
+    }
+
+    function paintRelations() {
+      const f  = rel ? (rel.following || []).length : 0;
+      const fo = rel ? (rel.followers || []).length : 0;
+      const b  = rel ? (rel.blocked   || []).length : 0;
+      document.getElementById('followingCount').textContent = f;
+      document.getElementById('followersCount').textContent = fo;
+      document.getElementById('blockedCount').textContent   = b;
+
+      // 看自己的主页不显示关注 / 拉黑；没登录也没法点
+      if (!rel || isSelf || !token) {
+        el.profileActions.style.display = 'none';
+        return;
+      }
+      el.profileActions.style.display = 'flex';
+      el.followBtn.textContent = rel.meFollowing ? '已关注' : '关注';
+      el.followBtn.className = 'act-btn' + (rel.meFollowing ? ' on' : '');
+      el.blockBtn.textContent = rel.meBlocked ? '取消拉黑' : '拉黑';
+      el.blockBtn.className = 'act-btn danger' + (rel.meBlocked ? ' on' : '');
+    }
+
+    async function toggleRelation(kind) {
+      if (!token) return alert('请先登录');
+      if (!viewUid) return;
+      const btn = (kind === 'follow') ? el.followBtn : el.blockBtn;
+      btn.disabled = true;
+      try {
+        const res = await fetch(API + '/' + kind, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ uid: viewUid })
+        });
+        const d = await res.json();
+        btn.disabled = false;
+        if (!d.ok) return alert(d.error || '操作失败');
+        await loadRelations(viewUid);
+      } catch {
+        btn.disabled = false;
+        alert('网络错误，请重试');
+      }
+    }
+
+    el.followBtn.addEventListener('click', () => toggleRelation('follow'));
+    el.blockBtn.addEventListener('click', () => toggleRelation('block'));
+
+    /* ---------- 关注 / 粉丝 / 拉黑 三个数字点开看人 ---------- */
+
+    const STAT_TITLE = { following: '关注', followers: '粉丝', blocked: '拉黑' };
+    const STAT_EMPTY = {
+      following: '还没有关注任何人',
+      followers: '还没有粉丝',
+      blocked: '还没有拉黑任何人'
+    };
+
+    async function fetchUsers() {
+      if (usersCache) return usersCache;
+      try {
+        const res = await fetch(API + '/users');
+        const d = await res.json();
+        usersCache = Array.isArray(d) ? d : [];
+      } catch { usersCache = []; }
+      return usersCache;
+    }
+
+    async function showStatList(type) {
+      const uids = (rel && rel[type]) || [];
+      el.genericTitle.textContent = STAT_TITLE[type] + '（' + uids.length + '）';
+      el.genericBody.innerHTML = '<p class="empty-hint">加载中…</p>';
+      el.genericModal.classList.add('show');
+
+      if (!uids.length) {
+        el.genericBody.innerHTML = '<p class="empty-hint">' + STAT_EMPTY[type] + '</p>';
+        return;
+      }
+
+      const all = await fetchUsers();
+      const map = new Map(all.map(u => [u.uid, u]));
+      el.genericBody.innerHTML = uids.map(uid => {
+        const u = map.get(uid);
+        const name = u ? u.username : ('UID ' + uid);
+        const meMark = (uid === myUid) ? ' <span class="user-row-you">（我）</span>' : '';
+        return `
+          <a class="user-row" href="/profile/?uid=${encodeURIComponent(uid)}">
+            <img class="user-row-avatar" src="${fixAvatar(u && u.avatar)}" alt="">
+            <span class="user-row-info">
+              <span class="user-row-name">${escapeHTML(name)}${meMark}</span>
+              <span class="user-row-uid">UID: ${escapeHTML(uid)}</span>
+            </span>
+          </a>`;
+      }).join('');
+    }
+
+    async function loadMessages(username) {
+      try {
+        const res = await fetch(API + '/messages');
+        const data = await res.json();
+        const mine = data.filter(m => m.name === username).reverse();
+        if (!mine.length) {
+          el.myMessages.innerHTML = '<p class="empty-hint">' +
+            (isSelf ? '还没有发过留言' : 'TA 还没有发过留言') + '</p>';
+          return;
+        }
+        el.myMessages.innerHTML = mine.map(m => `
+          <div class="my-msg-item">
+            <div class="my-msg-text">${escapeHTML(m.text)}</div>
+            <div class="my-msg-time">${escapeHTML(m.time)}</div>
+          </div>
+        `).join('');
+      } catch {
+        el.myMessages.innerHTML = '<p class="empty-hint">加载失败</p>';
+      }
+    }
+
+    /* ---------- 我的文章：可以改、可以删 ---------- */
+    async function loadArticles(uid) {
+      const box = el.myArticles;
+      if (!box) return;
+      if (!uid) { box.innerHTML = '<p class="empty-hint">—</p>'; return; }
+      try {
+        const res = await fetch(API + '/articles?uid=' + encodeURIComponent(uid) + '&limit=50');
+        const d = await res.json();
+        const list = (d && d.list) || [];
+        if (!list.length) {
+          box.innerHTML = '<p class="empty-hint">' +
+            (isSelf ? '还没有写过文章，<a href="/pages/write.html">去写一篇</a>' : 'TA 还没有写过文章') + '</p>';
+          return;
+        }
+        box.innerHTML = list.map(a => `
+          <div class="my-art-item">
+            <a class="my-art-title" href="/pages/article.html?id=${a.id}">${escapeHTML(a.title)}</a>
+            <div class="my-art-meta">
+              <span>${escapeHTML(a.updatedAt || a.createdAt || '')}</span>
+              <span>${a.chars || 0} 字</span>
+              <span>♥ ${a.likes || 0}</span>
+              <span>★ ${a.favs || 0}</span>
+              <span>👁 ${a.views || 0}</span>
+              ${isSelf ? `<span class="my-art-ops">
+                <button class="act-btn" data-art="edit" data-id="${a.id}">编辑</button>
+                <button class="act-btn danger" data-art="del" data-id="${a.id}">删除</button>
+              </span>` : ''}
+            </div>
+          </div>`).join('');
+      } catch {
+        box.innerHTML = '<p class="empty-hint">加载失败</p>';
+      }
+    }
+
+    el.myArticles.addEventListener('click', async e => {
+      const btn = e.target.closest('[data-art]');
+      if (!btn) return;
+      const artId = parseInt(btn.dataset.id, 10);
+      if (btn.dataset.art === 'edit') {
+        location.href = '/pages/write.html?id=' + artId;
+        return;
+      }
+      if (!confirm('确定删掉这篇文章吗？\n里面的图片视频也会一起删掉，删了找不回来。')) return;
+      btn.disabled = true;
+      try {
+        const res = await fetch(API + '/article/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ id: artId })
+        });
+        const d = await res.json();
+        if (!d.ok) { btn.disabled = false; return alert(d.error || '删除失败'); }
+        loadArticles(viewUid);
+      } catch { btn.disabled = false; alert('网络错误，请重试'); }
+    });
+
+    /* ---------- 右栏：我点赞 / 收藏的文章 ---------- */
+    async function loadUserActs(uid) {
+      const card = document.getElementById('actsCard');
+      const likedBox = document.getElementById('likedList');
+      const favedBox = document.getElementById('favedList');
+      if (!card || !uid) { if (card) card.style.display = 'none'; return; }
+      card.style.display = 'block';
+      document.getElementById('likedLabel').textContent = isSelf ? '我赞过的文章' : 'TA 赞过的文章';
+      document.getElementById('favedLabel').textContent = isSelf ? '我收藏的文章' : 'TA 收藏的文章';
+      likedBox.innerHTML = '<p class="empty-hint">加载中…</p>';
+      favedBox.innerHTML = '<p class="empty-hint">加载中…</p>';
+
+      try {
+        const [la, fa] = await Promise.all([
+          (await fetch(API + '/article/liked-by?uid=' + encodeURIComponent(uid))).json(),
+          (await fetch(API + '/article/faved-by?uid=' + encodeURIComponent(uid))).json()
+        ]);
+        likedBox.innerHTML = actsRows((la && la.list) || []);
+        favedBox.innerHTML = actsRows((fa && fa.list) || []);
+      } catch {
+        likedBox.innerHTML = '<p class="acts-empty">加载失败</p>';
+        favedBox.innerHTML = '<p class="acts-empty">加载失败</p>';
+      }
+    }
+
+    function actsRows(list) {
+      if (!list.length) return '<p class="acts-empty">还没有</p>';
+      return list.map(a => `
+        <a class="acts-item" href="/pages/article.html?id=${a.id}">
+          <span class="t">${escapeHTML(a.title)}</span>
+          <span class="m">${escapeHTML(a.author || '匿名')} · ♥${a.likes || 0} · 👁${a.views || 0}</span>
+        </a>`).join('');
+    }
+
+    /* ---------- 右栏：我传 / 赞过 / 收藏的视频 ---------- */
+    function videoRows(list) {
+      if (!list.length) return '<p class="acts-empty">还没有</p>';
+      return list.map(v => `
+        <a class="acts-item" href="/pages/video.html?id=${v.id}">
+          <span class="t">${escapeHTML(v.title)}</span>
+          <span class="m">${escapeHTML(v.author || '匿名')} · ▶${v.views || 0} · ♥${v.likes || 0}</span>
+        </a>`).join('');
+    }
+
+    async function loadUserVideos(uid) {
+      const myBox = document.getElementById('myVideosList');
+      const likedBox = document.getElementById('likedVideosList');
+      const favedBox = document.getElementById('favedVideosList');
+      if (!myBox || !uid) return;
+      document.getElementById('myVideosLabel').textContent = isSelf ? '我传的视频' : 'TA 传的视频';
+      document.getElementById('likedVideosLabel').textContent = isSelf ? '我赞过的视频' : 'TA 赞过的视频';
+      document.getElementById('favedVideosLabel').textContent = isSelf ? '我收藏的视频' : 'TA 收藏的视频';
+      myBox.innerHTML = '<p class="empty-hint">加载中…</p>';
+      likedBox.innerHTML = '<p class="empty-hint">加载中…</p>';
+      favedBox.innerHTML = '<p class="empty-hint">加载中…</p>';
+      try {
+        const [mv, lv, fv] = await Promise.all([
+          (await fetch(API + '/videos?uid=' + encodeURIComponent(uid) + '&limit=50')).json(),
+          (await fetch(API + '/video/liked-by?uid=' + encodeURIComponent(uid))).json(),
+          (await fetch(API + '/video/faved-by?uid=' + encodeURIComponent(uid))).json()
+        ]);
+        myBox.innerHTML = videoRows((mv && mv.list) || []);
+        likedBox.innerHTML = videoRows((lv && lv.list) || []);
+        favedBox.innerHTML = videoRows((fv && fv.list) || []);
+      } catch {
+        myBox.innerHTML = '<p class="acts-empty">加载失败</p>';
+        likedBox.innerHTML = '<p class="acts-empty">加载失败</p>';
+        favedBox.innerHTML = '<p class="acts-empty">加载失败</p>';
+      }
+    }
+
+    /* 文本和属性里都能安全用的转义 */
+    function escapeHTML(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function enterEdit() {
+      editing = true;
+      el.bioText.style.display = 'none';
+      el.bioInput.style.display = 'block';
+      el.avatarLabel.style.display = 'flex';
+      el.editActions.style.display = 'flex';
+      el.editIcon.innerHTML = closeSVG;
+    }
+
+    function exitEdit() {
+      editing = false;
+      el.bioText.style.display = 'block';
+      el.bioInput.style.display = 'none';
+      el.avatarLabel.style.display = 'none';
+      el.editActions.style.display = 'none';
+      el.editIcon.innerHTML = pencilSVG;
+      el.bioInput.value = originalBio;
+      el.avatarImg.src = originalAvatar;
+    }
+
+    el.editFab.addEventListener('click', () => {
+      editing ? exitEdit() : enterEdit();
+    });
+    el.cancelBtn.addEventListener('click', exitEdit);
+
+    el.avatarInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) return alert('请选图片文件');
+      if (file.size > 1024 * 1024) return alert('图片不能超过 1MB');
+      const reader = new FileReader();
+      reader.onload = ev => { el.avatarImg.src = ev.target.result; };
+      reader.readAsDataURL(file);
+    });
+
+    el.saveBtn.addEventListener('click', async () => {
+      const bio = el.bioInput.value;
+      const avatar = el.avatarImg.src;
+      try {
+        const res = await fetch(API + '/profile', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ bio, avatar })
+        });
+        const data = await res.json();
+        if (!data.ok) return alert('保存失败：' + (data.error || '未知错误'));
+        originalBio = bio;
+        originalAvatar = avatar;
+        // 铭牌跟着一起变，不用刷新页面
+        const t = String(bio || '').trim();
+        el.roleTag.className = 'role-tag';
+        if (t) {
+          el.roleTag.style.display = '';
+          el.roleTag.textContent = t.length > 20 ? t.slice(0, 20) + '…' : t;
+          el.roleTag.classList.add('role-bio');
+          el.roleTag.title = t;
+        } else {
+          el.roleTag.style.display = 'none';
+          el.roleTag.removeAttribute('title');
+        }
+        el.bioText.textContent = t || '这个人很懒，什么都没写。';
+        alert('保存成功');
+        exitEdit();
+        init();
+      } catch {
+        alert('网络错误，保存失败');
+      }
+    });
+
+    el.pwdBtn.addEventListener('click', async () => {
+      const oldPassword = prompt('请输入原密码');
+      if (!oldPassword) return;
+      const newPassword = prompt('请输入新密码（至少 6 位）');
+      if (!newPassword) return;
+      if (newPassword.length < 6) return alert('新密码至少 6 位');
+      try {
+        const res = await fetch(API + '/change-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ oldPassword, newPassword })
+        });
+        const data = await res.json();
+        if (!data.ok) return alert('修改失败：' + (data.error || '未知错误'));
+        alert('密码已修改');
+      } catch {
+        alert('网络错误，修改失败');
+      }
+    });
+
+    document.querySelectorAll('.profile-stat').forEach(stat => {
+      stat.addEventListener('click', () => showStatList(stat.dataset.type));
+    });
+
+    el.genericClose.addEventListener('click', () => el.genericModal.classList.remove('show'));
+    el.genericModal.addEventListener('click', e => {
+      if (e.target === el.genericModal) el.genericModal.classList.remove('show');
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') el.genericModal.classList.remove('show');
+    });
+
+    init();
+  })();
+  </script>
+
+</body>
+</html>
