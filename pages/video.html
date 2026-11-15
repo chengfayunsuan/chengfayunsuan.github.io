@@ -419,6 +419,15 @@ const mediaUrl = p => {
      【合起来】不管两边带不带斜杠，拼出来永远只有一个斜杠。
        比用 if/else 判断四种组合干净得多。这个技巧拼 URL 时非常常用。 */
 };
+// 播放地址的缓存版本号。
+// 旧版后端把「不带内容的空响应」缓存进了 Cloudflare 边缘，导致这个地址永远返回 0 字节、
+// 视频一直转圈加载不出来。换个 query 就等于换一个全新的缓存键，旧毒缓存自然被绕开。
+// 以后再动 /api/f/ 的响应逻辑，把这个数字加一。
+const MEDIA_VER = 'r=3';
+function withVer(u) {
+  if (!u) return u;
+  return u + (u.indexOf('?') === -1 ? '?' : '&') + MEDIA_VER;
+}
 // B 站外部播放：库里 video_path 存成 bili:BV1xx411c7mD，文件不在本站
 function biliOf(p) {
   /* 从播放路径里提取 BV 号。 */
@@ -532,7 +541,7 @@ function render() {
   /* 封面图地址。没有就 null（后面用三元判断要不要加这个属性）。 */
   const bili = biliOf(v.video_path);
   /* 提取 BV 号。有值 = 这是 B 站视频；空字符串（假值）= 本站视频。 */
-  const localSrc = bili ? '' : mediaUrl(v.video_path);
+  const localSrc = bili ? '' : withVer(mediaUrl(v.video_path));
   /* 【本站视频的地址】如果是 B 站视频就空着（不需要本地源）。
      【注意顺序】先判断 bili，再决定要不要处理 video_path —— 
        因为 B 站视频的 video_path 是 "bili:BVxxx" 这种假路径，

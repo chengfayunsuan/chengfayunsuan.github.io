@@ -376,22 +376,64 @@ export async function onRequest(context) {
       return json({ error: 'quota_exceeded', message: '读取次数接近上限，已暂停访问' }, 503, cors);
     }
 
-    const cache = caches.default;
-    const cacheKey = new Request(url.toString(), { method: 'GET' });
-    const hit = await cache.match(cacheKey);
-    if (hit) return hit;
+    const isHead = request.method === 'HEAD';
+    const rangeHeader = request.headers.get('range');
 
-    const obj = await env.MEDIA.get(key);
+    const cache = caches.default;
+    // 缓存键固定去掉 query，避免 ?r=2 这类版本参数把同一份文件打成多个副本
+    const cacheUrl = new URL(url.toString());
+    cacheUrl.search = '';
+    const cacheKey = new Request(cacheUrl.toString(), { method: 'GET' });
+
+    // 只有「不带 Range 的 GET」才查缓存；HEAD 和 Range 一律不查
+    if (!isHead && !rangeHeader) {
+      const hit = await cache.match(cacheKey);
+      if (hit) {
+        const cl = hit.headers.get('content-length');
+        // content-length 为空或 0 是历史遗留的毒数据（旧版把 HEAD 缓存进去了），丢掉重取
+        if (cl && cl !== '0') return hit;
+        await cache.delete(cacheKey);
+      }
+    }
+
+    let obj;
+    try {
+      obj = await env.MEDIA.get(key, rangeHeader ? { range: request.headers } : undefined);
+    } catch (e) {
+      // Range 超出文件范围、格式非法：按 HTTP 规范回 416
+      return new Response('range_not_satisfiable', {
+        status: 416,
+        headers: { ...cors, 'accept-ranges': 'bytes' },
+      });
+    }
     if (!obj) return json({ error: 'not_found' }, 404, cors);
 
     const headers = new Headers();
     obj.writeHttpMetadata(headers);
     headers.set('etag', obj.httpEtag);
+    headers.set('accept-ranges', 'bytes');
     headers.set('cache-control', 'public, max-age=2592000, immutable');
     headers.set('access-control-allow-origin', env.ALLOW_ORIGIN || '*');
 
-    const res = new Response(request.method === 'HEAD' ? null : obj.body, { headers });
-    if (waitUntil) waitUntil(cache.put(cacheKey, res.clone()));
+    // 带 Range 时回 206 + Content-Range，浏览器才肯「边下边播、拖进度条」
+    let status = 200;
+    let len = obj.size;
+    if (rangeHeader && obj.range) {
+      const off = Number(obj.range.offset) || 0;
+      const l = obj.range.length != null ? Number(obj.range.length) : obj.size - off;
+      len = l;
+      status = 206;
+      headers.set('content-range', `bytes ${off}-${off + l - 1}/${obj.size}`);
+    }
+    headers.set('content-length', String(len));
+
+    // 只有「小文件的完整 GET」才进边缘缓存。
+    // 大视频绝对不能缓存：对几百 MB 的流做 clone + put，一旦中途断开就存成残缺甚至空文件，
+    // 之后所有访客都只能拿到那半个字节，页面表现就是「一直加载不出来」。
+    const cacheable = !isHead && !rangeHeader && obj.size <= 32 * 1024 * 1024;
+
+    const res = new Response(isHead ? null : obj.body, { status, headers });
+    if (cacheable && waitUntil) waitUntil(cache.put(cacheKey, res.clone()));
     return res;
   }
 
