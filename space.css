@@ -265,43 +265,41 @@
   border-left-color: var(--hair);
 }
 
-/* ---------- 关注与粉丝数字 ---------- */
+/* ---------- 关注与粉丝：两行小字，点进列表页 ---------- */
 
-.sp-social {
+.sp-soc {
   display: flex;
-  align-items: baseline;
-  gap: 26px;
-  margin-top: 20px;
-  padding-top: 18px;
-  border-top: 2px solid var(--ink);
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 16px;
 }
 
-.sp-social__i {
-  display: flex;
+.sp-soc[hidden] { display: none; }
+
+.sp-soc__i {
+  display: inline-flex;
   align-items: baseline;
-  gap: 7px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font-family: inherit;
-  cursor: pointer;
+  gap: 3px;
+  width: fit-content;
+  color: #4A453A;
+  font-size: 12.5px;
+  letter-spacing: .06em;
+  text-decoration: none;
+  transition: color .14s ease;
 }
 
-.sp-social__i b {
+.sp-soc__i b {
   font-family: var(--black);
   font-weight: 800;
-  font-size: 26px;
+  font-size: 15px;
   line-height: 1;
+  letter-spacing: 0;
+  color: var(--ink);
+  transition: color .14s ease;
 }
 
-.sp-social__i span {
-  font-size: 11px;
-  letter-spacing: .16em;
-  color: var(--gray);
-}
-
-.sp-social__i:hover b { color: var(--red); }
+.sp-soc__i:hover,
+.sp-soc__i:hover b { color: var(--red); }
 
 /* ---------- 关注按钮 ---------- */
 
@@ -494,7 +492,6 @@
 @media (max-width: 620px) {
   .sp-bar__k { display: none; }
   .sp-name { letter-spacing: -.03em; }
-  .sp-social { gap: 20px; }
   .sp-do { flex-wrap: wrap; }
   .sp-do .btn { flex: 1 1 100%; justify-content: center; }
   .po__sum { grid-template-columns: minmax(0, 1fr); }
@@ -513,5 +510,3 @@
   .sp-acts .btn,
   .sp-none__a .btn { flex: 1 1 100%; justify-content: center; }
 }
-
-.sp-social[hidden] { display: none; }

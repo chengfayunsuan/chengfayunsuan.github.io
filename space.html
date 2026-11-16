@@ -8,8 +8,8 @@
 <meta name="theme-color" content="#E0291E">
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="/style.css?v=2">
-<link rel="stylesheet" href="/home.css?v=4">
-<link rel="stylesheet" href="/space.css?v=3">
+<link rel="stylesheet" href="/home.css?v=5">
+<link rel="stylesheet" href="/space.css?v=4">
 <script src="/js/config.js"></script>
 </head>
 <body>
@@ -62,18 +62,18 @@
 
           <p class="sp-sub" id="sub">注册于 — · 已加入 1 天</p>
 
+          <div class="sp-soc" id="socialRow">
+            <a class="sp-soc__i" id="socFollow" href="/relations">
+              关注：<b id="followN">0</b>
+            </a>
+            <a class="sp-soc__i" id="socFans" href="/relations">
+              粉丝：<b id="fansN">0</b>
+            </a>
+          </div>
+
           <p class="sp-restrict" id="restrictNote" hidden></p>
 
           <p class="sp-bio" id="bio"></p>
-
-          <div class="sp-social" id="socialRow">
-            <button class="sp-social__i" type="button" data-jump="followers">
-              <b id="fansN">0</b><span>粉丝</span>
-            </button>
-            <button class="sp-social__i" type="button" data-jump="following">
-              <b id="followN">0</b><span>关注</span>
-            </button>
-          </div>
 
           <div class="sp-do" id="followBox" hidden>
             <button class="btn btn--red btn--s" id="followBtn" type="button">关注</button>
@@ -104,40 +104,11 @@
     </div>
   </section>
 
-  <!-- ============ 关注与粉丝 ============ -->
-  <section class="sp-sec" id="socialSec">
-    <div class="wrap">
-      <div class="sp-h">
-        <span class="sp-h__n">01</span>
-        <h2 class="sp-h__t">关注与粉丝</h2>
-      </div>
-
-      <div class="rel">
-        <div class="rel__head">
-          <div class="rel__tabs">
-            <button class="rel__tab is-on" type="button" data-scope="followers">
-              粉丝 <b id="tabFans">0</b>
-            </button>
-            <button class="rel__tab" type="button" data-scope="following">
-              关注 <b id="tabFollow">0</b>
-            </button>
-          </div>
-        </div>
-
-        <ul class="rel__list" id="relList"></ul>
-
-        <p class="rel__empty" id="relEmpty" hidden></p>
-
-        <button class="rel__more" id="relMore" type="button" hidden>载入更多</button>
-      </div>
-    </div>
-  </section>
-
   <!-- ============ 提现记录 ============ -->
   <section class="sp-sec" id="payoutSec">
     <div class="wrap">
       <div class="sp-h">
-        <span class="sp-h__n">02</span>
+        <span class="sp-h__n">01</span>
         <h2 class="sp-h__t">提现记录</h2>
       </div>
 
@@ -206,6 +177,6 @@
   </div>
 </footer>
 
-<script src="/js/space.js?v=2" defer></script>
+<script src="/js/space.js?v=4" defer></script>
 </body>
 </html>

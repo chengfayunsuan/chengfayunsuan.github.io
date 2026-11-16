@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>关注与粉丝 · 乘法</title>
+<meta name="description" content="乘法用户的关注与粉丝列表。">
+<meta name="theme-color" content="#E0291E">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/style.css?v=2">
+<link rel="stylesheet" href="/home.css?v=5">
+<link rel="stylesheet" href="/relations.css?v=1">
+<script src="/js/config.js"></script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav" id="navAuthed" hidden>
+      <span class="hm-nav__bal">
+        <b id="navBal">0.0000</b><i data-cur="code">FC</i>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/home">我</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
+    </div>
+
+    <div class="hm-nav" id="navGuest">
+      <a class="hm-nav__exit" href="/login">登录</a>
+    </div>
+  </div>
+</header>
+
+<div class="rl-bar">
+  <div class="wrap rl-bar__in">
+    <a class="rl-bar__back" id="backLink" href="/">← 返回主页</a>
+    <span class="rl-bar__k">RELATIONS / 关注与粉丝</span>
+  </div>
+</div>
+
+<main id="app" hidden>
+
+  <section class="rl-hero">
+    <div class="wrap">
+      <h1 class="rl-t" id="rlName">—</h1>
+
+      <p class="rl-sub">
+        <span id="rlUid">UID —</span>
+        <span class="rl-dot" aria-hidden="true">/</span>
+        关注 <b id="sumFollow">0</b>
+        <span class="rl-dot" aria-hidden="true">/</span>
+        粉丝 <b id="sumFans">0</b>
+      </p>
+    </div>
+  </section>
+
+  <section class="rl-body">
+    <div class="wrap">
+      <div class="rel">
+        <div class="rel__head">
+          <div class="rel__tabs">
+            <button class="rel__tab is-on" type="button" data-scope="followers">
+              粉丝 <b id="tabFans">0</b>
+            </button>
+            <button class="rel__tab" type="button" data-scope="following">
+              关注 <b id="tabFollow">0</b>
+            </button>
+          </div>
+        </div>
+
+        <ul class="rel__list" id="relList"></ul>
+
+        <p class="rel__empty" id="relEmpty" hidden></p>
+
+        <button class="rel__more" id="relMore" type="button" hidden>载入更多</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<section class="rl-none" id="none" hidden>
+  <div class="wrap">
+    <p class="rl-none__k" id="noneK">NO SUCH USER</p>
+    <h1 class="rl-none__t" id="noneT">没有这个用户</h1>
+    <p class="rl-none__d" id="noneD">UID 可能写错了，或者该账户已经注销。</p>
+    <p class="rl-none__a">
+      <a class="btn btn--red" id="noneHome" href="/home">回到账户首页</a>
+    </p>
+  </div>
+</section>
+
+<div class="hm-load" id="loading">
+  <span class="hm-load__mark" aria-hidden="true"></span>
+  <span>正在载入列表</span>
+</div>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 乘法 CHENGFA</span>
+      <span>参与调研 · 累计余额 · 兑换回报</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/relations.js?v=1" defer></script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 /* ============================================================
    乘法 · 用户公开主页
-   数据来自 /api/pub/user，关系列表来自 /api/follow
-   页面只渲染接口给出的字段，缺的字段不猜、不补假值
+   数据来自 /api/pub/user；关注与粉丝只显示两行数字，
+   点进去是完整的列表页 /relations
    ============================================================ */
 (function () {
   'use strict';
@@ -12,25 +12,16 @@
     banned: '该账户已被封禁，公开资料不再展示。',
     frozen: '该账户已被冻结，公开资料暂停展示。'
   };
-  var SCOPES = { followers: '粉丝', following: '关注' };
 
   var app = document.getElementById('app');
   var loading = document.getElementById('loading');
   var none = document.getElementById('none');
   var toast = document.getElementById('toast');
 
-  var relList = document.getElementById('relList');
-  var relEmpty = document.getElementById('relEmpty');
-  var relMore = document.getElementById('relMore');
-
   var state = {
     uid: null,
     social: { followers: 0, following: 0 },
-    viewer: { self: false, signedIn: false, following: false },
-    scope: 'followers',
-    offset: 0,
-    total: 0,
-    busy: false
+    viewer: { self: false, signedIn: false, following: false }
   };
 
   function $(id) { return document.getElementById(id); }
@@ -67,14 +58,18 @@
     document.title = title + ' · 乘法';
   }
 
-  /* ---------- 统计数字 ---------- */
+  /* ---------- 关注与粉丝数字 ---------- */
 
   function paintSocial() {
     var f = state.social;
     $('fansN').textContent = f.followers;
     $('followN').textContent = f.following;
-    $('tabFans').textContent = f.followers;
-    $('tabFollow').textContent = f.following;
+
+    var uid = encodeURIComponent(state.uid);
+    var follow = $('socFollow');
+    var fans = $('socFans');
+    if (follow) follow.href = '/relations?uid=' + uid + '&scope=following';
+    if (fans) fans.href = '/relations?uid=' + uid + '&scope=followers';
   }
 
   /* ---------- 关注按钮 ---------- */
@@ -130,9 +125,6 @@
             paintSocial();
             paintFollow(r.body.following);
             say(r.body.following ? '已关注该用户' : '已取消关注');
-
-            /* 关系变了，列表需要按新状态重取 */
-            if (state.scope === 'followers') loadRel('followers', false);
             return;
           }
 
@@ -159,188 +151,6 @@
         });
     });
   }
-
-  /* ---------- 关系列表 ---------- */
-
-  function itemNode(it) {
-    var li = document.createElement('li');
-    li.className = 'rel__i';
-
-    var a = document.createElement('a');
-    a.className = 'rel__a';
-    a.href = '/space?uid=' + encodeURIComponent(it.uid);
-
-    var uid = document.createElement('span');
-    uid.className = 'rel__uid';
-    uid.textContent = 'UID ' + it.uid;
-
-    var name = document.createElement('span');
-    name.className = 'rel__name';
-    name.textContent = it.username || '未命名';
-
-    var role = document.createElement('span');
-    role.className = 'face__role rel__role';
-    role.setAttribute('data-role', it.role || 'user');
-    role.textContent = ROLES[it.role] || it.role || '用户';
-
-    var lv = document.createElement('span');
-    lv.className = 'rel__lv';
-    lv.textContent = 'LV ' + (it.level || 1);
-
-    var at = document.createElement('span');
-    at.className = 'rel__at';
-    at.textContent = fmtDate(it.at);
-
-    a.appendChild(uid);
-    a.appendChild(name);
-    a.appendChild(role);
-    a.appendChild(lv);
-    a.appendChild(at);
-    li.appendChild(a);
-
-    var isSelf = String(it.uid) === String(state.uid);
-
-    if (state.viewer.signedIn && !isSelf) {
-      var act = document.createElement('button');
-      act.className = 'rel__act';
-      act.type = 'button';
-      act.setAttribute('data-uid', it.uid);
-      act.setAttribute('data-following', it.following ? '1' : '0');
-      act.textContent = it.following ? '取消关注' : '关注';
-      li.appendChild(act);
-    }
-
-    return li;
-  }
-
-  function emptyText(scope) {
-    if (!state.viewer.signedIn) {
-      return scope === 'followers' ? '该账户还没有粉丝。' : '该账户还没有关注任何人。';
-    }
-    if (state.viewer.self) {
-      return scope === 'followers' ? '还没有人关注你。' : '还没有关注任何人。';
-    }
-    return scope === 'followers' ? '该账户还没有粉丝。' : '该账户还没有关注任何人。';
-  }
-
-  function loadRel(scope, append) {
-    if (state.busy) return;
-    state.busy = true;
-
-    if (!append) {
-      state.offset = 0;
-      relList.textContent = '';
-      relEmpty.hidden = true;
-      relMore.hidden = true;
-    }
-
-    if (append) relMore.disabled = true;
-
-    state.scope = scope;
-
-    Array.prototype.forEach.call(document.querySelectorAll('.rel__tab'), function (t) {
-      t.classList.toggle('is-on', t.getAttribute('data-scope') === scope);
-    });
-
-    var url =
-      '/api/follow?scope=' + encodeURIComponent(scope) +
-      '&uid=' + encodeURIComponent(state.uid) +
-      '&offset=' + state.offset;
-
-    fetch(url, { headers: { Accept: 'application/json' } })
-      .then(function (res) {
-        return res.json().then(function (d) { return { status: res.status, body: d }; });
-      })
-      .then(function (r) {
-        state.busy = false;
-        relMore.disabled = false;
-
-        if (!r.body || !r.body.ok) {
-          relEmpty.hidden = false;
-          relEmpty.textContent = '列表载入失败，稍后重试。';
-          return;
-        }
-
-        var items = r.body.items || [];
-        state.total = r.body.total || 0;
-        state.offset += items.length;
-
-        items.forEach(function (it) { relList.appendChild(itemNode(it)); });
-
-        if (!state.offset) {
-          relEmpty.hidden = false;
-          relEmpty.textContent = emptyText(scope);
-        }
-
-        relMore.hidden = !(r.body.hasMore && state.offset < state.total);
-      })
-      .catch(function () {
-        state.busy = false;
-        relMore.disabled = false;
-        relEmpty.hidden = false;
-        relEmpty.textContent = '网络连接失败，请稍后刷新。';
-      });
-  }
-
-  Array.prototype.forEach.call(document.querySelectorAll('.rel__tab'), function (tab) {
-    tab.addEventListener('click', function () {
-      var scope = tab.getAttribute('data-scope');
-      if (scope === state.scope && state.offset > 0) return;
-      loadRel(scope, false);
-    });
-  });
-
-  if (relMore) {
-    relMore.addEventListener('click', function () {
-      loadRel(state.scope, true);
-    });
-  }
-
-  relList.addEventListener('click', function (ev) {
-    var btn = ev.target.closest ? ev.target.closest('.rel__act') : null;
-    if (!btn || btn.disabled) return;
-
-    var uid = btn.getAttribute('data-uid');
-    var following = btn.getAttribute('data-following') === '1';
-
-    btn.disabled = true;
-
-    fetch('/api/follow', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ uid: Number(uid), act: following ? 'unfollow' : 'follow' })
-    })
-      .then(function (res) {
-        return res.json().then(function (d) { return { ok: res.ok, body: d }; });
-      })
-      .then(function (r) {
-        btn.disabled = false;
-        if (!r.ok || !r.body.ok) {
-          var err = r.body && r.body.error;
-          say(err === 'too_many' ? '关注人数已达上限' : '操作失败，请重试');
-          return;
-        }
-
-        btn.setAttribute('data-following', r.body.following ? '1' : '0');
-        btn.textContent = r.body.following ? '取消关注' : '关注';
-        say(r.body.following ? '已关注' : '已取消关注');
-      })
-      .catch(function () {
-        btn.disabled = false;
-        say('网络连接失败，操作未生效');
-      });
-  });
-
-  /* 顶部数字跳到列表 */
-
-  Array.prototype.forEach.call(document.querySelectorAll('.sp-social__i'), function (b) {
-    b.addEventListener('click', function () {
-      var scope = b.getAttribute('data-jump');
-      loadRel(scope, false);
-      var sec = $('socialSec');
-      if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  });
 
   /* ---------- 提现记录 ---------- */
 
@@ -413,7 +223,6 @@
       $('bio').hidden = true;
       $('socialRow').hidden = true;
       $('followBox').hidden = true;
-      $('socialSec').hidden = true;
       $('payoutSec').hidden = true;
       var lvBox = document.querySelector('.sp-lv');
       if (lvBox) lvBox.hidden = true;
@@ -463,11 +272,9 @@
     if (state.viewer.self) {
       $('selfNote').hidden = false;
     }
-
-    loadRel('followers', false);
   }
 
-  /* ---------- 导航与自身判断 ---------- */
+  /* ---------- 导航 ---------- */
 
   var logoutBtn = $('logoutBtn');
   if (logoutBtn) {

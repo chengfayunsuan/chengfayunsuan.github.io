@@ -1,0 +1,294 @@
+/* ============================================================
+   乘法 · 关注与粉丝列表页
+   沿用 style.css 与 home.css 的变量、导航与角色铭牌
+   ============================================================ */
+
+/* .hm-nav 自带 display:flex，会盖掉 hidden 属性 */
+.hm-nav[hidden] { display: none; }
+
+/* ---------- 顶栏 ---------- */
+
+.rl-bar {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.rl-bar__in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px 0;
+}
+
+.rl-bar__back {
+  color: var(--paper);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-decoration: none;
+  transition: color .14s ease;
+}
+
+.rl-bar__back:hover { color: var(--red); }
+
+.rl-bar__k {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .2em;
+  color: #B8B0A0;
+}
+
+/* ---------- 页头 ---------- */
+
+.rl-hero { padding: clamp(28px, 3.8vw, 50px) 0 0; }
+
+.rl-t {
+  margin: 0;
+  font-size: clamp(30px, 4.4vw, 56px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -.04em;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.rl-sub {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 16px 0 0;
+  font-size: 12.5px;
+  letter-spacing: .06em;
+  color: var(--gray);
+}
+
+.rl-sub b {
+  font-family: var(--black);
+  font-weight: 800;
+  font-size: 15px;
+  line-height: 1;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+
+.rl-dot { color: var(--hair); }
+
+/* ---------- 列表 ---------- */
+
+.rl-body {
+  padding: clamp(24px, 3.4vw, 38px) 0 clamp(44px, 5.4vw, 76px);
+  min-height: clamp(320px, 46vh, 560px);
+}
+
+.rel { background: transparent; }
+
+.rel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--hair);
+}
+
+.rel__tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.rel__tab {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 7px 15px;
+  border: 2px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  cursor: pointer;
+  transition: background .14s, color .14s;
+}
+
+.rel__tab b {
+  font-family: var(--black);
+  font-weight: 800;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.rel__tab.is-on {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.rel__tab:not(.is-on):hover { background: var(--paper-2); }
+
+.rel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rel__i {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+}
+
+.rel__i + .rel__i { border-top: 1px solid var(--hair); }
+
+.rel__a {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.rel__uid {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .08em;
+  color: var(--gray);
+  white-space: nowrap;
+}
+
+.rel__name {
+  font-size: 15px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rel__a:hover .rel__name { color: var(--red); }
+
+.rel__lv {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .08em;
+  color: var(--gray);
+  white-space: nowrap;
+}
+
+.rel__at {
+  margin-left: auto;
+  padding-left: 12px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .06em;
+  color: #6A6154;
+  white-space: nowrap;
+}
+
+.rel__act {
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  border: 2px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .14s, color .14s;
+}
+
+.rel__act:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.rel__empty {
+  margin: 0;
+  padding: 22px 0;
+  font-size: 13px;
+  color: var(--gray);
+}
+
+.rel__more {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  border: 0;
+  border-top: 1px solid var(--hair);
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .14s, color .14s;
+}
+
+.rel__more:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.rel__more[hidden] { display: none; }
+
+/* ---------- 空态 ---------- */
+
+.rl-none { padding: clamp(40px, 7vw, 90px) 0 clamp(50px, 7vw, 100px); }
+
+.rl-none__k {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .24em;
+  color: var(--red);
+}
+
+.rl-none__t {
+  margin: 12px 0 0;
+  font-family: var(--black);
+  font-weight: 800;
+  font-size: clamp(38px, 6vw, 84px);
+  line-height: .96;
+  letter-spacing: -.01em;
+}
+
+.rl-none__d {
+  margin: 14px 0 0;
+  max-width: 46ch;
+  font-size: 14px;
+  line-height: 1.85;
+  color: #4A453A;
+}
+
+.rl-none__a {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 26px 0 0;
+}
+
+.rl-none__a .btn {
+  padding: 12px 24px;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+/* ---------- 响应式 ---------- */
+
+@media (max-width: 620px) {
+  .rl-bar__k { display: none; }
+  .rl-t { letter-spacing: -.03em; }
+  .rel__head { flex-wrap: wrap; gap: 10px; }
+  .rel__tabs { width: 100%; }
+  .rel__tab { flex: 1 1 auto; justify-content: center; }
+  .rel__i { flex-wrap: wrap; padding: 13px 0; }
+  .rel__a { gap: 8px; }
+  .rel__at { display: none; }
+  .rel__act { padding: 6px 10px; font-size: 11.5px; }
+  .rl-none__a .btn { flex: 1 1 100%; justify-content: center; }
+}

@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#E0291E">
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="/style.css?v=2">
-<link rel="stylesheet" href="/home.css?v=4">
+<link rel="stylesheet" href="/home.css?v=5">
 <script src="/js/config.js"></script>
 </head>
 <body>
@@ -97,18 +97,7 @@
         <div class="face__bal">
           <div class="face__bal-k"><span data-cur="name">法币</span>余额</div>
 
-          <div class="face__bal-row">
-            <div class="face__bal-n" id="fcText">0.0000</div>
-
-            <div class="face__soc">
-              <button class="face__soc-i" type="button" data-scope="following">
-                关注：<b id="faceFollow">0</b>
-              </button>
-              <button class="face__soc-i" type="button" data-scope="followers">
-                粉丝：<b id="faceFans">0</b>
-              </button>
-            </div>
-          </div>
+          <div class="face__bal-n" id="fcText">0.0000</div>
 
           <div class="face__bal-f">
             冻结 <span id="fcFrozen">0.0000</span>
@@ -217,33 +206,6 @@
 
 </main>
 
-<!-- 小窗口：关注与粉丝 -->
-<div class="sheet" id="relSheet" hidden>
-  <div class="sheet__mask" data-sheet-close></div>
-
-  <div class="sheet__box" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
-    <div class="sheet__head">
-      <span class="sheet__t" id="sheetTitle">关注与粉丝</span>
-      <button class="sheet__x" id="sheetClose" type="button">关闭</button>
-    </div>
-
-    <div class="rel__tabs sheet__tabs">
-      <button class="rel__tab is-on" type="button" data-scope="following">
-        关注 <b id="tabFollow">0</b>
-      </button>
-      <button class="rel__tab" type="button" data-scope="followers">
-        粉丝 <b id="tabFans">0</b>
-      </button>
-    </div>
-
-    <ul class="rel__list" id="relList"></ul>
-
-    <p class="rel__empty" id="relEmpty" hidden></p>
-
-    <button class="rel__more" id="relMore" type="button" hidden>载入更多</button>
-  </div>
-</div>
-
 <!-- 载入遮罩 -->
 <div class="hm-load" id="loading">
   <span class="hm-load__mark" aria-hidden="true"></span>
@@ -262,6 +224,6 @@
   </div>
 </footer>
 
-<script src="/js/home.js?v=4" defer></script>
+<script src="/js/home.js?v=5" defer></script>
 </body>
 </html>
