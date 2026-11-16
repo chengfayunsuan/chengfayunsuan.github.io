@@ -12,3 +12,6 @@
 /config.js /js/config.js 301
 /nav.js /js/nav.js 301
 /main.js /js/main.js 301
+
+# 书已于 2026-11-16 独立成站，旧路径全部 301 过去，:splat 把后面的子路径原样带走
+/book/*  https://chengfa-book.pages.dev/:splat  301
