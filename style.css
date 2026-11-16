@@ -397,109 +397,136 @@ button { font-family: inherit; cursor: pointer; }
 
 .art {
   position: relative;
-  width: clamp(280px, 25vw, 356px);
-  aspect-ratio: 1 / 1.06;
+  width: clamp(248px, 21vw, 308px);
+  aspect-ratio: 308 / 430;
   flex: none;
 }
 
-/* 主形：不等边五边形，五条边没有一条水平或垂直 */
+/* 空心圆环，细线描边 */
+.art__ring {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 28%;
+  aspect-ratio: 1;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+}
+
+/* 十字线：横线贯穿，竖线自圆环中心下探 */
+.art__line {
+  position: absolute;
+  z-index: 2;
+  background: var(--ink);
+}
+
+.art__line--h {
+  left: 27%;
+  right: 0;
+  top: 13.6%;
+  height: 3px;
+}
+
+.art__line--v {
+  left: 13.6%;
+  top: 13.6%;
+  width: 3px;
+  height: 19%;
+}
+
+/* 右上角宽字距小标题 */
+.art__word {
+  position: absolute;
+  right: 0;
+  top: 9.5%;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .34em;
+  color: var(--ink);
+}
+
+/* 红色斜切块 */
 .art__plate {
   position: absolute;
-  inset: 0;
+  left: 0;
+  top: 22%;
+  width: 100%;
+  height: 34%;
   background: var(--red);
-  clip-path: polygon(3% 13%, 84% 0, 100% 47%, 58% 100%, 0 79%);
-  filter: drop-shadow(10px 10px 0 var(--ink));
+  clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%);
 }
 
-/* 黑色斜带：以 -12.5 度横切主形上部，两端探出边界 */
-.art__band {
+/* 黑色横条，压住红块腰部 */
+.art__bar {
   position: absolute;
-  left: -9%;
-  right: -9%;
-  top: 21%;
-  height: 20px;
+  left: -3.5%;
+  top: 39%;
+  width: 103.5%;
+  height: 10.5%;
   background: var(--ink);
-  transform: rotate(-12.5deg);
-  transform-origin: center;
-}
-
-/* 右上的细竖条，带自身倾角 */
-.art__tab {
-  position: absolute;
-  right: 6%;
-  top: -5%;
-  width: 14px;
-  height: 24%;
-  background: var(--ink);
-  transform: rotate(13deg);
-}
-
-/* 数据主体，压在主形中段 */
-.art__body {
-  position: absolute;
-  left: 46%;
-  top: 53%;
-  transform: translate(-50%, -50%);
-  z-index: 2;
-  text-align: center;
   color: var(--paper);
-}
-
-.art__num {
+  display: flex;
+  align-items: center;
+  padding-left: 6%;
   font-family: var(--black);
-  font-size: clamp(56px, 5.9vw, 78px);
+  font-size: clamp(15px, 1.65vw, 23px);
+  letter-spacing: .18em;
+}
+
+/* 红块右侧的小方块 */
+.art__chip {
+  position: absolute;
+  right: 11%;
+  top: 49.5%;
+  width: 12%;
+  aspect-ratio: 1;
+  background: var(--red);
+}
+
+/* 红块右下方的黑色短条 */
+.art__stub {
+  position: absolute;
+  right: 0;
+  top: 63.5%;
+  width: 27%;
+  height: 3.6%;
+  background: var(--ink);
+}
+
+/* 巨型数字 */
+.art__num {
+  position: absolute;
+  left: -2%;
+  top: 53.5%;
+  font-family: var(--black);
+  font-size: clamp(62px, 6.6vw, 94px);
   line-height: .82;
-  letter-spacing: -.03em;
-  white-space: nowrap;
-}
-
-.art__num .u {
-  font-size: .34em;
-  letter-spacing: 0;
-  margin-left: 2px;
-}
-
-.art__label {
-  margin-top: 12px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .02em;
-  line-height: 1.5;
-}
-
-/* 左上角标签 */
-.art__tag {
-  position: absolute;
-  left: 2%;
-  top: 2%;
-  z-index: 3;
-  background: var(--paper);
-  border: 3px solid var(--ink);
+  letter-spacing: -.02em;
   color: var(--ink);
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .1em;
-  padding: 3px 8px;
-  white-space: nowrap;
-  transform: rotate(-3deg);
 }
 
-/* 左下角方框，从主形边角探出 */
-.art__box {
+/* 底部黑块 */
+.art__foot {
   position: absolute;
-  left: -14px;
+  left: -3.5%;
+  bottom: 7%;
+  width: 103.5%;
+  height: 14.5%;
+  background: var(--ink);
+}
+
+/* 最底部说明文字 */
+.art__cap {
+  position: absolute;
+  left: 0;
   bottom: 0;
-  z-index: 3;
-  width: 66px;
-  height: 66px;
-  border: 3px solid var(--ink);
-  display: grid;
-  place-items: center;
-  background: var(--paper);
+  width: 100%;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .16em;
   color: var(--ink);
-  font-size: 23px;
-  box-shadow: 5px 5px 0 var(--red);
 }
 
 /* Hero 底部的黑色斜带 */
@@ -1108,14 +1135,12 @@ button { font-family: inherit; cursor: pointer; }
   .hero__sub { font-size: 13px; line-height: 1.8; }
   .hero__actions .btn { flex: 1 1 100%; justify-content: center; }
 
-  .hero__art { justify-content: center; padding: 24px 0 18px; }
-  .art { width: 238px; margin-left: 3%; }
-  .art__band { top: 21%; height: 14px; left: -7%; right: -7%; }
-  .art__tab { width: 10px; right: 10%; top: -6%; }
-  .art__num { font-size: 48px; }
-  .art__label { font-size: 10px; margin-top: 8px; }
-  .art__tag { left: 1%; top: 5%; font-size: 8px; padding: 2px 6px; border-width: 2px; }
-  .art__box { width: 50px; height: 50px; left: -12px; bottom: -8px; font-size: 17px; box-shadow: 4px 4px 0 var(--red); }
+  .hero__art { justify-content: center; padding: 26px 0 20px; }
+  .art { width: 218px; }
+  .art__word { font-size: 9px; letter-spacing: .2em; }
+  .art__bar { font-size: 13px; letter-spacing: .12em; padding-left: 4%; }
+  .art__num { font-size: 58px; left: -1%; }
+  .art__cap { font-size: 9px; letter-spacing: .1em; }
 
   .belt { padding: 22px 0 26px; clip-path: polygon(0 0, 100% 1.6vw, 100% 100%, 0 100%); }
   .belt__in { gap: 12px 14px; }
