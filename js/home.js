@@ -160,14 +160,75 @@
   var relList = $('relList');
   var relEmpty = $('relEmpty');
   var relMore = $('relMore');
+  var sheet = $('relSheet');
 
-  var REL = { scope: 'following', offset: 0, total: 0, busy: false };
+  var REL = { scope: 'following', loaded: '', offset: 0, total: 0, busy: false };
 
   function paintCounts(c) {
     if (!c) return;
-    $('tabFollow').textContent = c.following;
-    $('tabFans').textContent = c.followers;
+    ['tabFollow', 'faceFollow'].forEach(function (id) {
+      var el = $(id);
+      if (el) el.textContent = c.following;
+    });
+    ['tabFans', 'faceFans'].forEach(function (id) {
+      var el = $(id);
+      if (el) el.textContent = c.followers;
+    });
   }
+
+  function setTabs(scope) {
+    Array.prototype.forEach.call(document.querySelectorAll('.rel__tab'), function (t) {
+      t.classList.toggle('is-on', t.getAttribute('data-scope') === scope);
+    });
+  }
+
+  /* ---------- 小窗口 ---------- */
+
+  var lastFocus = null;
+
+  function openSheet(scope) {
+    if (!sheet) return;
+
+    lastFocus = document.activeElement;
+    sheet.hidden = false;
+    document.body.classList.add('is-locked');
+
+    if (REL.loaded !== scope) {
+      loadRel(scope, false);
+    } else {
+      REL.scope = scope;
+      setTabs(scope);
+    }
+
+    var x = $('sheetClose');
+    if (x) x.focus();
+  }
+
+  function closeSheet() {
+    if (!sheet || sheet.hidden) return;
+
+    sheet.hidden = true;
+    document.body.classList.remove('is-locked');
+
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  if (sheet) {
+    $('sheetClose').addEventListener('click', closeSheet);
+
+    var mask = sheet.querySelector('.sheet__mask');
+    if (mask) mask.addEventListener('click', closeSheet);
+
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape') closeSheet();
+    });
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.face__soc-i'), function (b) {
+    b.addEventListener('click', function () {
+      openSheet(b.getAttribute('data-scope'));
+    });
+  });
 
   function relEmptyText(scope) {
     return scope === 'following'
@@ -237,12 +298,9 @@
       relMore.disabled = true;
     }
 
-    Array.prototype.forEach.call(document.querySelectorAll('.rel__tab'), function (t) {
-      t.classList.toggle('is-on', t.getAttribute('data-scope') === scope);
-    });
+    setTabs(scope);
 
     var url = '/api/follow?scope=' + encodeURIComponent(scope) + '&offset=' + REL.offset;
-
     fetch(url, { headers: { Accept: 'application/json' } })
       .then(function (res) {
         return res.json().then(function (d) { return { status: res.status, body: d }; });
@@ -264,6 +322,7 @@
         }
 
         paintCounts(r.body.counts);
+        REL.loaded = scope;
 
         var items = r.body.items || [];
         REL.total = r.body.total || 0;
@@ -398,7 +457,10 @@
 
     paintBio(user.bio || '');
 
-    $('fcText').textContent = user.fc;
+    var fcEl = $('fcText');
+    fcEl.textContent = user.fc;
+    /* 位数多时收一号字，避免大额余额把小窗口入口挤掉 */
+    fcEl.classList.toggle('is-long', String(user.fc || '').length > 8);
     $('fcFrozen').textContent = user.fcFrozen;
 
     $('statDays').textContent = daysSince(user.createdAt);
@@ -469,6 +531,12 @@
       render(data.user);
       app.hidden = false;
       loadRel('following', false);
+
+      /* 本地开发：?sheet=following|followers 直接展开小窗口，便于检查版面 */
+      if (isLocal) {
+        var m = location.search.match(/[?&]sheet=(following|followers)\b/);
+        if (m) setTimeout(function () { openSheet(m[1]); }, 300);
+      }
     })
     .catch(function () {
       loading.hidden = true;

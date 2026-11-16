@@ -127,8 +127,6 @@
 
 /* ---------- 社交关系：关注与粉丝 ---------- */
 
-.rel-sec { padding: 30px 0 0; }
-
 .rel { background: transparent; }
 
 .rel__head {
@@ -138,27 +136,6 @@
   gap: 16px;
   padding: 0 0 12px;
   border-bottom: 1px solid var(--hair);
-}
-
-.rel__hd {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  min-width: 0;
-}
-
-.rel__t {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: .02em;
-}
-
-.rel__k {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: .2em;
-  color: var(--gray);
 }
 
 .rel__tabs {
@@ -301,6 +278,83 @@
   background: var(--ink);
   color: var(--paper);
 }
+
+/* ---------- 小窗口：关注与粉丝 ---------- */
+
+body.is-locked { overflow: hidden; }
+
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+}
+
+.sheet[hidden] { display: none; }
+
+.sheet__mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 18, 14, .52);
+}
+
+.sheet__box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(540px, 100%);
+  max-height: min(72vh, 600px);
+  border: var(--edge);
+  background: var(--paper);
+  box-shadow: 10px 10px 0 rgba(20, 18, 14, .88);
+}
+
+.sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--hair);
+}
+
+.sheet__t {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+.sheet__x {
+  padding: 6px 12px;
+  border: 2px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .14s, color .14s;
+}
+
+.sheet__x:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.sheet__tabs { padding: 12px 18px; }
+
+.sheet__box .rel__list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.sheet__box .rel__i { padding: 12px 18px; }
+
+.sheet__box .rel__empty { padding: 22px 18px; }
 
 /* ---------- 门面 ---------- */
 
@@ -453,6 +507,7 @@
   display: flex;
   flex-direction: column;
   padding: clamp(24px, 3.2vw, 44px);
+  padding-left: clamp(20px, 2.6vw, 36px);
   background: var(--paper-2);
   color: var(--ink);
   min-width: 0;
@@ -475,6 +530,60 @@
   color: var(--ink);
   word-break: break-all;
 }
+
+.face__bal-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 14px;
+}
+
+.face__bal-row .face__bal-n {
+  margin: 0;
+  min-width: 0;
+}
+
+.face__bal-n.is-long { font-size: clamp(34px, 4.4vw, 70px); }
+
+/* 关注与粉丝：两行小字，贴在法币数右侧 */
+.face__soc {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 0 0 auto;
+  padding-bottom: 4px;
+}
+
+.face__soc-i {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 2px;
+  padding: 5px 0 5px 16px;
+  border: 0;
+  background: transparent;
+  color: var(--gray);
+  font-family: inherit;
+  font-size: 11.5px;
+  letter-spacing: .06em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color .14s ease;
+}
+
+.face__soc-i b {
+  font-family: var(--black);
+  font-weight: 800;
+  font-size: 17px;
+  line-height: 1;
+  letter-spacing: 0;
+  color: var(--ink);
+  transition: color .14s ease;
+}
+
+.face__soc-i:hover,
+.face__soc-i:hover b { color: var(--red); }
 
 .face__bal-n::after {
   content: "";
@@ -886,7 +995,6 @@
 
   .prog__note { flex-direction: column; align-items: flex-start; gap: 12px; }
 
-  .rel-sec { padding-top: 22px; }
   .rel__head { flex-direction: column; align-items: stretch; gap: 10px; }
   .rel__tabs { width: 100%; }
   .rel__tab { flex: 1 1 auto; justify-content: center; }
@@ -894,6 +1002,12 @@
   .rel__a { gap: 8px; }
   .rel__at { display: none; }
   .rel__act { padding: 6px 10px; font-size: 11.5px; }
+
+  .sheet { padding: 14px; }
+  .sheet__box { max-height: 78vh; }
+  .sheet__tabs { padding: 12px 14px; }
+  .sheet__box .rel__i { padding: 12px 14px; }
+  .sheet__box .rel__empty { padding: 20px 14px; }
 }
 
 .rel__more[hidden] { display: none; }
