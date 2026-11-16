@@ -7,10 +7,10 @@
 <meta name="description" content="乘法用户的公开主页。">
 <meta name="theme-color" content="#E0291E">
 <meta name="robots" content="noindex">
-<link rel="stylesheet" href="/style.css?v=5">
-<link rel="stylesheet" href="/home.css?v=7">
-<link rel="stylesheet" href="/space.css?v=6">
-<link rel="stylesheet" href="/relation.css?v=1">
+<link rel="stylesheet" href="/css/style.css?v=6">
+<link rel="stylesheet" href="/css/home.css?v=8">
+<link rel="stylesheet" href="/css/space.css?v=6">
+<link rel="stylesheet" href="/css/relation.css?v=1">
 <script src="/js/config.js"></script>
 </head>
 <body>
@@ -56,7 +56,7 @@
           <div class="sp-meta">
             <span class="mono">UID <b id="uid">—</b></span>
             <span class="face__role" id="role" data-role="user">用户</span>
-            <span class="sp-status" id="status">正常</span>
+            <span class="sp-status" id="statusBox">状态 <b id="status">正常</b></span>
           </div>
 
           <h1 class="sp-name" id="name">—</h1>
@@ -85,20 +85,35 @@
           </p>
         </div>
 
-        <div class="sp-lv">
-          <span class="sp-k">等级</span>
-          <div class="sp-lv__n"><span class="sp-lv__lv">LV</span><b id="lv">1</b></div>
+        <div class="sp-side">
+          <span class="sp-k"><span data-cur="name">法币</span>余额</span>
+
+          <div class="sp-bal">
+            <b id="fc">0</b>
+            <i data-cur="code">FC</i>
+          </div>
+
+          <p class="sp-bal__f">
+            冻结 <b id="fcFrozen">0</b>
+            <span data-cur="code">FC</span>
+          </p>
+
+          <div class="sp-duo">
+            <div class="sp-duo__i">
+              <span class="sp-k">等级</span>
+              <div class="sp-duo__v"><i>LV</i><b id="lv">1</b></div>
+            </div>
+            <div class="sp-duo__i">
+              <span class="sp-k">好感度</span>
+              <div class="sp-duo__v"><b id="aff">0</b></div>
+            </div>
+          </div>
 
           <div class="sp-exp">
             <span class="sp-exp__bar"><i id="expBar"></i></span>
             <span class="sp-exp__x"><b id="expNow">0</b> / <span id="expNext">100</span></span>
           </div>
           <p class="sp-exp__h" id="expHint">—</p>
-
-          <div class="sp-aff">
-            <span class="sp-k">好感度</span>
-            <b id="aff">0</b>
-          </div>
         </div>
 
       </div>
@@ -141,7 +156,6 @@
     <div class="wrap">
       <div class="sp-acts">
         <button class="btn btn--red btn--s" id="copyLink" type="button">复制主页链接</button>
-        <a class="btn btn--ghost btn--s" href="/settings#sec-find">查找其他用户</a>
         <a class="btn btn--ghost btn--s" href="/home">回到我的账户</a>
       </div>
     </div>
@@ -156,8 +170,7 @@
     <h1 class="sp-none__t" id="noneT">没有这个用户</h1>
     <p class="sp-none__d" id="noneD">UID 可能写错了，或者该账户已经注销。</p>
     <p class="sp-none__a">
-      <a class="btn btn--red" href="/settings#sec-find">去查找用户</a>
-      <a class="btn btn--ghost" href="/home">回到账户首页</a>
+      <a class="btn btn--red" href="/home">回到账户首页</a>
     </p>
   </div>
 </section>

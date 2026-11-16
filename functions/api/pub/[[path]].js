@@ -41,7 +41,8 @@ const json = (data, status) =>
     }
   });
 
-const COLS = 'id, username, role, status, level, exp, affinity, bio, created_at, deleted_at';
+const COLS =
+  'id, username, role, status, level, exp, affinity, fc_units, fc_frozen, bio, created_at, deleted_at';
 
 /* "2026-11-16 08:00:46" 是 UTC 且无时区标记，补成 ISO 再解析 */
 function parseTs(s) {
@@ -212,6 +213,8 @@ export async function onRequestGet(context) {
     {
       ok: true,
       user: Object.assign(base, {
+        fc: fc(row.fc_units),
+        fcFrozen: fc(row.fc_frozen),
         level: row.level || 1,
         exp: row.exp || 0,
         affinity: row.affinity || 0,

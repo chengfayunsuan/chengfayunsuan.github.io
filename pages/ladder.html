@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>天梯榜 · 乘法</title>
+<meta name="description" content="乘法天梯榜：按等级与法币排序的公开榜单。">
+<meta name="theme-color" content="#E0291E">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=6">
+<link rel="stylesheet" href="/css/home.css?v=8">
+<link rel="stylesheet" href="/css/page.css?v=2">
+<script src="/js/config.js"></script>
+</head>
+<body data-page="ladder">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><i data-cur="code">FC</i>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/home">我</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
+    </div>
+  </div>
+</header>
+
+<div class="pg-bar">
+  <div class="wrap pg-bar__in">
+    <a class="pg-bar__a" href="/home">← 返回账户首页</a>
+    <span class="pg-bar__k">LADDER / 天梯榜</span>
+  </div>
+</div>
+
+<main class="pg">
+  <div class="wrap">
+
+    <div class="pg-head">
+      <div>
+        <span class="pg-k">LADDER</span>
+        <h1 class="pg-t">天梯榜</h1>
+        <p class="pg-d">
+          按等级与法币两条线排列。等级取决于累计经验，法币取决于已完成问卷的结算金额，
+          两者不互相换算，各有各的榜。
+        </p>
+      </div>
+
+      <div class="pg-side">
+        <b>TOP 50</b>
+        <span>仅列活跃账户</span>
+      </div>
+    </div>
+
+    <div class="pg-tools">
+      <div class="pg-tabs">
+        <button class="pg-tab is-on" type="button" data-by="level">按等级</button>
+        <button class="pg-tab" type="button" data-by="fc">按法币</button>
+      </div>
+      <span class="pg-tools__r">封禁与注销账户不计入</span>
+    </div>
+
+    <ul class="ld-list" id="ldList"></ul>
+
+    <p class="pg-empty" id="ldEmpty" hidden>榜单还没有数据。</p>
+
+    <div class="pg-note">
+      <span class="stamp stamp--red">RULE / 规则</span>
+      <p>
+        等级由经验累计决定，经验只来自通过核验的问卷；法币榜统计当前可用余额，
+        提现后排名会下降。榜单只展示公开信息，点击用户名可查看对方的公开主页。
+      </p>
+    </div>
+
+  </div>
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 乘法 CHENGFA</span>
+      <span>参与调研 · 累计余额 · 兑换回报</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/app.js?v=1" defer></script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>收支明细 · 乘法</title>
+<meta name="description" content="乘法收支明细：逐笔查看问卷奖励、提现与兑换记录。">
+<meta name="theme-color" content="#E0291E">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=6">
+<link rel="stylesheet" href="/css/home.css?v=8">
+<link rel="stylesheet" href="/css/page.css?v=2">
+<script src="/js/config.js"></script>
+</head>
+<body data-page="ledger">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><i data-cur="code">FC</i>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/home">我</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
+    </div>
+  </div>
+</header>
+
+<div class="pg-bar">
+  <div class="wrap pg-bar__in">
+    <a class="pg-bar__a" href="/home">← 返回账户首页</a>
+    <span class="pg-bar__k">LEDGER / 收支明细</span>
+  </div>
+</div>
+
+<main class="pg">
+  <div class="wrap">
+
+    <div class="pg-head">
+      <div>
+        <span class="pg-k">LEDGER</span>
+        <h1 class="pg-t">收支明细</h1>
+        <p class="pg-d">
+          每一笔余额变动都先记流水再落余额，可按时间与类型逐笔核对。
+          出现金额差异时，用单号追溯对应的问卷或提现申请。
+        </p>
+      </div>
+
+      <div class="pg-side">
+        <b id="lgCount">0</b>
+        <span>笔记录</span>
+      </div>
+    </div>
+
+    <div class="lg-sum">
+      <div class="lg-sum__i">
+        <span class="lg-sum__k">累计收入</span>
+        <p class="lg-sum__n is-in">
+          <b id="lgIn">0</b><i data-cur="code">FC</i>
+        </p>
+      </div>
+      <div class="lg-sum__i">
+        <span class="lg-sum__k">累计支出</span>
+        <p class="lg-sum__n is-out">
+          <b id="lgOut">0</b><i data-cur="code">FC</i>
+        </p>
+      </div>
+      <div class="lg-sum__i">
+        <span class="lg-sum__k">当前可用</span>
+        <p class="lg-sum__n">
+          <b id="lgNow">0</b><i data-cur="code">FC</i>
+        </p>
+      </div>
+    </div>
+
+    <div class="pg-tools">
+      <div class="pg-tabs">
+        <button class="pg-tab is-on" type="button" data-filter="all">全部</button>
+        <button class="pg-tab" type="button" data-filter="in">收入</button>
+        <button class="pg-tab" type="button" data-filter="out">支出</button>
+        <button class="pg-tab" type="button" data-filter="survey">问卷</button>
+        <button class="pg-tab" type="button" data-filter="withdraw">提现</button>
+        <button class="pg-tab" type="button" data-filter="cdk">兑换</button>
+      </div>
+      <span class="pg-tools__r">按时间倒序</span>
+    </div>
+
+    <div class="lg-table">
+      <div class="lg-head">
+        <span>时间</span>
+        <span>类型</span>
+        <span>说明</span>
+        <span>变动</span>
+        <span>余额</span>
+      </div>
+
+      <div id="lgBody"></div>
+    </div>
+
+    <p class="pg-empty" id="lgEmpty" hidden>账户还没有任何资金变动。</p>
+
+    <div class="lg-more" id="lgMore" hidden>
+      <button class="btn btn--ghost" type="button">载入更多</button>
+    </div>
+
+    <div class="pg-note">
+      <span class="stamp stamp--red">NOTE / 说明</span>
+      <p>
+        余额以整数最小单位记账，展示时省略小数末尾的零，因此显示的数值与实际记账完全一致。
+        提现申请提交后，金额从可用余额划入冻结，审核通过才从冻结中扣除。
+      </p>
+    </div>
+
+  </div>
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 乘法 CHENGFA</span>
+      <span>参与调研 · 累计余额 · 兑换回报</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/app.js?v=1" defer></script>
+</body>
+</html>

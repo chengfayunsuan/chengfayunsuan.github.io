@@ -73,7 +73,13 @@
   color: var(--gray);
 }
 
-.sp-status.is-bad { color: var(--red-deep); }
+.sp-status b {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.sp-status.is-bad,
+.sp-status.is-bad b { color: var(--red-deep); }
 
 .sp-name {
   margin: 18px 0 10px;
@@ -122,9 +128,9 @@
   border-bottom: 2px solid var(--red);
 }
 
-/* ---------- 等级块 ---------- */
+/* ---------- 余额与等级 ---------- */
 
-.sp-lv {
+.sp-side {
   display: flex;
   flex-direction: column;
   padding: clamp(24px, 3.2vw, 44px);
@@ -132,7 +138,7 @@
   min-width: 0;
 }
 
-.sp-lv[hidden] { display: none; }
+.sp-side[hidden] { display: none; }
 
 .sp-k {
   font-size: 11px;
@@ -140,33 +146,98 @@
   color: var(--gray);
 }
 
-.sp-lv__n {
+/* 余额是这块唯一的主数字，字号压过等级与好感度 */
+.sp-bal {
   display: flex;
   align-items: baseline;
   gap: 8px;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
-.sp-lv__lv {
+.sp-bal b {
+  font-family: var(--black);
+  font-weight: 400;
+  font-size: clamp(52px, 6.2vw, 92px);
+  line-height: .88;
+  letter-spacing: -.01em;
+  word-break: break-all;
+}
+
+.sp-bal b.is-long { font-size: clamp(32px, 4.2vw, 60px); }
+
+.sp-bal i {
   font-family: var(--mono);
-  font-size: 12px;
+  font-style: normal;
+  font-size: 11px;
   letter-spacing: .16em;
   color: var(--gray);
 }
 
-.sp-lv__n b {
+.sp-bal__f {
+  margin: 16px 0 0;
+  padding-bottom: 18px;
+  border-bottom: 2px solid var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .06em;
+  color: var(--gray);
+}
+
+.sp-bal__f b {
   font-family: var(--black);
-  font-weight: 800;
-  font-size: clamp(50px, 6vw, 88px);
-  line-height: .9;
-  letter-spacing: 0;
+  font-weight: 400;
+  font-size: 17px;
+  letter-spacing: .02em;
+  color: var(--ink);
+}
+
+/* 等级与好感度：同一行，等宽，同字号 */
+.sp-duo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: auto;
+  padding-top: 22px;
+}
+
+.sp-duo__i {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.sp-duo__i + .sp-duo__i {
+  border-left: 1px solid var(--hair);
+  padding-left: 18px;
+}
+
+.sp-duo__v {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.sp-duo__v i {
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 11px;
+  letter-spacing: .14em;
+  color: var(--gray);
+}
+
+.sp-duo__v b {
+  font-family: var(--black);
+  font-weight: 400;
+  font-size: 34px;
+  line-height: 1;
 }
 
 .sp-exp {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 22px;
+  margin-top: 16px;
 }
 
 .sp-exp__bar {
@@ -194,27 +265,10 @@
 }
 
 .sp-exp__h {
-  margin: 10px 0 0;
+  margin: 8px 0 0;
   font-size: 11.5px;
   line-height: 1.7;
   color: var(--gray);
-}
-
-.sp-aff {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: auto;
-  padding-top: 26px;
-  border-top: 2px solid var(--ink);
-}
-
-.sp-aff b {
-  font-family: var(--black);
-  font-weight: 800;
-  font-size: 28px;
-  line-height: 1;
 }
 
 /* ---------- 区块 ---------- */
@@ -491,8 +545,8 @@
 @media (max-width: 900px) {
   .sp-hero__in { grid-template-columns: minmax(0, 1fr); }
   .sp-id { border-right: 0; }
-  .sp-lv { border-top: var(--edge); }
-  .sp-aff { margin-top: 24px; }
+  .sp-side { border-top: var(--edge); }
+  .sp-duo { margin-top: 26px; }
 }
 
 @media (max-width: 620px) {

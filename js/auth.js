@@ -44,6 +44,14 @@
 
   /* ---------- 模式切换 ---------- */
 
+  /* 从 /login?next=/ledger 回来时跳回原页面；只接受站内路径，避免被拿去当跳板 */
+  function nextPath() {
+    var raw = new URLSearchParams(location.search).get('next') || '';
+    if (raw.charAt(0) !== '/' || raw.charAt(1) === '/' || raw.charAt(1) === '\\') return '/home';
+    if (raw.indexOf('/login') === 0) return '/home';
+    return raw;
+  }
+
   function setMode(next) {
     mode = next === 'signup' ? 'signup' : 'login';
     var cfg = MODES[mode];
@@ -192,7 +200,7 @@
 
       if (res.ok && data.ok) {
         noteEl.textContent = (mode === 'signup' ? '账户已创建' : '登录成功') + '，正在进入…';
-        location.href = '/home';
+        location.href = nextPath();
         return;
       }
 

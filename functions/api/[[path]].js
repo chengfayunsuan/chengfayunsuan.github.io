@@ -36,6 +36,8 @@ export async function onRequest(context) {
     if (path === 'auth/logout' && request.method === 'POST') return await logout(request, env, url);
     if (path === 'auth/me' && request.method === 'GET') return await me(request, env);
     if (path === 'user/profile' && request.method === 'PATCH') return await updateProfile(request, env);
+    if (path === 'ledger' && request.method === 'GET') return await ledger(request, env, url);
+    if (path === 'ladder' && request.method === 'GET') return await ladder(request, env, url);
     return json({ ok: false, error: 'not_found' }, 404);
   } catch (err) {
     console.error('api error:', err && err.stack ? err.stack : err);
@@ -223,6 +225,88 @@ async function updateProfile(request, env) {
   await env.DB.prepare(`UPDATE users SET ${sets.join(', ')} WHERE id = ?`).bind(...binds).run();
 
   return json({ ok: true, user: await profileOf(env, session.uid) });
+}
+
+/* ---------------- 收支明细 ---------------- */
+
+const LEDGER_KINDS = [
+  'signup_bonus', 'survey_reward', 'survey_reject',
+  'withdraw_lock', 'withdraw_refund', 'withdraw_paid',
+  'cdk_redeem', 'admin_adjust', 'penalty'
+];
+
+async function ledger(request, env, url) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+
+  const limit = Math.min(200, Math.max(1, Number(url.searchParams.get('limit')) || 50));
+  const kind = (url.searchParams.get('kind') || '').trim();
+  const filtered = LEDGER_KINDS.indexOf(kind) >= 0;
+
+  const sum = await env.DB.prepare(
+    `SELECT COALESCE(SUM(CASE WHEN delta > 0 THEN delta ELSE 0 END), 0) AS income,
+            COALESCE(SUM(CASE WHEN delta < 0 THEN -delta ELSE 0 END), 0) AS outcome,
+            COUNT(*) AS n
+       FROM fc_ledger WHERE uid = ?`
+  ).bind(session.uid).first();
+
+  const sql = `SELECT delta, balance, kind, memo, ref, created_at
+                 FROM fc_ledger
+                WHERE uid = ?` + (filtered ? ' AND kind = ?' : '') +
+              ' ORDER BY id DESC LIMIT ?';
+
+  const args = filtered ? [session.uid, kind, limit + 1] : [session.uid, limit + 1];
+  const rows = await env.DB.prepare(sql).bind(...args).all();
+
+  const list = rows.results || [];
+  const hasMore = list.length > limit;
+
+  return json({
+    ok: true,
+    summary: {
+      income: formatFc(sum ? sum.income : 0),
+      outcome: formatFc(sum ? sum.outcome : 0),
+      count: sum ? sum.n : 0
+    },
+    hasMore,
+    items: list.slice(0, limit).map((row) => ({
+      at: toIso(row.created_at),
+      kind: row.kind,
+      delta: formatFc(row.delta),
+      balance: formatFc(row.balance),
+      memo: row.memo || '',
+      ref: row.ref || ''
+    }))
+  });
+}
+
+/* ---------------- 天梯榜 ---------------- */
+
+async function ladder(request, env, url) {
+  const by = (url.searchParams.get('by') || '').trim() === 'fc' ? 'fc' : 'level';
+  const order = by === 'fc'
+    ? 'fc_units DESC, level DESC, exp DESC, id ASC'
+    : 'level DESC, exp DESC, id ASC';
+
+  const rows = await env.DB.prepare(
+    `SELECT id, username, role, level, exp, affinity, fc_units
+       FROM users
+      WHERE deleted_at IS NULL AND status = 'active'
+      ORDER BY ` + order + ' LIMIT 50'
+  ).all();
+
+  const items = (rows.results || []).map((row, i) => ({
+    rank: i + 1,
+    uid: row.id,
+    username: row.username,
+    role: row.role,
+    level: row.level || 1,
+    exp: row.exp || 0,
+    affinity: row.affinity || 0,
+    fc: formatFc(row.fc_units)
+  }));
+
+  return json({ ok: true, by, items });
 }
 
 /* ---------------- 会话 ---------------- */

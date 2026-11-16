@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>问卷大厅 · 乘法</title>
+<meta name="description" content="乘法问卷大厅：查看可参与的调研问卷与奖励额度。">
+<meta name="theme-color" content="#E0291E">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=6">
+<link rel="stylesheet" href="/css/home.css?v=8">
+<link rel="stylesheet" href="/css/page.css?v=2">
+<script src="/js/config.js"></script>
+</head>
+<body data-page="hall">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><i data-cur="code">FC</i>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/home">我</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
+    </div>
+  </div>
+</header>
+
+<div class="pg-bar">
+  <div class="wrap pg-bar__in">
+    <a class="pg-bar__a" href="/home">← 返回账户首页</a>
+    <span class="pg-bar__k">SURVEY HALL / 问卷大厅</span>
+  </div>
+</div>
+
+<main class="pg">
+  <div class="wrap">
+
+    <div class="pg-head">
+      <div>
+        <span class="pg-k">SURVEY HALL</span>
+        <h1 class="pg-t">问卷大厅</h1>
+        <p class="pg-d">
+          委托方发布的调研问卷在此集中展示。列表标注题目数量、预计耗时与奖励额度，
+          符合样本条件的问卷才会出现，名额已满或条件不符的不展示。
+        </p>
+      </div>
+
+      <div class="pg-side">
+        <b id="hallCount">0</b>
+        <span>份可参与</span>
+      </div>
+    </div>
+
+    <div class="pg-tools">
+      <div class="pg-tabs">
+        <button class="pg-tab is-on" type="button" data-filter="all">全部</button>
+        <button class="pg-tab" type="button" data-filter="todo">待完成</button>
+        <button class="pg-tab" type="button" data-filter="done">已完成</button>
+      </div>
+      <span class="pg-tools__r">按发布时间排序</span>
+    </div>
+
+    <div class="pg-empty">
+      <p class="pg-empty__k">NO SURVEY OPEN</p>
+      <h2 class="pg-empty__t">当前没有可参与的问卷</h2>
+      <p class="pg-empty__d">
+        平台处于内测阶段，问卷尚未开放。新问卷上线时，站内消息会发出提醒；
+        在此之前，账户余额、等级与公开主页均可正常使用。
+      </p>
+      <div class="pg-empty__a">
+        <a class="btn btn--red" href="/settings">补全账户资料</a>
+        <a class="btn btn--ghost" href="/home">回到账户首页</a>
+      </div>
+    </div>
+
+    <ol class="hl-steps">
+      <li>
+        <span class="hl-steps__n">01</span>
+        <span class="hl-steps__t">补全基础信息</span>
+        <span class="hl-steps__d">年龄段、城市与职业决定可参与的问卷范围，缺项会错过匹配。</span>
+      </li>
+      <li>
+        <span class="hl-steps__n">02</span>
+        <span class="hl-steps__t">选择符合条件的问卷</span>
+        <span class="hl-steps__d">每份问卷标注题目数量、预计耗时与奖励额度，开始后可暂存。</span>
+      </li>
+      <li>
+        <span class="hl-steps__n">03</span>
+        <span class="hl-steps__t">审核通过后入账</span>
+        <span class="hl-steps__d">答卷经有效性与完整性核验，通过即计入余额，可在收支明细中查到。</span>
+      </li>
+    </ol>
+
+    <p class="hl-tail">
+      问卷收益来自委托方支付的调研费用，平台不设邀请返利与层级分成，也不存在先交费后接单。
+      <a href="/#how">查看运作流程 →</a>
+    </p>
+
+  </div>
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 乘法 CHENGFA</span>
+      <span>参与调研 · 累计余额 · 兑换回报</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/app.js?v=1" defer></script>
+</body>
+</html>

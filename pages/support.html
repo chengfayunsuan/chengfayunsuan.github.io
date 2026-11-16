@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>联系客服 · 乘法</title>
+<meta name="description" content="乘法客服：账户、余额、问卷相关问题的反馈渠道。">
+<meta name="theme-color" content="#E0291E">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=6">
+<link rel="stylesheet" href="/css/home.css?v=8">
+<link rel="stylesheet" href="/css/page.css?v=2">
+<script src="/js/config.js"></script>
+</head>
+<body data-page="support">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><i data-cur="code">FC</i>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/home">我</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
+    </div>
+  </div>
+</header>
+
+<div class="pg-bar">
+  <div class="wrap pg-bar__in">
+    <a class="pg-bar__a" href="/home">← 返回账户首页</a>
+    <span class="pg-bar__k">SUPPORT / 联系客服</span>
+  </div>
+</div>
+
+<main class="pg">
+  <div class="wrap">
+
+    <div class="pg-head">
+      <div>
+        <span class="pg-k">SUPPORT</span>
+        <h1 class="pg-t">联系客服</h1>
+        <p class="pg-d">
+          账户、余额、问卷与提现的问题都可以在这里提交。附上账户 UID 与相关单号，
+          处理会快很多；涉及资金的争议请在描述中写明金额与时间。
+        </p>
+      </div>
+
+      <div class="pg-side">
+        <b>24h</b>
+        <span>工作日内回复</span>
+      </div>
+    </div>
+
+    <div class="sp-cols">
+
+      <form class="sp-form" id="spForm" novalidate>
+        <h2 class="sp-form__t">提交工单</h2>
+        <p class="sp-form__d">表单会记录提交时的账户与时间，便于核对。</p>
+
+        <label class="sp-field">
+          <span>问题类型</span>
+          <select name="type">
+            <option value="account">账户与登录</option>
+            <option value="balance">余额与提现</option>
+            <option value="survey">问卷与奖励</option>
+            <option value="report">举报与申诉</option>
+            <option value="other">其他</option>
+          </select>
+        </label>
+
+        <label class="sp-field">
+          <span>联系邮箱</span>
+          <input type="email" name="email" id="spMail" placeholder="name@example.com" autocomplete="email">
+        </label>
+
+        <label class="sp-field">
+          <span>详细描述</span>
+          <textarea name="detail" placeholder="发生了什么、什么时候发生、涉及多少金额或哪个单号。"></textarea>
+        </label>
+
+        <div class="sp-form__a">
+          <button class="btn btn--red" type="submit">提交工单</button>
+          <span class="sp-form__h">内测阶段先走邮件，工单系统开放后此处直连。</span>
+        </div>
+      </form>
+
+      <aside class="sp-box">
+        <p class="sp-box__t">DIRECT / 直接联系</p>
+        <a class="sp-box__m" href="mailto:support@chengfa.cc">support@chengfa.cc</a>
+        <p class="sp-box__d">邮件标题写明账户 UID，正文附截图或单号，处理时不用再来回确认身份。</p>
+
+        <a class="sp-box__m" href="/settings#sec-ticket">我的工单 →</a>
+        <p class="sp-box__d">已提交的工单与处理进度在账户设置的工单区块查看。</p>
+
+        <div class="sp-time">
+          <dl>
+            <dt>受理时间</dt>
+            <dd>周一至周五 10:00–18:00</dd>
+            <dt>回复时长</dt>
+            <dd>一般 24 小时内，资金争议 3 个工作日内</dd>
+            <dt>处理范围</dt>
+            <dd>账户、余额、问卷、提现、举报</dd>
+          </dl>
+        </div>
+      </aside>
+
+    </div>
+
+    <div class="sp-faq">
+      <div class="sp-faq__h">
+        <span>FAQ</span>
+        <h2>常见问题</h2>
+      </div>
+
+      <div class="faq">
+        <details>
+          <summary>问卷为什么一份都看不到？</summary>
+          <p class="faq__a">
+            平台处于内测阶段，问卷尚未开放。此外，问卷按样本条件投放，
+            资料缺项或不符合条件的账户不会收到匹配，补全资料后才会进入样本池。
+          </p>
+        </details>
+
+        <details>
+          <summary>余额和冻结金额有什么区别？</summary>
+          <p class="faq__a">
+            余额是当前可以提现或兑换的部分；冻结是已经提交提现申请、正在审核的部分。
+            审核通过后从冻结中扣除，驳回则原路退回余额。
+          </p>
+        </details>
+
+        <details>
+          <summary>提现为什么被驳回？</summary>
+          <p class="faq__a">
+            常见原因是收款账户与注册人实名信息不一致、账号未完成基础资料，
+            或同一账户短时间内多次提交。驳回后金额立即退回，可修正信息后重新提交。
+          </p>
+        </details>
+
+        <details>
+          <summary>等级怎么升？经验从哪里来？</summary>
+          <p class="faq__a">
+            经验只来自通过核验的问卷，答卷被判定无效时对应经验一并扣回。
+            等级不设人工调整通道，也不出售经验。
+          </p>
+        </details>
+
+        <details>
+          <summary>别人能看到我的余额吗？</summary>
+          <p class="faq__a">
+            公开主页展示法币余额、等级、好感度与已完成的提现记录，
+            不展示邮箱、IP、登录记录与提现账户信息。
+          </p>
+        </details>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 乘法 CHENGFA</span>
+      <span>参与调研 · 累计余额 · 兑换回报</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/app.js?v=1" defer></script>
+</body>
+</html>

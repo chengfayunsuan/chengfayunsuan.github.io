@@ -472,9 +472,8 @@
     roleEl.textContent = ROLES[role] || role;
     roleEl.setAttribute('data-role', role);
 
-    var st = $('status');
-    st.textContent = STATUS[u.status] || u.status || '—';
-    st.classList.toggle('is-bad', u.status !== 'active');
+    $('status').textContent = STATUS[u.status] || u.status || '—';
+    $('statusBox').classList.toggle('is-bad', u.status !== 'active');
 
     if (u.restricted) {
       $('sub').hidden = true;
@@ -484,7 +483,7 @@
       $('socialRow').hidden = true;
       $('followBox').hidden = true;
       $('payoutSec').hidden = true;
-      var lvBox = document.querySelector('.sp-lv');
+      var lvBox = document.querySelector('.sp-side');
       if (lvBox) lvBox.hidden = true;
       var heroIn = document.querySelector('.sp-hero__in');
       if (heroIn) heroIn.classList.add('is-single');
@@ -501,6 +500,14 @@
     var next = lv * lv * 100;
     var pct = ((exp - start) / (next - start)) * 100;
     pct = Math.max(0, Math.min(100, pct));
+
+    /* 余额是这块的主数字，位数多了要缩字号，免得撑破格子 */
+    var fcText = trimNum(u.fc == null ? '0' : u.fc);
+    var fcEl = $('fc');
+    fcEl.textContent = fcText;
+    fcEl.classList.toggle('is-long', fcText.length > 7);
+
+    $('fcFrozen').textContent = trimNum(u.fcFrozen == null ? '0' : u.fcFrozen);
 
     $('lv').textContent = lv;
     $('expNow').textContent = exp;
@@ -582,6 +589,8 @@
     username: '林一舟',
     role: 'user',
     status: 'active',
+    fc: '218.65',
+    fcFrozen: '20',
     level: 2,
     exp: 240,
     affinity: 7,

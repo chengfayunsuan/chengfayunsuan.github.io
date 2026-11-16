@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>兑换中心 · 乘法</title>
+<meta name="description" content="乘法兑换中心：法币提现与数字兑换码。">
+<meta name="theme-color" content="#E0291E">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=6">
+<link rel="stylesheet" href="/css/home.css?v=8">
+<link rel="stylesheet" href="/css/page.css?v=2">
+<script src="/js/config.js"></script>
+</head>
+<body data-page="store">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><i data-cur="code">FC</i>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/home">我</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
+    </div>
+  </div>
+</header>
+
+<div class="pg-bar">
+  <div class="wrap pg-bar__in">
+    <a class="pg-bar__a" href="/home">← 返回账户首页</a>
+    <span class="pg-bar__k">REDEEM / 兑换中心</span>
+  </div>
+</div>
+
+<main class="pg">
+  <div class="wrap">
+
+    <div class="pg-head">
+      <div>
+        <span class="pg-k">REDEEM</span>
+        <h1 class="pg-t">兑换中心</h1>
+        <p class="pg-d">
+          法币可提现至支付宝或微信，也可即时兑换数字兑换码。两条路径折算比例一致，
+          不存在手续费差价，选择哪一种只取决于用途。
+        </p>
+      </div>
+
+      <div class="pg-side">
+        <b>1:1</b>
+        <span>法币折人民币</span>
+      </div>
+    </div>
+
+    <div class="st-wallet">
+      <div>
+        <span class="st-wallet__k">可兑换余额</span>
+        <div class="st-wallet__n">
+          <b id="stFc">0</b><i data-cur="code">FC</i>
+        </div>
+      </div>
+
+      <div>
+        <span class="st-wallet__k">冻结中</span>
+        <div class="st-wallet__n st-wallet__n--sm">
+          <b id="stFrozen">0</b><i data-cur="code">FC</i>
+        </div>
+        <p class="st-wallet__f">提现审核期间不可动用</p>
+      </div>
+
+      <div class="st-wallet__a">
+        <button class="btn btn--red" type="button" data-soon="提现申请">申请提现</button>
+        <button class="btn btn--ghost" type="button" data-soon="兑换码">兑换兑换码</button>
+      </div>
+    </div>
+
+    <div class="st-grid">
+
+      <article class="st-card">
+        <span class="st-card__k">CASH / 现金</span>
+        <h2 class="st-card__t">提现至支付宝 / 微信</h2>
+        <p class="st-card__d">
+          余额累计至十元即可提交申请，审核通过后七个工作日内到账。
+          收款账户须与注册人实名信息一致，不一致会被驳回。
+        </p>
+        <p class="st-card__p"><b>10</b><span data-cur="code">FC</span><span>起提</span></p>
+        <p class="st-card__s">需人工审核</p>
+      </article>
+
+      <article class="st-card st-card--ink">
+        <span class="st-card__k">CODE / 兑换码</span>
+        <h2 class="st-card__t">Steam 充值卡</h2>
+        <p class="st-card__d">
+          兑换后即时发放激活码，无需审核等待。库存实时更新，
+          缺货时档位会暂时置灰。
+        </p>
+        <p class="st-card__p"><b>30</b><span data-cur="code">FC</span><span>起兑</span></p>
+        <p class="st-card__s">即时发码</p>
+      </article>
+
+      <article class="st-card">
+        <span class="st-card__k">SUBSCRIPTION / 订阅</span>
+        <h2 class="st-card__t">会员与软件年费</h2>
+        <p class="st-card__d">
+          常用软件的年费会员与订阅码，按档位兑换。
+          具体品类随委托方结算周期调整，以兑换时列表为准。
+        </p>
+        <p class="st-card__p"><b>50</b><span data-cur="code">FC</span><span>起兑</span></p>
+        <p class="st-card__s">按档位发放</p>
+      </article>
+
+    </div>
+
+    <div class="pg-note">
+      <span class="stamp stamp--red">NOTICE / 公告</span>
+      <p>
+        兑换与提现通道处于内测阶段，按钮暂不可用。余额与冻结金额已按真实规则记账，
+        通道开放后可直接提交，无需重新累计。
+      </p>
+    </div>
+
+    <ul class="st-rule">
+      <li>
+        <b>折算比例</b>
+        <span>1 法币折 1 元人民币，提现与兑换码采用同一比例，不额外收取手续费。</span>
+      </li>
+      <li>
+        <b>到账时间</b>
+        <span>兑换码即时发放；提现经人工审核后七个工作日内到账，节假日顺延。</span>
+      </li>
+      <li>
+        <b>冻结规则</b>
+        <span>提现申请提交时，对应金额从可用余额划入冻结，审核驳回则原路退回。</span>
+      </li>
+      <li>
+        <b>记录查询</b>
+        <span>每一笔收入与支出都记入收支明细，可逐笔核对，出现差异用单号追溯。</span>
+      </li>
+    </ul>
+
+  </div>
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 乘法 CHENGFA</span>
+      <span>参与调研 · 累计余额 · 兑换回报</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/app.js?v=1" defer></script>
+</body>
+</html>
