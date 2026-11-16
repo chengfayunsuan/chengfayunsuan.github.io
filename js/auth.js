@@ -133,6 +133,7 @@
     weak_password: '密码需同时包含字母与数字。',
     email_taken: '该邮箱已注册，请直接登录。',
     invalid_credentials: '邮箱或密码不正确。',
+    too_many_attempts: '尝试次数过多，请二十分钟后再试。',
     bad_request: '请求格式有误，请刷新页面后重试。',
     unauthorized: '登录状态已失效，请重新登录。',
     db_unbound: '服务端数据库尚未就绪。',

@@ -22,3 +22,11 @@ CREATE TABLE IF NOT EXISTS sessions (
 
 CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_exp  ON sessions(expires_at);
+
+-- 登录失败记录，用于限制在线爆破
+CREATE TABLE IF NOT EXISTS login_fails (
+  email       TEXT NOT NULL,
+  ts          TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_fails_email ON login_fails(email, ts);

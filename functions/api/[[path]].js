@@ -33,9 +33,8 @@ export async function onRequest(context) {
     if (path === 'auth/me' && request.method === 'GET') return await me(request, env);
     return json({ ok: false, error: 'not_found' }, 404);
   } catch (err) {
-    const detail = String((err && err.message) || err);
     console.error('api error:', err && err.stack ? err.stack : err);
-    return json({ ok: false, error: 'server_error', detail }, 500);
+    return json({ ok: false, error: 'server_error' }, 500);
   }
 }
 
@@ -88,20 +87,35 @@ async function login(request, env, url) {
   const email = String(body.email || '').trim().toLowerCase();
   const password = String(body.password || '');
 
+  // 同一邮箱 20 分钟内失败达 10 次即拒绝，挡在线爆破
+  const fails = await env.DB.prepare(
+    "SELECT COUNT(*) AS n FROM login_fails WHERE email = ? AND ts > datetime('now','-20 minutes')"
+  ).bind(email).first();
+
+  if (fails && fails.n >= 10) {
+    return json({ ok: false, error: 'too_many_attempts' }, 429);
+  }
+
   const user = await env.DB.prepare(
     'SELECT id, email, pw_hash, pw_salt, points, status FROM users WHERE email = ?'
   ).bind(email).first();
 
   if (!user || user.status !== 'active') {
-    // 该邮箱不存在时也走一次哈希，避免通过响应时间判断账号是否存在
+    // 该邮箱不存在时也走一次派生，避免通过响应时间判断账号是否存在
     await pbkdf2Hex(password, '00000000000000000000000000000000');
+    await recordFail(env, email);
     return json({ ok: false, error: 'invalid_credentials' }, 401);
   }
 
   const hash = await pbkdf2Hex(password, user.pw_salt);
   if (!timingSafeEqual(hash, user.pw_hash)) {
+    await recordFail(env, email);
     return json({ ok: false, error: 'invalid_credentials' }, 401);
   }
+
+  // 登录成功：清掉该邮箱的失败计数，并顺手清理两天前的旧记录
+  await env.DB.prepare('DELETE FROM login_fails WHERE email = ?').bind(email).run();
+  await env.DB.prepare("DELETE FROM login_fails WHERE ts < datetime('now','-2 days')").run();
 
   await env.DB.prepare('DELETE FROM sessions WHERE expires_at < ?')
     .bind(new Date().toISOString()).run();
@@ -159,6 +173,10 @@ async function createSession(env, userId, request) {
   ).bind(tokenHash, userId, expires, ua).run();
 
   return token;
+}
+
+async function recordFail(env, email) {
+  await env.DB.prepare('INSERT INTO login_fails (email) VALUES (?)').bind(email).run();
 }
 
 function buildCookie(token, secure) {
