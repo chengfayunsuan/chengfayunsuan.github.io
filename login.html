@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>账户入口 · 乘法</title>
+<meta name="description" content="登录或注册乘法账户。创建账户后可浏览公开问卷，参与市场调研并累积积分。">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/auth.css">
+</head>
+<body class="auth-page">
+
+<!-- ============ 导航 ============ -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">CHENGFA</span>
+    </a>
+    <a class="auth-back" href="/">← 返回首页</a>
+  </div>
+</header>
+
+<main class="auth">
+  <div class="wrap auth__in">
+
+    <!-- ---------- 表单 ---------- -->
+    <section class="auth__panel">
+
+      <span class="stamp stamp--red">ACCOUNT / 账户</span>
+
+      <h1 class="auth__t" id="authTitle">登录</h1>
+      <p class="auth__d" id="authDesc">使用注册时填写的邮箱与密码进入账户。</p>
+
+      <div class="auth__tabs" role="tablist" aria-label="登录或注册">
+        <button class="auth__tab is-on" type="button" role="tab" data-mode="login" aria-selected="true">登录</button>
+        <button class="auth__tab" type="button" role="tab" data-mode="signup" aria-selected="false">注册</button>
+      </div>
+
+      <form class="auth__form" id="authForm" novalidate>
+
+        <div class="field">
+          <label class="field__l" for="email">邮箱</label>
+          <input class="field__i" id="email" name="email" type="email"
+                 autocomplete="email" placeholder="name@example.com"
+                 spellcheck="false" required>
+          <p class="field__e" id="emailErr" hidden></p>
+        </div>
+
+        <div class="field">
+          <label class="field__l" for="password">密码</label>
+          <input class="field__i" id="password" name="password" type="password"
+                 autocomplete="current-password" placeholder="至少 8 位，含字母与数字" required>
+          <p class="field__h" id="pwHint">若忘记密码，需通过注册邮箱重置。</p>
+          <p class="field__e" id="pwErr" hidden></p>
+        </div>
+
+        <div class="field" id="agreeRow" hidden>
+          <label class="check">
+            <input type="checkbox" id="agree" name="agree">
+            <span class="check__box" aria-hidden="true"></span>
+            <span class="check__t">我已阅读并同意《用户协议》与《隐私说明》，了解积分规则与提现条件。</span>
+          </label>
+          <p class="field__e" id="agreeErr" hidden></p>
+        </div>
+
+        <button class="btn auth__submit" type="submit" id="authSubmit">
+          登录 <span aria-hidden="true">→</span>
+        </button>
+
+        <p class="auth__note" id="authNote">
+          后端账户系统尚未接入。本页仅呈现界面结构，提交不会进入账户。
+        </p>
+
+      </form>
+    </section>
+
+    <!-- ---------- 右侧图形 ---------- -->
+    <aside class="auth__art" aria-hidden="true">
+      <span class="ac__bar"></span>
+      <div class="ac__red"></div>
+      <span class="ac__x">×</span>
+      <span class="ac__box"></span>
+      <span class="ac__cap">MEMBER / 02</span>
+    </aside>
+
+  </div>
+</main>
+
+<footer class="auth-foot">
+  <div class="wrap auth-foot__in">
+    <span>© 2026 乘法 CHENGFA</span>
+    <span>参与调研 · 累计积分 · 兑换回报</span>
+  </div>
+</footer>
+
+<script src="/js/auth.js?v=1" defer></script>
+</body>
+</html>
