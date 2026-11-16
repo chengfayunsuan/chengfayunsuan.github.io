@@ -1,0 +1,9 @@
+name = "chengfa"
+compatibility_date = "2026-11-16"
+pages_build_output_dir = "."
+
+# 账户数据库
+[[d1_databases]]
+binding = "DB"
+database_name = "chengfa-db"
+database_id = "43824080-6865-44ff-b6a2-4618089d9f20"

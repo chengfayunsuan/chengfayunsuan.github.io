@@ -1,6 +1,6 @@
 /* ============================================================
    乘法 · 账户入口
-   仅负责界面交互与前端校验，不发起任何网络请求
+   界面交互、前端校验、接口调用
    ============================================================ */
 (function () {
   'use strict';
@@ -13,10 +13,8 @@
   var descEl = document.getElementById('authDesc');
   var submitEl = document.getElementById('authSubmit');
   var noteEl = document.getElementById('authNote');
-  var agreeRow = document.getElementById('agreeRow');
   var agreeEl = document.getElementById('agree');
   var pwEl = document.getElementById('password');
-  var pwHint = document.getElementById('pwHint');
   var emailEl = document.getElementById('email');
   var emailErr = document.getElementById('emailErr');
   var pwErr = document.getElementById('pwErr');
@@ -27,17 +25,15 @@
       title: '登录',
       desc: '使用注册时填写的邮箱与密码进入账户。',
       submit: '登录',
-      note: '后端账户系统尚未接入。本页仅呈现界面结构，提交不会进入账户。',
-      pwAuto: 'current-password',
-      pwHint: '若忘记密码，需通过注册邮箱重置。'
+      note: '登录状态保持 30 天。在公共设备上使用后请退出。',
+      pwAuto: 'current-password'
     },
     signup: {
       title: '注册',
       desc: '创建账户后可浏览全部公开问卷，参与市场调研并累积积分。',
       submit: '创建账户',
-      note: '后端账户系统尚未接入。本页仅呈现界面结构，提交不会创建账户。',
-      pwAuto: 'new-password',
-      pwHint: '至少 8 位，需同时包含字母与数字。'
+      note: '注册不收取任何费用，无需绑定银行卡。',
+      pwAuto: 'new-password'
     }
   };
 
@@ -54,9 +50,6 @@
     submitEl.innerHTML = cfg.submit + ' <span aria-hidden="true">→</span>';
     noteEl.textContent = cfg.note;
     pwEl.setAttribute('autocomplete', cfg.pwAuto);
-    pwHint.textContent = cfg.pwHint;
-
-    agreeRow.hidden = mode !== 'signup';
 
     tabs.forEach(function (tab) {
       var on = tab.getAttribute('data-mode') === mode;
@@ -116,7 +109,7 @@
       ok = false;
     }
 
-    if (mode === 'signup' && !agreeEl.checked) {
+    if (!agreeEl.checked) {
       fail(agreeEl, agreeErr, '请先阅读并同意用户协议与隐私说明。');
       ok = false;
     }
@@ -134,15 +127,65 @@
 
   /* ---------- 提交 ---------- */
 
-  form.addEventListener('submit', function (ev) {
+  var ERRORS = {
+    invalid_email: '邮箱格式不正确，请检查后重试。',
+    invalid_password: '密码长度需在 8 至 72 位之间。',
+    weak_password: '密码需同时包含字母与数字。',
+    email_taken: '该邮箱已注册，请直接登录。',
+    invalid_credentials: '邮箱或密码不正确。',
+    bad_request: '请求格式有误，请刷新页面后重试。',
+    unauthorized: '登录状态已失效，请重新登录。',
+    db_unbound: '服务端数据库尚未就绪。',
+    server_error: '服务器出错，请稍后重试。'
+  };
+
+  var busy = false;
+
+  form.addEventListener('submit', async function (ev) {
     ev.preventDefault();
+    if (busy) return;
+
     if (!validate()) {
       var bad = form.querySelector('[aria-invalid="true"]');
       if (bad) bad.focus();
       return;
     }
-    noteEl.textContent = '账户系统尚未接入，本次提交未发送至服务器。接入后可在此完成' +
-      (mode === 'signup' ? '账户创建' : '身份验证') + '。';
+
+    busy = true;
+    var prev = submitEl.innerHTML;
+    submitEl.disabled = true;
+    submitEl.textContent = '处理中…';
+    noteEl.classList.remove('is-error');
+
+    try {
+      var res = await fetch(mode === 'signup' ? '/api/auth/register' : '/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailEl.value.trim(), password: pwEl.value })
+      });
+      var data = await res.json().catch(function () { return {}; });
+
+      if (res.ok && data.ok) {
+        noteEl.textContent = (mode === 'signup' ? '账户已创建' : '登录成功') + '，正在进入…';
+        location.href = '/';
+        return;
+      }
+
+      noteEl.textContent = ERRORS[data.error] || '操作失败，请稍后重试。';
+      noteEl.classList.add('is-error');
+
+      if (data.error === 'invalid_credentials') {
+        fail(pwEl, pwErr, '邮箱或密码不正确。');
+        pwEl.focus();
+      }
+    } catch (err) {
+      noteEl.textContent = '网络连接失败，请检查网络后重试。';
+      noteEl.classList.add('is-error');
+    } finally {
+      busy = false;
+      submitEl.disabled = false;
+      submitEl.innerHTML = prev;
+    }
   });
 
   setMode('login');

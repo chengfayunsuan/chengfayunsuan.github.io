@@ -52,11 +52,10 @@
           <label class="field__l" for="password">密码</label>
           <input class="field__i" id="password" name="password" type="password"
                  autocomplete="current-password" placeholder="至少 8 位，含字母与数字" required>
-          <p class="field__h" id="pwHint">若忘记密码，需通过注册邮箱重置。</p>
           <p class="field__e" id="pwErr" hidden></p>
         </div>
 
-        <div class="field" id="agreeRow" hidden>
+        <div class="field" id="agreeRow">
           <label class="check">
             <input type="checkbox" id="agree" name="agree">
             <span class="check__box" aria-hidden="true"></span>
@@ -78,11 +77,12 @@
 
     <!-- ---------- 右侧图形 ---------- -->
     <aside class="auth__art" aria-hidden="true">
-      <span class="ac__bar"></span>
-      <div class="ac__red"></div>
-      <span class="ac__x">×</span>
-      <span class="ac__box"></span>
-      <span class="ac__cap">MEMBER / 02</span>
+      <div class="ac-tri">
+        <div class="ac-tri__inner">
+          <span class="ac-tri__num">180<span class="u">分</span></span>
+          <span class="ac-tri__label">单份平均收益</span>
+        </div>
+      </div>
     </aside>
 
   </div>
