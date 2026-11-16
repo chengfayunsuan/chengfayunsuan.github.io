@@ -397,56 +397,49 @@ button { font-family: inherit; cursor: pointer; }
 
 .art {
   position: relative;
-  width: clamp(272px, 24vw, 344px);
-  aspect-ratio: 1 / 1.04;
+  width: clamp(280px, 25vw, 356px);
+  aspect-ratio: 1 / 1.06;
   flex: none;
-  transform: rotate(-2.4deg);
 }
 
-/* 部件一：红色主块 */
+/* 主形：不等边五边形，五条边没有一条水平或垂直 */
 .art__plate {
   position: absolute;
   inset: 0;
   background: var(--red);
-  box-shadow: 9px 9px 0 var(--ink);
+  clip-path: polygon(3% 13%, 84% 0, 100% 47%, 58% 100%, 0 79%);
+  filter: drop-shadow(10px 10px 0 var(--ink));
 }
 
-/* 部件二：顶部封条，左侧探出主块 */
-.art__cap {
+/* 黑色斜带：以 -12.5 度横切主形上部，两端探出边界 */
+.art__band {
   position: absolute;
-  left: -24px;
-  right: -18px;
-  top: 0;
-  height: 15px;
+  left: -9%;
+  right: -9%;
+  top: 21%;
+  height: 20px;
   background: var(--ink);
+  transform: rotate(-12.5deg);
+  transform-origin: center;
 }
 
-/* 部件三：右侧竖条，与封条接成直角 */
+/* 右上的细竖条，带自身倾角 */
 .art__tab {
   position: absolute;
-  right: -18px;
-  top: 0;
-  width: 19px;
-  height: 46%;
+  right: 6%;
+  top: -5%;
+  width: 14px;
+  height: 24%;
   background: var(--ink);
+  transform: rotate(13deg);
 }
 
-/* 部件四：右下方的细短横线，收在块内 */
-.art__hair {
-  position: absolute;
-  left: 9%;
-  right: 24%;
-  bottom: 16%;
-  height: 3px;
-  background: rgba(20, 19, 15, .38);
-}
-
-/* 部件五：数据主体，居中偏上 */
+/* 数据主体，压在主形中段 */
 .art__body {
   position: absolute;
-  left: 50%;
-  top: 32%;
-  transform: translateX(-50%);
+  left: 46%;
+  top: 53%;
+  transform: translate(-50%, -50%);
   z-index: 2;
   text-align: center;
   color: var(--paper);
@@ -454,7 +447,7 @@ button { font-family: inherit; cursor: pointer; }
 
 .art__num {
   font-family: var(--black);
-  font-size: clamp(54px, 5.6vw, 72px);
+  font-size: clamp(56px, 5.9vw, 78px);
   line-height: .82;
   letter-spacing: -.03em;
   white-space: nowrap;
@@ -474,11 +467,11 @@ button { font-family: inherit; cursor: pointer; }
   line-height: 1.5;
 }
 
-/* 部件六：封条下方左侧的标签 */
+/* 左上角标签 */
 .art__tag {
   position: absolute;
-  left: 7%;
-  top: 8%;
+  left: 2%;
+  top: 2%;
   z-index: 3;
   background: var(--paper);
   border: 3px solid var(--ink);
@@ -489,23 +482,24 @@ button { font-family: inherit; cursor: pointer; }
   letter-spacing: .1em;
   padding: 3px 8px;
   white-space: nowrap;
+  transform: rotate(-3deg);
 }
 
-/* 部件七：左下角方框，从左侧探出 */
+/* 左下角方框，从主形边角探出 */
 .art__box {
   position: absolute;
-  left: -25px;
-  bottom: -17px;
+  left: -14px;
+  bottom: 0;
   z-index: 3;
-  width: 70px;
-  height: 70px;
+  width: 66px;
+  height: 66px;
   border: 3px solid var(--ink);
   display: grid;
   place-items: center;
   background: var(--paper);
   color: var(--ink);
-  font-size: 24px;
-  box-shadow: 6px 6px 0 var(--red);
+  font-size: 23px;
+  box-shadow: 5px 5px 0 var(--red);
 }
 
 /* Hero 底部的黑色斜带 */
@@ -1115,15 +1109,13 @@ button { font-family: inherit; cursor: pointer; }
   .hero__actions .btn { flex: 1 1 100%; justify-content: center; }
 
   .hero__art { justify-content: center; padding: 24px 0 18px; }
-  .art { width: 232px; margin-left: 4%; transform: rotate(-1.8deg); }
-  .art__plate { box-shadow: 8px 8px 0 var(--ink); }
-  .art__cap { left: -13px; right: -11px; height: 11px; }
-  .art__tab { right: -11px; width: 13px; height: 44%; }
-  .art__hair { bottom: 15%; height: 2px; left: 8%; right: 22%; }
-  .art__num { font-size: 46px; }
+  .art { width: 238px; margin-left: 3%; }
+  .art__band { top: 21%; height: 14px; left: -7%; right: -7%; }
+  .art__tab { width: 10px; right: 10%; top: -6%; }
+  .art__num { font-size: 48px; }
   .art__label { font-size: 10px; margin-top: 8px; }
-  .art__tag { left: 6%; top: 8%; font-size: 8px; padding: 2px 6px; border-width: 2px; }
-  .art__box { width: 50px; height: 50px; left: -13px; bottom: -11px; font-size: 17px; box-shadow: 4px 4px 0 var(--red); }
+  .art__tag { left: 1%; top: 5%; font-size: 8px; padding: 2px 6px; border-width: 2px; }
+  .art__box { width: 50px; height: 50px; left: -12px; bottom: -8px; font-size: 17px; box-shadow: 4px 4px 0 var(--red); }
 
   .belt { padding: 22px 0 26px; clip-path: polygon(0 0, 100% 1.6vw, 100% 100%, 0 100%); }
   .belt__in { gap: 12px 14px; }
