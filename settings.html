@@ -9,7 +9,7 @@
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="/style.css?v=2">
 <link rel="stylesheet" href="/home.css?v=5">
-<link rel="stylesheet" href="/settings.css?v=2">
+<link rel="stylesheet" href="/settings.css?v=3">
 <link rel="stylesheet" href="/relation.css?v=1">
 <script src="/js/config.js"></script>
 </head>
@@ -84,7 +84,7 @@
         <a href="#sec-risk">06 问卷商风控</a>
         <a href="#sec-ticket">07 我的工单</a>
         <a href="#sec-pref">08 自定义设置</a>
-        <a href="#sec-find">09 查找用户</a>
+        <a class="jump__find" href="#sec-find">09 查找用户</a>
       </nav>
     </div>
   </section>
@@ -104,17 +104,19 @@
             <span class="mono">UID <b id="setUid">—</b></span>
             <span class="plate" id="setRole">用户</span>
           </div>
-          <p class="card__frz">冻结 <b id="setFrozen">0.0000</b> <i data-cur="code">FC</i></p>
         </div>
 
         <div class="card__row">
           <p class="card__name" id="setUser">—</p>
 
           <div class="card__side">
-            <p class="card__bal">
-              <span class="card__n" id="setFc">0.0000</span>
-              <i class="card__cur" data-cur="code">FC</i>
-            </p>
+            <div class="card__money">
+              <p class="card__frz">冻结 <b id="setFrozen">0.0000</b> <i data-cur="code">FC</i></p>
+              <p class="card__bal">
+                <span class="card__n" id="setFc">0.0000</span>
+                <i class="card__cur" data-cur="code">FC</i>
+              </p>
+            </div>
 
             <div class="set-soc">
               <button class="set-soc__i" type="button" data-scope="following">

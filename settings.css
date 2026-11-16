@@ -73,6 +73,8 @@
   color: var(--paper);
 }
 
+.jump .jump__find { margin-left: auto; }
+
 /* ---------- 区块骨架 ---------- */
 
 .blk {
@@ -163,6 +165,7 @@
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .14em;
+  transform: rotate(-2deg);
 }
 
 .card__frz {
@@ -173,6 +176,13 @@
 }
 
 .card__frz b { color: var(--ink); font-weight: 700; }
+
+.card__money {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
 
 .card__frz i {
   font-family: var(--mono);
@@ -236,7 +246,7 @@
   flex: 0 0 auto;
 }
 
-.card__bal { margin-top: 4px; }
+.card__bal { margin-top: 0; }
 
 .set-soc {
   display: flex;
