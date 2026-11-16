@@ -1,502 +1,497 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>账户设置 · 乘法</title>
-<meta name="description" content="乘法账户设置。查看身份、余额、安全与偏好。">
-<meta name="theme-color" content="#E0291E">
-<meta name="robots" content="noindex">
-<link rel="stylesheet" href="/style.css?v=4">
-<link rel="stylesheet" href="/home.css?v=6">
-<link rel="stylesheet" href="/settings.css?v=7">
-<link rel="stylesheet" href="/relation.css?v=1">
-<script src="/js/config.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>账户设置 · 乘法</title>
+  <meta name="description" content="乘法账户设置。查看身份、余额、安全与偏好。">
+  <meta name="theme-color" content="#E0291E">
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="/style.css?v=4">
+  <link rel="stylesheet" href="/home.css?v=6">
+  <link rel="stylesheet" href="/settings.css?v=8">
+  <link rel="stylesheet" href="/relation.css?v=1">
+  <script src="/js/config.js"></script>
 </head>
+
 <body>
 
-<header class="nav">
-  <div class="wrap nav__in">
-    <a class="brand" href="/">
-      <span class="brand__mark" aria-hidden="true"></span>
-      乘法
-      <span class="brand__en">CHENGFA</span>
-    </a>
+  <header class="nav">
+    <div class="wrap nav__in">
+      <a class="brand" href="/">
+        <span class="brand__mark" aria-hidden="true"></span>
+        乘法
+        <span class="brand__en">CHENGFA</span>
+      </a>
 
-    <div class="hm-nav">
-      <span class="hm-nav__bal">
-        <b id="navBal">0</b><i data-cur="code">FC</i>
-      </span>
-      <span class="hm-nav__sep" aria-hidden="true"></span>
-      <span class="hm-nav__name" id="navName">载入中</span>
-      <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
-    </div>
-  </div>
-</header>
-
-<nav class="dock" aria-label="功能目录">
-  <div class="wrap dock__in">
-    <a class="dock__i" href="/home#surveys">
-      <span class="dock__n">01</span><span class="dock__t">问卷大厅</span>
-    </a>
-    <button class="dock__i" type="button" data-soon="兑换中心">
-      <span class="dock__n">02</span><span class="dock__t">兑换中心</span>
-    </button>
-    <button class="dock__i" type="button" data-soon="收支明细">
-      <span class="dock__n">03</span><span class="dock__t">收支明细</span>
-    </button>
-    <button class="dock__i" type="button" data-soon="天梯榜">
-      <span class="dock__n">04</span><span class="dock__t">天梯榜</span>
-    </button>
-    <button class="dock__i" type="button" data-soon="站内消息">
-      <span class="dock__n">05</span><span class="dock__t">站内消息</span>
-    </button>
-    <button class="dock__i" type="button" data-soon="联系客服">
-      <span class="dock__n">06</span><span class="dock__t">联系客服</span>
-    </button>
-    <a class="dock__i is-on" href="/settings" aria-current="page">
-      <span class="dock__n">07</span><span class="dock__t">账户设置</span>
-    </a>
-  </div>
-</nav>
-
-<main id="app" hidden>
-
-  <!-- ============ 页头 ============ -->
-  <section class="set-top">
-    <div class="wrap">
-      <div class="set-top__row">
-        <div>
-          <span class="set-k">ACCOUNT SETTINGS</span>
-          <h1 class="set-t">账户设置</h1>
-        </div>
-        <p class="set-d">
-          身份、余额、安全、工单与偏好集中在这一页，改动即刻生效。
-        </p>
+      <div class="hm-nav">
+        <span class="hm-nav__bal">
+          <b id="navBal">0</b><i data-cur="code">FC</i>
+        </span>
+        <span class="hm-nav__sep" aria-hidden="true"></span>
+        <span class="hm-nav__name" id="navName">载入中</span>
+        <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
       </div>
     </div>
-  </section>
+  </header>
 
-  <!-- ============ 01 账户概览 ============ -->
-  <section class="blk" id="sec-id">
-    <div class="wrap">
-      <div class="blk__h">
-        <span class="blk__n">01</span>
-        <h2 class="blk__t">账户概览</h2>
+  <nav class="dock" aria-label="功能目录">
+    <div class="wrap dock__in">
+      <a class="dock__i" href="/home#surveys">
+        <span class="dock__n">01</span><span class="dock__t">问卷大厅</span>
+      </a>
+      <button class="dock__i" type="button" data-soon="兑换中心">
+        <span class="dock__n">02</span><span class="dock__t">兑换中心</span>
+      </button>
+      <button class="dock__i" type="button" data-soon="收支明细">
+        <span class="dock__n">03</span><span class="dock__t">收支明细</span>
+      </button>
+      <button class="dock__i" type="button" data-soon="天梯榜">
+        <span class="dock__n">04</span><span class="dock__t">天梯榜</span>
+      </button>
+      <button class="dock__i" type="button" data-soon="站内消息">
+        <span class="dock__n">05</span><span class="dock__t">站内消息</span>
+      </button>
+      <button class="dock__i" type="button" data-soon="联系客服">
+        <span class="dock__n">06</span><span class="dock__t">联系客服</span>
+      </button>
+      <a class="dock__i is-on" href="/settings" aria-current="page">
+        <span class="dock__n">07</span><span class="dock__t">账户设置</span>
+      </a>
+    </div>
+  </nav>
 
-        <form class="find find--mini" id="findForm" novalidate>
-          <input class="fld" id="findInput" type="search" name="q" maxlength="20"
-                 placeholder="UID 或用户名" autocomplete="off" aria-label="查找用户">
-          <button class="btn btn--ghost btn--s" type="submit">查找用户</button>
-        </form>
-      </div>
+  <main id="app" hidden>
 
-      <div class="card">
-        <div class="card__top">
-          <div class="card__meta">
-            <span class="mono">UID <b id="setUid">—</b></span>
-            <span class="plate" id="setRole">用户</span>
+    <!-- ============ 页头 ============ -->
+    <section class="set-top">
+      <div class="wrap">
+        <div class="set-top__row">
+          <div>
+            <span class="set-k">ACCOUNT SETTINGS</span>
+            <h1 class="set-t">账户设置</h1>
           </div>
         </div>
+      </div>
+    </section>
 
-        <div class="card__row">
-          <div class="card__id">
-            <p class="card__name" id="setUser">—</p>
-            <p class="card__sub">
-              <span id="setJoined">—</span>
-              <span class="card__sep" aria-hidden="true">·</span>
-              <span id="setStatus">—</span>
-            </p>
+    <!-- ============ 01 账户概览 ============ -->
+    <section class="blk" id="sec-id">
+      <div class="wrap">
+        <div class="blk__h">
+          <span class="blk__n">01</span>
+          <h2 class="blk__t">账户概览</h2>
+
+          <form class="find find--mini" id="findForm" novalidate>
+            <input class="fld" id="findInput" type="search" name="q" maxlength="20" placeholder="UID 或用户名"
+              autocomplete="off" aria-label="查找用户">
+            <button class="btn btn--ghost btn--s" type="submit">查找用户</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card__top">
+            <div class="card__meta">
+              <span class="mono">UID <b id="setUid">—</b></span>
+              <span class="plate" id="setRole">用户</span>
+            </div>
           </div>
 
-          <div class="card__side">
-            <div class="card__money">
-              <p class="card__frz">冻结 <b id="setFrozen">0</b> <i data-cur="code">FC</i></p>
-              <p class="card__bal">
-                <span class="card__n" id="setFc">0</span>
-                <i class="card__cur" data-cur="code">FC</i>
+          <div class="card__row">
+            <div class="card__id">
+              <p class="card__name" id="setUser">—</p>
+              <p class="card__sub">
+                <span id="setJoined">—</span>
+                <span class="card__sep" aria-hidden="true">·</span>
+                <span id="setStatus">—</span>
               </p>
             </div>
 
-            <div class="set-soc">
-              <button class="set-soc__i" type="button" data-scope="following">
-                关注：<b id="setFollowN">0</b>
-              </button>
-              <button class="set-soc__i" type="button" data-scope="followers">
-                粉丝：<b id="setFansN">0</b>
-              </button>
+            <div class="card__side">
+              <div class="card__money">
+                <p class="card__frz">冻结 <b id="setFrozen">0</b> <i data-cur="code">FC</i></p>
+                <p class="card__bal">
+                  <span class="card__n" id="setFc">0</span>
+                  <i class="card__cur" data-cur="code">FC</i>
+                </p>
+              </div>
+
+              <div class="set-soc">
+                <button class="set-soc__i" type="button" data-scope="following">
+                  关注：<b id="setFollowN">0</b>
+                </button>
+                <button class="set-soc__i" type="button" data-scope="followers">
+                  粉丝：<b id="setFansN">0</b>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card__body">
+            <div class="card__stats">
+              <div><b id="stDone">0</b><span>已完成问卷</span></div>
+              <div><b id="stDays">1</b><span>注册天数</span></div>
+              <div><b id="stLevel">1</b><span>当前等级</span></div>
+              <div><b id="stAff">0</b><span>好感度</span></div>
             </div>
           </div>
         </div>
+      </div>
+    </section>
 
-        <div class="card__body">
-          <div class="card__stats">
-            <div><b id="stDone">0</b><span>已完成问卷</span></div>
-            <div><b id="stDays">1</b><span>注册天数</span></div>
-            <div><b id="stLevel">1</b><span>当前等级</span></div>
-            <div><b id="stAff">0</b><span>好感度</span></div>
+    <!-- ============ 02 兑换记录 ============ -->
+    <section class="blk" id="sec-redeem">
+      <div class="wrap">
+        <div class="blk__h">
+          <span class="blk__n">02</span>
+          <h2 class="blk__t">兑换成功记录</h2>
+        </div>
+
+        <div class="tb-wrap">
+          <table class="tb">
+            <thead>
+              <tr>
+                <th>时间</th>
+                <th>项目</th>
+                <th class="ta-r">扣除</th>
+                <th>兑换码 / 单号</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody id="redeemBody">
+              <tr class="tb__empty">
+                <td colspan="5">暂无兑换记录。兑换成功后，条目与兑换码会出现在这里。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 03 账号安全 ============ -->
+    <section class="blk" id="sec-sec">
+      <div class="wrap">
+        <div class="blk__h">
+          <span class="blk__n">03</span>
+          <h2 class="blk__t">账号安全</h2>
+        </div>
+
+        <div class="row3">
+
+          <!-- 用户名 -->
+          <div class="row3__i">
+            <div class="row" id="rowName">
+              <div class="row__l">
+                <span class="row__k">用户名</span>
+                <span class="row__v" id="curName">—</span>
+                <span class="row__h">2 至 20 个字符</span>
+              </div>
+              <button class="btn btn--ghost btn--s" type="button" data-edit="name">更改</button>
+            </div>
+
+            <form class="edit" id="formName" hidden novalidate>
+              <div class="edit__f">
+                <label class="fld__l" for="newName">新用户名</label>
+                <input class="fld" id="newName" name="username" type="text" maxlength="20" autocomplete="nickname"
+                  placeholder="输入新的用户名">
+              </div>
+              <div class="edit__a">
+                <button class="btn btn--red btn--s" type="submit" id="saveName">保存</button>
+                <button class="btn btn--ghost btn--s" type="button" data-cancel="name">取消</button>
+              </div>
+              <p class="edit__e" id="nameErr" hidden></p>
+            </form>
+
+          </div>
+
+          <!-- 邮箱 -->
+          <div class="row3__i">
+            <div class="row" id="rowEmail">
+              <div class="row__l">
+                <span class="row__k">注册邮箱</span>
+                <span class="row__v" id="curEmail">—</span>
+                <span class="row__h">用于登录与找回密码。更换后需要在新邮箱完成一次验证。</span>
+              </div>
+              <button class="btn btn--ghost btn--s" type="button" data-edit="email">更改</button>
+            </div>
+
+            <form class="edit" id="formEmail" hidden novalidate>
+              <div class="edit__f">
+                <label class="fld__l" for="newEmail">新邮箱</label>
+                <input class="fld" id="newEmail" name="email" type="email" spellcheck="false" autocomplete="email"
+                  placeholder="name@example.com">
+              </div>
+              <div class="edit__f">
+                <label class="fld__l" for="emailPw">当前密码</label>
+                <input class="fld" id="emailPw" name="password" type="password" autocomplete="current-password"
+                  placeholder="确认是你本人操作">
+              </div>
+              <div class="edit__a">
+                <button class="btn btn--red btn--s" type="submit" id="saveEmail">保存</button>
+                <button class="btn btn--ghost btn--s" type="button" data-cancel="email">取消</button>
+              </div>
+              <p class="edit__e" id="emailErr" hidden></p>
+            </form>
+
+          </div>
+
+          <!-- 密码 -->
+          <div class="row3__i">
+            <div class="row" id="rowPw">
+              <div class="row__l">
+                <span class="row__k">登录密码</span>
+                <span class="row__v">••••••••</span>
+                <span class="row__h">最近一次修改时间暂未记录。建议与其他站点使用不同密码。</span>
+              </div>
+              <button class="btn btn--ghost btn--s" type="button" data-edit="pw">更改</button>
+            </div>
+
+            <form class="edit" id="formPw" hidden novalidate>
+              <div class="edit__grid">
+                <div class="edit__f">
+                  <label class="fld__l" for="oldPw">当前密码</label>
+                  <input class="fld" id="oldPw" name="old" type="password" autocomplete="current-password">
+                </div>
+                <div class="edit__f">
+                  <label class="fld__l" for="newPw">新密码</label>
+                  <input class="fld" id="newPw" name="new" type="password" autocomplete="new-password">
+                </div>
+                <div class="edit__f">
+                  <label class="fld__l" for="newPw2">确认新密码</label>
+                  <input class="fld" id="newPw2" name="confirm" type="password" autocomplete="new-password">
+                </div>
+              </div>
+              <div class="edit__a">
+                <button class="btn btn--red btn--s" type="submit" id="savePw">保存</button>
+                <button class="btn btn--ghost btn--s" type="button" data-cancel="pw">取消</button>
+              </div>
+              <p class="edit__e" id="pwErr" hidden></p>
+            </form>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ============ 02 兑换记录 ============ -->
-  <section class="blk" id="sec-redeem">
-    <div class="wrap">
-      <div class="blk__h">
-        <span class="blk__n">02</span>
-        <h2 class="blk__t">兑换成功记录</h2>
-        <span class="blk__s">兑换中心与提现共用一份流水</span>
-      </div>
-
-      <div class="tb-wrap">
-        <table class="tb">
-          <thead>
-            <tr>
-              <th>时间</th><th>项目</th><th class="ta-r">扣除</th><th>兑换码 / 单号</th><th>状态</th>
-            </tr>
-          </thead>
-          <tbody id="redeemBody">
-            <tr class="tb__empty"><td colspan="5">暂无兑换记录。兑换成功后，条目与兑换码会出现在这里。</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 03 账号安全 ============ -->
-  <section class="blk" id="sec-sec">
-    <div class="wrap">
-      <div class="blk__h">
-        <span class="blk__n">03</span>
-        <h2 class="blk__t">账号安全</h2>
-        <span class="blk__s">用户名、邮箱、密码</span>
-      </div>
-
-      <div class="row3">
-
-      <!-- 用户名 -->
-      <div class="row3__i">
-      <div class="row" id="rowName">
-        <div class="row__l">
-          <span class="row__k">用户名</span>
-          <span class="row__v" id="curName">—</span>
-          <span class="row__h">2 至 20 个字符，中文、字母、数字、下划线或连字符，也可以是纯数字。</span>
+    <!-- ============ 04 登录与网络 ============ -->
+    <section class="blk" id="sec-net">
+      <div class="wrap">
+        <div class="blk__h">
+          <span class="blk__n">04</span>
+          <h2 class="blk__t">登录与网络</h2>
         </div>
-        <button class="btn btn--ghost btn--s" type="button" data-edit="name">更改</button>
+
+        <ul class="kv">
+          <li>
+            <span class="kv__k">IP</span>
+            <b class="kv__v mono" id="curIp">—</b>
+          </li>
+          <li>
+            <span class="kv__k">网络</span>
+            <b class="kv__v" id="curNet">—</b>
+          </li>
+          <li>
+            <span class="kv__k">最近登录</span>
+            <b class="kv__v" id="lastLogin">—</b>
+          </li>
+        </ul>
       </div>
+    </section>
 
-      <form class="edit" id="formName" hidden novalidate>
-        <div class="edit__f">
-          <label class="fld__l" for="newName">新用户名</label>
-          <input class="fld" id="newName" name="username" type="text" maxlength="20"
-                 autocomplete="nickname" placeholder="输入新的用户名">
+    <!-- ============ 05 封禁记录 ============ -->
+    <section class="blk" id="sec-ban">
+      <div class="wrap">
+        <div class="blk__h">
+          <span class="blk__n">05</span>
+          <h2 class="blk__t">封禁记录</h2>
         </div>
-        <div class="edit__a">
-          <button class="btn btn--red btn--s" type="submit" id="saveName">保存</button>
-          <button class="btn btn--ghost btn--s" type="button" data-cancel="name">取消</button>
-        </div>
-        <p class="edit__e" id="nameErr" hidden></p>
-      </form>
 
-      </div>
-
-      <!-- 邮箱 -->
-      <div class="row3__i">
-      <div class="row" id="rowEmail">
-        <div class="row__l">
-          <span class="row__k">注册邮箱</span>
-          <span class="row__v" id="curEmail">—</span>
-          <span class="row__h">用于登录与找回密码。更换后需要在新邮箱完成一次验证。</span>
-        </div>
-        <button class="btn btn--ghost btn--s" type="button" data-edit="email">更改</button>
-      </div>
-
-      <form class="edit" id="formEmail" hidden novalidate>
-        <div class="edit__f">
-          <label class="fld__l" for="newEmail">新邮箱</label>
-          <input class="fld" id="newEmail" name="email" type="email" spellcheck="false"
-                 autocomplete="email" placeholder="name@example.com">
-        </div>
-        <div class="edit__f">
-          <label class="fld__l" for="emailPw">当前密码</label>
-          <input class="fld" id="emailPw" name="password" type="password"
-                 autocomplete="current-password" placeholder="确认是你本人操作">
-        </div>
-        <div class="edit__a">
-          <button class="btn btn--red btn--s" type="submit" id="saveEmail">保存</button>
-          <button class="btn btn--ghost btn--s" type="button" data-cancel="email">取消</button>
-        </div>
-        <p class="edit__e" id="emailErr" hidden></p>
-      </form>
-
-      </div>
-
-      <!-- 密码 -->
-      <div class="row3__i">
-      <div class="row" id="rowPw">
-        <div class="row__l">
-          <span class="row__k">登录密码</span>
-          <span class="row__v">••••••••</span>
-          <span class="row__h">最近一次修改时间暂未记录。建议与其他站点使用不同密码。</span>
-        </div>
-        <button class="btn btn--ghost btn--s" type="button" data-edit="pw">更改</button>
-      </div>
-
-      <form class="edit" id="formPw" hidden novalidate>
-        <div class="edit__grid">
-          <div class="edit__f">
-            <label class="fld__l" for="oldPw">当前密码</label>
-            <input class="fld" id="oldPw" name="old" type="password" autocomplete="current-password">
+        <div class="ban">
+          <div class="ban__c">
+            <b id="banCount">0</b>
+            <span>累计封禁次数</span>
           </div>
-          <div class="edit__f">
-            <label class="fld__l" for="newPw">新密码</label>
-            <input class="fld" id="newPw" name="new" type="password" autocomplete="new-password">
-          </div>
-          <div class="edit__f">
-            <label class="fld__l" for="newPw2">确认新密码</label>
-            <input class="fld" id="newPw2" name="confirm" type="password" autocomplete="new-password">
-          </div>
+          <ol class="ban__l" id="banList">
+            <li class="ban__empty">没有封禁记录。</li>
+          </ol>
         </div>
-        <div class="edit__a">
-          <button class="btn btn--red btn--s" type="submit" id="savePw">保存</button>
-          <button class="btn btn--ghost btn--s" type="button" data-cancel="pw">取消</button>
+      </div>
+    </section>
+
+    <!-- ============ 06 问卷商风控 ============ -->
+    <section class="blk" id="sec-risk">
+      <div class="wrap">
+        <div class="blk__h">
+          <span class="blk__n">06</span>
+          <h2 class="blk__t">问卷商风控等级</h2>
         </div>
-        <p class="edit__e" id="pwErr" hidden></p>
-      </form>
 
-      </div>
-
-      </div>
-
-      <p class="blk__note">
-        用户名即刻生效。邮箱与密码的更改需要后端写入接口，接口接入前提交会返回失败提示。
-      </p>
-    </div>
-  </section>
-
-  <!-- ============ 04 登录与网络 ============ -->
-  <section class="blk" id="sec-net">
-    <div class="wrap">
-      <div class="blk__h">
-        <span class="blk__n">04</span>
-        <h2 class="blk__t">登录与网络</h2>
-        <span class="blk__s">用于风控与异常登录排查</span>
-      </div>
-
-      <ul class="kv">
-        <li>
-          <span class="kv__k">IP</span>
-          <b class="kv__v mono" id="curIp">—</b>
-        </li>
-        <li>
-          <span class="kv__k">网络</span>
-          <b class="kv__v" id="curNet">—</b>
-        </li>
-        <li>
-          <span class="kv__k">最近登录</span>
-          <b class="kv__v" id="lastLogin">—</b>
-        </li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- ============ 05 封禁记录 ============ -->
-  <section class="blk" id="sec-ban">
-    <div class="wrap">
-      <div class="blk__h">
-        <span class="blk__n">05</span>
-        <h2 class="blk__t">封禁记录</h2>
-        <span class="blk__s">次数与原因</span>
-      </div>
-
-      <div class="ban">
-        <div class="ban__c">
-          <b id="banCount">0</b>
-          <span>累计封禁次数</span>
+        <div class="tb-wrap">
+          <table class="tb">
+            <thead>
+              <tr>
+                <th>问卷商</th>
+                <th>风控等级</th>
+                <th class="ta-r">最近更新</th>
+                <th>说明</th>
+              </tr>
+            </thead>
+            <tbody id="riskBody">
+              <tr class="tb__empty">
+                <td colspan="4">尚无问卷商回传风控数据。</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <ol class="ban__l" id="banList">
-          <li class="ban__empty">没有封禁记录。</li>
-        </ol>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ============ 06 问卷商风控 ============ -->
-  <section class="blk" id="sec-risk">
-    <div class="wrap">
-      <div class="blk__h">
-        <span class="blk__n">06</span>
-        <h2 class="blk__t">问卷商风控等级</h2>
-        <span class="blk__s">各委托方对你的判定</span>
+    <!-- ============ 07 我的工单 ============ -->
+    <section class="blk" id="sec-ticket">
+      <div class="wrap">
+        <div class="blk__h">
+          <span class="blk__n">07</span>
+          <h2 class="blk__t">我的工单</h2>
+        </div>
+
+        <ul class="tk" id="ticketList">
+          <li class="tk__empty">
+            还没有工单。账户、余额、提现或问卷审核的问题都可以在这里提，回复会同时发到站内消息。
+          </li>
+        </ul>
+
+        <div class="tk__act">
+          <button class="btn btn--red" type="button" data-soon="新建工单">提交工单</button>
+          <span class="tk__h">工单系统尚未开放，暂时可以通过联系客服反馈。</span>
+        </div>
       </div>
+    </section>
 
-      <div class="tb-wrap">
-        <table class="tb">
-          <thead>
-            <tr><th>问卷商</th><th>风控等级</th><th class="ta-r">最近更新</th><th>说明</th></tr>
-          </thead>
-          <tbody id="riskBody">
-            <tr class="tb__empty"><td colspan="4">尚无问卷商回传风控数据。</td></tr>
-          </tbody>
-        </table>
+    <!-- ============ 08 自定义设置 ============ -->
+    <section class="blk" id="sec-pref">
+      <div class="wrap">
+        <div class="blk__h">
+          <span class="blk__n">08</span>
+          <h2 class="blk__t">自定义设置</h2>
+        </div>
+
+        <div class="pref">
+
+          <fieldset class="pref__g">
+            <legend class="pref__gt">通知</legend>
+            <label class="sw"><input type="checkbox" data-pref="notify.survey"><span class="sw__b"></span>
+              <span class="sw__x"><b>问卷上新</b><i>有符合你条件的问卷时发出提醒</i></span></label>
+            <label class="sw"><input type="checkbox" data-pref="notify.review"><span class="sw__b"></span>
+              <span class="sw__x"><b>答卷审核结果</b><i>答卷通过或驳回时通知</i></span></label>
+            <label class="sw"><input type="checkbox" data-pref="notify.balance"><span class="sw__b"></span>
+              <span class="sw__x"><b>余额变动</b><i>入账、扣除、冻结都会提示</i></span></label>
+            <label class="sw"><input type="checkbox" data-pref="notify.withdraw"><span class="sw__b"></span>
+              <span class="sw__x"><b>提现进度</b><i>审核、打款、退回三个节点各一条</i></span></label>
+            <label class="sw"><input type="checkbox" data-pref="notify.notice"><span class="sw__b"></span>
+              <span class="sw__x"><b>站内公告</b><i>规则调整、维护安排</i></span></label>
+            <label class="sw"><input type="checkbox" data-pref="notify.weekly"><span class="sw__b"></span>
+              <span class="sw__x"><b>每周汇总邮件</b><i>收益、等级、可参与问卷一并发出</i></span></label>
+          </fieldset>
+
+          <fieldset class="pref__g">
+            <legend class="pref__gt">隐私</legend>
+            <label class="sw"><input type="checkbox" data-pref="privacy.page"><span class="sw__b"></span>
+              <span class="sw__x"><b>公开个人主页</b><i>关闭后他人无法访问你的主页</i></span></label>
+            <label class="sw"><input type="checkbox" data-pref="privacy.ladder"><span class="sw__b"></span>
+              <span class="sw__x"><b>在天梯榜展示</b><i>关闭后不参与排名，仍可看到榜单</i></span></label>
+            <label class="sw"><input type="checkbox" data-pref="privacy.joined"><span class="sw__b"></span>
+              <span class="sw__x"><b>展示注册时间</b><i>只影响他人看到的主页</i></span></label>
+            <label class="sw"><input type="checkbox" data-pref="privacy.search"><span class="sw__b"></span>
+              <span class="sw__x"><b>允许按 UID 搜到我</b><i>关闭后只能用用户名查找</i></span></label>
+            <label class="sw"><input type="checkbox" data-pref="privacy.online"><span class="sw__b"></span>
+              <span class="sw__x"><b>展示在线状态</b><i>关闭后一律显示离线</i></span></label>
+          </fieldset>
+
+          <fieldset class="pref__g">
+            <legend class="pref__gt">界面</legend>
+            <label class="sw"><input type="checkbox" data-pref="ui.compact"><span class="sw__b"></span>
+              <span class="sw__x"><b>紧凑视图</b><i>列表行高收紧，一屏看到更多条目</i></span></label>
+            <label class="sw"><input type="checkbox" data-pref="ui.motion"><span class="sw__b"></span>
+              <span class="sw__x"><b>减少动效</b><i>关闭进度条与提示条的过渡动画</i></span></label>
+            <label class="sw"><input type="checkbox" data-pref="ui.tabular"><span class="sw__b"></span>
+              <span class="sw__x"><b>表格数字等宽</b><i>流水、榜单、明细改用等宽数字，逐行对齐</i></span></label>
+            <label class="sw"><input type="checkbox" data-pref="ui.grid"><span class="sw__b"></span>
+              <span class="sw__x"><b>显示网格底纹</b><i>背景叠加一层浅网格，版心更清楚</i></span></label>
+          </fieldset>
+
+          <fieldset class="pref__g">
+            <legend class="pref__gt">安全</legend>
+            <label class="sw"><input type="checkbox" data-pref="safe.device"><span class="sw__b"></span>
+              <span class="sw__x"><b>新设备登录提醒</b><i>换设备登录时发一封邮件</i></span></label>
+            <label class="sw"><input type="checkbox" data-pref="safe.region"><span class="sw__b"></span>
+              <span class="sw__x"><b>异地登录二次确认</b><i>非常用地区登录需再验证一次</i></span></label>
+            <label class="sw"><input type="checkbox" data-pref="safe.withdraw"><span class="sw__b"></span>
+              <span class="sw__x"><b>提现前验证密码</b><i>提交提现申请时要求输入密码</i></span></label>
+          </fieldset>
+
+          <fieldset class="pref__g">
+            <legend class="pref__gt">数据</legend>
+            <label class="sw"><input type="checkbox" data-pref="data.stats"><span class="sw__b"></span>
+              <span class="sw__x"><b>匿名参与统计</b><i>只统计完成率与耗时，不含答案内容</i></span></label>
+            <label class="sw"><input type="checkbox" data-pref="data.research"><span class="sw__b"></span>
+              <span class="sw__x"><b>允许用于学术研究</b><i>脱敏后的数据可供高校课题使用</i></span></label>
+          </fieldset>
+
+        </div>
+
+        <p class="blk__note">
+          开关会先保存在本机，账号同步接口接上后随账号走。隐私组的开关目前只在本机生效，
+          还不能阻止他人通过主页地址访问；账号级隐私要等偏好同步接口接上。
+        </p>
       </div>
+    </section>
 
-      <p class="blk__note">
-        多数问卷商只回传「合格 / 不合格」两档，不回传内部评分与判定依据。表内能显示的，
-        是对方明确回传的部分；空白不代表没有评分，只代表对方没有给。等级越高，可参与的问卷越少。
-      </p>
-    </div>
-  </section>
+  </main>
 
-  <!-- ============ 07 我的工单 ============ -->
-  <section class="blk" id="sec-ticket">
-    <div class="wrap">
-      <div class="blk__h">
-        <span class="blk__n">07</span>
-        <h2 class="blk__t">我的工单</h2>
-        <span class="blk__s">与客服往来的记录</span>
-      </div>
-
-      <ul class="tk" id="ticketList">
-        <li class="tk__empty">
-          还没有工单。账户、余额、提现或问卷审核的问题都可以在这里提，回复会同时发到站内消息。
-        </li>
-      </ul>
-
-      <div class="tk__act">
-        <button class="btn btn--red" type="button" data-soon="新建工单">提交工单</button>
-        <span class="tk__h">工单系统尚未开放，暂时可以通过联系客服反馈。</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 08 自定义设置 ============ -->
-  <section class="blk" id="sec-pref">
-    <div class="wrap">
-      <div class="blk__h">
-        <span class="blk__n">08</span>
-        <h2 class="blk__t">自定义设置</h2>
-        <span class="blk__s">通知、隐私、界面、安全</span>
-      </div>
-
-      <div class="pref">
-
-        <fieldset class="pref__g">
-          <legend class="pref__gt">通知</legend>
-          <label class="sw"><input type="checkbox" data-pref="notify.survey"><span class="sw__b"></span>
-            <span class="sw__x"><b>问卷上新</b><i>有符合你条件的问卷时发出提醒</i></span></label>
-          <label class="sw"><input type="checkbox" data-pref="notify.review"><span class="sw__b"></span>
-            <span class="sw__x"><b>答卷审核结果</b><i>答卷通过或驳回时通知</i></span></label>
-          <label class="sw"><input type="checkbox" data-pref="notify.balance"><span class="sw__b"></span>
-            <span class="sw__x"><b>余额变动</b><i>入账、扣除、冻结都会提示</i></span></label>
-          <label class="sw"><input type="checkbox" data-pref="notify.withdraw"><span class="sw__b"></span>
-            <span class="sw__x"><b>提现进度</b><i>审核、打款、退回三个节点各一条</i></span></label>
-          <label class="sw"><input type="checkbox" data-pref="notify.notice"><span class="sw__b"></span>
-            <span class="sw__x"><b>站内公告</b><i>规则调整、维护安排</i></span></label>
-          <label class="sw"><input type="checkbox" data-pref="notify.weekly"><span class="sw__b"></span>
-            <span class="sw__x"><b>每周汇总邮件</b><i>收益、等级、可参与问卷一并发出</i></span></label>
-        </fieldset>
-
-        <fieldset class="pref__g">
-          <legend class="pref__gt">隐私</legend>
-          <label class="sw"><input type="checkbox" data-pref="privacy.page"><span class="sw__b"></span>
-            <span class="sw__x"><b>公开个人主页</b><i>关闭后他人无法访问你的主页</i></span></label>
-          <label class="sw"><input type="checkbox" data-pref="privacy.ladder"><span class="sw__b"></span>
-            <span class="sw__x"><b>在天梯榜展示</b><i>关闭后不参与排名，仍可看到榜单</i></span></label>
-          <label class="sw"><input type="checkbox" data-pref="privacy.joined"><span class="sw__b"></span>
-            <span class="sw__x"><b>展示注册时间</b><i>只影响他人看到的主页</i></span></label>
-          <label class="sw"><input type="checkbox" data-pref="privacy.search"><span class="sw__b"></span>
-            <span class="sw__x"><b>允许按 UID 搜到我</b><i>关闭后只能用用户名查找</i></span></label>
-          <label class="sw"><input type="checkbox" data-pref="privacy.online"><span class="sw__b"></span>
-            <span class="sw__x"><b>展示在线状态</b><i>关闭后一律显示离线</i></span></label>
-        </fieldset>
-
-        <fieldset class="pref__g">
-          <legend class="pref__gt">界面</legend>
-          <label class="sw"><input type="checkbox" data-pref="ui.compact"><span class="sw__b"></span>
-            <span class="sw__x"><b>紧凑视图</b><i>列表行高收紧，一屏看到更多条目</i></span></label>
-          <label class="sw"><input type="checkbox" data-pref="ui.motion"><span class="sw__b"></span>
-            <span class="sw__x"><b>减少动效</b><i>关闭进度条与提示条的过渡动画</i></span></label>
-          <label class="sw"><input type="checkbox" data-pref="ui.tabular"><span class="sw__b"></span>
-            <span class="sw__x"><b>表格数字等宽</b><i>流水、榜单、明细改用等宽数字，逐行对齐</i></span></label>
-          <label class="sw"><input type="checkbox" data-pref="ui.grid"><span class="sw__b"></span>
-            <span class="sw__x"><b>显示网格底纹</b><i>背景叠加一层浅网格，版心更清楚</i></span></label>
-        </fieldset>
-
-        <fieldset class="pref__g">
-          <legend class="pref__gt">安全</legend>
-          <label class="sw"><input type="checkbox" data-pref="safe.device"><span class="sw__b"></span>
-            <span class="sw__x"><b>新设备登录提醒</b><i>换设备登录时发一封邮件</i></span></label>
-          <label class="sw"><input type="checkbox" data-pref="safe.region"><span class="sw__b"></span>
-            <span class="sw__x"><b>异地登录二次确认</b><i>非常用地区登录需再验证一次</i></span></label>
-          <label class="sw"><input type="checkbox" data-pref="safe.withdraw"><span class="sw__b"></span>
-            <span class="sw__x"><b>提现前验证密码</b><i>提交提现申请时要求输入密码</i></span></label>
-        </fieldset>
-
-        <fieldset class="pref__g">
-          <legend class="pref__gt">数据</legend>
-          <label class="sw"><input type="checkbox" data-pref="data.stats"><span class="sw__b"></span>
-            <span class="sw__x"><b>匿名参与统计</b><i>只统计完成率与耗时，不含答案内容</i></span></label>
-          <label class="sw"><input type="checkbox" data-pref="data.research"><span class="sw__b"></span>
-            <span class="sw__x"><b>允许用于学术研究</b><i>脱敏后的数据可供高校课题使用</i></span></label>
-        </fieldset>
-
-      </div>
-
-      <p class="blk__note">
-        开关会先保存在本机，账号同步接口接上后随账号走。隐私组的开关目前只在本机生效，
-        还不能阻止他人通过主页地址访问；账号级隐私要等偏好同步接口接上。
-      </p>
-    </div>
-  </section>
-
-</main>
-
-<div class="hm-load" id="loading">
-  <span class="hm-load__mark" aria-hidden="true"></span>
-  <span>正在载入账户</span>
-</div>
-
-<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
-
-<!-- ============ 小窗口：关注与粉丝 ============ -->
-<div class="sheet" id="relSheet" hidden>
-  <div class="sheet__mask" data-sheet-close></div>
-
-  <div class="sheet__box" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
-    <div class="sheet__head">
-      <span class="sheet__t" id="sheetTitle">关注与粉丝</span>
-      <button class="sheet__x" id="sheetClose" type="button">关闭</button>
-    </div>
-
-    <div class="rel__tabs sheet__tabs">
-      <button class="rel__tab is-on" type="button" data-scope="following">
-        关注 <b id="tabFollow">0</b>
-      </button>
-      <button class="rel__tab" type="button" data-scope="followers">
-        粉丝 <b id="tabFans">0</b>
-      </button>
-    </div>
-
-    <ul class="rel__list" id="relList"></ul>
-
-    <p class="rel__empty" id="relEmpty" hidden></p>
-
-    <button class="rel__more" id="relMore" type="button" hidden>载入更多</button>
+  <div class="hm-load" id="loading">
+    <span class="hm-load__mark" aria-hidden="true"></span>
+    <span>正在载入账户</span>
   </div>
-</div>
 
-<footer class="foot">
-  <div class="wrap">
-    <div class="foot__bar foot__bar--single">
-      <span>© 2026 乘法 CHENGFA</span>
-      <span>参与调研 · 累计余额 · 兑换回报</span>
+  <div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ============ 小窗口：关注与粉丝 ============ -->
+  <div class="sheet" id="relSheet" hidden>
+    <div class="sheet__mask" data-sheet-close></div>
+
+    <div class="sheet__box" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+      <div class="sheet__head">
+        <span class="sheet__t" id="sheetTitle">关注与粉丝</span>
+        <button class="sheet__x" id="sheetClose" type="button">关闭</button>
+      </div>
+
+      <div class="rel__tabs sheet__tabs">
+        <button class="rel__tab is-on" type="button" data-scope="following">
+          关注 <b id="tabFollow">0</b>
+        </button>
+        <button class="rel__tab" type="button" data-scope="followers">
+          粉丝 <b id="tabFans">0</b>
+        </button>
+      </div>
+
+      <ul class="rel__list" id="relList"></ul>
+
+      <p class="rel__empty" id="relEmpty" hidden></p>
+
+      <button class="rel__more" id="relMore" type="button" hidden>载入更多</button>
     </div>
   </div>
-</footer>
 
-<script src="/js/settings.js?v=5" defer></script>
+  <footer class="foot">
+    <div class="wrap">
+      <div class="foot__bar foot__bar--single">
+        <span>© 2026 乘法 CHENGFA</span>
+        <span>参与调研 · 累计余额 · 兑换回报</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/settings.js?v=5" defer></script>
 </body>
+
 </html>

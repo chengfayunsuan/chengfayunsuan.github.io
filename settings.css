@@ -6,8 +6,13 @@
 /* ---------- 页头 ---------- */
 
 /* 目录条当前页 */
-.dock__i.is-on { background: var(--red); }
-.dock__i.is-on .dock__n { color: rgba(244, 240, 230, .82); }
+.dock__i.is-on {
+  background: var(--red);
+}
+
+.dock__i.is-on .dock__n {
+  color: rgba(244, 240, 230, .82);
+}
 
 .set-top {
   padding: clamp(16px, 2.2vw, 28px) 0 0;
@@ -148,7 +153,10 @@
   color: var(--gray);
 }
 
-.card__frz b { color: var(--ink); font-weight: 700; }
+.card__frz b {
+  color: var(--ink);
+  font-weight: 700;
+}
 
 .card__money {
   display: flex;
@@ -175,7 +183,9 @@
   padding: 6px clamp(22px, 3vw, 40px) clamp(16px, 2vw, 22px);
 }
 
-.card__id { min-width: 0; }
+.card__id {
+  min-width: 0;
+}
 
 /* 注册时间与账号状态：名字下方的小字，同一行 */
 .card__sub {
@@ -185,7 +195,10 @@
   color: var(--gray);
 }
 
-.card__sep { margin: 0 7px; color: var(--hair); }
+.card__sep {
+  margin: 0 7px;
+  color: var(--hair);
+}
 
 .card__name {
   margin: 0;
@@ -231,7 +244,9 @@
   flex: 0 0 auto;
 }
 
-.card__bal { margin-top: 0; }
+.card__bal {
+  margin-top: 0;
+}
 
 .set-soc {
   display: flex;
@@ -268,7 +283,9 @@
 }
 
 .set-soc__i:hover,
-.set-soc__i:hover b { color: var(--red); }
+.set-soc__i:hover b {
+  color: var(--red);
+}
 
 .card__body {
   display: grid;
@@ -360,9 +377,13 @@
   vertical-align: top;
 }
 
-.tb .ta-r { text-align: right; }
+.tb .ta-r {
+  text-align: right;
+}
 
-.tb tbody tr:hover td { background: rgba(20, 19, 15, .03); }
+.tb tbody tr:hover td {
+  background: rgba(20, 19, 15, .03);
+}
 
 .tb__empty td {
   padding: 26px 16px;
@@ -380,11 +401,19 @@
   border-top: 3px solid var(--ink);
 }
 
-.row3__i { min-width: 0; }
+.row3__i {
+  min-width: 0;
+}
 
-.row3 .row { padding: 16px 0; gap: 14px; }
+.row3 .row {
+  padding: 16px 0;
+  gap: 14px;
+}
 
-.row3 .row__h { font-size: 11px; line-height: 1.6; }
+.row3 .row__h {
+  font-size: 11px;
+  line-height: 1.6;
+}
 
 .row {
   display: flex;
@@ -395,7 +424,9 @@
   border-bottom: 1px solid var(--hair);
 }
 
-.row__l { min-width: 0; }
+.row__l {
+  min-width: 0;
+}
 
 .row__k {
   display: block;
@@ -434,7 +465,9 @@
   border-bottom: 1px solid var(--hair);
 }
 
-.edit__f { margin-bottom: 14px; }
+.edit__f {
+  margin-bottom: 14px;
+}
 
 .edit__grid {
   display: grid;
@@ -470,7 +503,10 @@
   border-color: var(--red);
 }
 
-.fld--lg { padding: 15px 16px; font-size: 16px; }
+.fld--lg {
+  padding: 15px 16px;
+  font-size: 16px;
+}
 
 .edit__a {
   display: flex;
@@ -576,8 +612,13 @@
   line-height: 1.75;
 }
 
-.ban__l li:last-child { border-bottom: 0; }
-.ban__empty { color: var(--gray); }
+.ban__l li:last-child {
+  border-bottom: 0;
+}
+
+.ban__empty {
+  color: var(--gray);
+}
 
 /* ---------- 07 工单 ---------- */
 
@@ -624,7 +665,9 @@
 }
 
 /* 组数为奇数时，最后一组横跨两列，避免右下留空 */
-.pref__g:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.pref__g:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
 
 .pref__gt {
   padding: 0 8px;
@@ -644,7 +687,9 @@
   cursor: pointer;
 }
 
-.sw:last-child { border-bottom: 0; }
+.sw:last-child {
+  border-bottom: 0;
+}
 
 .sw input {
   position: absolute;
@@ -675,14 +720,17 @@
   transition: left .16s ease, background .16s ease;
 }
 
-.sw input:checked + .sw__b { background: var(--red); border-color: var(--red); }
+.sw input:checked+.sw__b {
+  background: var(--red);
+  border-color: var(--red);
+}
 
-.sw input:checked + .sw__b::after {
+.sw input:checked+.sw__b::after {
   left: 18px;
   background: var(--paper);
 }
 
-.sw input:focus-visible + .sw__b {
+.sw input:focus-visible+.sw__b {
   box-shadow: 3px 3px 0 var(--ink);
 }
 
@@ -719,7 +767,9 @@
 
 /* ---------- 09 查找 ---------- */
 
-.blk:last-of-type { padding-bottom: clamp(44px, 5.4vw, 76px); }
+.blk:last-of-type {
+  padding-bottom: clamp(44px, 5.4vw, 76px);
+}
 
 .find {
   display: flex;
@@ -727,7 +777,10 @@
   gap: 12px;
 }
 
-.find .fld { flex: 1 1 auto; min-width: 0; }
+.find .fld {
+  flex: 1 1 auto;
+  min-width: 0;
+}
 
 .find .btn {
   flex: 0 0 auto;
@@ -761,8 +814,14 @@
 /* ---------- 偏好开关的实际效果 ---------- */
 
 body.is-compact .row,
-body.is-compact .sw { padding-top: 8px; padding-bottom: 8px; }
-body.is-compact .kv li { padding: 10px 0; }
+body.is-compact .sw {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+body.is-compact .kv li {
+  padding: 10px 0;
+}
 
 body.is-still *,
 body.is-still *::before,
@@ -788,39 +847,136 @@ body.is-grid {
 /* ---------- 响应式 ---------- */
 
 @media (max-width: 1080px) {
-  .pref { grid-template-columns: minmax(0, 1fr); }
-  .ban { grid-template-columns: 150px minmax(0, 1fr); }
+  .pref {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ban {
+    grid-template-columns: 150px minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 860px) {
-  .edit__grid { grid-template-columns: minmax(0, 1fr); }
-  .row3 { grid-template-columns: minmax(0, 1fr); }
-  .kv li { grid-template-columns: 1fr; gap: 5px; }
-  .kv__h { margin-top: 2px; }
+  .edit__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .row3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kv li {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .kv__h {
+    margin-top: 2px;
+  }
 }
 
 @media (max-width: 620px) {
-  .sw__x { gap: 0 9px; }
-  .sw__x i::before { content: none; }
-  .tb { min-width: 0; }
-  .tb th { padding: 9px 8px; font-size: 9.5px; letter-spacing: .08em; }
-  .tb td { padding: 11px 8px; font-size: 12px; }
-  .tb__empty td { padding: 20px 12px; }
-  .set-top__row { gap: 16px; }
-  .set-d { font-size: 13px; }
-  .blk__h { flex-wrap: wrap; gap: 8px; }
-  .blk__s { margin-left: 0; width: 100%; text-align: left; }
-  .card__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .card__stats b { font-size: 24px; }
-  .card__id { flex: 1 1 100%; }
-  .card__side { width: 100%; gap: 16px; justify-content: space-between; }
-  .set-soc { padding-top: 4px; }
-  .ban { grid-template-columns: minmax(0, 1fr); }
-  .ban__c { padding: 18px 22px; flex-direction: row; align-items: baseline; gap: 10px; }
-  .ban__c b { font-size: 40px; }
-  .row { gap: 12px; }
-  .find { flex-wrap: wrap; }
-  .find .btn { width: 100%; }
-  .find--mini { width: min(240px, 54vw); flex-wrap: nowrap; }
-  .find--mini .btn { width: auto; }
+  .sw__x {
+    gap: 0 9px;
+  }
+
+  .sw__x i::before {
+    content: none;
+  }
+
+  .tb {
+    min-width: 0;
+  }
+
+  .tb th {
+    padding: 9px 8px;
+    font-size: 9.5px;
+    letter-spacing: .08em;
+  }
+
+  .tb td {
+    padding: 11px 8px;
+    font-size: 12px;
+  }
+
+  .tb__empty td {
+    padding: 20px 12px;
+  }
+
+  .set-top__row {
+    gap: 16px;
+  }
+
+  .set-d {
+    font-size: 13px;
+  }
+
+  .blk__h {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .blk__s {
+    margin-left: 0;
+    width: 100%;
+    text-align: left;
+  }
+
+  .card__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .card__stats b {
+    font-size: 24px;
+  }
+
+  .card__id {
+    flex: 1 1 100%;
+  }
+
+  .card__side {
+    width: 100%;
+    gap: 16px;
+    justify-content: space-between;
+  }
+
+  .set-soc {
+    padding-top: 4px;
+  }
+
+  .ban {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ban__c {
+    padding: 18px 22px;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .ban__c b {
+    font-size: 40px;
+  }
+
+  .row {
+    gap: 12px;
+  }
+
+  .find {
+    flex-wrap: wrap;
+  }
+
+  .find .btn {
+    width: 100%;
+  }
+
+  .find--mini {
+    width: min(240px, 54vw);
+    flex-wrap: nowrap;
+  }
+
+  .find--mini .btn {
+    width: auto;
+  }
 }
