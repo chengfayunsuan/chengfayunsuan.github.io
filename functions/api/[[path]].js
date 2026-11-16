@@ -1,17 +1,21 @@
 /**
  * 乘法 · 账户接口
  *
- * POST /api/auth/register   注册
- * POST /api/auth/login      登录
- * POST /api/auth/logout     退出
- * GET  /api/auth/me         当前会话
+ * POST  /api/auth/register   注册
+ * POST  /api/auth/login      登录
+ * POST  /api/auth/logout     退出
+ * GET   /api/auth/me         当前会话与完整资料
+ * PATCH /api/user/profile    修改用户名与简介
  *
  * 依赖 D1 绑定 DB，表结构见 db/schema.sql
+ *
+ * 法币以「万分之一 fc」为整数单位存储，接口层统一输出 4 位小数字符串。
  */
 
 const COOKIE_NAME = 'cf_session';
 const SESSION_DAYS = 30;
 const PBKDF2_ITER = 4000;
+const FC_SCALE = 10000;
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -19,7 +23,7 @@ export async function onRequest(context) {
   const path = url.pathname.replace(/^\/api\/?/, '').replace(/\/+$/, '');
 
   if (request.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: { Allow: 'GET,POST,OPTIONS' } });
+    return new Response(null, { status: 204, headers: { Allow: 'GET,POST,PATCH,OPTIONS' } });
   }
 
   if (!env.DB) {
@@ -31,6 +35,7 @@ export async function onRequest(context) {
     if (path === 'auth/login' && request.method === 'POST') return await login(request, env, url);
     if (path === 'auth/logout' && request.method === 'POST') return await logout(request, env, url);
     if (path === 'auth/me' && request.method === 'GET') return await me(request, env);
+    if (path === 'user/profile' && request.method === 'PATCH') return await updateProfile(request, env);
     return json({ ok: false, error: 'not_found' }, 404);
   } catch (err) {
     console.error('api error:', err && err.stack ? err.stack : err);
@@ -56,12 +61,14 @@ async function register(request, env, url) {
 
   const salt = randomHex(16);
   const hash = await pbkdf2Hex(password, salt);
+  const net = clientNet(request);
 
   let result;
   try {
     result = await env.DB.prepare(
-      'INSERT INTO users (email, pw_hash, pw_salt) VALUES (?, ?, ?)'
-    ).bind(email, hash, salt).run();
+      `INSERT INTO users (email, pw_hash, pw_salt, pw_algo, pw_iter, reg_ip, reg_net, updated_at)
+       VALUES (?, ?, ?, 'pbkdf2-sha256', ?, ?, ?, datetime('now'))`
+    ).bind(email, hash, salt, PBKDF2_ITER, net.ip, net.asn).run();
   } catch (err) {
     // 并发注册时唯一索引兜底
     if (String(err && err.message).includes('UNIQUE')) {
@@ -70,11 +77,16 @@ async function register(request, env, url) {
     throw err;
   }
 
-  const userId = result.meta && result.meta.last_row_id;
-  const token = await createSession(env, userId, request);
+  const uid = result.meta && result.meta.last_row_id;
+
+  // 默认用户名取 uid，用户可在个人中心修改
+  await env.DB.prepare('UPDATE users SET username = ? WHERE id = ?')
+    .bind('用户' + uid, uid).run();
+
+  const token = await createSession(env, uid, request);
 
   return json(
-    { ok: true, user: { id: userId, email, points: 0 } },
+    { ok: true, user: await profileOf(env, uid) },
     200,
     { 'Set-Cookie': buildCookie(token, url.protocol === 'https:') }
   );
@@ -97,17 +109,17 @@ async function login(request, env, url) {
   }
 
   const user = await env.DB.prepare(
-    'SELECT id, email, pw_hash, pw_salt, points, status FROM users WHERE email = ?'
+    'SELECT id, email, pw_hash, pw_salt, pw_algo, pw_iter, status, deleted_at FROM users WHERE email = ?'
   ).bind(email).first();
 
-  if (!user || user.status !== 'active') {
+  if (!user || user.status !== 'active' || user.deleted_at) {
     // 该邮箱不存在时也走一次派生，避免通过响应时间判断账号是否存在
     await pbkdf2Hex(password, '00000000000000000000000000000000');
     await recordFail(env, email);
     return json({ ok: false, error: 'invalid_credentials' }, 401);
   }
 
-  const hash = await pbkdf2Hex(password, user.pw_salt);
+  const hash = await pbkdf2Hex(password, user.pw_salt, user.pw_iter || PBKDF2_ITER);
   if (!timingSafeEqual(hash, user.pw_hash)) {
     await recordFail(env, email);
     return json({ ok: false, error: 'invalid_credentials' }, 401);
@@ -120,10 +132,13 @@ async function login(request, env, url) {
   await env.DB.prepare('DELETE FROM sessions WHERE expires_at < ?')
     .bind(new Date().toISOString()).run();
 
+  await env.DB.prepare("UPDATE users SET last_login_at = datetime('now') WHERE id = ?")
+    .bind(user.id).run();
+
   const token = await createSession(env, user.id, request);
 
   return json(
-    { ok: true, user: { id: user.id, email: user.email, points: user.points } },
+    { ok: true, user: await profileOf(env, user.id) },
     200,
     { 'Set-Cookie': buildCookie(token, url.protocol === 'https:') }
   );
@@ -139,44 +154,147 @@ async function logout(request, env) {
 }
 
 async function me(request, env) {
-  const token = readCookie(request, COOKIE_NAME);
-  if (!token) return json({ ok: false, error: 'unauthorized' }, 401);
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+  return json({ ok: true, user: await profileOf(env, session.uid) });
+}
 
-  const tokenHash = await sha256Hex(token);
-  const row = await env.DB.prepare(
-    `SELECT s.expires_at, u.id, u.email, u.points
-       FROM sessions s
-       JOIN users u ON u.id = s.user_id
-      WHERE s.token_hash = ? AND u.status = 'active'`
-  ).bind(tokenHash).first();
+async function updateProfile(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
 
-  if (!row) return json({ ok: false, error: 'unauthorized' }, 401);
+  const body = await readJson(request);
+  if (!body) return json({ ok: false, error: 'bad_request' }, 400);
 
-  if (new Date(row.expires_at).getTime() < Date.now()) {
-    await env.DB.prepare('DELETE FROM sessions WHERE token_hash = ?').bind(tokenHash).run();
-    return json({ ok: false, error: 'expired' }, 401);
+  const sets = [];
+  const binds = [];
+
+  if (body.username !== undefined) {
+    const username = String(body.username).trim();
+    if (!isValidUsername(username)) return json({ ok: false, error: 'invalid_username' }, 400);
+
+    const taken = await env.DB.prepare(
+      'SELECT id FROM users WHERE username = ? COLLATE NOCASE AND id <> ?'
+    ).bind(username, session.uid).first();
+    if (taken) return json({ ok: false, error: 'username_taken' }, 409);
+
+    sets.push('username = ?');
+    binds.push(username);
   }
 
-  return json({ ok: true, user: { id: row.id, email: row.email, points: row.points } });
+  if (body.bio !== undefined) {
+    const bio = String(body.bio).trim();
+    if (bio.length > 200) return json({ ok: false, error: 'bio_too_long' }, 400);
+    sets.push('bio = ?');
+    binds.push(bio);
+  }
+
+  if (!sets.length) return json({ ok: false, error: 'nothing_to_update' }, 400);
+
+  sets.push("updated_at = datetime('now')");
+  binds.push(session.uid);
+
+  await env.DB.prepare(`UPDATE users SET ${sets.join(', ')} WHERE id = ?`).bind(...binds).run();
+
+  return json({ ok: true, user: await profileOf(env, session.uid) });
 }
 
 /* ---------------- 会话 ---------------- */
 
-async function createSession(env, userId, request) {
+async function currentSession(request, env) {
+  const token = readCookie(request, COOKIE_NAME);
+  if (!token) return null;
+
+  const tokenHash = await sha256Hex(token);
+  const row = await env.DB.prepare(
+    `SELECT s.expires_at, s.user_id, u.status, u.deleted_at
+       FROM sessions s
+       JOIN users u ON u.id = s.user_id
+      WHERE s.token_hash = ?`
+  ).bind(tokenHash).first();
+
+  if (!row) return null;
+
+  if (new Date(row.expires_at).getTime() < Date.now()) {
+    await env.DB.prepare('DELETE FROM sessions WHERE token_hash = ?').bind(tokenHash).run();
+    return null;
+  }
+
+  if (row.status !== 'active' || row.deleted_at) return null;
+
+  return { uid: row.user_id, tokenHash };
+}
+
+async function createSession(env, uid, request) {
   const token = randomHex(32);
   const tokenHash = await sha256Hex(token);
   const expires = new Date(Date.now() + SESSION_DAYS * 86400000).toISOString();
   const ua = (request.headers.get('User-Agent') || '').slice(0, 200);
+  const ip = clientNet(request).ip;
 
   await env.DB.prepare(
-    'INSERT INTO sessions (token_hash, user_id, expires_at, ua) VALUES (?, ?, ?, ?)'
-  ).bind(tokenHash, userId, expires, ua).run();
+    'INSERT INTO sessions (token_hash, user_id, expires_at, ua, ip) VALUES (?, ?, ?, ?, ?)'
+  ).bind(tokenHash, uid, expires, ua, ip).run();
 
   return token;
 }
 
 async function recordFail(env, email) {
   await env.DB.prepare('INSERT INTO login_fails (email) VALUES (?)').bind(email).run();
+}
+
+/* ---------------- 资料输出 ---------------- */
+
+const PROFILE_COLUMNS = `id, username, email, email_verified, role, status,
+  fc_units, fc_frozen, affinity, exp, level, bio, avatar,
+  last_login_at, created_at`;
+
+async function profileOf(env, uid) {
+  const row = await env.DB.prepare(`SELECT ${PROFILE_COLUMNS} FROM users WHERE id = ?`)
+    .bind(uid).first();
+  if (!row) return null;
+
+  return {
+    uid: row.id,
+    username: row.username,
+    email: row.email,
+    emailVerified: !!row.email_verified,
+    role: row.role,
+    status: row.status,
+    fc: formatFc(row.fc_units),
+    fcFrozen: formatFc(row.fc_frozen),
+    affinity: row.affinity,
+    exp: row.exp,
+    level: row.level,
+    bio: row.bio,
+    avatar: row.avatar,
+    createdAt: toIso(row.created_at),
+    lastLoginAt: toIso(row.last_login_at)
+  };
+}
+
+// 整数单位转 4 位小数字符串，避免浮点误差
+function formatFc(units) {
+  const n = Number(units) || 0;
+  const sign = n < 0 ? '-' : '';
+  const abs = Math.abs(n);
+  return sign + Math.floor(abs / FC_SCALE) + '.' + String(abs % FC_SCALE).padStart(4, '0');
+}
+
+// D1 的 datetime('now') 为 UTC，补上 T 与 Z 供前端解析
+function toIso(value) {
+  if (!value) return null;
+  if (value.includes('T')) return value;
+  return value.replace(' ', 'T') + 'Z';
+}
+
+/* ---------------- 工具 ---------------- */
+
+function clientNet(request) {
+  const ip = request.headers.get('CF-Connecting-IP') || '';
+  const cf = request.cf || {};
+  const asn = cf.asn ? 'AS' + cf.asn : '';
+  return { ip: ip.slice(0, 45), asn: (asn + ' ' + (cf.country || '')).trim() };
 }
 
 function buildCookie(token, secure) {
@@ -205,8 +323,6 @@ function readCookie(request, name) {
   return null;
 }
 
-/* ---------------- 工具 ---------------- */
-
 function json(data, status = 200, headers = {}) {
   return new Response(JSON.stringify(data), {
     status,
@@ -232,6 +348,13 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 }
 
+// 2 至 20 字，限中文、字母、数字、下划线与连字符，不允许纯数字
+function isValidUsername(name) {
+  if (!/^[\u4e00-\u9fa5A-Za-z0-9_-]{2,20}$/.test(name)) return false;
+  if (/^\d+$/.test(name)) return false;
+  return true;
+}
+
 function bytesToHex(bytes) {
   let out = '';
   for (const b of bytes) out += b.toString(16).padStart(2, '0');
@@ -255,12 +378,12 @@ async function sha256Hex(text) {
   return bytesToHex(new Uint8Array(buf));
 }
 
-async function pbkdf2Hex(password, saltHex) {
+async function pbkdf2Hex(password, saltHex, iterations = PBKDF2_ITER) {
   const key = await crypto.subtle.importKey(
     'raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']
   );
   const bits = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt: hexToBytes(saltHex), iterations: PBKDF2_ITER, hash: 'SHA-256' },
+    { name: 'PBKDF2', salt: hexToBytes(saltHex), iterations, hash: 'SHA-256' },
     key,
     256
   );
