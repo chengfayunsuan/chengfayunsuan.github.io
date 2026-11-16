@@ -11,7 +11,7 @@
 
 const COOKIE_NAME = 'cf_session';
 const SESSION_DAYS = 30;
-const PBKDF2_ITER = 120000;
+const PBKDF2_ITER = 4000;
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -33,8 +33,9 @@ export async function onRequest(context) {
     if (path === 'auth/me' && request.method === 'GET') return await me(request, env);
     return json({ ok: false, error: 'not_found' }, 404);
   } catch (err) {
+    const detail = String((err && err.message) || err);
     console.error('api error:', err && err.stack ? err.stack : err);
-    return json({ ok: false, error: 'server_error' }, 500);
+    return json({ ok: false, error: 'server_error', detail }, 500);
   }
 }
 
