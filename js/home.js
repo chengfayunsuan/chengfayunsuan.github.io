@@ -22,6 +22,13 @@
     return s;
   }
 
+  /* 余额小数末尾的 0 不显示：0.0000 -> 0，128.4500 -> 128.45 */
+  function trimNum(v) {
+    var s = String(v == null ? '' : v);
+    if (s.indexOf('.') < 0) return s;
+    return s.replace(/0+$/, '').replace(/\.$/, '');
+  }
+
   /* ---------- 提示条 ---------- */
 
   var toastTimer = null;
@@ -181,15 +188,12 @@
 
   function render(user) {
     $('navName').textContent = user.username || '未命名';
-    $('navBal').textContent = user.fc;
+    $('navBal').textContent = trimNum(user.fc);
 
     $('uidText').textContent = user.uid;
     $('userName').textContent = user.username || '未命名';
     $('joinedAt').textContent = fmtDate(user.createdAt);
     $('statusText').textContent = STATUS[user.status] || user.status;
-
-    var mineLink = $('mineLink');
-    if (mineLink) mineLink.href = '/space?uid=' + encodeURIComponent(user.uid);
 
     var roleEl = $('roleText');
     roleEl.textContent = ROLES[user.role] || user.role;
@@ -198,10 +202,10 @@
     paintBio(user.bio || '');
 
     var fcEl = $('fcText');
-    fcEl.textContent = user.fc;
+    fcEl.textContent = trimNum(user.fc);
     /* 位数多时收一号字，避免大额余额把小窗口入口挤掉 */
-    fcEl.classList.toggle('is-long', String(user.fc || '').length > 8);
-    $('fcFrozen').textContent = user.fcFrozen;
+    fcEl.classList.toggle('is-long', trimNum(user.fc).length > 8);
+    $('fcFrozen').textContent = trimNum(user.fcFrozen);
 
     $('statDays').textContent = daysSince(user.createdAt);
     $('statLevel').textContent = user.level;

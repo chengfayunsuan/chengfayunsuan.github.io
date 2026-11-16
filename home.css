@@ -104,7 +104,7 @@
   background: transparent;
   color: inherit;
   font-family: inherit;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: .03em;
   text-align: left;
@@ -117,7 +117,7 @@
 
 .dock__n {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: .1em;
   color: var(--red);
@@ -196,21 +196,6 @@
   letter-spacing: .06em;
   color: var(--gray);
 }
-
-.face__link { margin: 12px 0 0; }
-
-.face__link a {
-  display: inline-block;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .06em;
-  color: var(--ink);
-  text-decoration: none;
-  border-bottom: 2px solid var(--red);
-  transition: color .14s ease;
-}
-
-.face__link a:hover { color: var(--red); }
 
 .face__dot {
   margin: 0 8px;
@@ -314,15 +299,15 @@
 
 .face__bal-f {
   margin-top: 14px;
-  font-size: 12px;
-  letter-spacing: .06em;
+  font-size: 14px;
+  letter-spacing: .04em;
   color: var(--gray);
 }
 
 .face__bal-tag {
-  margin-left: 6px;
+  margin-left: 8px;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: .14em;
   color: #6A6154;
 }
@@ -355,7 +340,7 @@
 
 .face__strip {
   display: grid;
-  grid-template-columns: 1fr 1fr 1.5fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   border: var(--edge);
   border-top: 0;
 }

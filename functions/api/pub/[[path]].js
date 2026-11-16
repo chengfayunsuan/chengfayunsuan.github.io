@@ -57,8 +57,9 @@ function toIso(s) {
   return /[Z+]/.test(t) ? t : t + 'Z';
 }
 
+// 小数末尾的 0 不显示：0.0000 -> 0，20.0000 -> 20，128.4500 -> 128.45
 function fc(units) {
-  return (Number(units || 0) / FC_SCALE).toFixed(4);
+  return (Number(units || 0) / FC_SCALE).toFixed(4).replace(/0+$/, '').replace(/\.$/, '');
 }
 
 function readCookie(request, name) {

@@ -15,6 +15,13 @@
   function $(id) { return document.getElementById(id); }
   function pad(n, len) { var s = String(n); while (s.length < len) s = '0' + s; return s; }
 
+  /* 余额小数末尾的 0 不显示：0.0000 -> 0，128.4500 -> 128.45 */
+  function trimNum(v) {
+    var s = String(v == null ? '' : v);
+    if (s.indexOf('.') < 0) return s;
+    return s.replace(/0+$/, '').replace(/\.$/, '');
+  }
+
   /* ---------- 提示条 ---------- */
 
   var toastTimer = null;
@@ -78,7 +85,7 @@
     current = u;
 
     $('navName').textContent = u.username || '未命名';
-    $('navBal').textContent = u.fc;
+    $('navBal').textContent = trimNum(u.fc);
 
     $('setUid').textContent = u.uid;
     $('setUser').textContent = u.username || '未命名';
@@ -92,8 +99,8 @@
     $('curName').textContent = u.username || '—';
     $('curEmail').textContent = u.email || '—';
 
-    $('setFc').textContent = u.fc;
-    $('setFrozen').textContent = u.fcFrozen;
+    $('setFc').textContent = trimNum(u.fc);
+    $('setFrozen').textContent = trimNum(u.fcFrozen);
 
     $('stDone').textContent = u.done || 0;
     $('stDays').textContent = daysSince(u.createdAt);

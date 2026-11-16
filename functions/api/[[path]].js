@@ -282,12 +282,14 @@ async function profileOf(env, uid) {
   };
 }
 
-// 整数单位转 4 位小数字符串，避免浮点误差
+// 整数单位转小数字符串，避免浮点误差；小数末尾的 0 不显示
+// 0.0000 -> 0，20.0000 -> 20，128.4500 -> 128.45
 function formatFc(units) {
   const n = Number(units) || 0;
   const sign = n < 0 ? '-' : '';
   const abs = Math.abs(n);
-  return sign + Math.floor(abs / FC_SCALE) + '.' + String(abs % FC_SCALE).padStart(4, '0');
+  const frac = String(abs % FC_SCALE).padStart(4, '0').replace(/0+$/, '');
+  return sign + Math.floor(abs / FC_SCALE) + (frac ? '.' + frac : '');
 }
 
 // D1 的 datetime('now') 为 UTC，补上 T 与 Z 供前端解析

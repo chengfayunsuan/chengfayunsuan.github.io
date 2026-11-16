@@ -169,8 +169,8 @@
 
 .card__frz {
   margin: 0;
-  font-size: 12px;
-  letter-spacing: .05em;
+  font-size: 14px;
+  letter-spacing: .04em;
   color: var(--gray);
 }
 
@@ -186,7 +186,7 @@
 .card__frz i {
   font-family: var(--mono);
   font-style: normal;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: .14em;
   color: #6A6154;
 }

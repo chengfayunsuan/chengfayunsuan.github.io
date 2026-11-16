@@ -35,6 +35,13 @@
 
   function pad(n) { return n < 10 ? '0' + n : String(n); }
 
+  /* 余额小数末尾的 0 不显示：0.0000 -> 0，128.4500 -> 128.45 */
+  function trimNum(v) {
+    var s = String(v == null ? '' : v);
+    if (s.indexOf('.') < 0) return s;
+    return s.replace(/0+$/, '').replace(/\.$/, '');
+  }
+
   function fmtDate(iso) {
     if (!iso) return '—';
     var d = new Date(iso);
@@ -411,7 +418,7 @@
     var data = p || { count: 0, total: '0.0000', lastAt: null, items: [] };
 
     $('poCount').textContent = data.count || 0;
-    $('poTotal').textContent = data.total || '0.0000';
+    $('poTotal').textContent = trimNum(data.total || '0');
     $('poLast').textContent = data.lastAt ? fmtDate(data.lastAt) : '—';
 
     var list = $('poList');
@@ -425,7 +432,7 @@
 
       var amt = document.createElement('span');
       amt.className = 'po__amt';
-      amt.textContent = it.amount;
+      amt.textContent = trimNum(it.amount);
       var unit = document.createElement('i');
       unit.setAttribute('data-cur', 'code');
       unit.textContent = 'FC';
@@ -627,7 +634,7 @@
     if (me) {
       $('navGuest').hidden = true;
       $('navAuthed').hidden = false;
-      $('navBal').textContent = me.fc;
+      $('navBal').textContent = trimNum(me.fc);
       $('navName').textContent = me.username || '我';
       if (String(me.uid) === uid) $('selfNote').hidden = false;
     }
