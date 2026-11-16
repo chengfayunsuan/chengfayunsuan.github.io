@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>天梯榜 · 乘法</title>
-<meta name="description" content="乘法天梯榜：按等级与法币排序的公开榜单。">
+<meta name="description" content="乘法天梯榜：按乘法币与等级排序的公开榜单。">
 <meta name="theme-color" content="#E0291E">
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="/css/style.css?v=6">
 <link rel="stylesheet" href="/css/home.css?v=8">
-<link rel="stylesheet" href="/css/page.css?v=2">
-<script src="/js/config.js"></script>
+<link rel="stylesheet" href="/css/page.css?v=3">
+<script src="/js/config.js?v=2"></script>
 </head>
 <body data-page="ladder">
 
@@ -48,7 +48,7 @@
         <span class="pg-k">LADDER</span>
         <h1 class="pg-t">天梯榜</h1>
         <p class="pg-d">
-          按等级与法币两条线排列。等级取决于累计经验，法币取决于已完成问卷的结算金额，
+          法币为主榜，等级为次榜。法币取决于已完成问卷的结算金额，等级取决于累计经验，
           两者不互相换算，各有各的榜。
         </p>
       </div>
@@ -61,11 +61,13 @@
 
     <div class="pg-tools">
       <div class="pg-tabs">
-        <button class="pg-tab is-on" type="button" data-by="level">按等级</button>
-        <button class="pg-tab" type="button" data-by="fc">按法币</button>
+        <button class="pg-tab is-on" type="button" data-by="fc">按法币</button>
+        <button class="pg-tab" type="button" data-by="level">按等级</button>
       </div>
       <span class="pg-tools__r">封禁与注销账户不计入</span>
     </div>
+
+    <ul class="ld-hero" id="ldHero"></ul>
 
     <ul class="ld-list" id="ldList"></ul>
 
@@ -74,8 +76,8 @@
     <div class="pg-note">
       <span class="stamp stamp--red">RULE / 规则</span>
       <p>
-        等级由经验累计决定，经验只来自通过核验的问卷；法币榜统计当前可用余额，
-        提现后排名会下降。榜单只展示公开信息，点击用户名可查看对方的公开主页。
+        法币榜统计当前可用余额，提现后排名会下降；等级由经验累计决定，经验只来自通过核验的问卷。
+        榜单只展示公开信息，点击用户名可查看对方的公开主页。
       </p>
     </div>
 
@@ -93,6 +95,6 @@
   </div>
 </footer>
 
-<script src="/js/app.js?v=1" defer></script>
+<script src="/js/app.js?v=2" defer></script>
 </body>
 </html>

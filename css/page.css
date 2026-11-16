@@ -590,7 +590,6 @@
   border-bottom: 1px solid var(--hair);
 }
 
-.ld-row.is-top { background: rgba(224, 41, 30, .05); }
 
 .ld-rank {
   font-family: var(--black);
@@ -600,7 +599,6 @@
   color: var(--gray);
 }
 
-.ld-row.is-top .ld-rank { color: var(--red); }
 
 .ld-who {
   display: flex;
@@ -893,4 +891,241 @@
   .pg-tab { flex: 1 1 auto; padding: 9px 10px; text-align: center; font-size: 12px; }
   .pg-side b { font-size: 48px; }
   .pg-empty__a .btn { flex: 1 1 100%; justify-content: center; }
+}
+
+/* ---------- 问卷大厅 · 紧凑页头与计数 ---------- */
+
+.pg--tight { padding-top: clamp(14px, 2vw, 26px); }
+
+.pg-side--num { text-align: left; }
+.pg-side--num b { color: var(--red); }
+
+/* ---------- 问卷卡 ---------- */
+
+.sv-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 26px 0 0;
+}
+
+.sv-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px 28px;
+  padding: 20px 24px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+
+.sv-card__top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sv-card__star {
+  font-size: 13px;
+  letter-spacing: .12em;
+  color: var(--red);
+}
+
+.sv-card__flag {
+  padding: 2px 8px;
+  border: 1.5px solid var(--hair);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .14em;
+  color: var(--gray);
+}
+
+.sv-card__t {
+  margin: 10px 0 0;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+
+.sv-card__d {
+  margin: 8px 0 0;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: .04em;
+  color: #4A453A;
+}
+
+.sv-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.sv-card__tags span {
+  padding: 3px 10px;
+  border: 1px solid var(--hair);
+  background: var(--paper-2);
+  font-size: 11px;
+  color: var(--gray);
+}
+
+.sv-card__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.sv-card__pay {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--black);
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.sv-card__pay i {
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: .14em;
+  color: var(--gray);
+}
+
+@media (max-width: 700px) {
+  .sv-card { grid-template-columns: minmax(0, 1fr); }
+  .sv-card__side {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+/* ---------- 天梯榜 · 前三整行 ---------- */
+
+.ld-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 26px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ld-hero:empty { display: none; }
+
+.ld-hero__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px 24px;
+  padding: 18px 26px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+}
+
+/* 01 红、02 黑、03 米灰红边，三种底色拉开层次 */
+.ld-hero__row.is-r1 { background: var(--red); border-color: var(--red); color: var(--paper); }
+.ld-hero__row.is-r2 { background: var(--ink); color: var(--paper); }
+.ld-hero__row.is-r3 { background: var(--paper-2); border-color: var(--red); }
+
+.ld-hero__rank {
+  font-family: var(--black);
+  font-weight: 400;
+  font-size: 54px;
+  line-height: .9;
+  color: var(--red);
+}
+
+.ld-hero__row.is-r1 .ld-hero__rank,
+.ld-hero__row.is-r2 .ld-hero__rank { color: var(--paper); }
+
+.ld-hero__who {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  min-width: 0;
+}
+
+.ld-hero__name {
+  font-size: 20px;
+  font-weight: 700;
+  color: inherit;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ld-hero__name:hover { text-decoration: underline; }
+
+.ld-hero__uid {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .08em;
+  opacity: .65;
+}
+
+.ld-hero__stats {
+  display: flex;
+  align-items: baseline;
+  gap: 22px;
+  white-space: nowrap;
+}
+
+.ld-hero__lv,
+.ld-hero__af {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-family: var(--black);
+  font-weight: 400;
+  font-size: 20px;
+}
+
+.ld-hero__lv i,
+.ld-hero__af i {
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 9.5px;
+  letter-spacing: .12em;
+  opacity: .6;
+}
+
+.ld-hero__fc {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  font-family: var(--black);
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 1;
+}
+
+.ld-hero__fc i {
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: .14em;
+  opacity: .65;
+}
+
+@media (max-width: 700px) {
+  .ld-hero__row {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px 14px;
+    padding: 14px 16px;
+  }
+  .ld-hero__rank { font-size: 38px; }
+  .ld-hero__stats {
+    grid-column: 1 / -1;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .ld-hero__fc { font-size: 30px; }
 }

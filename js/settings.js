@@ -586,6 +586,25 @@
     net: 'CN · 浙江 · 电信'
   };
 
+  /* ---------- 币种显示切换 ---------- */
+
+  var curSeg = document.getElementById('curSeg');
+  if (curSeg && window.CF && window.CF.setCurrency) {
+    var markCur = function (m) {
+      curSeg.querySelectorAll('.cur-seg__b').forEach(function (b) {
+        b.classList.toggle('is-on', b.getAttribute('data-cur-mode') === m);
+      });
+    };
+    markCur(window.CF.currency.mode);
+    curSeg.addEventListener('click', function (ev) {
+      var b = ev.target.closest('.cur-seg__b');
+      if (!b) return;
+      var m = b.getAttribute('data-cur-mode');
+      window.CF.setCurrency(m);
+      markCur(m);
+    });
+  }
+
   var isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
   if (isLocal && /[?&]preview\b/.test(location.search)) {

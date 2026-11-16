@@ -9,8 +9,8 @@
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="/css/style.css?v=6">
 <link rel="stylesheet" href="/css/home.css?v=8">
-<link rel="stylesheet" href="/css/page.css?v=2">
-<script src="/js/config.js"></script>
+<link rel="stylesheet" href="/css/page.css?v=3">
+<script src="/js/config.js?v=2"></script>
 </head>
 <body data-page="hall">
 
@@ -40,20 +40,16 @@
   </div>
 </div>
 
-<main class="pg">
+<main class="pg pg--tight">
   <div class="wrap">
 
     <div class="pg-head">
       <div>
         <span class="pg-k">SURVEY HALL</span>
         <h1 class="pg-t">问卷大厅</h1>
-        <p class="pg-d">
-          委托方发布的调研问卷在此集中展示。列表标注题目数量、预计耗时与奖励额度，
-          符合样本条件的问卷才会出现，名额已满或条件不符的不展示。
-        </p>
       </div>
 
-      <div class="pg-side">
+      <div class="pg-side pg-side--num">
         <b id="hallCount">0</b>
         <span>份可参与</span>
       </div>
@@ -61,14 +57,34 @@
 
     <div class="pg-tools">
       <div class="pg-tabs">
-        <button class="pg-tab is-on" type="button" data-filter="all">全部</button>
-        <button class="pg-tab" type="button" data-filter="todo">待完成</button>
-        <button class="pg-tab" type="button" data-filter="done">已完成</button>
+        <button class="pg-tab is-on" type="button" data-sort="fc">法币 · 高到低</button>
+        <button class="pg-tab" type="button" data-sort="time">时间 · 最新</button>
+        <button class="pg-tab" type="button" data-sort="star">星级 · 高到低</button>
       </div>
-      <span class="pg-tools__r">按发布时间排序</span>
     </div>
 
-    <div class="pg-empty">
+    <!-- 伪问卷卡：想改造就改这里，接口上线后由数据接管 -->
+    <div class="sv-list">
+      <article class="sv-card">
+        <div class="sv-card__main">
+          <div class="sv-card__top">
+            <span class="sv-card__star">★★★★★</span>
+            <span class="sv-card__flag">SAMPLE / 样例</span>
+          </div>
+          <h2 class="sv-card__t">样例问卷 · 城市通勤与消费习惯调研</h2>
+          <p class="sv-card__d">题目 18 · 预计 6 分钟 · 单次提交 · 通过核验后即时入账</p>
+          <div class="sv-card__tags">
+            <span>18–35 岁</span><span>一二线城市</span><span>答卷时长校验</span>
+          </div>
+        </div>
+        <div class="sv-card__side">
+          <div class="sv-card__pay"><b>12</b><i data-cur="code">CFB</i></div>
+          <button class="btn btn--red btn--s" type="button" data-soon="答卷通道">开始答卷</button>
+        </div>
+      </article>
+    </div>
+
+    <div class="pg-empty" hidden>
       <p class="pg-empty__k">NO SURVEY OPEN</p>
       <h2 class="pg-empty__t">当前没有可参与的问卷</h2>
       <p class="pg-empty__d">
@@ -118,6 +134,6 @@
   </div>
 </footer>
 
-<script src="/js/app.js?v=1" defer></script>
+<script src="/js/app.js?v=2" defer></script>
 </body>
 </html>

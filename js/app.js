@@ -161,16 +161,22 @@
   /* ---------- 问卷大厅 ---------- */
 
   function initHall(me) {
-    /* 问卷接口尚未上线，列表固定为空态；份数由接口接管 */
+    /* 问卷接口尚未上线；列表里的样例卡是占位，接接口后由数据接管 */
     var n = $('hallCount');
     if (n) n.textContent = '0';
 
     document.querySelectorAll('.pg-tab').forEach(function (tab) {
       tab.addEventListener('click', function () {
-        var key = tab.getAttribute('data-filter');
         document.querySelectorAll('.pg-tab').forEach(function (t) { t.classList.remove('is-on'); });
         tab.classList.add('is-on');
-        if (key !== 'all') say('问卷上线后可按此筛选');
+        say('排序将在问卷开放后生效');
+      });
+    });
+
+    document.querySelectorAll('[data-soon]').forEach(function (el) {
+      el.addEventListener('click', function (ev) {
+        ev.preventDefault();
+        say(el.getAttribute('data-soon') + ' · 内测阶段暂未开放');
       });
     });
   }
@@ -321,10 +327,14 @@
   /* ---------- 天梯榜 ---------- */
 
   function initLadder(me) {
+    var hero = $('ldHero');
     var list = $('ldList');
     var empty = $('ldEmpty');
-    var by = 'level';
+    /* 法币比等级重要，默认按法币排 */
+    var by = 'fc';
     var data = [];
+
+    function rowText(rank) { return rank < 10 ? '0' + rank : String(rank); }
 
     function paint() {
       var rows = data.slice();
@@ -335,15 +345,82 @@
         rows.sort(function (a, b) { return (b.level - a.level) || (b.exp - a.exp); });
       }
 
+      hero.textContent = '';
       list.textContent = '';
 
       rows.forEach(function (it, i) {
-        var li = document.createElement('li');
-        li.className = 'ld-row' + (i < 3 ? ' is-top' : '');
+        /* 前三名：整行大块，三种底色 */
+        if (i < 3 && hero) {
+          var hrow = document.createElement('li');
+          hrow.className = 'ld-hero__row is-r' + (i + 1);
 
-        var rank = document.createElement('span');
-        rank.className = 'ld-rank';
-        rank.textContent = i + 1 < 10 ? '0' + (i + 1) : String(i + 1);
+          var hrank = document.createElement('span');
+          hrank.className = 'ld-hero__rank';
+          hrank.textContent = rowText(i + 1);
+
+          var hwho = document.createElement('span');
+          hwho.className = 'ld-hero__who';
+
+          var ha = document.createElement('a');
+          ha.className = 'ld-hero__name';
+          ha.href = '/space?uid=' + encodeURIComponent(it.uid);
+          ha.textContent = it.username || '未命名';
+
+          var huid = document.createElement('span');
+          huid.className = 'ld-hero__uid';
+          huid.textContent = 'UID ' + it.uid;
+
+          hwho.appendChild(ha);
+          hwho.appendChild(huid);
+
+          if (me && String(me.uid) === String(it.uid)) {
+            var hme = document.createElement('span');
+            hme.className = 'ld-me';
+            hme.textContent = 'ME';
+            hwho.appendChild(hme);
+          }
+
+          var hstats = document.createElement('span');
+          hstats.className = 'ld-hero__stats';
+
+          var hlv = document.createElement('span');
+          hlv.className = 'ld-hero__lv';
+          hlv.textContent = 'LV ' + (it.level || 1);
+
+          var haf = document.createElement('span');
+          haf.className = 'ld-hero__af';
+          haf.textContent = it.affinity || 0;
+          var hafu = document.createElement('i');
+          hafu.textContent = '好感';
+          haf.appendChild(hafu);
+
+          var hfc = document.createElement('span');
+          hfc.className = 'ld-hero__fc';
+          hfc.textContent = trimNum(it.fc);
+          var hfcu = document.createElement('i');
+          hfcu.setAttribute('data-cur', 'code');
+          hfcu.textContent = 'CFB';
+          hfc.appendChild(hfcu);
+
+          hstats.appendChild(hlv);
+          hstats.appendChild(haf);
+          hstats.appendChild(hfc);
+
+          hrow.appendChild(hrank);
+          hrow.appendChild(hwho);
+          hrow.appendChild(hstats);
+          hero.appendChild(hrow);
+          return;
+        }
+
+        /* 第四名起：普通行，名次接着前三往下排 */
+        var rank = i + 1;
+        var li = document.createElement('li');
+        li.className = 'ld-row';
+
+        var rk = document.createElement('span');
+        rk.className = 'ld-rank';
+        rk.textContent = rowText(rank);
 
         var who = document.createElement('span');
         who.className = 'ld-who';
@@ -383,10 +460,10 @@
         fc.textContent = trimNum(it.fc);
         var fcu = document.createElement('i');
         fcu.setAttribute('data-cur', 'code');
-        fcu.textContent = 'FC';
+        fcu.textContent = 'CFB';
         fc.appendChild(fcu);
 
-        li.appendChild(rank);
+        li.appendChild(rk);
         li.appendChild(who);
         li.appendChild(lv);
         li.appendChild(af);

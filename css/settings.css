@@ -662,6 +662,9 @@
   min-width: 0;
 }
 
+/* 币种显示独占一行，分组保持两两配对 */
+.pref__g--wide { grid-column: 1 / -1; }
+
 /* 组数为奇数时，最后一组横跨两列，避免右下留空 */
 .pref__g:last-child:nth-child(odd) {
   grid-column: 1 / -1;
@@ -977,4 +980,48 @@ body.is-grid {
   .find--mini .btn {
     width: auto;
   }
+}
+/* ---------- 币种显示 ---------- */
+
+.cur-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px 26px;
+}
+
+.cur-seg {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  max-width: 420px;
+}
+
+.cur-seg__b {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background .14s ease, color .14s ease;
+}
+
+.cur-seg__b b { font-size: 13px; font-weight: 700; letter-spacing: .02em; }
+.cur-seg__b i { font-style: normal; font-size: 11px; color: var(--gray); }
+.cur-seg__b:hover { background: var(--paper-2); }
+
+.cur-seg__b.is-on {
+  background: var(--ink);
+  color: var(--paper);
+}
+.cur-seg__b.is-on i { color: #B8B0A0; }
+
+.pref__hint {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--gray);
 }

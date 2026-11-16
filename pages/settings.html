@@ -10,9 +10,9 @@
   <meta name="robots" content="noindex">
   <link rel="stylesheet" href="/css/style.css?v=6">
   <link rel="stylesheet" href="/css/home.css?v=8">
-  <link rel="stylesheet" href="/css/settings.css?v=10">
+  <link rel="stylesheet" href="/css/settings.css?v=11">
   <link rel="stylesheet" href="/css/relation.css?v=1">
-  <script src="/js/config.js"></script>
+  <script src="/js/config.js?v=2"></script>
 </head>
 
 <body>
@@ -377,6 +377,21 @@
 
         <div class="pref">
 
+          <fieldset class="pref__g pref__g--wide">
+            <legend class="pref__gt">币种显示</legend>
+            <div class="cur-row">
+              <div class="cur-seg" id="curSeg">
+                <button class="cur-seg__b" type="button" data-cur-mode="CNY">
+                  <b>CFB · 乘法币</b><i>按人民币显示</i>
+                </button>
+                <button class="cur-seg__b" type="button" data-cur-mode="USD">
+                  <b>CFD · 乘法刀</b><i>按美元显示</i>
+                </button>
+              </div>
+              <p class="pref__hint">两种币种数值恒为 1:1，切换只改名称与单位，立即生效。</p>
+            </div>
+          </fieldset>
+
           <fieldset class="pref__g">
             <legend class="pref__gt">通知</legend>
             <label class="sw"><input type="checkbox" data-pref="notify.survey"><span class="sw__b"></span>
@@ -491,7 +506,7 @@
     </div>
   </footer>
 
-  <script src="/js/settings.js?v=6" defer></script>
+  <script src="/js/settings.js?v=7" defer></script>
 </body>
 
 </html>
