@@ -1,419 +1,406 @@
 <!DOCTYPE html>
-<!-- 【<!DOCTYPE html>】固定第一行，声明这是 HTML5 文档。不写浏览器会进入「怪异模式」，布局尺寸会和现代浏览器不一致。 -->
-
-<!-- ============================================================
-     文件：index.html（首页）
-     作用：访客打开网站看到的第一个页面。包含六个功能入口按钮
-           （文章 / 视频 / 留言板 / 动态 / 工具 / 个人主页）、
-           个人简介、更新日志、登录状态展示。
-     说明：这里写的注释不会显示在页面上，只给看代码的人（也就是你）看。
-     ============================================================ -->
-
 <html lang="zh-CN">
-<!-- 【<html>】最外层大盒子，页面的一切都装在它里面。
-     【lang="zh-CN"】告知浏览器「内容是简体中文」—— 影响字体选择、朗读发音、翻译提示。 -->
-
 <head>
-<!-- 【<head>】设置区。这里的东西不会显示在页面上，都是给浏览器看的：编码、标题、引用的文件。 -->
-
-<meta charset="UTF-8">
-<!-- 【<meta charset>】声明文件编码 UTF-8。漏掉这句中文会变成乱码方块。 -->
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- 【viewport】手机适配必写。
-     【width=device-width】页面宽度 = 手机真实屏幕宽度；
-     【initial-scale=1.0】初始不缩放。不写这行，手机上整页会被缩小，字小到看不清。 -->
-
-<title>乘法 · 个人主页</title>
-<!-- 【<title>】浏览器标签页上的字，也决定收藏夹里存的名字。 -->
-
-<meta name="description" content="乘法的个人主页，记录编程学习与项目">
-<!-- 【description】页面简介。搜索引擎在结果列表里展示的那两行灰字就是它。
-     写得好坏直接影响别人搜到你时愿不愿意点进来。 -->
-
-<link rel="icon" href="/favicon.ico">
-<!-- 【<link rel="icon">】标签页左边的小图标。
-     【href="/favicon.ico"】开头的斜杠 = 从网站根目录算起，不管当前页面在哪一层都能找到。 -->
-
-<link rel="stylesheet" href="/style.css?v=26">
-<!-- 【<link rel="stylesheet">】引入全站公共样式表。
-     【?v=26】防缓存版本号：浏览器会缓存 CSS 加快加载，但改了样式后可能还读旧文件。
-     把这个数字改大（26 → 27），浏览器就当它是新文件，会重新下载。 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>乘法 · 做问卷，攒积分，换真钱</title>
+<meta name="description" content="乘法是一个问卷积分平台。注册后挑选问卷作答，按完成度获得积分，积分可以提现成现金，也可以兑换游戏与软件 CDK。">
+<meta name="theme-color" content="#E0291E">
+<link rel="stylesheet" href="/style.css?v=1">
 </head>
-
 <body>
-<!-- 【<body>】页面上所有「看得见」的东西都装在这里。 -->
 
-  <div id="navbar"></div>
-  <!-- 【占位空盒子】导航栏不写在这里，而是由 js/nav.js 在运行时塞进来。
-       【id="navbar"】id 是元素的唯一标识，一个页面里不能重复。
-       JS 用 document.getElementById('navbar') 就能精确找到它。
-       为什么不在每个页面重复写一遍导航？因为改一次要改十几个文件，动态注入只改一处。 -->
+<!-- ============ 导航 ============ -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">CHENGFA</span>
+    </a>
+    <nav class="nav__links">
+      <a href="#how">怎么运作</a>
+      <a href="#redeem">能换什么</a>
+      <a href="#source">问卷从哪来</a>
+      <a href="#faq">常见问题</a>
+    </nav>
+    <div class="nav__cta">
+      <a class="btn btn--ghost" href="#cta">登录</a>
+      <a class="btn btn--red" href="#cta">注册</a>
+    </div>
+  </div>
+</header>
 
-  <header>
-  <!-- 【<header>】语义化标签，表示「页头」。它和 <div> 效果一样，但名字告诉了人和搜索引擎这块是什么。 -->
+<!-- ============ Hero ============ -->
+<section class="hero">
+  <span class="hero__ghostx" aria-hidden="true">×</span>
 
-    <img class="avatar" src="avatar.jpg" alt="头像"
-         onerror="this.style.display='none'">
-    <!-- 【<img>】图片标签，没有结束标签。三个属性缺一不可：
-         【src="avatar.jpg"】图片地址，相对路径 = 和本文件放在同一个文件夹；
-         【alt="头像"】图片加载不出来时显示的替代文字，也是盲人读屏软件念的内容；
-         【onerror="..."】图片加载失败时执行的一小段 JS。
-         这里的意思是 this.style.display='none' —— this 指这张图自己，把它隐藏掉。
-         为什么要这样？因为头像文件丢了的话，浏览器会显示一个破图标，很难看。 -->
+  <div class="wrap hero__in">
 
-    <h1 class="name">乘法</h1>
-    <!-- 【<h1>】一级标题，一个页面只应该有一个，搜索引擎靠它判断这页的主题。
-         【class="name"】给它挂一个类名，方便 CSS 里用 .name 精准设置样式。 -->
-
-    <p class="tagline">这是想要进行乘法运算的测试网页</p>
-    <!-- 【<p>】段落标签。这里是副标题 / 一句话签名。 -->
-  </header>
-
-  <section id="test">
-  <!-- 【<section>】语义化标签，表示「一个内容区块」。
-       【id="test"】给这个区块起个唯一名字，CSS 里可以用 #test 选中，
-       页面内的锚点链接也能写成 href="#test" 直接跳到这里。 -->
-
-    <div class="card">
-    <!-- 【class="card"】套上 style.css 里定义的「磨砂玻璃卡片」样式：
-         半透明底 + 背后模糊 + 12px 圆角。 -->
-
-      <h2 class="section-title">测试页</h2>
-      <!-- 【<h2>】二级标题，比 h1 小一号，用来做板块标题（h1 已经给站名用了）。
-           【section-title】这个类会让标题左边出现一根紫色竖条（用伪元素画的）。 -->
-
-      <div class="test-grid">         
-      <!-- 【test-grid】三列网格布局的容器，里面的子元素会自动排成规整的方块。 -->
-
-        <a class="test-item" href="/test/board">留言板</a>
-        <!-- 【<a>】链接标签，href 是「点它跳去哪」。
-             这里的 /test/board 会被服务器解析成 /test/board.html。
-             每个链接都套了 test-item 类，网格会自动给它们上不同的颜色。 -->
-        <a class="test-item" href="/test/tools">小工具集</a>
-        <a class="test-item" href="/test/weather">天气预报</a>
-        <a class="test-item" href="/test/dynamic">近期动态</a>
-        <a class="test-item" href="/test/mouse">鼠标特效</a>
-        <a class="test-item" href="/test/users">用户名单</a>
-        <!-- 第 7 个：原来独立跑的 Local.html，现在并进本站静态托管 -->
-        <a class="test-item" href="http://localhost:8080/">个人主页</a>
-        <!-- 【指向本机的地址】localhost 意思是「你自己的这台电脑」，8080 是端口号。
-             这个链接只有在你本机跑着那个服务时才打得开，
-             别人点会显示打不开 —— 这是故意的，属于本地开发页。 -->
-
-        <!-- 第 8 个：潮院长的小巧思（一个已经部署到公网的独立小站） -->
-        <a class="test-item" href="https://shiyun-poetry-91792.app.workbuddy.host/?sharecode=MLN2BHLPAD">潮院长的小巧思</a>
-        <!-- 【为什么是「新增第 8 个」而不是「改掉第 7 个」】
-             第 7 个和第 8 个指向的是两个完全不同的地方：
-               · 第 7 个 localhost:8080 —— 只有本机跑着服务时才通，是站主自己的入口；
-               · 第 8 个 https://...workbuddy.host —— 已经部署到公网，谁点都打得开。
-             一个链接标签里，href 只能装一个地址，所以「改掉第 7 个」的真实含义是
-             「删掉本机入口」。这不是换皮，是拆掉一扇门再钉上另一扇。
-             要让两扇门都在，就只能并排写两个 <a>，也就是多出来一个格子。
-             【颜色为什么是青色】色相是按格子序号循环的（6n+2 对应第 2、8、14 个），
-             所以第 8 个和第 2 个「小工具集」同色，这是规律，不是写错了。 -->
-
-        <!-- 第 9 个：计算机全书（2026-11-16 已独立成站，域名不同，必须写完整地址） -->
-        <a class="test-item" href="https://chengfa-book.pages.dev/">计算机全书</a>
-        <!-- 【为什么这里要写完整网址而不是 /book/】
-             书原来放在本站的 /book/ 子目录里，现在搬出去成了独立的 Cloudflare Pages
-             项目，域名是 chengfa-book.pages.dev。一旦跨了域名，相对路径就不再管用，
-             href 必须从头写全，否则浏览器会在本站域名下找一个不存在的路径。
-             本站的 _redirects 里还留着 /book/* 的 301，老链接点进来会自动跳过去。
-             【为什么不是 book.chengfa-761.pages.dev】
-             pages.dev 是 Cloudflare 自己的域名，只能整段分给一个项目，
-             不允许在它下面再开子域。想要 book.xxx.com 这种，得先有一个自己的域名，
-             再把子域名 CNAME 到 Pages 项目上。
-             【颜色为什么跟「天气预报」一样】色相还是按格子序号循环：
-             第 9 个落在 6n+3 上，和 3、15 同色。想换颜色得改 CSS 里的循环规则，不是改这里。 -->
+    <div>
+      <div class="hero__tag">
+        <span class="stamp stamp--red">SURVEY → POINTS → REWARD</span>
+        <span class="txt">问卷积分平台</span>
       </div>
 
-      <a class="art-entry-btn" href="/pages/write.html">✍ 写文章</a>
-      <!-- 【入口按钮】点它去写文章页。
-           ✍ 是 Unicode 字符，直接写在 HTML 里就行，不需要图片。 -->
-      <a class="art-entry-btn" href="/pages/video-write.html">🎬 传视频</a>
+      <h1 class="hero__title">乘<span class="x">法</span></h1>
 
-      <!-- 视频入口：小方框里放最新的几支（放在文章之上） -->
-      <div class="art-box">
-      <!-- 【art-box】主页上的小方框容器，比大卡片更轻、更紧凑。 -->
+      <p class="hero__lead">
+        把你的碎片时间，换成能兑现的积分。
+      </p>
+      <p class="hero__sub">
+        品牌方和调研机构需要真实用户的答案，他们为此付钱。你花三到十五分钟认真填完一份问卷，
+        就能拿到积分；积分攒够了，提现到支付宝、微信，或者换一张 CDK。
+      </p>
 
-        <div class="art-box-head">
-        <!-- 小方框的标题行：左边「视频」两字，右边「全部 ›」链接，两端对齐。 -->
-
-          <span class="art-box-title">视频</span>
-          <!-- 【<span>】行内容器，本身没有任何样式，用来给一小段文字单独套样式。
-               和 <div> 的区别：div 独占一行（块级），span 不换行（行内）。 -->
-
-          <a class="art-box-more" href="/pages/videos.html">全部 ›</a>
-          <!-- 【›】是「右单角引号」字符，画成一个箭头，比用图片省事。 -->
-        </div>
-
-        <div class="art-box-list v-grid" id="vidList">
-        <!-- 两个类叠加：art-box-list 负责竖排列表，v-grid 负责视频卡之间的间距。
-             【id="vidList"】留给下面那段 JS 用：JS 找到它，把视频卡片塞进去。 -->
-
-          <p class="v-empty">加载中…</p>
-          <!-- 【占位提示】JS 还没跑完时先显示这句，用户不会看到一块空白发呆。
-               JS 拉完数据会用真实内容整个替换掉这里。 -->
-        </div>
+      <div class="hero__actions">
+        <a class="btn" href="#cta">
+          免费注册 <span aria-hidden="true">→</span>
+        </a>
+        <a class="btn btn--ghost" href="#how">先看怎么玩</a>
       </div>
 
-      <!-- 文章入口：小方框里放最新的几篇 -->
-      <div class="art-box">
-        <div class="art-box-head">
-          <span class="art-box-title">文章</span>
-          <a class="art-box-more" href="/pages/articles.html">全部 ›</a>
-        </div>
-        <div class="art-box-list" id="artList">
-          <p class="art-box-empty">加载中…</p>
-        </div>
+      <p class="hero__note">注册不需要付费 · 不绑定银行卡 · 随时可以注销</p>
+    </div>
+
+    <div class="hero__disc">
+      <div class="disc">
+        <span class="disc__corner">AVG. / 单份</span>
+        <div class="disc__num">180<small>分</small></div>
+        <div class="disc__label">一次问卷的平均收益</div>
+        <div class="disc__arrow" aria-hidden="true">↓</div>
       </div>
     </div>
-  </section>
 
-  <section id="about">
-    <div class="card">
-      <h2 class="section-title">关于我</h2>
-      <p>你好，我是乘法。一名热爱编程与计算机技术的学习者，目前正在认真学习C语言和html，css，喜欢折腾各种小项目，乐于把想法一点点变成代码。希望在这里记录成长，也期待与你交流。</p>
+  </div>
 
-      <div class="socials">
-      <!-- 【socials】一排圆形社交图标。flex 横排 + 水平居中，悬停时变紫并上浮。 -->
-
-        <a href="https://github.com/chengfayunsuan" target="_blank" rel="noopener" title="GitHub" aria-label="GitHub">
-        <!-- 【target="_blank"】在新标签页打开，不把访客从你站点带走。
-             【rel="noopener"】安全补丁：新页面拿不到原页面的 window 对象，
-               防止对方页面用 window.opener 把你的页面偷偷跳转到钓鱼站。
-             【title】鼠标停住时浮出的小提示。
-             【aria-label】给盲人读屏软件念的名字（svg 本身没有文字，必须靠它）。 -->
-
-          <svg viewBox="0 0 24 24" fill="currentColor">
-          <!-- 【<svg>】矢量图形标签，图标是「算出来的」而不是图片，放大多少倍都清晰。
-               【viewBox="0 0 24 24"】画布坐标系：左上角是 (0,0)，右下角是 (24,24)。
-                 所有路径坐标都按这个 24×24 的格子来画，缩放时整体等比放大。
-               【fill="currentColor"】填充色 = 继承父元素的文字颜色。
-                 所以 CSS 里改 .socials a 的 color，图标自动跟着变，不用单独写图标颜色。 -->
-
-            <path d="M12 .5A11.5 11.5 0 0 0 .5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.3-1.7-1.3-1.7-1.06-.72.08-.71.08-.71 1.17.08 1.79 1.2 1.79 1.2 1.04 1.79 2.73 1.27 3.4.97.11-.76.41-1.27.74-1.56-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.42-2.69 5.38-5.25 5.66.42.36.79 1.08.79 2.18v3.23c0 .31.21.68.8.56A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5z"/>
-            <!-- 【<path>】路径，用一串指令描述形状。d 属性的字母含义：
-                   M = 移动到某点（起点）
-                   A = 画圆弧，参数是「半径 半径 旋转 大弧标志 顺逆时针 终点」
-                   c = 相对坐标的三次贝塞尔曲线（画弯的）
-                   v = 竖直向下的相对线段     z = 闭合路径（回到起点）
-                 这一长串就是 GitHub 那只章鱼猫的轮廓，完全是算出来的。 -->
-          </svg>
-        </a>
-
-        <a href="https://space.bilibili.com/1567979505" target="_blank" rel="noopener" title="B站" aria-label="B站">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <!-- 【fill="none"】不填充内部，只画线框。
-               【stroke="currentColor"】线条颜色继承文字色。
-               【stroke-width="2"】线粗 2 个格子单位。
-               【stroke-linecap="round"】线头画成圆的；
-               【stroke-linejoin="round"】拐角画成圆的 —— 这两条让线条看起来柔和得多。 -->
-            <rect x="2" y="7" width="20" height="14" rx="2"/>
-            <!-- 【<rect>】矩形：左上角坐标 (2,7)，宽 20 高 14，rx="2" 是圆角半径。 -->
-            <path d="m6 3 3 3M18 3l-3 3"/>
-            <!-- 两条斜线当 B 站的天线。M18 3 后又 l-3 3 是「相对上一点」画线段。 -->
-          </svg>
-        </a>
-
-        <a href="https://mnb.ee?ar=chengfa" target="_blank" rel="noopener" title="MB" aria-label="MB">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <!-- 【<circle>】圆：圆心 (12,12)，半径 10。 -->
-            <path d="M8 15V9l4 4 4-4v6"/>
-            <!-- 一个 M 形折线，画在圆里面。 -->
-          </svg>
-        </a>
-
-        <a href="https://link3.cc/chengfa" target="_blank" rel="noopener" title="稿纸" aria-label="稿纸">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <!-- 一张纸的轮廓，右上角故意缺一块，形成「翻折角」的效果。 -->
-            <path d="M14 2v6h6"/>
-            <!-- 那个翻折角本身。 -->
-            <path d="M8 13h8M8 17h8M8 9h2"/>
-            <!-- 三根横线假装纸上的字。M 之后连续写同方向线段，最后回到新起点继续画。 -->
-          </svg>
-        </a>
+  <!-- 黑色斜带：四条产品参数 -->
+  <div class="belt">
+    <div class="wrap belt__in">
+      <div class="belt__item">
+        <span class="belt__n">4</span>
+        <span class="belt__t">类问卷方向</span>
+      </div>
+      <span class="belt__sep" aria-hidden="true"></span>
+      <div class="belt__item">
+        <span class="belt__n">3–15</span>
+        <span class="belt__t">分钟 / 单份</span>
+      </div>
+      <span class="belt__sep" aria-hidden="true"></span>
+      <div class="belt__item">
+        <span class="belt__n">10</span>
+        <span class="belt__t">元起提</span>
+      </div>
+      <span class="belt__sep" aria-hidden="true"></span>
+      <div class="belt__item">
+        <span class="belt__n">2</span>
+        <span class="belt__t">种兑换方式</span>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section id="changelog">
-    <div class="card">
-      <div class="log-head">
-        <h2 class="section-title">更新日志</h2>
-
-        <button class="log-add" id="logAdd" type="button" title="添加一条更新日志" style="display:none;">
-        <!-- 【<button>】按钮标签，比 <a> 更适合「执行一个动作」而不是「跳转」。
-             【type="button"】明确这是普通按钮。不写的话在某些情况下默认是 submit，
-               点一下会提交表单、刷新页面，很难查的坑。
-             【style="display:none;"】内联样式，写在标签上优先级最高。
-               这里先把「添加」按钮藏起来，等 JS 确认你是站长后再显示。 -->
-
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          <!-- 一个加号：竖线 M12 5v14 + 横线 M5 12h14。
-               【width/height="16"】svg 标签上也可以直接写宽高，
-               这里写在标签上是为了让图标和文字「添加」排在一起不撑高按钮。 -->
-          添加
-        </button>
+<!-- ============ 01 怎么运作 ============ -->
+<section class="sect" id="how">
+  <div class="wrap">
+    <div class="sect-head reveal">
+      <div class="sect-head__no">01</div>
+      <div>
+        <h2 class="sect-head__t zh-big">三步，没有第四步。</h2>
+        <p class="sect-head__d">
+          没有邀请码，没有等级，没有需要解锁的权限。注册完就能直接挑问卷，做完分数立刻进账。
+        </p>
       </div>
+    </div>
 
-      <div class="log-editor" id="logEditor" style="display:none;">
-      <!-- 编辑区，默认隐藏，点「添加」才展开。 -->
+    <div class="steps reveal">
+      <article class="step">
+        <span class="step__tag">STEP / 01</span>
+        <div class="step__no">01</div>
+        <h3 class="step__t">注册一个账号</h3>
+        <p class="step__d">
+          邮箱或手机号，三十秒。填几个基础信息——年龄段、所在城市、职业。
+          这些不是用来卖钱的，是用来把合适的问卷推给你，别让二十岁的人去答母婴调查。
+        </p>
+      </article>
 
-        <textarea class="log-input" id="logInput" rows="2" maxlength="200" placeholder="写一条更新日志…（最多 200 字，Ctrl+Enter 快速发布）"></textarea>
-        <!-- 【<textarea>】多行文本框（input 只能单行）。
-             【rows="2"】默认高度显示 2 行，实际可以拖高。
-             【maxlength="200"】最多 200 字，超了浏览器直接不让输入 —— 前端第一道防线。
-             【placeholder】没输入时显示的灰色提示。
-             注意 textarea 必须写结束标签，不能像 input 那样自闭合。 -->
-        <div class="log-editor-actions">
-          <button class="log-submit" id="logSubmit" type="button">发布</button>
-          <button class="log-cancel" id="logCancel" type="button">取消</button>
-          <span class="log-editor-msg" id="logEditorMsg"></span>
-          <!-- 空 span 用来存放「发布成功 / 失败」的提示文字，由 JS 往里塞内容并换颜色。 -->
+      <article class="step">
+        <span class="step__tag">STEP / 02</span>
+        <div class="step__no">02</div>
+        <h3 class="step__t">挑一份问卷做完</h3>
+        <p class="step__d">
+          列表里会标明题目类型、预计耗时和积分数。挑你感兴趣的，认真答。
+          答到一半退出不会得分，中途乱填会被判定无效——所以我们更希望你别勉强。
+        </p>
+      </article>
+
+      <article class="step">
+        <span class="step__tag">STEP / 03</span>
+        <div class="step__no">03</div>
+        <h3 class="step__t">积分换成你要的</h3>
+        <p class="step__d">
+          满 10 元等值积分就能申请提现，转到支付宝或微信；也可以直接换 Steam 卡、
+          游戏激活码、软件会员这类 CDK，通常比提现更快到账。
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02 能换什么 ============ -->
+<section class="sect sect--paper2" id="redeem">
+  <div class="wrap">
+    <div class="sect-head reveal">
+      <div class="sect-head__no">02</div>
+      <div>
+        <h2 class="sect-head__t zh-big">现金，或者一张 CDK。</h2>
+        <p class="sect-head__d">
+          积分不锁死在某一种用途上。你想换成钱就换钱，想要某个游戏的激活码就直接换码。
+        </p>
+      </div>
+    </div>
+
+    <div class="redeem reveal">
+      <article class="card">
+        <span class="card__deco" aria-hidden="true"></span>
+        <div class="card__k">CASH / 现金</div>
+        <h3 class="card__t">提现到支付宝 / 微信</h3>
+        <p class="card__d">
+          满 10 元等值积分即可申请。审核通过后 7 个工作日内到账，
+          到账记录在「积分明细」里可查。只支持提现到本人实名的账户。
+        </p>
+        <div class="card__rate">
+          <b>10</b>
+          <span>元起提 · 单笔无上限</span>
         </div>
+      </article>
+
+      <article class="card card--ink">
+        <span class="card__deco" aria-hidden="true"></span>
+        <div class="card__k">CODE / 兑换码</div>
+        <h3 class="card__t">Steam 卡 · 激活码 · 会员</h3>
+        <p class="card__d">
+          Steam 充值卡、游戏激活码、常见软件的年费会员。
+          兑换后立刻发码，不用等审核——这是最快拿到手的方式，通常比提现划算。
+        </p>
+        <div class="card__rate">
+          <b>即时</b>
+          <span>发码 · 库存实时可见</span>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 03 问卷从哪来 ============ -->
+<section class="sect sect--dark" id="source">
+  <div class="wrap">
+    <div class="sect-head reveal">
+      <div class="sect-head__no">03</div>
+      <div>
+        <h2 class="sect-head__t zh-big">钱不是你出的，是委托方出的。</h2>
+        <p class="sect-head__d">
+          这件事能成立，是因为有人急着想知道真实用户怎么想。他们付调研费，我们分发问卷，
+          你交答案——你拿的是这笔钱里的一块。
+        </p>
+      </div>
+    </div>
+
+    <div class="source reveal">
+      <div class="source__quote">
+        <p>「与其猜用户怎么想，不如直接问。<br>一份有效样本，比十次内部会议便宜。」</p>
+        <span>— 这就是问卷行业存在的理由</span>
       </div>
 
-      <ul class="log-list" id="logList"></ul>
-      <!-- 【<ul>】无序列表，里面的每一项要用 <li>。
-           这里标签中间是空的，日志条目全部由 js/main.js 动态生成。 -->
-      <button class="log-more" id="logMore">加载更多</button>
+      <ul class="source__list">
+        <li>
+          <span class="n">01</span>
+          <span class="t">品牌方的新品调研</span>
+          <span class="p">消费品 / 快消</span>
+        </li>
+        <li>
+          <span class="n">02</span>
+          <span class="t">高校与研究机构的学术问卷</span>
+          <span class="p">学术 / 公益</span>
+        </li>
+        <li>
+          <span class="n">03</span>
+          <span class="t">互联网产品的体验测试</span>
+          <span class="p">产品 / 设计</span>
+        </li>
+        <li>
+          <span class="n">04</span>
+          <span class="t">广告与内容的投放回访</span>
+          <span class="p">市场 / 媒介</span>
+        </li>
+      </ul>
     </div>
-  </section>
+  </div>
+</section>
 
-  <footer>
-  <!-- 【<footer>】页脚语义化标签。 -->
-    <p>chengfayunsuan@qq.com</p>
-    <p>© 2026 CHENGFA</p>
-    <!-- 【©】版权符号，直接写字符就行，不需要特殊写法。 -->
-  </footer>
+<!-- ============ 04 为什么信得过 ============ -->
+<section class="sect" id="trust">
+  <div class="wrap">
+    <div class="sect-head reveal">
+      <div class="sect-head__no">04</div>
+      <div>
+        <h2 class="sect-head__t zh-big">该说清楚的，一次说清。</h2>
+        <p class="sect-head__d">
+          问卷平台最容易让人怀疑的就是「到底给不给钱」。所以我们把规则摆在明面上。
+        </p>
+      </div>
+    </div>
 
-  <script src="/js/config.js"></script>
-  <!-- 【脚本标签】引入外部 JS 文件。
-       顺序非常关键：后面的文件可能用到前面定义的东西，所以不能乱调。
-       这里必须先 config（配置）、再 bg（背景）、再 sb（数据层）、最后 nav（导航）。 -->
-<script src="/js/bg.js?v=2"></script>
-<script src="/js/vendor/supabase-js.js"></script>
-<!-- 第三方库 Supabase 的浏览器版（放在 vendor 目录 = 「第三方依赖」的意思）。 -->
-  <script src="/js/sb.js"></script>
-  <script src="/js/nav.js?v=23"></script>
-  <script src="main.js"></script>
-  <!-- 注意这个没写开头的斜杠：main.js 表示「和本文件同一个文件夹的 main.js」。
-       不带斜杠是相对路径，带斜杠是从网站根目录算。 -->
+    <div class="trust reveal">
+      <div class="trust__i">
+        <div class="trust__n">T+7</div>
+        <h3 class="trust__t">提现结算周期</h3>
+        <p class="trust__d">申请后七个工作日内到账，进度在明细里可查，不玩「审核中」无限挂起。</p>
+      </div>
+      <div class="trust__i">
+        <div class="trust__n">1<small>人 1 号</small></div>
+        <h3 class="trust__t">防刷规则</h3>
+        <p class="trust__d">同一人重复注册、脚本代答、乱填秒交，都会被判无效并扣回积分。这条对认真答的人有利。</p>
+      </div>
+      <div class="trust__i">
+        <div class="trust__n">0<small>元</small></div>
+        <h3 class="trust__t">注册与参与成本</h3>
+        <p class="trust__d">注册不要钱，答问卷不要钱，提现不要手续费。任何要你先付钱的「任务」都是骗子。</p>
+      </div>
+      <div class="trust__i">
+        <div class="trust__n">2<small>层</small></div>
+        <h3 class="trust__t">数据去向</h3>
+        <p class="trust__d">答案以脱敏统计的形式交给委托方，不包含你的手机号、邮箱和真实姓名。</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-<script>
-/* 主页那个文章小方框：拉最新的 5 篇 */
-/* 下面是这一段内嵌 JS。从 script 的开始标签到它的结束标签之间全是 JavaScript 语法，
-   这里的注释必须用斜杠加星号，HTML 那种尖括号叹号写法在这块区域里是无效的。 */
+<!-- ============ 05 FAQ ============ -->
+<section class="sect sect--tight" id="faq">
+  <div class="wrap">
+    <div class="sect-head reveal">
+      <div class="sect-head__no">05</div>
+      <div>
+        <h2 class="sect-head__t zh-big">常见问题</h2>
+      </div>
+    </div>
 
-(function () {
-// 【IIFE 立即执行函数】(function(){ ... })();
-//   把函数用括号包起来，后面紧跟一对括号：定义完立刻执行一次。
-//   为什么这么写？因为里面的变量（box、esc）就被关在这个函数内部，
-//   不会和别的文件里同名的变量打架。这叫「作用域隔离」。
+    <div class="faq reveal">
+      <details open>
+        <summary>真的能拿到钱吗，还是又一个画饼的？</summary>
+        <p class="faq__a">
+          能。积分对应的是委托方已经付过的调研费，不是我们凭空发的。
+          满 10 元提现门槛是刻意的——低于这个数额的转账手续费比金额还高，对双方都不划算。
+          你可以在「积分明细」里看到每一分的来源：哪份问卷、什么时候、得了多少。
+        </p>
+      </details>
 
-  const box = document.getElementById('artList');
-  // 【const】声明一个常量（不会被重新赋值）。
-  //   注意是「不能重新赋值」，不是「内容不能改」—— 对象和数组内部照样能改。
-  // 【document.getElementById('artList')】在页面里找 id 为 artList 的元素。
-  //   找不到会返回 null。
+      <details>
+        <summary>一份问卷要做多久，能赚多少？</summary>
+        <p class="faq__a">
+          大部分在三到十五分钟，收益按题目数量和调研难度定，通常相当于几元到二十元不等。
+          长问卷不一定更赚，有些短问卷因为样本稀缺单价反而更高。列表页会直接标出耗时和积分，自己挑。
+        </p>
+      </details>
 
-  if (!box) return;
-  // 【if】条件判断。【!box】取反：如果 box 是 null（假值）就为真。
-  // 【return】直接结束这个函数，后面的代码不再执行。
-  //   为什么要这行？万一有人删了那个 div，下面的 box.innerHTML 会报错崩掉整段脚本。
-  //   这是最便宜的防御性写法。
+      <details>
+        <summary>为什么有些问卷我看得到却做不了？</summary>
+        <p class="faq__a">
+          因为委托方会限定样本条件：只要某个年龄段、某个城市、某个职业，或者某个产品的高频用户。
+          名额满了或者你不符合条件，就会被挡住。这不是针对你，是问卷本身的要求。
+        </p>
+      </details>
 
-  const esc = s => String(s == null ? '' : s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-  // 【箭头函数】s => 表达式 等价于 function(s){ return 表达式; }
-  // 【String(...)】转成字符串，防止传进来数字之类时后面 .replace 报错。
-  // 【s == null ? '' : s】三元运算符：「条件 ？ 真时用什么 ： 假时用什么」。
-  //   注意这里是两个等号 ==，它能同时匹配 null 和 undefined。
-  // 【.replace(/&/g, '&amp;')】把 & 换成它的实体编码。
-  //   /&/g 是正则表达式：斜杠包起来是正则，g 表示「全局替换所有出现的地方」。
-  //   【为什么要转义】如果用户在标题里贴一段 script 代码，
-  //   直接插进页面就会被浏览器当成真代码执行 —— 这叫 XSS 攻击。
-  //   把这 5 个字符换掉，它就只能老老实实显示成文字。
-  //   （额外注意：这段 JS 里也绝对不能出现 script 的结束标签原文，
-  //     浏览器一看到它就会以为脚本到此结束，后面的代码全变成页面文字。）
+      <details>
+        <summary>答到一半退出会怎样？</summary>
+        <p class="faq__a">
+          不得分。问卷按完成度结算，中途退出等于这份样本作废，委托方不会为半份答案付钱。
+          所以请挑你真的有时间做完的再开始。
+        </p>
+      </details>
 
-  // 【下面这段的写法】先把数组里的每篇文章「变成」一段 HTML 字符串（map），
-  //   再用空字符串把它们接起来（join），最后一次性塞进容器（innerHTML）。
-  //   注意：模板字符串（反引号）里面是字符串内容，不是代码，
-  //   所以在反引号里写 // 或注释符号，都会原样显示到页面上 —— 新手最常踩的坑。
-  //   本段所有注释都写在反引号外面。
+      <details>
+        <summary>什么叫「无效答卷」？会不会冤枉我？</summary>
+        <p class="faq__a">
+          三种情况会被判无效：全部选同一个选项、填写时间明显短于正常阅读时间、
+          答案与前置筛选题自相矛盾。被判无效会扣回该份问卷的积分并记录原因。
+          如果你认为判错了，可以在明细里提交申诉，人工复核。
+        </p>
+      </details>
 
-  SBAPI.getArticles({ limit: 5, offset: 0 })
-  // 【SBAPI】是 js/sb.js 挂到全局对象上的一组方法。
-  // 【getArticles({...})】传一个对象当参数：要 5 条，从第 0 条开始。
-  //   它返回一个 Promise（承诺）：现在还没拿到数据，但保证以后给结果。
+      <details>
+        <summary>我的答案会被谁看到？</summary>
+        <p class="faq__a">
+          委托方拿到的是脱敏后的统计结果和匿名答卷，不含你的手机号、邮箱、真实姓名。
+          我们不会把你的联系方式卖给第三方，也不会用它给你打推销电话。
+        </p>
+      </details>
 
-    .then(d => {
-    // 【.then(回调)】承诺兑现时执行。d 就是服务器返回的数据。
+      <details>
+        <summary>这个站现在能注册吗？</summary>
+        <p class="faq__a">
+          正在做。这一页是产品介绍，注册、问卷列表、积分明细这些页面在陆续上线。
+          你可以先看看规则，等通道开了再进来。
+        </p>
+      </details>
+    </div>
+  </div>
+</section>
 
-      if (!d || !d.ok || !d.list.length) {
-      // 三种失败情况一次挡掉：
-      //   !d           → 什么都没返回
-      //   !d.ok        → 接口说「这次失败了」
-      //   !d.list.length → 返回成功但列表是空的（length 为 0 即「假值」）
-        box.innerHTML = '<p class="art-box-none">还没有人写文章，来当第一个吧~</p>';
-        // 【innerHTML】把字符串当成 HTML 塞进这个元素里，原来的内容全部替换掉。
-        return;
-        // 处理完就退出，不再往下走。
-      }
+<!-- ============ 底部 CTA ============ -->
+<section class="cta" id="cta">
+  <div class="wrap cta__in">
+    <div>
+      <h2 class="cta__t zh-big">闲着也是闲着，<br>不如换点东西。</h2>
+      <p class="cta__d">
+        注册通道正在最后调试。开的时候，你会在这里看到入口。
+      </p>
+    </div>
+    <div class="cta__side">
+      <span class="stamp">REGISTRATION / 即将开放</span>
+      <a class="btn" href="/" data-soon>免费注册 <span aria-hidden="true">→</span></a>
+      <a class="btn btn--line" href="#how">再看一遍怎么运作</a>
+    </div>
+  </div>
+</section>
 
-      box.innerHTML = d.list.map(a => `
-        <a class="art-box-row" href="/pages/article.html?id=${a.id}">
-          <span class="t" style="font-weight:700">${esc(a.title)}</span>
-          <span class="m">作者：${esc(a.author || '匿名')} · ♥${a.likes || 0} · 👁${a.views || 0}</span>
-        </a>`).join('');
-        // 【.map(回调)】把数组里每一项变成一个东西，返回新数组。
-        //   这里把每篇文章对象 a 变成上面那段 HTML 字符串。
-        // 【反引号】模板字符串：能换行、能嵌 ${表达式}，比用加号拼字符串好读多了。
-        // 【${a.id}】把变量的值直接填进字符串。
-        // 【${esc(a.title)}】标题必须先 esc 转义，防止别人的标题里藏坏代码。
-        // 【a.author || '匿名'】|| 是「或」：左边有值就用左边，是空/undefined 就用右边。
-        //   这是给字段设默认值最常用的写法。
-        // 【a.likes || 0】同理 —— 一个赞都没有时显示 0，而不是 undefined。
-        // 【.join('')】把 map 出来的数组用空字符串连成一个长字符串。
-        //   不加 join 直接赋给 innerHTML 会自动用逗号连接，页面上就多出一堆逗号。
-    })
+<!-- ============ 页脚 ============ -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__in">
+      <div>
+        <p class="foot__brand">乘法 <span style="color:var(--red)">×</span></p>
+        <p class="foot__d">
+          一个把碎片时间换成积分的问卷平台。做问卷、攒积分、换现金或 CDK。
+        </p>
+      </div>
+      <div>
+        <p class="foot__h">站内</p>
+        <ul class="foot__links">
+          <li><a href="#how">怎么运作</a></li>
+          <li><a href="#redeem">能换什么</a></li>
+          <li><a href="#source">问卷从哪来</a></li>
+          <li><a href="#faq">常见问题</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="foot__h">规则</p>
+        <ul class="foot__links">
+          <li><a href="#faq">积分规则</a></li>
+          <li><a href="#faq">提现说明</a></li>
+          <li><a href="#faq">隐私说明</a></li>
+          <li><a href="https://github.com/chengfayunsuan" target="_blank" rel="noopener">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot__bar">
+      <span>© 2026 乘法 CHENGFA</span>
+      <span>做问卷 · 攒积分 · 换真钱</span>
+    </div>
+  </div>
+</footer>
 
-    .catch(() => { box.innerHTML = '<p class="art-box-none">文章加载失败</p>'; });
-    // 【.catch(回调)】出任何错（断网、接口 500、代码异常）都会走到这里。
-    //   有了它，用户看到的是「加载失败」而不是一个永远转圈的空框。
-
-  /* 主页视频小方框：拉最新的 5 支（放在文章之上） */
-  (function () {
-  // 又一个 IIFE，套在上一个里面 —— 这叫「嵌套作用域」，
-  // 里面的 vbox 变量连外层都拿不到，彻底隔离。
-
-    const vbox = document.getElementById('vidList');
-    if (!vbox) return;
-
-    SBAPI.getVideos({ limit: 5, offset: 0 })
-      .then(d => {
-        if (!d || !d.ok || !d.list.length) {
-          vbox.innerHTML = '<p class="v-empty">还没有人传视频，来当第一个吧~</p>';
-          return;
-        }
-        vbox.innerHTML = d.list.map(v => `
-          <a class="v-card" href="/pages/video.html?id=${v.id}">
-            <span class="v-thumb">▶</span>
-            <span class="v-info">
-              <span class="t">${esc(v.title)}</span>
-              <span class="m">作者：${esc(v.author || '匿名')} · ▶${v.views || 0} · ♥${v.likes || 0}</span>
-            </span>
-          </a>`).join('');
-      })
-      .catch(() => { vbox.innerHTML = '<p class="v-empty">视频加载失败</p>'; });
-  })();
-})();
-</script>
+<script src="/js/main.js?v=1" defer></script>
 </body>
 </html>
