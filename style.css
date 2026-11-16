@@ -386,89 +386,117 @@ button { font-family: inherit; cursor: pointer; }
   color: #6B6558;
 }
 
-/* 右侧：红色尖锐箭头块
-   构成主义标志性的楔形，右侧收成尖角，指向页面下方内容 */
-.hero__disc {
+/* 右侧几何组：由主块、压条、侧条、细线、标签、方框六个部件拼装
+   构成主义海报本来就是拼贴结构，不是单一形状 */
+.hero__art {
   position: relative;
   display: flex;
   justify-content: flex-end;
   align-items: center;
 }
 
-.disc-wrap {
+.art {
   position: relative;
-  width: clamp(268px, 24vw, 348px);
-  aspect-ratio: 1;
+  width: clamp(272px, 24vw, 344px);
+  aspect-ratio: 1 / 1.04;
   flex: none;
+  transform: rotate(-2.4deg);
 }
 
-.disc {
+/* 部件一：红色主块 */
+.art__plate {
   position: absolute;
   inset: 0;
   background: var(--red);
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding-left: 15%;
+  box-shadow: 9px 9px 0 var(--ink);
+}
+
+/* 部件二：顶部封条，左侧探出主块 */
+.art__cap {
+  position: absolute;
+  left: -24px;
+  right: -18px;
+  top: 0;
+  height: 15px;
+  background: var(--ink);
+}
+
+/* 部件三：右侧竖条，与封条接成直角 */
+.art__tab {
+  position: absolute;
+  right: -18px;
+  top: 0;
+  width: 19px;
+  height: 46%;
+  background: var(--ink);
+}
+
+/* 部件四：右下方的细短横线，收在块内 */
+.art__hair {
+  position: absolute;
+  left: 9%;
+  right: 24%;
+  bottom: 16%;
+  height: 3px;
+  background: rgba(20, 19, 15, .38);
+}
+
+/* 部件五：数据主体，居中偏上 */
+.art__body {
+  position: absolute;
+  left: 50%;
+  top: 32%;
+  transform: translateX(-50%);
+  z-index: 2;
+  text-align: center;
   color: var(--paper);
-  /* 三角形楔子，三条边全部倾斜，尖端刺向右侧 */
-  clip-path: polygon(7% 0, 0 97%, 96% 53%);
-  filter: drop-shadow(14px 14px 0 var(--ink));
 }
 
-/* 内容放在三角形左侧的宽处，不接近尖端 */
-.disc__inner {
-  width: 46%;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-}
-
-.disc__num {
+.art__num {
   font-family: var(--black);
-  font-size: clamp(58px, 5.8vw, 76px);
+  font-size: clamp(54px, 5.6vw, 72px);
   line-height: .82;
   letter-spacing: -.03em;
   white-space: nowrap;
 }
 
-.disc__num .u {
+.art__num .u {
   font-size: .34em;
   letter-spacing: 0;
   margin-left: 2px;
 }
 
-.disc__label {
-  margin-top: 10px;
+.art__label {
+  margin-top: 12px;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: .02em;
   line-height: 1.5;
 }
 
-/* 右上角黑色标签，独立于裁剪层之外 */
-.disc__corner {
+/* 部件六：封条下方左侧的标签 */
+.art__tag {
   position: absolute;
-  top: 4px;
-  right: 10px;
-  z-index: 2;
-  background: var(--ink);
-  color: var(--paper);
+  left: 7%;
+  top: 8%;
+  z-index: 3;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  color: var(--ink);
   font-family: var(--mono);
   font-size: 10px;
-  letter-spacing: .12em;
-  padding: 6px 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  padding: 3px 8px;
   white-space: nowrap;
-  box-shadow: 4px 4px 0 rgba(224, 41, 30, .45);
 }
 
-/* 左下角方框，骑在楔形左下边缘上 */
-.disc__arrow {
+/* 部件七：左下角方框，从左侧探出 */
+.art__box {
   position: absolute;
-  left: 2px;
-  bottom: 8px;
-  z-index: 2;
+  left: -25px;
+  bottom: -17px;
+  z-index: 3;
   width: 70px;
   height: 70px;
   border: 3px solid var(--ink);
@@ -477,7 +505,7 @@ button { font-family: inherit; cursor: pointer; }
   background: var(--paper);
   color: var(--ink);
   font-size: 24px;
-  box-shadow: 6px 6px 0 var(--ink);
+  box-shadow: 6px 6px 0 var(--red);
 }
 
 /* Hero 底部的黑色斜带 */
@@ -1048,7 +1076,7 @@ button { font-family: inherit; cursor: pointer; }
 
 @media (max-width: 1080px) {
   .hero__in { grid-template-columns: 1fr; gap: 28px; }
-  .hero__disc { min-height: 280px; justify-content: flex-start; padding-left: 8px; }
+  .hero__art { min-height: 280px; justify-content: flex-start; padding-left: 8px; }
   .trust { grid-template-columns: repeat(2, 1fr); }
   .trust__i:nth-child(2) { border-right: 0; }
   .source { grid-template-columns: 1fr; gap: 36px; }
@@ -1086,12 +1114,16 @@ button { font-family: inherit; cursor: pointer; }
   .hero__sub { font-size: 13px; line-height: 1.8; }
   .hero__actions .btn { flex: 1 1 100%; justify-content: center; }
 
-  .hero__disc { justify-content: center; padding: 16px 0 4px; }
-  .disc-wrap { width: 208px; margin-left: 6%; }
-  .disc__num { font-size: 50px; }
-  .disc__label { font-size: 10px; margin-top: 8px; }
-  .disc__arrow { width: 52px; height: 52px; left: 0; bottom: 4px; font-size: 18px; box-shadow: 4px 4px 0 var(--ink); }
-  .disc__corner { top: 0; right: 0; font-size: 9px; padding: 5px 8px; }
+  .hero__art { justify-content: center; padding: 24px 0 18px; }
+  .art { width: 232px; margin-left: 4%; transform: rotate(-1.8deg); }
+  .art__plate { box-shadow: 8px 8px 0 var(--ink); }
+  .art__cap { left: -13px; right: -11px; height: 11px; }
+  .art__tab { right: -11px; width: 13px; height: 44%; }
+  .art__hair { bottom: 15%; height: 2px; left: 8%; right: 22%; }
+  .art__num { font-size: 46px; }
+  .art__label { font-size: 10px; margin-top: 8px; }
+  .art__tag { left: 6%; top: 8%; font-size: 8px; padding: 2px 6px; border-width: 2px; }
+  .art__box { width: 50px; height: 50px; left: -13px; bottom: -11px; font-size: 17px; box-shadow: 4px 4px 0 var(--red); }
 
   .belt { padding: 22px 0 26px; clip-path: polygon(0 0, 100% 1.6vw, 100% 100%, 0 100%); }
   .belt__in { gap: 12px 14px; }
