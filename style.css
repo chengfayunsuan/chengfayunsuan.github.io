@@ -4,6 +4,25 @@
    排版靠几何、色块、错位、巨字，不靠花哨字体
    ============================================================ */
 
+/* 显示字体：Dosis Bold，自托管，只含拉丁字母与数字
+   中文不在字体里，会自动落到后面的中文字体，不受影响 */
+
+@font-face {
+  font-family: "Dosis";
+  src: url("/fonts/dosis-700.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Dosis";
+  src: url("/fonts/dosis-800.woff2") format("woff2");
+  font-weight: 800 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --red: #E0291E;
   --red-deep: #B31F16;
@@ -14,7 +33,8 @@
   --hair: rgba(20, 19, 15, .16);
 
   --sans: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Source Han Sans SC", sans-serif;
-  --black: Impact, "Arial Black", "Haettenschweiler", var(--sans);
+  --num: "Dosis", Impact, "Arial Black", "Haettenschweiler", var(--sans);
+  --black: var(--num);
   --mono: "Cascadia Mono", Consolas, "Courier New", monospace;
 
   --edge: 6px solid var(--ink);

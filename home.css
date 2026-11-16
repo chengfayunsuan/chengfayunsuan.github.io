@@ -35,9 +35,10 @@
   align-items: baseline;
   gap: 6px;
   font-family: var(--black);
-  font-size: 27px;
+  font-weight: 800;
+  font-size: 28px;
   line-height: 1;
-  letter-spacing: -.01em;
+  letter-spacing: 0;
 }
 
 .hm-nav__bal i {
@@ -275,10 +276,10 @@
 .face__bal-n {
   margin: 14px 0 0;
   font-family: var(--black);
-  font-weight: 400;
-  font-size: clamp(44px, 5.6vw, 88px);
+  font-weight: 800;
+  font-size: clamp(46px, 6vw, 96px);
   line-height: .92;
-  letter-spacing: -.02em;
+  letter-spacing: .005em;
   color: var(--ink);
   word-break: break-all;
 }
@@ -353,8 +354,10 @@
 
 .stat__n {
   font-family: var(--black);
-  font-size: clamp(24px, 2.6vw, 34px);
+  font-weight: 800;
+  font-size: clamp(25px, 2.7vw, 36px);
   line-height: 1.05;
+  letter-spacing: .01em;
   white-space: nowrap;
 }
 
@@ -409,8 +412,9 @@
 }
 
 .stat__x {
-  font-family: var(--mono);
-  font-size: 11px;
+  font-family: var(--num);
+  font-weight: 700;
+  font-size: 13px;
   letter-spacing: .02em;
   color: #4A453A;
   white-space: nowrap;
@@ -476,9 +480,10 @@
 .hall__count b {
   display: block;
   font-family: var(--black);
-  font-weight: 400;
-  font-size: clamp(40px, 4.6vw, 64px);
+  font-weight: 800;
+  font-size: clamp(42px, 4.8vw, 68px);
   line-height: 1;
+  letter-spacing: -.01em;
   color: var(--red);
 }
 
