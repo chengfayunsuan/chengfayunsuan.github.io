@@ -7,12 +7,6 @@
 
   var ROLES = { owner: '站长', admin: '管理员', premium: '大会员', user: '用户' };
   var STATUS = { active: '正常', frozen: '已冻结', banned: '已封禁' };
-  var PLATE_HINT = {
-    owner: '站点所有者，权限最高',
-    admin: '运营管理，可审核问卷与工单',
-    premium: '大会员，手续费与审核优先',
-    user: '普通账户'
-  };
 
   var app = document.getElementById('app');
   var loading = document.getElementById('loading');
@@ -94,8 +88,6 @@
 
     var role = u.role || 'user';
     $('setRole').textContent = ROLES[role] || role;
-    $('setPlate').textContent = ROLES[role] || role;
-    $('setPlateHint').textContent = PLATE_HINT[role] || '';
 
     $('curName').textContent = u.username || '—';
     $('curEmail').textContent = u.email || '—';
@@ -272,21 +264,47 @@
 
   /* ---------- 09 查找 ---------- */
 
-  $('findForm').addEventListener('submit', function (ev) {
-    ev.preventDefault();
-    var q = $('findInput').value.trim();
-    var out = $('findOut');
-    out.classList.remove('is-hit');
+  var findForm = $('findForm');
+  var findInput = $('findInput');
+  var findOut = $('findOut');
+  var finding = false;
 
+  findForm.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (finding) return;
+
+    var q = findInput.value.trim();
+    findOut.classList.remove('is-hit');
     if (!q) {
-      out.textContent = '请输入 UID 或用户名。';
+      findOut.textContent = '请输入 UID 或用户名。';
       return;
     }
-    if (/^\d+$/.test(q)) {
-      out.textContent = '已识别为 UID ' + q + '。个人主页与查询接口尚未开放，开放后这里会直接给出主页入口。';
-    } else {
-      out.textContent = '已识别为用户名「' + q + '」。个人主页与查询接口尚未开放，开放后这里会直接给出主页入口。';
-    }
+
+    finding = true;
+    findOut.textContent = '查找中…';
+
+    fetch('/api/pub/user?q=' + encodeURIComponent(q), { headers: { Accept: 'application/json' } })
+      .then(function (res) {
+        return res.json().then(function (d) { return { status: res.status, body: d }; });
+      })
+      .then(function (r) {
+        var err = r.body && r.body.error;
+        if (r.status === 200 && r.body.ok && r.body.user) {
+          findOut.textContent =
+            '找到 UID ' + r.body.user.uid + '「' + r.body.user.username + '」，正在进入主页…';
+          location.href = '/space?uid=' + r.body.user.uid;
+        } else if (err === 'not_found') {
+          findOut.textContent = '没有这个 UID 或用户名，检查一下再试。';
+        } else if (err === 'gone') {
+          findOut.textContent = '该账户已注销，主页不再公开。';
+        } else {
+          findOut.textContent = '查找失败，请稍后重试。';
+        }
+      })
+      .catch(function () {
+        findOut.textContent = '网络连接失败，请检查网络后重试。';
+      })
+      .then(function () { finding = false; });
   });
 
   /* ---------- 本地预览 ---------- */

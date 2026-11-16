@@ -98,14 +98,23 @@
       </div>
 
       <div class="card">
-        <div class="card__l">
+        <div class="card__top">
           <div class="card__meta">
             <span class="mono">UID <b id="setUid">—</b></span>
             <span class="plate" id="setRole">用户</span>
           </div>
+          <p class="card__frz">冻结 <b id="setFrozen">0.0000</b> <i data-cur="code">FC</i></p>
+        </div>
 
+        <div class="card__row">
           <p class="card__name" id="setUser">—</p>
+          <p class="card__bal">
+            <span class="card__n" id="setFc">0.0000</span>
+            <i class="card__cur" data-cur="code">FC</i>
+          </p>
+        </div>
 
+        <div class="card__body">
           <dl class="dl">
             <div>
               <dt>账号状态</dt>
@@ -119,18 +128,7 @@
               <dt>注册邮箱</dt>
               <dd id="setEmail">—</dd>
             </div>
-            <div>
-              <dt>账号铭牌</dt>
-              <dd><span class="plate plate--sm" id="setPlate">用户</span>
-                <span class="dl__hint" id="setPlateHint"></span></dd>
-            </div>
           </dl>
-        </div>
-
-        <div class="card__r">
-          <span class="card__k"><span data-cur="name">法币</span>余额</span>
-          <span class="card__n" id="setFc">0.0000</span>
-          <span class="card__f">冻结 <b id="setFrozen">0.0000</b> <i data-cur="code">FC</i></span>
 
           <div class="card__stats">
             <div><b id="stDone">0</b><span>已完成问卷</span></div>
@@ -462,7 +460,7 @@
         <button class="btn btn--red" type="submit">查找</button>
       </form>
 
-      <p class="find__out" id="findOut">个人主页尚未开放，查到结果后会在此显示并给出入口。</p>
+      <p class="find__out" id="findOut">输入 UID 或用户名，回车直接进入对方主页。对方若已封禁或注销，只会显示状态说明。</p>
     </div>
   </section>
 

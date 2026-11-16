@@ -135,21 +135,24 @@
 /* ---------- 01 概览卡 ---------- */
 
 .card {
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
   border: var(--edge);
   background: var(--paper);
 }
 
-.card__l {
-  padding: clamp(22px, 3vw, 40px);
-  min-width: 0;
+.card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  flex-wrap: wrap;
+  padding: clamp(22px, 3vw, 34px) clamp(22px, 3vw, 40px) 0;
 }
 
 .card__meta {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .plate {
@@ -162,23 +165,82 @@
   letter-spacing: .14em;
 }
 
-.plate--sm { font-size: 10px; padding: 2px 9px; }
+.card__frz {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: .05em;
+  color: var(--gray);
+}
+
+.card__frz b { color: var(--ink); font-weight: 700; }
+
+.card__frz i {
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: .14em;
+  color: #6A6154;
+}
+
+/* 名字与余额同一行 */
+.card__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px 30px;
+  flex-wrap: wrap;
+  padding: 12px clamp(22px, 3vw, 40px) clamp(22px, 3vw, 32px);
+}
 
 .card__name {
-  margin: 16px 0 0;
+  margin: 0;
+  min-width: 0;
   font-family: var(--black);
   font-weight: 800;
-  font-size: clamp(34px, 4.6vw, 62px);
-  line-height: 1;
+  font-size: clamp(30px, 4.2vw, 56px);
+  line-height: 1.04;
   letter-spacing: 0;
   word-break: break-word;
 }
 
+.card__bal {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+.card__n {
+  font-family: var(--black);
+  font-weight: 800;
+  font-size: clamp(26px, 3.2vw, 44px);
+  line-height: 1;
+  letter-spacing: .005em;
+  word-break: break-all;
+}
+
+.card__cur {
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 11px;
+  letter-spacing: .14em;
+  color: #6A6154;
+}
+
+.card__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.32fr) minmax(0, 1fr);
+  border-top: var(--edge);
+}
+
 .dl {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px 26px;
-  margin: 30px 0 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px 22px;
+  margin: 0;
+  padding: clamp(22px, 3vw, 34px) clamp(22px, 3vw, 40px);
+  align-content: start;
 }
 
 .dl dt {
@@ -195,62 +257,15 @@
   word-break: break-all;
 }
 
-.dl__hint {
-  margin-left: 8px;
-  font-size: 11px;
-  font-weight: 400;
-  color: var(--gray);
-}
-
-.card__r {
-  display: flex;
-  flex-direction: column;
-  padding: clamp(22px, 3vw, 40px);
-  background: var(--paper-2);
-  border-left: var(--edge);
-  margin-left: calc(var(--edge) * -1);
-  min-width: 0;
-}
-
-.card__k {
-  font-size: 11px;
-  letter-spacing: .18em;
-  color: var(--gray);
-}
-
-.card__n {
-  margin: 12px 0 0;
-  font-family: var(--black);
-  font-weight: 800;
-  font-size: clamp(40px, 4.8vw, 72px);
-  line-height: .94;
-  letter-spacing: .005em;
-  word-break: break-all;
-}
-
-.card__f {
-  margin-top: 12px;
-  font-size: 12px;
-  letter-spacing: .05em;
-  color: var(--gray);
-}
-
-.card__f b { color: var(--ink); font-weight: 700; }
-
-.card__f i {
-  font-family: var(--mono);
-  font-style: normal;
-  font-size: 10px;
-  letter-spacing: .14em;
-  color: #6A6154;
-}
-
 .card__stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: auto;
-  padding-top: 28px;
+  gap: 16px;
+  padding: clamp(22px, 3vw, 34px);
+  background: var(--paper-2);
+  border-left: var(--edge);
+  margin-left: calc(var(--edge) * -1);
+  align-content: center;
 }
 
 .card__stats div {
@@ -569,9 +584,9 @@
 
 .sw {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
-  padding: 12px 0;
+  padding: 11px 0;
   border-bottom: 1px solid var(--hair);
   cursor: pointer;
 }
@@ -591,7 +606,6 @@
   flex: 0 0 auto;
   width: 36px;
   height: 20px;
-  margin-top: 2px;
   border: 2px solid var(--ink);
   background: var(--paper);
   transition: background .16s ease;
@@ -619,22 +633,35 @@
   box-shadow: 3px 3px 0 var(--ink);
 }
 
-.sw__x { min-width: 0; }
+.sw__x {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 0;
+  min-width: 0;
+}
 
 .sw__x b {
-  display: block;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: .01em;
+  white-space: nowrap;
 }
 
 .sw__x i {
-  display: block;
-  margin-top: 3px;
   font-size: 11.5px;
   font-style: normal;
   line-height: 1.6;
   color: var(--gray);
+  min-width: 0;
+}
+
+/* 说明跟在作用同一行，用一道细斜杠分隔 */
+.sw__x i::before {
+  content: "/";
+  margin: 0 9px;
+  color: var(--red);
+  opacity: .45;
 }
 
 /* ---------- 09 查找 ---------- */
@@ -695,13 +722,12 @@ body.is-grid {
 /* ---------- 响应式 ---------- */
 
 @media (max-width: 1080px) {
-  .card { grid-template-columns: minmax(0, 1fr); }
-  .card__r {
+  .card__body { grid-template-columns: minmax(0, 1fr); }
+  .card__stats {
     border-left: 0;
     border-top: var(--edge);
     margin-left: 0;
   }
-  .card__stats { margin-top: 26px; }
   .pref { grid-template-columns: minmax(0, 1fr); }
   .ban { grid-template-columns: 150px minmax(0, 1fr); }
 }
@@ -714,6 +740,8 @@ body.is-grid {
 }
 
 @media (max-width: 620px) {
+  .sw__x { gap: 0 9px; }
+  .sw__x i::before { content: none; }
   .tb { min-width: 0; }
   .tb th { padding: 9px 8px; font-size: 9.5px; letter-spacing: .08em; }
   .tb td { padding: 11px 8px; font-size: 12px; }
