@@ -166,19 +166,14 @@
 
 .face__role {
   display: inline-block;
-  padding: 3px 11px;
-  background: var(--gray);
+  padding: 3px 10px 3px 9px;
+  background: var(--role-bg, var(--gray));
   color: var(--paper);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: .18em;
+  letter-spacing: .14em;
   transform: rotate(-2deg);
 }
-
-.face__role[data-role="owner"]   { background: var(--red); }
-.face__role[data-role="admin"]   { background: var(--ink); }
-.face__role[data-role="premium"] { background: #8C6A14; }
-.face__role[data-role="user"]    { background: var(--gray); }
 
 .face__name {
   margin: 20px 0 10px;

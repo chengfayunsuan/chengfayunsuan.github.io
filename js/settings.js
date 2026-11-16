@@ -94,6 +94,7 @@
 
     var role = u.role || 'user';
     $('setRole').textContent = ROLES[role] || role;
+    $('setRole').setAttribute('data-role', role);
 
     $('curName').textContent = u.username || '—';
     $('curEmail').textContent = u.email || '—';

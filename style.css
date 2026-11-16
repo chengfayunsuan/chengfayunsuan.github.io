@@ -43,6 +43,44 @@
   --edge: 6px solid var(--ink);
 }
 
+/* ---------- 角色铭牌：四色 + 图标 ----------
+   站长深红、管理员墨蓝、大会员赭金、普通用户暖灰。
+   配色统一在这里定义，首页、公开主页、账户设置三处共用。
+   图标走 mask，跟随文字颜色，不额外请求图片文件。 */
+
+[data-role] {
+  --role-bg: #6A6154;
+  --role-ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M12%204a4%204%200%201%201%200%208%204%204%200%200%201%200-8zm0%2010c4.4%200%207%201.9%207%204.2V20H5v-1.8C5%2015.9%207.6%2014%2012%2014z'/%3E%3C/svg%3E");
+}
+
+[data-role="owner"] {
+  --role-bg: #A81B14;
+  --role-ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M3%207.2l4.6%203.1L12%203.6l4.4%206.7L21%207.2%2019.2%2020H4.8L3%207.2z'/%3E%3C/svg%3E");
+}
+
+[data-role="admin"] {
+  --role-bg: #1F3D5C;
+  --role-ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M12%202l8%203v6.5c0%205-3.3%208.3-8%2010.5-4.7-2.2-8-5.5-8-10.5V5l8-3z'/%3E%3C/svg%3E");
+}
+
+[data-role="premium"] {
+  --role-bg: #8C6A14;
+  --role-ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M12%203.2l7.2%208.1L12%2020.8%204.8%2011.3%2012%203.2z'/%3E%3C/svg%3E");
+}
+
+.face__role::before,
+.plate::before {
+  content: "";
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  margin-right: 6px;
+  vertical-align: -1px;
+  background: currentColor;
+  -webkit-mask: var(--role-ico) center / contain no-repeat;
+  mask: var(--role-ico) center / contain no-repeat;
+}
+
 *,
 *::before,
 *::after { box-sizing: border-box; }
