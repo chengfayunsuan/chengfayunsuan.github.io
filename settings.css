@@ -10,7 +10,7 @@
 .dock__i.is-on .dock__n { color: rgba(244, 240, 230, .82); }
 
 .set-top {
-  padding: clamp(30px, 4vw, 56px) 0 0;
+  padding: clamp(16px, 2.2vw, 28px) 0 0;
   border-bottom: var(--edge);
 }
 
@@ -45,32 +45,6 @@
   font-size: 14px;
   line-height: 1.8;
   color: #4A453A;
-}
-
-/* ---------- 页内跳转 ---------- */
-
-.jump {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 20px 0 0;
-}
-
-.jump a {
-  padding: 7px 13px;
-  border: 2px solid var(--ink);
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: .1em;
-  color: var(--ink);
-  text-decoration: none;
-  transition: background .14s ease, color .14s ease;
-}
-
-.jump a:hover,
-.jump a:focus-visible {
-  background: var(--ink);
-  color: var(--paper);
 }
 
 
@@ -146,7 +120,7 @@
   justify-content: space-between;
   gap: 12px 20px;
   flex-wrap: wrap;
-  padding: clamp(22px, 3vw, 34px) clamp(22px, 3vw, 40px) 0;
+  padding: clamp(18px, 2.4vw, 28px) clamp(22px, 3vw, 40px) 0;
 }
 
 .card__meta {
@@ -194,12 +168,24 @@
 /* 名字与余额同一行 */
 .card__row {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 10px 30px;
+  gap: 6px 30px;
   flex-wrap: wrap;
-  padding: 12px clamp(22px, 3vw, 40px) clamp(22px, 3vw, 32px);
+  padding: 6px clamp(22px, 3vw, 40px) clamp(16px, 2vw, 22px);
 }
+
+.card__id { min-width: 0; }
+
+/* 注册时间与账号状态：名字下方的小字，同一行 */
+.card__sub {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  letter-spacing: .03em;
+  color: var(--gray);
+}
+
+.card__sep { margin: 0 7px; color: var(--hair); }
 
 .card__name {
   margin: 0;
@@ -286,7 +272,7 @@
 
 .card__body {
   display: grid;
-  grid-template-columns: minmax(0, 1.32fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   border-top: var(--edge);
 }
 
@@ -315,12 +301,10 @@
 
 .card__stats {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  padding: clamp(22px, 3vw, 34px);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px clamp(14px, 2.4vw, 30px);
+  padding: clamp(18px, 2.4vw, 26px) clamp(22px, 3vw, 40px);
   background: var(--paper-2);
-  border-left: var(--edge);
-  margin-left: calc(var(--edge) * -1);
   align-content: center;
 }
 
@@ -333,7 +317,7 @@
   display: block;
   font-family: var(--black);
   font-weight: 800;
-  font-size: 26px;
+  font-size: 28px;
   line-height: 1.05;
 }
 
@@ -388,6 +372,19 @@
 }
 
 /* ---------- 03 安全 ---------- */
+
+.row3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 clamp(20px, 3vw, 44px);
+  border-top: 3px solid var(--ink);
+}
+
+.row3__i { min-width: 0; }
+
+.row3 .row { padding: 16px 0; gap: 14px; }
+
+.row3 .row__h { font-size: 11px; line-height: 1.6; }
 
 .row {
   display: flex;
@@ -791,19 +788,13 @@ body.is-grid {
 /* ---------- 响应式 ---------- */
 
 @media (max-width: 1080px) {
-  .card__body { grid-template-columns: minmax(0, 1fr); }
-  .card__stats {
-    border-left: 0;
-    border-top: var(--edge);
-    margin-left: 0;
-  }
   .pref { grid-template-columns: minmax(0, 1fr); }
   .ban { grid-template-columns: 150px minmax(0, 1fr); }
 }
 
 @media (max-width: 860px) {
   .edit__grid { grid-template-columns: minmax(0, 1fr); }
-  .dl { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .row3 { grid-template-columns: minmax(0, 1fr); }
   .kv li { grid-template-columns: 1fr; gap: 5px; }
   .kv__h { margin-top: 2px; }
 }
@@ -817,13 +808,12 @@ body.is-grid {
   .tb__empty td { padding: 20px 12px; }
   .set-top__row { gap: 16px; }
   .set-d { font-size: 13px; }
-  .jump { gap: 6px; }
-  .jump a { padding: 6px 10px; font-size: 10px; }
   .blk__h { flex-wrap: wrap; gap: 8px; }
   .blk__s { margin-left: 0; width: 100%; text-align: left; }
-  .card__stats b { font-size: 22px; }
-  .card__name { flex: 1 1 100%; }
-  .card__side { width: 100%; gap: 22px; }
+  .card__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card__stats b { font-size: 24px; }
+  .card__id { flex: 1 1 100%; }
+  .card__side { width: 100%; gap: 16px; justify-content: space-between; }
   .set-soc { padding-top: 4px; }
   .ban { grid-template-columns: minmax(0, 1fr); }
   .ban__c { padding: 18px 22px; flex-direction: row; align-items: baseline; gap: 10px; }

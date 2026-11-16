@@ -165,7 +165,24 @@ async function logout(request, env) {
 async function me(request, env) {
   const session = await currentSession(request, env);
   if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
-  return json({ ok: true, user: await profileOf(env, session.uid) });
+  const user = await profileOf(env, session.uid);
+  return json({ ok: true, user: Object.assign({}, user, clientInfo(request)) });
+}
+
+// 当前请求的来源 IP 与网络，供「登录与网络」区块显示
+function clientInfo(request) {
+  const raw = request.headers.get('CF-Connecting-IP')
+    || request.headers.get('X-Forwarded-For')
+    || request.headers.get('X-Real-IP')
+    || '';
+  const ip = raw.split(',')[0].trim();
+  const cf = request.cf || {};
+  const parts = [];
+  if (cf.country) parts.push(cf.country);
+  if (cf.region) parts.push(cf.region);
+  if (cf.city) parts.push(cf.city);
+  if (cf.asOrganization) parts.push(cf.asOrganization);
+  return { ip, net: parts.join(' · ') };
 }
 
 async function updateProfile(request, env) {
@@ -359,11 +376,9 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 }
 
-// 2 至 20 字，限中文、字母、数字、下划线与连字符，不允许纯数字
+// 2 至 20 字，限中文、字母、数字、下划线与连字符；纯数字也允许
 function isValidUsername(name) {
-  if (!/^[\u4e00-\u9fa5A-Za-z0-9_-]{2,20}$/.test(name)) return false;
-  if (/^\d+$/.test(name)) return false;
-  return true;
+  return /^[\u4e00-\u9fa5A-Za-z0-9_-]{2,20}$/.test(name);
 }
 
 function bytesToHex(bytes) {

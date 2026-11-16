@@ -9,7 +9,7 @@
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="/style.css?v=4">
 <link rel="stylesheet" href="/home.css?v=6">
-<link rel="stylesheet" href="/settings.css?v=6">
+<link rel="stylesheet" href="/settings.css?v=7">
 <link rel="stylesheet" href="/relation.css?v=1">
 <script src="/js/config.js"></script>
 </head>
@@ -71,20 +71,9 @@
           <h1 class="set-t">账户设置</h1>
         </div>
         <p class="set-d">
-          身份、余额、安全、工单与偏好集中在这一页。目录可以直接跳转，改动即刻生效。
+          身份、余额、安全、工单与偏好集中在这一页，改动即刻生效。
         </p>
       </div>
-
-      <nav class="jump" aria-label="本页目录">
-        <a href="#sec-id">01 账户概览</a>
-        <a href="#sec-redeem">02 兑换记录</a>
-        <a href="#sec-sec">03 账号安全</a>
-        <a href="#sec-net">04 登录与网络</a>
-        <a href="#sec-ban">05 封禁记录</a>
-        <a href="#sec-risk">06 问卷商风控</a>
-        <a href="#sec-ticket">07 我的工单</a>
-        <a href="#sec-pref">08 自定义设置</a>
-      </nav>
     </div>
   </section>
 
@@ -111,7 +100,14 @@
         </div>
 
         <div class="card__row">
-          <p class="card__name" id="setUser">—</p>
+          <div class="card__id">
+            <p class="card__name" id="setUser">—</p>
+            <p class="card__sub">
+              <span id="setJoined">—</span>
+              <span class="card__sep" aria-hidden="true">·</span>
+              <span id="setStatus">—</span>
+            </p>
+          </div>
 
           <div class="card__side">
             <div class="card__money">
@@ -134,21 +130,6 @@
         </div>
 
         <div class="card__body">
-          <dl class="dl">
-            <div>
-              <dt>账号状态</dt>
-              <dd id="setStatus">—</dd>
-            </div>
-            <div>
-              <dt>注册时间</dt>
-              <dd id="setJoined">—</dd>
-            </div>
-            <div>
-              <dt>注册邮箱</dt>
-              <dd id="setEmail">—</dd>
-            </div>
-          </dl>
-
           <div class="card__stats">
             <div><b id="stDone">0</b><span>已完成问卷</span></div>
             <div><b id="stDays">1</b><span>注册天数</span></div>
@@ -193,12 +174,15 @@
         <span class="blk__s">用户名、邮箱、密码</span>
       </div>
 
+      <div class="row3">
+
       <!-- 用户名 -->
+      <div class="row3__i">
       <div class="row" id="rowName">
         <div class="row__l">
           <span class="row__k">用户名</span>
           <span class="row__v" id="curName">—</span>
-          <span class="row__h">2 至 20 个字符，中文、字母、数字、下划线或连字符，不能是纯数字。</span>
+          <span class="row__h">2 至 20 个字符，中文、字母、数字、下划线或连字符，也可以是纯数字。</span>
         </div>
         <button class="btn btn--ghost btn--s" type="button" data-edit="name">更改</button>
       </div>
@@ -216,7 +200,10 @@
         <p class="edit__e" id="nameErr" hidden></p>
       </form>
 
+      </div>
+
       <!-- 邮箱 -->
+      <div class="row3__i">
       <div class="row" id="rowEmail">
         <div class="row__l">
           <span class="row__k">注册邮箱</span>
@@ -244,7 +231,10 @@
         <p class="edit__e" id="emailErr" hidden></p>
       </form>
 
+      </div>
+
       <!-- 密码 -->
+      <div class="row3__i">
       <div class="row" id="rowPw">
         <div class="row__l">
           <span class="row__k">登录密码</span>
@@ -276,6 +266,10 @@
         <p class="edit__e" id="pwErr" hidden></p>
       </form>
 
+      </div>
+
+      </div>
+
       <p class="blk__note">
         用户名即刻生效。邮箱与密码的更改需要后端写入接口，接口接入前提交会返回失败提示。
       </p>
@@ -293,25 +287,18 @@
 
       <ul class="kv">
         <li>
-          <span class="kv__k">注册 IP</span>
-          <b class="kv__v mono" id="ipReg">—</b>
-          <span class="kv__h">注册当次请求的来源地址</span>
+          <span class="kv__k">IP</span>
+          <b class="kv__v mono" id="curIp">—</b>
         </li>
         <li>
-          <span class="kv__k">注册网络</span>
-          <b class="kv__v" id="netReg">—</b>
-          <span class="kv__h">接入商与国家，由 Cloudflare 提供</span>
+          <span class="kv__k">网络</span>
+          <b class="kv__v" id="curNet">—</b>
         </li>
         <li>
           <span class="kv__k">最近登录</span>
           <b class="kv__v" id="lastLogin">—</b>
-          <span class="kv__h">最近一次成功登录的时间</span>
         </li>
       </ul>
-
-      <p class="blk__note">
-        同一网络下短时间内出现大量新账号时，相关账户会被标记复核。记录只用于反作弊，不对外展示。
-      </p>
     </div>
   </section>
 
@@ -510,6 +497,6 @@
   </div>
 </footer>
 
-<script src="/js/settings.js?v=4" defer></script>
+<script src="/js/settings.js?v=5" defer></script>
 </body>
 </html>

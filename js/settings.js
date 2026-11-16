@@ -91,7 +91,6 @@
     $('setUser').textContent = u.username || '未命名';
     $('setStatus').textContent = STATUS[u.status] || u.status;
     $('setJoined').textContent = fmtFull(u.createdAt);
-    $('setEmail').textContent = u.email || '—';
 
     var role = u.role || 'user';
     $('setRole').textContent = ROLES[role] || role;
@@ -107,8 +106,8 @@
     $('stLevel').textContent = u.level;
     $('stAff').textContent = u.affinity;
 
-    $('ipReg').textContent = u.regIp || '未记录';
-    $('netReg').textContent = u.regNet || '未记录';
+    $('curIp').textContent = u.ip || '未记录';
+    $('curNet').textContent = u.net || '未记录';
     $('lastLogin').textContent = u.lastLoginAt ? fmtFull(u.lastLoginAt) : '未记录';
   }
 
@@ -393,7 +392,7 @@
     el.hidden = false;
   }
 
-  var NAME_RE = /^[\u4e00-\u9fa5A-Za-z_\-][\u4e00-\u9fa5A-Za-z0-9_\-]{1,19}$/;
+  var NAME_RE = /^[\u4e00-\u9fa5A-Za-z0-9_\-]{2,20}$/;
 
   $('formName').addEventListener('submit', function (ev) {
     ev.preventDefault();
@@ -401,8 +400,8 @@
     var err = $('nameErr');
     err.hidden = true;
 
-    if (!NAME_RE.test(val) || /^\d+$/.test(val)) {
-      showErr('nameErr', '用户名需 2 至 20 个字符，可用中文、字母、数字、下划线或连字符，不能以数字开头。');
+    if (!NAME_RE.test(val)) {
+      showErr('nameErr', '用户名需 2 至 20 个字符，可用中文、字母、数字、下划线或连字符。');
       $('newName').setAttribute('aria-invalid', 'true');
       return;
     }
@@ -426,7 +425,7 @@
         } else if (r.body && r.body.error === 'username_taken') {
           showErr('nameErr', '这个用户名已被占用，换一个。');
         } else if (r.body && r.body.error === 'invalid_username') {
-          showErr('nameErr', '格式不符合要求，2 至 20 个字符，不能是纯数字。');
+          showErr('nameErr', '格式不符合要求，2 至 20 个字符，可用中文、字母、数字、下划线或连字符。');
         } else if (r.body && r.body.error === 'unauthorized') {
           showErr('nameErr', '登录状态已失效，请刷新页面。');
         } else {
@@ -582,8 +581,8 @@
     email: '574366992@qq.com',
     createdAt: '2026-11-16T08:00:46Z',
     lastLoginAt: '2026-11-16T09:30:00Z',
-    regIp: '203.0.113.24',
-    regNet: 'AS4134 CHINANET / CN'
+    ip: '203.0.113.24',
+    net: 'CN · 浙江 · 电信'
   };
 
   var isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
