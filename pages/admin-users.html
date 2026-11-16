@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>用户管理 · 乘法后台</title>
+<meta name="description" content="乘法运营后台：用户管理。">
+<meta name="theme-color" content="#1D52E2">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=6">
+<link rel="stylesheet" href="/css/home.css?v=8">
+<link rel="stylesheet" href="/css/page.css?v=3">
+<link rel="stylesheet" href="/css/admin.css?v=1">
+<script src="/js/config.js?v=2"></script>
+</head>
+<body data-page="admin-users" data-accent="blue">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/admin">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><i data-cur="code">CFB</i>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/home">我</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
+    </div>
+  </div>
+</header>
+
+<div class="pg-bar">
+  <div class="wrap pg-bar__in">
+    <a class="pg-bar__a" href="/admin">← 返回后台首页</a>
+    <span class="pg-bar__k">ADMIN / 用户管理</span>
+  </div>
+</div>
+
+<main class="pg">
+  <div class="wrap">
+
+    <div class="pg-head">
+      <div>
+        <span class="pg-k">USERS</span>
+        <h1 class="pg-t">用户管理</h1>
+      </div>
+      <div class="pg-side">
+        <b id="usCount">0</b>
+        <span>个结果</span>
+      </div>
+    </div>
+
+    <div class="adm-search">
+      <input id="usQ" type="text" placeholder="UID / 用户名 / 邮箱" autocomplete="off">
+      <button class="btn btn--red" id="usGo" type="button">查找</button>
+      <span class="adm-search__hint">留空时列出最新注册的 20 个账户</span>
+    </div>
+
+    <div class="adm-list">
+      <div class="adm-tr adm-tr--user adm-head">
+        <span>UID</span><span>用户</span><span>角色</span><span>状态</span><span>法币</span><span>冻结</span>
+      </div>
+      <div id="usList"></div>
+    </div>
+    <p class="adm-empty" id="usEmpty" hidden>没有找到匹配的账户。</p>
+
+    <p class="adm-search__hint" style="margin-top:14px">
+      点击任意一行展开操作：调整法币、冻结 / 封禁 / 恢复、修改角色。修改角色仅站长可用。
+    </p>
+
+  </div>
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 乘法 CHENGFA</span>
+      <span>运营后台 · 仅限站长与管理员</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/admin.js?v=1" defer></script>
+</body>
+</html>

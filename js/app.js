@@ -100,6 +100,10 @@
       if (me.uid) name.href = '/space?uid=' + encodeURIComponent(me.uid);
     }
     document.body.setAttribute('data-uid', me.uid);
+
+    /* 站长与管理员点左上角乘法进后台，其余保持原跳转 */
+    var brand = document.querySelector('.brand');
+    if (brand && (me.role === 'owner' || me.role === 'admin')) brand.setAttribute('href', '/admin');
   }
 
   var logoutBtn = $('logoutBtn');

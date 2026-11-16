@@ -645,6 +645,10 @@
       $('navAuthed').hidden = false;
       $('navBal').textContent = trimNum(me.fc);
       $('navName').textContent = me.username || '我';
+
+      /* 站长与管理员点左上角乘法进后台 */
+      var brand = document.querySelector('.brand');
+      if (brand && (me.role === 'owner' || me.role === 'admin')) brand.setAttribute('href', '/admin');
       if (String(me.uid) === uid) $('selfNote').hidden = false;
     }
 

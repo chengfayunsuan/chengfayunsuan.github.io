@@ -87,6 +87,10 @@
     $('navName').textContent = u.username || '未命名';
     $('navBal').textContent = trimNum(u.fc);
 
+    /* 站长与管理员点左上角乘法进后台 */
+    var brand = document.querySelector('.brand');
+    if (brand && (u.role === 'owner' || u.role === 'admin')) brand.setAttribute('href', '/admin');
+
     $('setUid').textContent = u.uid;
     $('setUser').textContent = u.username || '未命名';
     $('setStatus').textContent = STATUS[u.status] || u.status;

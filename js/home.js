@@ -190,6 +190,10 @@
     $('navName').textContent = user.username || '未命名';
     $('navBal').textContent = trimNum(user.fc);
 
+    /* 站长与管理员点左上角乘法进后台 */
+    var brand = document.querySelector('.brand');
+    if (brand && (user.role === 'owner' || user.role === 'admin')) brand.setAttribute('href', '/admin');
+
     $('uidText').textContent = user.uid;
     $('userName').textContent = user.username || '未命名';
     $('joinedAt').textContent = fmtDate(user.createdAt);

@@ -11,3 +11,6 @@
 /ledger   /pages/ledger   200
 /ladder   /pages/ladder   200
 /support  /pages/support  200
+/admin             /pages/admin             200
+/admin/users       /pages/admin-users       200
+/admin/withdrawals /pages/admin-withdrawals 200

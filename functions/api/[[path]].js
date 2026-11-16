@@ -38,6 +38,7 @@ export async function onRequest(context) {
     if (path === 'user/profile' && request.method === 'PATCH') return await updateProfile(request, env);
     if (path === 'ledger' && request.method === 'GET') return await ledger(request, env, url);
     if (path === 'ladder' && request.method === 'GET') return await ladder(request, env, url);
+    if (path.indexOf('admin/') === 0) return await adminApi(request, env, url, path);
     return json({ ok: false, error: 'not_found' }, 404);
   } catch (err) {
     console.error('api error:', err && err.stack ? err.stack : err);
@@ -351,6 +352,291 @@ async function createSession(env, uid, request) {
 
 async function recordFail(env, email) {
   await env.DB.prepare('INSERT INTO login_fails (email) VALUES (?)').bind(email).run();
+}
+
+/* ---------------- 后台接口（仅站长与管理员） ---------------- */
+
+const ADMIN_ROLES = ['owner', 'admin'];
+const USER_STATUSES = ['active', 'frozen', 'banned'];
+const USER_ROLES = ['owner', 'admin', 'premium', 'user'];
+
+async function requireAdmin(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return null;
+  const row = await env.DB.prepare('SELECT role, status FROM users WHERE id = ?')
+    .bind(session.uid).first();
+  if (!row || row.status !== 'active' || ADMIN_ROLES.indexOf(row.role) < 0) return null;
+  return { uid: session.uid, role: row.role };
+}
+
+async function adminApi(request, env, url, path) {
+  const admin = await requireAdmin(request, env);
+  if (!admin) return json({ ok: false, error: 'forbidden' }, 403);
+
+  if (path === 'admin/overview' && request.method === 'GET') return await adminOverview(env);
+  if (path === 'admin/users' && request.method === 'GET') return await adminUsers(request, env, url);
+  if (path === 'admin/users/adjust' && request.method === 'POST') return await adminAdjust(request, env, admin);
+  if (path === 'admin/users/status' && request.method === 'POST') return await adminStatus(request, env, admin);
+  if (path === 'admin/users/role' && request.method === 'POST') return await adminRole(request, env, admin);
+  if (path === 'admin/withdrawals' && request.method === 'GET') return await adminWithdrawals(request, env, url);
+  if (path === 'admin/withdrawals/decide' && request.method === 'POST') return await adminWithdrawDecide(request, env, admin);
+  return json({ ok: false, error: 'not_found' }, 404);
+}
+
+async function adminOverview(env) {
+  const users = await env.DB.prepare(
+    `SELECT COUNT(*) AS n,
+            SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS active,
+            SUM(CASE WHEN status = 'frozen' THEN 1 ELSE 0 END) AS frozen,
+            SUM(CASE WHEN status = 'banned' THEN 1 ELSE 0 END) AS banned,
+            SUM(CASE WHEN date(created_at) = date('now') THEN 1 ELSE 0 END) AS today
+       FROM users WHERE deleted_at IS NULL`
+  ).first();
+
+  const money = await env.DB.prepare(
+    `SELECT COALESCE(SUM(fc_units), 0) AS units, COALESCE(SUM(fc_frozen), 0) AS frozen
+       FROM users WHERE deleted_at IS NULL`
+  ).first();
+
+  const wd = await env.DB.prepare(
+    `SELECT COUNT(*) AS n, COALESCE(SUM(amount), 0) AS amount
+       FROM withdrawals WHERE status = 'pending'`
+  ).first();
+
+  const recent = await env.DB.prepare(
+    `SELECT l.delta, l.kind, l.memo, l.created_at, u.username, u.id AS uid
+       FROM fc_ledger l LEFT JOIN users u ON u.id = l.uid
+      ORDER BY l.id DESC LIMIT 12`
+  ).all();
+
+  return json({
+    ok: true,
+    users: {
+      total: users ? users.n : 0,
+      active: users ? (users.active || 0) : 0,
+      frozen: users ? (users.frozen || 0) : 0,
+      banned: users ? (users.banned || 0) : 0,
+      today: users ? (users.today || 0) : 0
+    },
+    money: {
+      available: formatFc(money ? money.units : 0),
+      frozen: formatFc(money ? money.frozen : 0)
+    },
+    withdrawals: { pending: wd ? wd.n : 0, amount: formatFc(wd ? wd.amount : 0) },
+    recent: (recent.results || []).map((r) => ({
+      at: toIso(r.created_at),
+      uid: r.uid,
+      username: r.username || '已注销',
+      kind: r.kind,
+      delta: formatFc(r.delta),
+      memo: r.memo || ''
+    }))
+  });
+}
+
+const ADMIN_USER_COLS = 'id, username, email, role, status, fc_units, fc_frozen, level, created_at';
+
+function adminUserRow(r) {
+  return {
+    uid: r.id,
+    username: r.username,
+    email: r.email,
+    role: r.role,
+    status: r.status,
+    fc: formatFc(r.fc_units),
+    fcFrozen: formatFc(r.fc_frozen),
+    level: r.level || 1,
+    createdAt: toIso(r.created_at)
+  };
+}
+
+async function adminUsers(request, env, url) {
+  const q = (url.searchParams.get('q') || '').trim().slice(0, 64);
+  const limit = Math.min(50, Math.max(1, Number(url.searchParams.get('limit')) || 20));
+
+  let rows;
+  if (!q) {
+    rows = await env.DB.prepare(
+      `SELECT ${ADMIN_USER_COLS} FROM users WHERE deleted_at IS NULL ORDER BY id DESC LIMIT ?`
+    ).bind(limit).all();
+  } else if (/^\d+$/.test(q)) {
+    rows = await env.DB.prepare(
+      `SELECT ${ADMIN_USER_COLS} FROM users WHERE deleted_at IS NULL AND id = ?`
+    ).bind(Number(q)).all();
+  } else {
+    rows = await env.DB.prepare(
+      `SELECT ${ADMIN_USER_COLS} FROM users
+        WHERE deleted_at IS NULL AND (username LIKE ? OR email LIKE ?)
+        ORDER BY id DESC LIMIT ?`
+    ).bind('%' + q + '%', '%' + q + '%', limit).all();
+  }
+
+  return json({ ok: true, items: (rows.results || []).map(adminUserRow) });
+}
+
+async function adminTarget(env, uid) {
+  return await env.DB.prepare(
+    'SELECT id, role, status, fc_units, fc_frozen FROM users WHERE id = ? AND deleted_at IS NULL'
+  ).bind(uid).first();
+}
+
+/* 站长账户只有站长能动 */
+function canTouch(admin, target) {
+  return !(target.role === 'owner' && admin.role !== 'owner');
+}
+
+async function adminAdjust(request, env, admin) {
+  const body = await readJson(request);
+  const uid = Number(body && body.uid);
+  const delta = Number(body && body.delta);
+  const memo = String((body && body.memo) || '').trim().slice(0, 120);
+  if (!uid || !isFinite(delta) || delta === 0) return json({ ok: false, error: 'bad_request' }, 400);
+
+  const target = await adminTarget(env, uid);
+  if (!target) return json({ ok: false, error: 'user_not_found' }, 404);
+  if (!canTouch(admin, target)) return json({ ok: false, error: 'forbidden' }, 403);
+  if (target.status === 'banned') return json({ ok: false, error: 'user_banned' }, 400);
+
+  const deltaUnits = Math.round(delta * FC_SCALE);
+  const next = target.fc_units + deltaUnits;
+  if (next < 0) return json({ ok: false, error: 'insufficient_balance' }, 400);
+
+  const ref = 'A' + Date.now().toString(36).toUpperCase();
+  await env.DB.batch([
+    env.DB.prepare(
+      "UPDATE users SET fc_units = ?, updated_at = datetime('now') WHERE id = ?"
+    ).bind(next, uid),
+    env.DB.prepare(
+      'INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, ?, ?, ?)'
+    ).bind(uid, deltaUnits, next, 'admin_adjust', ref, memo || '后台人工调整')
+  ]);
+
+  return json({ ok: true, fc: formatFc(next), ref });
+}
+
+async function adminStatus(request, env, admin) {
+  const body = await readJson(request);
+  const uid = Number(body && body.uid);
+  const status = String((body && body.status) || '');
+  if (!uid || USER_STATUSES.indexOf(status) < 0) return json({ ok: false, error: 'bad_request' }, 400);
+
+  const target = await adminTarget(env, uid);
+  if (!target) return json({ ok: false, error: 'user_not_found' }, 404);
+  if (!canTouch(admin, target)) return json({ ok: false, error: 'forbidden' }, 403);
+  if (target.id === admin.uid) return json({ ok: false, error: 'self' }, 400);
+  if (target.role === 'owner' && status !== 'active') return json({ ok: false, error: 'owner_lock' }, 400);
+  if (target.status === status) return json({ ok: true });
+
+  await env.DB.prepare(
+    "UPDATE users SET status = ?, updated_at = datetime('now') WHERE id = ?"
+  ).bind(status, uid);
+
+  return json({ ok: true });
+}
+
+async function adminRole(request, env, admin) {
+  if (admin.role !== 'owner') return json({ ok: false, error: 'owner_only' }, 403);
+
+  const body = await readJson(request);
+  const uid = Number(body && body.uid);
+  const role = String((body && body.role) || '');
+  if (!uid || USER_ROLES.indexOf(role) < 0) return json({ ok: false, error: 'bad_request' }, 400);
+
+  const target = await adminTarget(env, uid);
+  if (!target) return json({ ok: false, error: 'user_not_found' }, 404);
+  if (target.id === admin.uid) return json({ ok: false, error: 'self' }, 400);
+  if (target.role === role) return json({ ok: true });
+
+  await env.DB.prepare(
+    "UPDATE users SET role = ?, updated_at = datetime('now') WHERE id = ?"
+  ).bind(role, uid);
+
+  return json({ ok: true });
+}
+
+async function adminWithdrawals(request, env, url) {
+  const status = (url.searchParams.get('status') || 'pending').trim();
+  const filtered = ['pending', 'approved', 'paid', 'rejected'].indexOf(status) >= 0;
+
+  const rows = await env.DB.prepare(
+    `SELECT w.id, w.uid, w.amount, w.channel, w.account, w.status,
+            w.created_at, w.reviewed_at, u.username
+       FROM withdrawals w LEFT JOIN users u ON u.id = w.uid
+      ${filtered ? 'WHERE w.status = ?' : ''}
+      ORDER BY w.id DESC LIMIT 100`
+  ).bind(...(filtered ? [status] : [])).all();
+
+  const pending = await env.DB.prepare(
+    "SELECT COUNT(*) AS n FROM withdrawals WHERE status = 'pending'"
+  ).first();
+
+  return json({
+    ok: true,
+    pending: pending ? pending.n : 0,
+    items: (rows.results || []).map((r) => ({
+      id: r.id,
+      uid: r.uid,
+      username: r.username || '',
+      amount: formatFc(r.amount),
+      channel: r.channel,
+      account: r.account,
+      status: r.status,
+      createdAt: toIso(r.created_at),
+      reviewedAt: toIso(r.reviewed_at)
+    }))
+  });
+}
+
+async function adminWithdrawDecide(request, env, admin) {
+  const body = await readJson(request);
+  const id = String((body && body.id) || '').trim();
+  const action = String((body && body.action) || '');
+  const note = String((body && body.note) || '').trim().slice(0, 120);
+  if (!id || (action !== 'paid' && action !== 'rejected')) {
+    return json({ ok: false, error: 'bad_request' }, 400);
+  }
+
+  const wd = await env.DB.prepare('SELECT * FROM withdrawals WHERE id = ?').bind(id).first();
+  if (!wd) return json({ ok: false, error: 'not_found' }, 404);
+  if (wd.status !== 'pending') return json({ ok: false, error: 'already_reviewed' }, 400);
+
+  const user = await env.DB.prepare('SELECT id, fc_units, fc_frozen FROM users WHERE id = ?')
+    .bind(wd.uid).first();
+  if (!user) return json({ ok: false, error: 'user_not_found' }, 404);
+  if (user.fc_frozen < wd.amount) return json({ ok: false, error: 'frozen_mismatch' }, 400);
+
+  const frozen = user.fc_frozen - wd.amount;
+
+  if (action === 'paid') {
+    /* 打款：冻结直接划走，可用余额不变，流水记负 */
+    await env.DB.batch([
+      env.DB.prepare(
+        "UPDATE users SET fc_frozen = ?, updated_at = datetime('now') WHERE id = ?"
+      ).bind(frozen, user.id),
+      env.DB.prepare(
+        'INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, ?, ?, ?)'
+      ).bind(user.id, -wd.amount, user.fc_units, 'withdraw_paid', id, note || '提现打款'),
+      env.DB.prepare(
+        "UPDATE withdrawals SET status = 'paid', reviewed_by = ?, review_note = ?, reviewed_at = datetime('now') WHERE id = ?"
+      ).bind(admin.uid, note, id)
+    ]);
+  } else {
+    /* 驳回：冻结退回可用余额，流水记正 */
+    const back = user.fc_units + wd.amount;
+    await env.DB.batch([
+      env.DB.prepare(
+        "UPDATE users SET fc_frozen = ?, fc_units = ?, updated_at = datetime('now') WHERE id = ?"
+      ).bind(frozen, back, user.id),
+      env.DB.prepare(
+        'INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, ?, ?, ?)'
+      ).bind(user.id, wd.amount, back, 'withdraw_refund', id, note || '提现驳回退回'),
+      env.DB.prepare(
+        "UPDATE withdrawals SET status = 'rejected', reviewed_by = ?, review_note = ?, reviewed_at = datetime('now') WHERE id = ?"
+      ).bind(admin.uid, note, id)
+    ]);
+  }
+
+  return json({ ok: true });
 }
 
 /* ---------------- 资料输出 ---------------- */

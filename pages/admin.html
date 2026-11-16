@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>运营后台 · 乘法</title>
+<meta name="description" content="乘法运营后台：账户、资金与站务管理。">
+<meta name="theme-color" content="#1D52E2">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=6">
+<link rel="stylesheet" href="/css/home.css?v=8">
+<link rel="stylesheet" href="/css/page.css?v=3">
+<link rel="stylesheet" href="/css/admin.css?v=1">
+<script src="/js/config.js?v=2"></script>
+</head>
+<body data-page="admin" data-accent="blue">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/admin">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><i data-cur="code">CFB</i>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/home">我</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
+    </div>
+  </div>
+</header>
+
+<div class="pg-bar">
+  <div class="wrap pg-bar__in">
+    <a class="pg-bar__a" href="/home">← 返回账户首页</a>
+    <span class="pg-bar__k">ADMIN PANEL / 运营后台</span>
+  </div>
+</div>
+
+<main class="pg">
+  <div class="wrap">
+
+    <div class="pg-head">
+      <div>
+        <span class="pg-k">ADMIN PANEL</span>
+        <h1 class="pg-t">运营后台</h1>
+      </div>
+      <div class="pg-side">
+        <b id="ovRole">—</b>
+        <span id="ovWho">当前操作者</span>
+      </div>
+    </div>
+
+    <div class="adm-stats">
+      <div class="adm-stat">
+        <span class="adm-stat__k">USERS / 用户总数</span>
+        <p class="adm-stat__v" id="stUsers">—</p>
+        <p class="adm-stat__s">今日新增 <b id="stToday">—</b></p>
+      </div>
+      <div class="adm-stat">
+        <span class="adm-stat__k">MONEY / 法币总量</span>
+        <p class="adm-stat__v" id="stMoney">—</p>
+        <p class="adm-stat__s">其中冻结 <b id="stFrozen">—</b></p>
+      </div>
+      <div class="adm-stat is-warn">
+        <span class="adm-stat__k">PENDING / 待审提现</span>
+        <p class="adm-stat__v" id="stWd">—</p>
+        <p class="adm-stat__s">涉及金额 <b id="stWdAmount">—</b></p>
+      </div>
+      <div class="adm-stat">
+        <span class="adm-stat__k">STATUS / 账户状态</span>
+        <p class="adm-stat__v" id="stActive">—</p>
+        <p class="adm-stat__s">冻结 <b id="stFrozenN">—</b> · 封禁 <b id="stBanned">—</b></p>
+      </div>
+    </div>
+
+    <div class="adm-quick">
+      <a class="adm-q" href="/admin/users">
+        <span class="adm-q__n">01</span>
+        <p class="adm-q__t">用户管理</p>
+        <p class="adm-q__d">查找账户、调整法币、冻结与封禁、修改角色。</p>
+      </a>
+      <a class="adm-q" href="/admin/withdrawals">
+        <span class="adm-q__n">02</span>
+        <p class="adm-q__t">提现审核</p>
+        <p class="adm-q__d">通过打款或驳回退回，资金自动回到账户。</p>
+      </a>
+      <button class="adm-q is-off" type="button" data-soon="问卷管理">
+        <span class="adm-q__n">03</span>
+        <p class="adm-q__t">问卷管理</p>
+        <p class="adm-q__d">问卷上线后在此发布与结算。</p>
+      </button>
+      <button class="adm-q is-off" type="button" data-soon="兑换码">
+        <span class="adm-q__n">04</span>
+        <p class="adm-q__t">兑换码</p>
+        <p class="adm-q__d">兑换码发放与核销记录待建。</p>
+      </button>
+      <button class="adm-q is-off" type="button" data-soon="工单">
+        <span class="adm-q__n">05</span>
+        <p class="adm-q__t">工单</p>
+        <p class="adm-q__d">客服工单流转待建。</p>
+      </button>
+      <button class="adm-q is-off" type="button" data-soon="站内消息">
+        <span class="adm-q__n">06</span>
+        <p class="adm-q__t">站内消息</p>
+        <p class="adm-q__d">事件通知中心待建。</p>
+      </button>
+    </div>
+
+    <h2 class="adm-h2">最近流水</h2>
+    <div class="adm-list">
+      <div class="adm-tr adm-tr--lg adm-head">
+        <span>时间</span><span>用户</span><span>类型</span><span>变动</span><span>备注</span>
+      </div>
+      <div id="ovLedger"></div>
+    </div>
+    <p class="adm-empty" id="ovEmpty" hidden>还没有任何流水。</p>
+
+  </div>
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 乘法 CHENGFA</span>
+      <span>运营后台 · 仅限站长与管理员</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/admin.js?v=1" defer></script>
+</body>
+</html>
