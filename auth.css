@@ -281,7 +281,7 @@
 .ac-tri__num {
   font-family: var(--black);
   font-weight: 800;
-  font-size: clamp(42px, 4vw, 54px);
+  font-size: clamp(58px, 5.6vw, 74px);
   line-height: .84;
   letter-spacing: -.01em;
   white-space: nowrap;
@@ -335,7 +335,7 @@
   }
 
   .ac-tri { width: min(272px, 80%); }
-  .ac-tri__num { font-size: 40px; }
+  .ac-tri__num { font-size: 48px; }
   .ac-tri__label { font-size: 11px; margin-top: 8px; }
 }
 
@@ -358,7 +358,7 @@
 
   .auth__art { min-height: 200px; }
   .ac-tri { width: 228px; }
-  .ac-tri__num { font-size: 36px; }
+  .ac-tri__num { font-size: 44px; }
 
   .auth-foot__in { flex-direction: column; gap: 6px; }
 }
