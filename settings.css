@@ -228,6 +228,53 @@
   color: #6A6154;
 }
 
+/* 余额往左让出位置，右侧上下两行是关注与粉丝 */
+.card__side {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(20px, 3vw, 44px);
+  flex: 0 0 auto;
+}
+
+.card__bal { margin-top: 4px; }
+
+.set-soc {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-top: 2px;
+}
+
+.set-soc__i {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  width: fit-content;
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  color: #4A453A;
+  font-family: inherit;
+  font-size: 12.5px;
+  letter-spacing: .06em;
+  text-align: left;
+  cursor: pointer;
+  transition: color .14s ease;
+}
+
+.set-soc__i b {
+  font-family: var(--black);
+  font-weight: 800;
+  font-size: 15px;
+  line-height: 1;
+  letter-spacing: 0;
+  color: var(--ink);
+  transition: color .14s ease;
+}
+
+.set-soc__i:hover,
+.set-soc__i:hover b { color: var(--red); }
+
 .card__body {
   display: grid;
   grid-template-columns: minmax(0, 1.32fr) minmax(0, 1fr);
@@ -753,6 +800,9 @@ body.is-grid {
   .blk__h { flex-wrap: wrap; gap: 8px; }
   .blk__s { margin-left: 0; width: 100%; text-align: left; }
   .card__stats b { font-size: 22px; }
+  .card__name { flex: 1 1 100%; }
+  .card__side { width: 100%; gap: 22px; }
+  .set-soc { padding-top: 4px; }
   .ban { grid-template-columns: minmax(0, 1fr); }
   .ban__c { padding: 18px 22px; flex-direction: row; align-items: baseline; gap: 10px; }
   .ban__c b { font-size: 40px; }

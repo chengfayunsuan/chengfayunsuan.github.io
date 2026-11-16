@@ -105,6 +105,253 @@
     $('lastLogin').textContent = u.lastLoginAt ? fmtFull(u.lastLoginAt) : '未记录';
   }
 
+  /* ---------- 关注与粉丝：两行数字与小窗口 ---------- */
+
+  var relList = $('relList');
+  var relEmpty = $('relEmpty');
+  var relMore = $('relMore');
+  var sheet = $('relSheet');
+
+  var REL = { uid: null, scope: 'following', offset: 0, total: 0, busy: false };
+  var SOC = { followers: 0, following: 0 };
+  var lastFocus = null;
+  var socialBound = false;
+
+  function paintSocial() {
+    $('setFollowN').textContent = SOC.following;
+    $('setFansN').textContent = SOC.followers;
+    $('tabFollow').textContent = SOC.following;
+    $('tabFans').textContent = SOC.followers;
+  }
+
+  function openSheet(scope) {
+    if (!sheet) return;
+    lastFocus = document.activeElement;
+    sheet.hidden = false;
+    document.body.classList.add('is-locked');
+    var x = $('sheetClose');
+    if (x) x.focus();
+    loadRel(scope, false);
+  }
+
+  function closeSheet() {
+    if (!sheet || sheet.hidden) return;
+    sheet.hidden = true;
+    document.body.classList.remove('is-locked');
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  function setTabs(scope) {
+    Array.prototype.forEach.call(document.querySelectorAll('.rel__tab'), function (t) {
+      t.classList.toggle('is-on', t.getAttribute('data-scope') === scope);
+    });
+  }
+
+  function emptyText(scope) {
+    return scope === 'followers' ? '还没有人关注你。' : '还没有关注任何人。';
+  }
+
+  function relItem(it) {
+    var li = document.createElement('li');
+    li.className = 'rel__i';
+
+    var a = document.createElement('a');
+    a.className = 'rel__a';
+    a.href = '/space?uid=' + encodeURIComponent(it.uid);
+
+    var uid = document.createElement('span');
+    uid.className = 'rel__uid';
+    uid.textContent = 'UID ' + it.uid;
+
+    var name = document.createElement('span');
+    name.className = 'rel__name';
+    name.textContent = it.username || '未命名';
+
+    var role = document.createElement('span');
+    role.className = 'face__role rel__role';
+    role.setAttribute('data-role', it.role || 'user');
+    role.textContent = ROLES[it.role] || it.role || '用户';
+
+    var lv = document.createElement('span');
+    lv.className = 'rel__lv';
+    lv.textContent = 'LV ' + (it.level || 1);
+
+    var at = document.createElement('span');
+    at.className = 'rel__at';
+    at.textContent = fmtDate(it.at);
+
+    a.appendChild(uid);
+    a.appendChild(name);
+    a.appendChild(role);
+    a.appendChild(lv);
+    a.appendChild(at);
+    li.appendChild(a);
+
+    if (String(it.uid) !== String(REL.uid)) {
+      var act = document.createElement('button');
+      act.className = 'rel__act';
+      act.type = 'button';
+      act.setAttribute('data-uid', it.uid);
+      act.setAttribute('data-following', it.following ? '1' : '0');
+      act.textContent = it.following ? '取消关注' : '关注';
+      li.appendChild(act);
+    }
+
+    return li;
+  }
+
+  function loadRel(scope, append) {
+    if (REL.busy || !sheet) return;
+
+    REL.busy = true;
+    REL.scope = scope;
+
+    if (!append) {
+      REL.offset = 0;
+      relList.textContent = '';
+      relEmpty.hidden = true;
+      relMore.hidden = true;
+    } else {
+      relMore.disabled = true;
+    }
+
+    setTabs(scope);
+
+    fetch('/api/follow?scope=' + encodeURIComponent(scope) +
+          '&uid=' + encodeURIComponent(REL.uid) + '&offset=' + REL.offset,
+          { headers: { Accept: 'application/json' } })
+      .then(function (res) { return res.json().then(function (d) { return { status: res.status, body: d }; }); })
+      .then(function (r) {
+        REL.busy = false;
+        relMore.disabled = false;
+
+        if (!r.body || !r.body.ok) {
+          relEmpty.hidden = false;
+          relEmpty.textContent = r.status === 401
+            ? '登录状态已失效，请重新登录。'
+            : '列表载入失败，稍后重试。';
+          return;
+        }
+
+        if (r.body.counts) {
+          SOC.followers = r.body.counts.followers;
+          SOC.following = r.body.counts.following;
+          paintSocial();
+        }
+
+        var items = r.body.items || [];
+        REL.total = r.body.total || 0;
+        REL.offset += items.length;
+        items.forEach(function (it) { relList.appendChild(relItem(it)); });
+
+        if (!REL.offset) {
+          relEmpty.hidden = false;
+          relEmpty.textContent = emptyText(scope);
+        }
+
+        relMore.hidden = !(r.body.hasMore && REL.offset < REL.total);
+      })
+      .catch(function () {
+        REL.busy = false;
+        relMore.disabled = false;
+        relEmpty.hidden = false;
+        relEmpty.textContent = '网络连接失败，请稍后刷新。';
+      });
+  }
+
+  function setupSocial(uid) {
+    if (!sheet) return;
+    REL.uid = uid;
+
+    if (!socialBound) {
+      socialBound = true;
+
+      Array.prototype.forEach.call(document.querySelectorAll('.set-soc__i'), function (b) {
+        b.addEventListener('click', function () {
+          openSheet(b.getAttribute('data-scope'));
+        });
+      });
+
+      $('sheetClose').addEventListener('click', closeSheet);
+
+      var mask = sheet.querySelector('.sheet__mask');
+      if (mask) mask.addEventListener('click', closeSheet);
+
+      document.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Escape') closeSheet();
+      });
+
+      Array.prototype.forEach.call(document.querySelectorAll('.rel__tab'), function (tab) {
+        tab.addEventListener('click', function () {
+          var scope = tab.getAttribute('data-scope');
+          if (scope === REL.scope && REL.offset > 0) return;
+          loadRel(scope, false);
+        });
+      });
+
+      if (relMore) {
+        relMore.addEventListener('click', function () { loadRel(REL.scope, true); });
+      }
+
+      relList.addEventListener('click', function (ev) {
+        var btn = ev.target.closest ? ev.target.closest('.rel__act') : null;
+        if (!btn || btn.disabled) return;
+
+        var target = Number(btn.getAttribute('data-uid'));
+        var wasFollowing = btn.getAttribute('data-following') === '1';
+
+        btn.disabled = true;
+
+        fetch('/api/follow', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ uid: target, act: wasFollowing ? 'unfollow' : 'follow' })
+        })
+          .then(function (res) {
+            return res.json().then(function (d) { return { ok: res.ok, body: d }; });
+          })
+          .then(function (r) {
+            if (r.ok && r.body.ok) {
+              btn.setAttribute('data-following', r.body.following ? '1' : '0');
+              btn.textContent = r.body.following ? '取消关注' : '关注';
+              SOC.followers = r.body.followers;
+              SOC.following = r.body.followees;
+              paintSocial();
+              say(r.body.following ? '已关注该用户' : '已取消关注');
+              return;
+            }
+            btn.disabled = false;
+            var err = r.body && r.body.error;
+            if (err === 'unauthorized') say('登录状态已失效，请刷新页面');
+            else if (err === 'self') say('不能关注自己');
+            else if (err === 'restricted') say('该账户当前状态不可关注');
+            else if (err === 'too_many') say('关注人数已达上限');
+            else say('操作失败，请重试');
+          })
+          .catch(function () {
+            btn.disabled = false;
+            say('网络连接失败，操作未生效');
+          });
+      });
+    }
+
+    fetch('/api/follow?scope=following&uid=' + encodeURIComponent(uid),
+          { headers: { Accept: 'application/json' } })
+      .then(function (res) { return res.json(); })
+      .then(function (d) {
+        if (!d || !d.ok || !d.counts) return;
+        SOC.followers = d.counts.followers;
+        SOC.following = d.counts.following;
+        paintSocial();
+      })
+      .catch(function () {});
+
+    if (isLocal) {
+      var m = location.search.match(/[?&]sheet=(following|followers)\b/);
+      if (m) setTimeout(function () { openSheet(m[1]); }, 400);
+    }
+  }
+
   /* ---------- 03 安全：展开与提交 ---------- */
 
   function openEdit(which) {
@@ -332,6 +579,7 @@
 
   if (isLocal && /[?&]preview\b/.test(location.search)) {
     render(DEMO);
+    setupSocial(DEMO.uid);
     loading.hidden = true;
     app.hidden = false;
     return;
@@ -349,6 +597,7 @@
       loading.hidden = true;
       if (!data.ok || !data.user) { say('账户载入失败，请刷新页面重试。'); return; }
       render(data.user);
+      setupSocial(data.user.uid);
       app.hidden = false;
     })
     .catch(function () {
