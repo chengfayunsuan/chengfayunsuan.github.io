@@ -389,6 +389,9 @@
     $('joinedAt').textContent = fmtDate(user.createdAt);
     $('statusText').textContent = STATUS[user.status] || user.status;
 
+    var mineLink = $('mineLink');
+    if (mineLink) mineLink.href = '/space?uid=' + encodeURIComponent(user.uid);
+
     var roleEl = $('roleText');
     roleEl.textContent = ROLES[user.role] || user.role;
     roleEl.setAttribute('data-role', user.role);

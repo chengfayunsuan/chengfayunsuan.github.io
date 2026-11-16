@@ -129,18 +129,29 @@
 
 .rel-sec { padding: 30px 0 0; }
 
-.rel {
-  border: var(--edge);
-  background: var(--paper);
-}
+.rel { background: transparent; }
 
 .rel__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 12px 18px;
-  border-bottom: var(--edge);
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--hair);
+}
+
+.rel__hd {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+}
+
+.rel__t {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: .02em;
 }
 
 .rel__k {
@@ -195,7 +206,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 18px;
+  padding: 12px 0;
 }
 
 .rel__i + .rel__i { border-top: 1px solid var(--hair); }
@@ -266,8 +277,7 @@
 
 .rel__empty {
   margin: 0;
-  padding: 24px 18px;
-  border-top: 1px solid var(--hair);
+  padding: 22px 0;
   font-size: 13px;
   color: var(--gray);
 }
@@ -277,13 +287,14 @@
   width: 100%;
   padding: 12px;
   border: 0;
-  border-top: var(--edge);
-  background: var(--paper-2);
+  border-top: 1px solid var(--hair);
+  background: transparent;
   color: var(--ink);
   font-family: inherit;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
+  transition: background .14s, color .14s;
 }
 
 .rel__more:hover {
@@ -362,6 +373,21 @@
   letter-spacing: .06em;
   color: var(--gray);
 }
+
+.face__link { margin: 12px 0 0; }
+
+.face__link a {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 2px solid var(--red);
+  transition: color .14s ease;
+}
+
+.face__link a:hover { color: var(--red); }
 
 .face__dot {
   margin: 0 8px;
@@ -861,10 +887,10 @@
   .prog__note { flex-direction: column; align-items: flex-start; gap: 12px; }
 
   .rel-sec { padding-top: 22px; }
-  .rel__head { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .rel__head { flex-direction: column; align-items: stretch; gap: 10px; }
   .rel__tabs { width: 100%; }
   .rel__tab { flex: 1 1 auto; justify-content: center; }
-  .rel__i { flex-wrap: wrap; padding: 12px 14px; }
+  .rel__i { flex-wrap: wrap; padding: 12px 0; }
   .rel__a { gap: 8px; }
   .rel__at { display: none; }
   .rel__act { padding: 6px 10px; font-size: 11.5px; }

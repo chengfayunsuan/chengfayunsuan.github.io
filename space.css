@@ -333,19 +333,19 @@
 
 /* ---------- 提现记录 ---------- */
 
-.po {
-  border: var(--edge);
-  background: var(--paper);
-}
+.po { background: transparent; }
 
 .po__sum {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.po__cell { padding: 20px 22px 22px; }
+.po__cell { padding: 0 22px 22px 0; }
 
-.po__cell + .po__cell { border-left: var(--edge); }
+.po__cell + .po__cell {
+  border-left: 1px solid var(--hair);
+  padding-left: 22px;
+}
 
 .po__n {
   display: flex;
@@ -374,7 +374,7 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  border-top: var(--edge);
+  border-top: 1px solid var(--hair);
 }
 
 .po__i {
@@ -382,7 +382,7 @@
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 18px;
-  padding: 14px 22px;
+  padding: 14px 0;
 }
 
 .po__i + .po__i { border-top: 1px solid var(--hair); }
@@ -419,8 +419,8 @@
 
 .po__empty {
   margin: 0;
-  padding: 26px 22px;
-  border-top: var(--edge);
+  padding: 22px 0;
+  border-top: 1px solid var(--hair);
   font-size: 13px;
   color: var(--gray);
 }
@@ -498,9 +498,12 @@
   .sp-do { flex-wrap: wrap; }
   .sp-do .btn { flex: 1 1 100%; justify-content: center; }
   .po__sum { grid-template-columns: minmax(0, 1fr); }
+  .po__cell { padding: 0 0 18px; }
   .po__cell + .po__cell {
     border-left: 0;
-    border-top: var(--edge);
+    border-top: 1px solid var(--hair);
+    padding-left: 0;
+    padding-top: 18px;
   }
   .po__i { grid-template-columns: minmax(0, 1fr) auto; }
   .po__at {
