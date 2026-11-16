@@ -265,53 +265,164 @@
   border-left-color: var(--hair);
 }
 
-/* ---------- 可见范围 ---------- */
+/* ---------- 关注与粉丝数字 ---------- */
 
-.sp-scope {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  border: 3px solid var(--ink);
+.sp-social {
+  display: flex;
+  align-items: baseline;
+  gap: 26px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 2px solid var(--ink);
 }
 
-.sp-scope__c { padding: 22px 24px; }
-
-.sp-scope__c + .sp-scope__c {
-  border-left: 3px solid var(--ink);
-  background: var(--paper-2);
+.sp-social__i {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  cursor: pointer;
 }
 
-.sp-scope__k {
-  display: inline-block;
-  padding: 3px 11px;
-  background: var(--ink);
-  color: var(--paper);
+.sp-social__i b {
+  font-family: var(--black);
+  font-weight: 800;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.sp-social__i span {
   font-size: 11px;
-  font-weight: 700;
   letter-spacing: .16em;
+  color: var(--gray);
 }
 
-.sp-scope__k--off { background: var(--red); }
+.sp-social__i:hover b { color: var(--red); }
 
-.sp-scope ul {
-  margin: 16px 0 0;
-  padding-left: 18px;
+/* ---------- 关注按钮 ---------- */
+
+.sp-do {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 18px;
 }
 
-.sp-scope li {
+.sp-do[hidden] { display: none; }
+
+.sp-do .btn {
+  padding: 10px 26px;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.sp-do .btn.is-on {
+  background: var(--paper);
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.sp-do__hint {
+  font-size: 12px;
+  color: var(--gray);
+}
+
+/* ---------- 提现记录 ---------- */
+
+.po {
+  border: var(--edge);
+  background: var(--paper);
+}
+
+.po__sum {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.po__cell { padding: 20px 22px 22px; }
+
+.po__cell + .po__cell { border-left: var(--edge); }
+
+.po__n {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin: 10px 0 0;
+}
+
+.po__n b {
+  font-family: var(--black);
+  font-weight: 800;
+  font-size: clamp(28px, 3.4vw, 40px);
+  line-height: 1;
+}
+
+.po__n--date b { font-size: clamp(19px, 2.2vw, 25px); }
+
+.po__u {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  color: var(--gray);
+}
+
+.po__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: var(--edge);
+}
+
+.po__i {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 22px;
+}
+
+.po__i + .po__i { border-top: 1px solid var(--hair); }
+
+.po__amt {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--black);
+  font-weight: 800;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.po__amt i {
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: .14em;
+  color: var(--gray);
+}
+
+.po__ch {
   font-size: 13px;
-  line-height: 1.95;
   color: #3E3930;
 }
 
-.sp-scope li::marker { color: var(--red); }
+.po__at {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: .04em;
+  color: var(--gray);
+}
 
-.sp-note {
-  margin: 18px 0 0;
-  padding-left: 14px;
-  border-left: 3px solid var(--hair);
-  font-size: 12.5px;
-  line-height: 1.85;
-  color: #5B5548;
+.po__empty {
+  margin: 0;
+  padding: 26px 22px;
+  border-top: var(--edge);
+  font-size: 13px;
+  color: var(--gray);
 }
 
 /* ---------- 操作 ---------- */
@@ -383,11 +494,21 @@
 @media (max-width: 620px) {
   .sp-bar__k { display: none; }
   .sp-name { letter-spacing: -.03em; }
-  .sp-scope { grid-template-columns: minmax(0, 1fr); }
-  .sp-scope__c + .sp-scope__c {
+  .sp-social { gap: 20px; }
+  .sp-do { flex-wrap: wrap; }
+  .sp-do .btn { flex: 1 1 100%; justify-content: center; }
+  .po__sum { grid-template-columns: minmax(0, 1fr); }
+  .po__cell + .po__cell {
     border-left: 0;
-    border-top: 3px solid var(--ink);
+    border-top: var(--edge);
+  }
+  .po__i { grid-template-columns: minmax(0, 1fr) auto; }
+  .po__at {
+    grid-column: 1 / -1;
+    margin-top: -6px;
   }
   .sp-acts .btn,
   .sp-none__a .btn { flex: 1 1 100%; justify-content: center; }
 }
+
+.sp-social[hidden] { display: none; }

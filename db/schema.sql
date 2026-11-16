@@ -128,3 +128,22 @@ CREATE TABLE IF NOT EXISTS withdrawals (
 
 CREATE INDEX IF NOT EXISTS idx_withdraw_uid    ON withdrawals(uid, id DESC);
 CREATE INDEX IF NOT EXISTS idx_withdraw_status ON withdrawals(status, created_at);
+
+-- ============================================================
+-- 关注关系
+-- ------------------------------------------------------------
+-- 有向边：follower_id 关注 followee_id。主键禁止重复关注。
+-- 不存冗余计数，粉丝数与关注数一律现算。
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS follows (
+  follower_id INTEGER NOT NULL,
+  followee_id INTEGER NOT NULL,
+  created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (follower_id, followee_id),
+  FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (followee_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_follows_followee ON follows(followee_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_follows_follower ON follows(follower_id, created_at DESC);

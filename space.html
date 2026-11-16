@@ -8,8 +8,8 @@
 <meta name="theme-color" content="#E0291E">
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="/style.css?v=2">
-<link rel="stylesheet" href="/home.css?v=1">
-<link rel="stylesheet" href="/space.css?v=1">
+<link rel="stylesheet" href="/home.css?v=2">
+<link rel="stylesheet" href="/space.css?v=2">
 <script src="/js/config.js"></script>
 </head>
 <body>
@@ -66,8 +66,21 @@
 
           <p class="sp-bio" id="bio"></p>
 
+          <div class="sp-social" id="socialRow">
+            <button class="sp-social__i" type="button" data-jump="followers">
+              <b id="fansN">0</b><span>粉丝</span>
+            </button>
+            <button class="sp-social__i" type="button" data-jump="following">
+              <b id="followN">0</b><span>关注</span>
+            </button>
+          </div>
+
+          <div class="sp-do" id="followBox" hidden>
+            <button class="btn btn--red btn--s" id="followBtn" type="button">关注</button>
+          </div>
+
           <p class="sp-self" id="selfNote" hidden>
-            这是你自己的主页，只有你能编辑资料。<a href="/settings">去账户设置</a>
+            这是你自己的主页。<a href="/settings">去账户设置</a>
           </p>
         </div>
 
@@ -91,42 +104,61 @@
     </div>
   </section>
 
-  <!-- ============ 可见范围 ============ -->
-  <section class="sp-sec" id="scopeSec">
+  <!-- ============ 关注与粉丝 ============ -->
+  <section class="sp-sec" id="socialSec">
     <div class="wrap">
       <div class="sp-h">
         <span class="sp-h__n">01</span>
-        <h2 class="sp-h__t">这一页能看到什么</h2>
+        <h2 class="sp-h__t">关注与粉丝</h2>
       </div>
 
-      <div class="sp-scope">
-        <div class="sp-scope__c">
-          <span class="sp-scope__k sp-scope__k--on">公开</span>
-          <ul>
-            <li>用户名、UID、角色铭牌</li>
-            <li>等级、经验、好感度</li>
-            <li>个人简介</li>
-            <li>注册年月与加入天数</li>
-            <li>账号是否可用</li>
-          </ul>
+      <div class="rel">
+        <div class="rel__tabs">
+          <button class="rel__tab is-on" type="button" data-scope="followers">
+            粉丝 <b id="tabFans">0</b>
+          </button>
+          <button class="rel__tab" type="button" data-scope="following">
+            关注 <b id="tabFollow">0</b>
+          </button>
         </div>
 
-        <div class="sp-scope__c">
-          <span class="sp-scope__k sp-scope__k--off">不公开</span>
-          <ul>
-            <li>注册邮箱</li>
-            <li>余额、冻结额与收支流水</li>
-            <li>注册 IP、网络归属与登录记录</li>
-            <li>封禁次数与原因、问卷商风控</li>
-            <li>工单、兑换记录与账号偏好</li>
-          </ul>
-        </div>
+        <ul class="rel__list" id="relList"></ul>
+
+        <p class="rel__empty" id="relEmpty" hidden></p>
+
+        <button class="rel__more" id="relMore" type="button" hidden>载入更多</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 提现记录 ============ -->
+  <section class="sp-sec" id="payoutSec">
+    <div class="wrap">
+      <div class="sp-h">
+        <span class="sp-h__n">02</span>
+        <h2 class="sp-h__t">提现记录</h2>
       </div>
 
-      <p class="sp-note">
-        这些字段不在页面里隐藏，而是根本不从接口返回。查看网页源码也拿不到，
-        因为公开接口只查询上面那一列。
-      </p>
+      <div class="po">
+        <div class="po__sum">
+          <div class="po__cell">
+            <span class="sp-k">成功提现</span>
+            <p class="po__n"><b id="poCount">0</b><span class="po__u">笔</span></p>
+          </div>
+          <div class="po__cell">
+            <span class="sp-k">累计金额</span>
+            <p class="po__n"><b id="poTotal">0.0000</b><span class="po__u" data-cur="code">FC</span></p>
+          </div>
+          <div class="po__cell">
+            <span class="sp-k">最近一笔</span>
+            <p class="po__n po__n--date"><b id="poLast">—</b></p>
+          </div>
+        </div>
+
+        <ul class="po__list" id="poList"></ul>
+
+        <p class="po__empty" id="poEmpty" hidden>该账户还没有成功的提现记录。</p>
+      </div>
     </div>
   </section>
 
@@ -172,6 +204,6 @@
   </div>
 </footer>
 
-<script src="/js/space.js?v=1" defer></script>
+<script src="/js/space.js?v=2" defer></script>
 </body>
 </html>

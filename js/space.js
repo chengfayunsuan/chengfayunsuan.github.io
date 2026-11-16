@@ -1,6 +1,6 @@
 /* ============================================================
    乘法 · 用户公开主页
-   数据来自 /api/pub/user，登录态来自 /api/auth/me
+   数据来自 /api/pub/user，关系列表来自 /api/follow
    页面只渲染接口给出的字段，缺的字段不猜、不补假值
    ============================================================ */
 (function () {
@@ -12,13 +12,37 @@
     banned: '该账户已被封禁，公开资料不再展示。',
     frozen: '该账户已被冻结，公开资料暂停展示。'
   };
+  var SCOPES = { followers: '粉丝', following: '关注' };
 
   var app = document.getElementById('app');
   var loading = document.getElementById('loading');
   var none = document.getElementById('none');
   var toast = document.getElementById('toast');
 
+  var relList = document.getElementById('relList');
+  var relEmpty = document.getElementById('relEmpty');
+  var relMore = document.getElementById('relMore');
+
+  var state = {
+    uid: null,
+    social: { followers: 0, following: 0 },
+    viewer: { self: false, signedIn: false, following: false },
+    scope: 'followers',
+    offset: 0,
+    total: 0,
+    busy: false
+  };
+
   function $(id) { return document.getElementById(id); }
+
+  function pad(n) { return n < 10 ? '0' + n : String(n); }
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '—';
+    return d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate());
+  }
 
   /* ---------- 提示条 ---------- */
 
@@ -43,10 +67,332 @@
     document.title = title + ' · 乘法';
   }
 
+  /* ---------- 统计数字 ---------- */
+
+  function paintSocial() {
+    var f = state.social;
+    $('fansN').textContent = f.followers;
+    $('followN').textContent = f.following;
+    $('tabFans').textContent = f.followers;
+    $('tabFollow').textContent = f.following;
+  }
+
+  /* ---------- 关注按钮 ---------- */
+
+  function paintFollow(on) {
+    state.viewer.following = on;
+    var btn = $('followBtn');
+    if (!btn) return;
+    btn.textContent = on ? '已关注' : '关注';
+    btn.classList.toggle('is-on', on);
+    btn.disabled = false;
+  }
+
+  function setupFollow() {
+    var box = $('followBox');
+    var btn = $('followBtn');
+
+    if (state.viewer.self) {
+      box.hidden = true;
+      return;
+    }
+
+    box.hidden = false;
+
+    if (!state.viewer.signedIn) {
+      btn.textContent = '登录后关注';
+      btn.addEventListener('click', function () {
+        location.href = '/login';
+      });
+      return;
+    }
+
+    paintFollow(state.viewer.following);
+
+    btn.addEventListener('click', function () {
+      if (btn.disabled) return;
+      btn.disabled = true;
+
+      var act = state.viewer.following ? 'unfollow' : 'follow';
+
+      fetch('/api/follow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid: Number(state.uid), act: act })
+      })
+        .then(function (res) {
+          return res.json().then(function (d) { return { ok: res.ok, body: d }; });
+        })
+        .then(function (r) {
+          if (r.ok && r.body.ok) {
+            state.social.followers = r.body.followers;
+            state.social.following = r.body.followees;
+            paintSocial();
+            paintFollow(r.body.following);
+            say(r.body.following ? '已关注该用户' : '已取消关注');
+
+            /* 关系变了，列表需要按新状态重取 */
+            if (state.scope === 'followers') loadRel('followers', false);
+            return;
+          }
+
+          btn.disabled = false;
+
+          var err = r.body && r.body.error;
+          if (err === 'unauthorized') {
+            say('登录状态已失效，请刷新页面');
+          } else if (err === 'self') {
+            say('不能关注自己');
+          } else if (err === 'restricted') {
+            say('该账户当前状态不可关注');
+          } else if (err === 'too_many') {
+            say('关注人数已达上限');
+          } else if (err === 'not_found') {
+            say('该用户不存在');
+          } else {
+            say('操作失败，请重试');
+          }
+        })
+        .catch(function () {
+          btn.disabled = false;
+          say('网络连接失败，操作未生效');
+        });
+    });
+  }
+
+  /* ---------- 关系列表 ---------- */
+
+  function itemNode(it) {
+    var li = document.createElement('li');
+    li.className = 'rel__i';
+
+    var a = document.createElement('a');
+    a.className = 'rel__a';
+    a.href = '/space?uid=' + encodeURIComponent(it.uid);
+
+    var uid = document.createElement('span');
+    uid.className = 'rel__uid';
+    uid.textContent = 'UID ' + it.uid;
+
+    var name = document.createElement('span');
+    name.className = 'rel__name';
+    name.textContent = it.username || '未命名';
+
+    var role = document.createElement('span');
+    role.className = 'face__role rel__role';
+    role.setAttribute('data-role', it.role || 'user');
+    role.textContent = ROLES[it.role] || it.role || '用户';
+
+    var lv = document.createElement('span');
+    lv.className = 'rel__lv';
+    lv.textContent = 'LV ' + (it.level || 1);
+
+    var at = document.createElement('span');
+    at.className = 'rel__at';
+    at.textContent = fmtDate(it.at);
+
+    a.appendChild(uid);
+    a.appendChild(name);
+    a.appendChild(role);
+    a.appendChild(lv);
+    a.appendChild(at);
+    li.appendChild(a);
+
+    var isSelf = String(it.uid) === String(state.uid);
+
+    if (state.viewer.signedIn && !isSelf) {
+      var act = document.createElement('button');
+      act.className = 'rel__act';
+      act.type = 'button';
+      act.setAttribute('data-uid', it.uid);
+      act.setAttribute('data-following', it.following ? '1' : '0');
+      act.textContent = it.following ? '取消关注' : '关注';
+      li.appendChild(act);
+    }
+
+    return li;
+  }
+
+  function emptyText(scope) {
+    if (!state.viewer.signedIn) {
+      return scope === 'followers' ? '该账户还没有粉丝。' : '该账户还没有关注任何人。';
+    }
+    if (state.viewer.self) {
+      return scope === 'followers' ? '还没有人关注你。' : '还没有关注任何人。';
+    }
+    return scope === 'followers' ? '该账户还没有粉丝。' : '该账户还没有关注任何人。';
+  }
+
+  function loadRel(scope, append) {
+    if (state.busy) return;
+    state.busy = true;
+
+    if (!append) {
+      state.offset = 0;
+      relList.textContent = '';
+      relEmpty.hidden = true;
+      relMore.hidden = true;
+    }
+
+    if (append) relMore.disabled = true;
+
+    state.scope = scope;
+
+    Array.prototype.forEach.call(document.querySelectorAll('.rel__tab'), function (t) {
+      t.classList.toggle('is-on', t.getAttribute('data-scope') === scope);
+    });
+
+    var url =
+      '/api/follow?scope=' + encodeURIComponent(scope) +
+      '&uid=' + encodeURIComponent(state.uid) +
+      '&offset=' + state.offset;
+
+    fetch(url, { headers: { Accept: 'application/json' } })
+      .then(function (res) {
+        return res.json().then(function (d) { return { status: res.status, body: d }; });
+      })
+      .then(function (r) {
+        state.busy = false;
+        relMore.disabled = false;
+
+        if (!r.body || !r.body.ok) {
+          relEmpty.hidden = false;
+          relEmpty.textContent = '列表载入失败，稍后重试。';
+          return;
+        }
+
+        var items = r.body.items || [];
+        state.total = r.body.total || 0;
+        state.offset += items.length;
+
+        items.forEach(function (it) { relList.appendChild(itemNode(it)); });
+
+        if (!state.offset) {
+          relEmpty.hidden = false;
+          relEmpty.textContent = emptyText(scope);
+        }
+
+        relMore.hidden = !(r.body.hasMore && state.offset < state.total);
+      })
+      .catch(function () {
+        state.busy = false;
+        relMore.disabled = false;
+        relEmpty.hidden = false;
+        relEmpty.textContent = '网络连接失败，请稍后刷新。';
+      });
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.rel__tab'), function (tab) {
+    tab.addEventListener('click', function () {
+      var scope = tab.getAttribute('data-scope');
+      if (scope === state.scope && state.offset > 0) return;
+      loadRel(scope, false);
+    });
+  });
+
+  if (relMore) {
+    relMore.addEventListener('click', function () {
+      loadRel(state.scope, true);
+    });
+  }
+
+  relList.addEventListener('click', function (ev) {
+    var btn = ev.target.closest ? ev.target.closest('.rel__act') : null;
+    if (!btn || btn.disabled) return;
+
+    var uid = btn.getAttribute('data-uid');
+    var following = btn.getAttribute('data-following') === '1';
+
+    btn.disabled = true;
+
+    fetch('/api/follow', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uid: Number(uid), act: following ? 'unfollow' : 'follow' })
+    })
+      .then(function (res) {
+        return res.json().then(function (d) { return { ok: res.ok, body: d }; });
+      })
+      .then(function (r) {
+        btn.disabled = false;
+        if (!r.ok || !r.body.ok) {
+          var err = r.body && r.body.error;
+          say(err === 'too_many' ? '关注人数已达上限' : '操作失败，请重试');
+          return;
+        }
+
+        btn.setAttribute('data-following', r.body.following ? '1' : '0');
+        btn.textContent = r.body.following ? '取消关注' : '关注';
+        say(r.body.following ? '已关注' : '已取消关注');
+      })
+      .catch(function () {
+        btn.disabled = false;
+        say('网络连接失败，操作未生效');
+      });
+  });
+
+  /* 顶部数字跳到列表 */
+
+  Array.prototype.forEach.call(document.querySelectorAll('.sp-social__i'), function (b) {
+    b.addEventListener('click', function () {
+      var scope = b.getAttribute('data-jump');
+      loadRel(scope, false);
+      var sec = $('socialSec');
+      if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  /* ---------- 提现记录 ---------- */
+
+  function renderPayouts(p) {
+    var data = p || { count: 0, total: '0.0000', lastAt: null, items: [] };
+
+    $('poCount').textContent = data.count || 0;
+    $('poTotal').textContent = data.total || '0.0000';
+    $('poLast').textContent = data.lastAt ? fmtDate(data.lastAt) : '—';
+
+    var list = $('poList');
+    list.textContent = '';
+
+    var items = data.items || [];
+
+    items.forEach(function (it) {
+      var li = document.createElement('li');
+      li.className = 'po__i';
+
+      var amt = document.createElement('span');
+      amt.className = 'po__amt';
+      amt.textContent = it.amount;
+      var unit = document.createElement('i');
+      unit.setAttribute('data-cur', 'code');
+      unit.textContent = 'FC';
+      amt.appendChild(unit);
+
+      var ch = document.createElement('span');
+      ch.className = 'po__ch';
+      ch.textContent = it.channel;
+
+      var at = document.createElement('span');
+      at.className = 'po__at';
+      at.textContent = fmtDate(it.at);
+
+      li.appendChild(amt);
+      li.appendChild(ch);
+      li.appendChild(at);
+      list.appendChild(li);
+    });
+
+    $('poEmpty').hidden = items.length > 0;
+  }
+
   /* ---------- 渲染 ---------- */
 
   function render(u) {
     document.title = (u.username || '用户') + ' · 乘法';
+
+    state.uid = u.uid;
+    state.viewer = u.viewer || { self: false, signedIn: false, following: false };
+    state.social = u.social || { followers: 0, following: 0 };
 
     $('uid').textContent = u.uid;
     $('name').textContent = u.username || '未命名';
@@ -65,7 +411,10 @@
       $('restrictNote').hidden = false;
       $('restrictNote').textContent = RESTRICT_TEXT[u.status] || '该账户当前状态异常，公开资料不展示。';
       $('bio').hidden = true;
-      $('scopeSec').hidden = true;
+      $('socialRow').hidden = true;
+      $('followBox').hidden = true;
+      $('socialSec').hidden = true;
+      $('payoutSec').hidden = true;
       var lvBox = document.querySelector('.sp-lv');
       if (lvBox) lvBox.hidden = true;
       var heroIn = document.querySelector('.sp-hero__in');
@@ -106,6 +455,16 @@
       bio.textContent = '该用户还没有填写个人简介。';
       bio.classList.add('is-empty');
     }
+
+    paintSocial();
+    setupFollow();
+    renderPayouts(u.payouts);
+
+    if (state.viewer.self) {
+      $('selfNote').hidden = false;
+    }
+
+    loadRel('followers', false);
   }
 
   /* ---------- 导航与自身判断 ---------- */
@@ -119,10 +478,6 @@
         .catch(function () {})
         .then(function () { location.replace('/'); });
     });
-  }
-
-  function showSelf() {
-    $('selfNote').hidden = false;
   }
 
   /* ---------- 复制链接 ---------- */
@@ -165,7 +520,19 @@
     affinity: 7,
     bio: '抽空填问卷，偶尔写点东西。对长问卷有耐心，对诱导性提问没有。',
     joinedMonth: '2026 年 10 月',
-    joinedDays: 28
+    joinedDays: 28,
+    social: { followers: 12, following: 5 },
+    payouts: {
+      count: 3,
+      total: '46.5000',
+      lastAt: '2026-11-12T09:20:00Z',
+      items: [
+        { amount: '20.0000', channel: '支付宝', at: '2026-11-12T09:20:00Z' },
+        { amount: '16.5000', channel: '微信', at: '2026-10-28T14:02:00Z' },
+        { amount: '10.0000', channel: '支付宝', at: '2026-10-05T11:41:00Z' }
+      ]
+    },
+    viewer: { self: false, signedIn: true, following: false }
   };
 
   var isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -202,7 +569,7 @@
       $('navAuthed').hidden = false;
       $('navBal').textContent = me.fc;
       $('navName').textContent = me.username || '我';
-      if (String(me.uid) === uid) showSelf();
+      if (String(me.uid) === uid) $('selfNote').hidden = false;
     }
 
     if (r.status === 0) {

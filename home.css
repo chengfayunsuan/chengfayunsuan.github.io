@@ -125,6 +125,172 @@
 
 .dock__i:hover .dock__n { color: rgba(244, 240, 230, .8); }
 
+/* ---------- 社交关系：关注与粉丝 ---------- */
+
+.rel-sec { padding: 30px 0 0; }
+
+.rel {
+  border: var(--edge);
+  background: var(--paper);
+}
+
+.rel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 18px;
+  border-bottom: var(--edge);
+}
+
+.rel__k {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .2em;
+  color: var(--gray);
+}
+
+.rel__tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.rel__tab {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 7px 15px;
+  border: 2px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  cursor: pointer;
+  transition: background .14s, color .14s;
+}
+
+.rel__tab b {
+  font-family: var(--black);
+  font-weight: 800;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.rel__tab.is-on {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.rel__tab:not(.is-on):hover { background: var(--paper-2); }
+
+.rel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rel__i {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+}
+
+.rel__i + .rel__i { border-top: 1px solid var(--hair); }
+
+.rel__a {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.rel__uid {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .08em;
+  color: var(--gray);
+  white-space: nowrap;
+}
+
+.rel__name {
+  font-size: 15px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rel__a:hover .rel__name { color: var(--red); }
+
+.rel__lv {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .08em;
+  color: var(--gray);
+  white-space: nowrap;
+}
+
+.rel__at {
+  margin-left: auto;
+  padding-left: 12px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .06em;
+  color: #6A6154;
+  white-space: nowrap;
+}
+
+.rel__act {
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  border: 2px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .14s, color .14s;
+}
+
+.rel__act:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.rel__empty {
+  margin: 0;
+  padding: 24px 18px;
+  border-top: 1px solid var(--hair);
+  font-size: 13px;
+  color: var(--gray);
+}
+
+.rel__more {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  border: 0;
+  border-top: var(--edge);
+  background: var(--paper-2);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.rel__more:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
 /* ---------- 门面 ---------- */
 
 .face { padding: 36px 0 0; }
@@ -693,4 +859,15 @@
   .hall__steps li { padding: 16px 18px; }
 
   .prog__note { flex-direction: column; align-items: flex-start; gap: 12px; }
+
+  .rel-sec { padding-top: 22px; }
+  .rel__head { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .rel__tabs { width: 100%; }
+  .rel__tab { flex: 1 1 auto; justify-content: center; }
+  .rel__i { flex-wrap: wrap; padding: 12px 14px; }
+  .rel__a { gap: 8px; }
+  .rel__at { display: none; }
+  .rel__act { padding: 6px 10px; font-size: 11.5px; }
 }
+
+.rel__more[hidden] { display: none; }
