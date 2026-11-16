@@ -396,7 +396,7 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 .art-svg {
-  width: clamp(252px, 21.5vw, 322px);
+  width: clamp(288px, 24.5vw, 374px);
   height: auto;
   flex: none;
 }
@@ -1008,7 +1008,7 @@ button { font-family: inherit; cursor: pointer; }
   .hero__actions .btn { flex: 1 1 100%; justify-content: center; }
 
   .hero__art { justify-content: center; padding: 26px 0 20px; }
-  .art-svg { width: 234px; }
+  .art-svg { width: 258px; }
 
   .belt { padding: 22px 0 26px; clip-path: polygon(0 0, 100% 1.6vw, 100% 100%, 0 100%); }
   .belt__in { gap: 12px 14px; }
