@@ -1,0 +1,3 @@
+# 字体文件按内容寻址，文件名变更即版本变更，可长期强缓存
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
