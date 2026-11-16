@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>账户 · 乘法</title>
+<meta name="description" content="乘法账户中心。查看余额、等级与问卷入口。">
+<meta name="theme-color" content="#E0291E">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/style.css?v=2">
+<link rel="stylesheet" href="/home.css?v=1">
+<script src="/js/config.js"></script>
+</head>
+<body>
+
+<!-- ============ 导航 ============ -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <span class="hm-nav__bal">
+        <b id="navBal">0.0000</b><i data-cur="code">FC</i>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <span class="hm-nav__name" id="navName">载入中</span>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ 操作栏：常驻目录 ============ -->
+<nav class="dock" aria-label="功能目录">
+  <div class="wrap dock__in">
+    <a class="dock__i" href="#surveys">
+      <span class="dock__n">01</span><span class="dock__t">问卷大厅</span>
+    </a>
+    <button class="dock__i" type="button" data-soon="兑换中心">
+      <span class="dock__n">02</span><span class="dock__t">兑换中心</span>
+    </button>
+    <button class="dock__i" type="button" data-soon="收支明细">
+      <span class="dock__n">03</span><span class="dock__t">收支明细</span>
+    </button>
+    <button class="dock__i" type="button" data-soon="提现申请">
+      <span class="dock__n">04</span><span class="dock__t">提现</span>
+    </button>
+    <button class="dock__i" type="button" data-soon="站内消息">
+      <span class="dock__n">05</span><span class="dock__t">站内消息</span>
+    </button>
+    <button class="dock__i" type="button" data-soon="联系客服">
+      <span class="dock__n">06</span><span class="dock__t">联系客服</span>
+    </button>
+    <button class="dock__i" type="button" data-soon="账户设置">
+      <span class="dock__n">07</span><span class="dock__t">账户设置</span>
+    </button>
+  </div>
+</nav>
+
+<main id="app" hidden>
+
+  <!-- ============ 门面 ============ -->
+  <section class="face">
+    <div class="wrap">
+
+      <div class="face__in">
+        <!-- 身份 -->
+        <div class="face__id">
+          <div class="face__meta">
+            <span class="face__uid">UID <b id="uidText">000001</b></span>
+            <span class="face__role" id="roleText">用户</span>
+          </div>
+
+          <h1 class="face__name" id="userName">—</h1>
+
+          <p class="face__sub">
+            注册于 <span id="joinedAt">—</span>
+            <span class="face__dot" aria-hidden="true">/</span>
+            状态 <span id="statusText">正常</span>
+          </p>
+
+          <div class="face__foot">
+            <p class="face__motto" id="bioText"></p>
+          </div>
+        </div>
+
+        <!-- 余额 -->
+        <div class="face__bal">
+          <div class="face__bal-k"><span data-cur="name">法币</span>余额</div>
+          <div class="face__bal-n" id="fcText">0.0000</div>
+          <div class="face__bal-f">
+            冻结 <span id="fcFrozen">0.0000</span>
+            <span class="face__bal-tag" data-cur="code">FC</span>
+          </div>
+
+          <div class="face__acts">
+            <button class="btn btn--red" type="button" data-soon="兑换中心">兑换</button>
+            <button class="btn btn--ghost" type="button" data-soon="提现申请">提现</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 数据条 -->
+      <div class="face__strip">
+        <div class="stat">
+          <span class="stat__n" id="statDone">0</span>
+          <span class="stat__t">已完成问卷</span>
+        </div>
+        <div class="stat">
+          <span class="stat__n" id="statDays">1</span>
+          <span class="stat__t">注册天数</span>
+        </div>
+        <div class="stat">
+          <span class="stat__n" id="statLevel">1</span>
+          <span class="stat__t">当前等级</span>
+        </div>
+        <div class="stat">
+          <span class="stat__n" id="statAff">0</span>
+          <span class="stat__t">好感度</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 等级与公告 ============ -->
+  <section class="prog">
+    <div class="wrap prog__in">
+
+      <div class="prog__exp">
+        <div class="prog__row">
+          <span class="prog__k">经验值 / 距离下一级</span>
+          <b><span id="expText">0</span> <span class="prog__slash">/</span> <span id="expNext">100</span></b>
+        </div>
+        <div class="prog__bar"><i id="expBar"></i></div>
+        <p class="prog__hint" id="expHint">再获得 100 点经验升至 2 级。</p>
+      </div>
+
+      <div class="prog__note">
+        <span class="stamp stamp--red">NOTICE / 公告</span>
+        <p>平台处于内测阶段，问卷大厅尚未开放。账户、余额与等级已可正常使用。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 问卷大厅 ============ -->
+  <section class="hall" id="surveys">
+    <div class="wrap">
+
+      <div class="hall__head">
+        <div>
+          <span class="hall__k">SURVEY HALL</span>
+          <h2 class="hall__t">问卷大厅</h2>
+        </div>
+        <div class="hall__count">
+          <b>00</b>
+          <span>份可参与</span>
+        </div>
+      </div>
+
+      <div class="hall__body">
+
+        <div class="hall__empty">
+          <p class="hall__empty-t">当前没有可参与的问卷</p>
+          <p class="hall__empty-d">
+            问卷由委托方发布，通过审核后在此处显示。新问卷上线时，站内消息会发出提醒。
+            符合样本条件的问卷才会出现在列表中，条件不符或名额已满的问卷不显示。
+          </p>
+          <button class="btn btn--red" type="button" data-soon="问卷大厅">
+            进入问卷大厅 <span aria-hidden="true">→</span>
+          </button>
+        </div>
+
+        <ol class="hall__steps">
+          <li>
+            <span class="hall__steps-n">01</span>
+            <span class="hall__steps-t">补全基础信息</span>
+            <span class="hall__steps-d">年龄段、城市与职业决定可参与的问卷范围。</span>
+          </li>
+          <li>
+            <span class="hall__steps-n">02</span>
+            <span class="hall__steps-t">选择符合条件的问卷</span>
+            <span class="hall__steps-d">列表标注题目类型、预计耗时与积分额度。</span>
+          </li>
+          <li>
+            <span class="hall__steps-n">03</span>
+            <span class="hall__steps-t">审核通过后入账</span>
+            <span class="hall__steps-d">答卷经有效性与完整性核验，通过即计入余额。</span>
+          </li>
+        </ol>
+
+      </div>
+
+      <p class="hall__tail">
+        问卷收益来自委托方支付的调研费用，平台不设邀请返利与层级分成。
+        <a href="/#how">查看运作流程 <span aria-hidden="true">→</span></a>
+      </p>
+
+    </div>
+  </section>
+
+</main>
+
+<!-- 载入遮罩 -->
+<div class="hm-load" id="loading">
+  <span class="hm-load__mark" aria-hidden="true"></span>
+  <span>正在载入账户</span>
+</div>
+
+<!-- 提示条 -->
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 乘法 CHENGFA</span>
+      <span>参与调研 · 累计余额 · 兑换回报</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/home.js?v=1" defer></script>
+</body>
+</html>

@@ -168,7 +168,7 @@
 
       if (res.ok && data.ok) {
         noteEl.textContent = (mode === 'signup' ? '账户已创建' : '登录成功') + '，正在进入…';
-        location.href = '/';
+        location.href = '/home';
         return;
       }
 

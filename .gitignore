@@ -16,3 +16,6 @@ preview-server.js
 
 # wrangler 本地缓存（部署凭证与打包中间产物），不进仓库
 .wrangler/
+
+# 本地截图与版面检查产物，不进仓库
+.preview/
