@@ -7,10 +7,12 @@
 
   var ROLES = { owner: '站长', admin: '管理员', premium: '大会员', user: '用户' };
   var STATUS = { active: '正常', frozen: '已冻结', banned: '已封禁' };
+  var BIO_MAX = 200;
 
   var app = document.getElementById('app');
   var loading = document.getElementById('loading');
   var toast = document.getElementById('toast');
+  var bioEl = document.getElementById('bioText');
 
   function $(id) { return document.getElementById(id); }
 
@@ -57,6 +59,102 @@
     });
   }
 
+  /* ---------- 个人简介：点击即改 ---------- */
+
+  var bioSaved = '';
+
+  function paintBio(text) {
+    bioSaved = text || '';
+    bioEl.textContent = bioSaved;
+    bioEl.classList.toggle('is-empty', !bioSaved);
+  }
+
+  function stopEdit() {
+    bioEl.removeAttribute('contenteditable');
+    bioEl.classList.remove('is-editing');
+  }
+
+  function saveBio(text) {
+    bioEl.textContent = text;
+    bioEl.classList.toggle('is-empty', !text);
+
+    fetch('/api/user/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bio: text })
+    })
+      .then(function (res) {
+        return res.json().then(function (d) { return { ok: res.ok, body: d }; });
+      })
+      .then(function (r) {
+        if (r.ok && r.body.ok) {
+          paintBio(r.body.user.bio);
+          say('个人简介已保存');
+        } else if (r.body && r.body.error === 'unauthorized') {
+          paintBio(bioSaved);
+          say('登录状态已失效，请刷新页面');
+        } else {
+          paintBio(bioSaved);
+          say('保存失败，请重试');
+        }
+      })
+      .catch(function () {
+        paintBio(bioSaved);
+        say('网络连接失败，简介未保存');
+      });
+  }
+
+  if (bioEl) {
+    bioEl.addEventListener('click', function () {
+      if (bioEl.isContentEditable) return;
+      bioEl.setAttribute('contenteditable', 'plaintext-only');
+      bioEl.classList.add('is-editing');
+      bioEl.focus();
+
+      var range = document.createRange();
+      range.selectNodeContents(bioEl);
+      range.collapse(false);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    });
+
+    bioEl.addEventListener('blur', function () {
+      if (!bioEl.isContentEditable) return;
+      stopEdit();
+
+      var text = (bioEl.textContent || '').replace(/\s+/g, ' ').trim().slice(0, BIO_MAX);
+      if (text === bioSaved) {
+        paintBio(bioSaved);
+        return;
+      }
+      saveBio(text);
+    });
+
+    bioEl.addEventListener('keydown', function (ev) {
+      if (!bioEl.isContentEditable) return;
+
+      if (ev.key === 'Escape') {
+        ev.preventDefault();
+        paintBio(bioSaved);
+        stopEdit();
+        bioEl.blur();
+      } else if (ev.key === 'Enter') {
+        ev.preventDefault();
+        bioEl.blur();
+      }
+    });
+
+    // 粘贴只取纯文本，避免带入外部样式
+    bioEl.addEventListener('paste', function (ev) {
+      if (!bioEl.isContentEditable) return;
+      ev.preventDefault();
+      var clip = ev.clipboardData || window.clipboardData;
+      var text = clip ? clip.getData('text') : '';
+      if (text) document.execCommand('insertText', false, text);
+    });
+  }
+
   /* ---------- 换算 ---------- */
 
   function fmtDate(iso) {
@@ -85,7 +183,7 @@
     $('navName').textContent = user.username || '未命名';
     $('navBal').textContent = user.fc;
 
-    $('uidText').textContent = pad(user.uid, 6);
+    $('uidText').textContent = user.uid;
     $('userName').textContent = user.username || '未命名';
     $('joinedAt').textContent = fmtDate(user.createdAt);
     $('statusText').textContent = STATUS[user.status] || user.status;
@@ -94,7 +192,7 @@
     roleEl.textContent = ROLES[user.role] || user.role;
     roleEl.setAttribute('data-role', user.role);
 
-    $('bioText').textContent = user.bio || '';
+    paintBio(user.bio || '');
 
     $('fcText').textContent = user.fc;
     $('fcFrozen').textContent = user.fcFrozen;
@@ -110,8 +208,6 @@
 
     $('expText').textContent = user.exp;
     $('expNext').textContent = range.to;
-    $('expHint').textContent =
-      '再获得 ' + Math.max(0, range.to - user.exp) + ' 点经验升至 ' + (user.level + 1) + ' 级。';
 
     requestAnimationFrame(function () {
       $('expBar').style.width = pct + '%';
@@ -123,7 +219,7 @@
 
   var DEMO = {
     uid: 1,
-    username: '用户1',
+    username: '乘法',
     role: 'owner',
     status: 'active',
     fc: '128.4500',

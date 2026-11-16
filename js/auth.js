@@ -19,6 +19,9 @@
   var emailErr = document.getElementById('emailErr');
   var pwErr = document.getElementById('pwErr');
   var agreeErr = document.getElementById('agreeErr');
+  var userRow = document.getElementById('userRow');
+  var usernameEl = document.getElementById('username');
+  var userErr = document.getElementById('userErr');
 
   var MODES = {
     login: {
@@ -50,6 +53,7 @@
     submitEl.innerHTML = cfg.submit + ' <span aria-hidden="true">→</span>';
     noteEl.textContent = cfg.note;
     pwEl.setAttribute('autocomplete', cfg.pwAuto);
+    userRow.hidden = mode !== 'signup';
 
     tabs.forEach(function (tab) {
       var on = tab.getAttribute('data-mode') === mode;
@@ -69,7 +73,7 @@
   /* ---------- 校验 ---------- */
 
   function clearErrors() {
-    [[emailEl, emailErr], [pwEl, pwErr], [agreeEl, agreeErr]].forEach(function (pair) {
+    [[emailEl, emailErr], [pwEl, pwErr], [agreeEl, agreeErr], [usernameEl, userErr]].forEach(function (pair) {
       pair[0].removeAttribute('aria-invalid');
       pair[1].hidden = true;
       pair[1].textContent = '';
@@ -83,12 +87,27 @@
   }
 
   var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  var NAME_RE = /^[\u4e00-\u9fa5A-Za-z0-9_-]{2,20}$/;
 
   function validate() {
     clearErrors();
     var ok = true;
     var email = emailEl.value.trim();
     var pw = pwEl.value;
+
+    if (mode === 'signup') {
+      var name = usernameEl.value.trim();
+      if (!name) {
+        fail(usernameEl, userErr, '请填写用户名。');
+        ok = false;
+      } else if (!NAME_RE.test(name)) {
+        fail(usernameEl, userErr, '用户名限 2 至 20 字，可用中文、字母、数字、下划线与连字符。');
+        ok = false;
+      } else if (/^\d+$/.test(name)) {
+        fail(usernameEl, userErr, '用户名不能全部为数字。');
+        ok = false;
+      }
+    }
 
     if (!email) {
       fail(emailEl, emailErr, '请填写邮箱地址。');
@@ -117,11 +136,11 @@
     return ok;
   }
 
-  [emailEl, pwEl].forEach(function (el) {
+  [emailEl, pwEl, usernameEl].forEach(function (el) {
     el.addEventListener('input', function () {
       if (el.getAttribute('aria-invalid') !== 'true') return;
       el.removeAttribute('aria-invalid');
-      (el === emailEl ? emailErr : pwErr).hidden = true;
+      (el === emailEl ? emailErr : el === pwEl ? pwErr : userErr).hidden = true;
     });
   });
 
@@ -131,6 +150,8 @@
     invalid_email: '邮箱格式不正确，请检查后重试。',
     invalid_password: '密码长度需在 8 至 72 位之间。',
     weak_password: '密码需同时包含字母与数字。',
+    invalid_username: '用户名限 2 至 20 字，可用中文、字母、数字、下划线与连字符。',
+    username_taken: '该用户名已被使用，请换一个。',
     email_taken: '该邮箱已注册，请直接登录。',
     invalid_credentials: '邮箱或密码不正确。',
     too_many_attempts: '尝试次数过多，请二十分钟后再试。',
@@ -159,10 +180,13 @@
     noteEl.classList.remove('is-error');
 
     try {
+      var payload = { email: emailEl.value.trim(), password: pwEl.value };
+      if (mode === 'signup') payload.username = usernameEl.value.trim();
+
       var res = await fetch(mode === 'signup' ? '/api/auth/register' : '/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailEl.value.trim(), password: pwEl.value })
+        body: JSON.stringify(payload)
       });
       var data = await res.json().catch(function () { return {}; });
 

@@ -40,6 +40,14 @@
 
       <form class="auth__form" id="authForm" novalidate>
 
+        <div class="field" id="userRow" hidden>
+          <label class="field__l" for="username">用户名</label>
+          <input class="field__i" id="username" name="username" type="text"
+                 autocomplete="nickname" placeholder="2 至 20 字，中文、字母、数字"
+                 spellcheck="false" maxlength="20">
+          <p class="field__e" id="userErr" hidden></p>
+        </div>
+
         <div class="field">
           <label class="field__l" for="email">邮箱</label>
           <input class="field__i" id="email" name="email" type="email"
@@ -69,7 +77,7 @@
         </button>
 
         <p class="auth__note" id="authNote">
-          后端账户系统尚未接入。本页仅呈现界面结构，提交不会进入账户。
+          登录状态保持 30 天。在公共设备上使用后请退出。
         </p>
 
       </form>

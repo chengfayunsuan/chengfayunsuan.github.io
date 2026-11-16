@@ -51,13 +51,22 @@ async function register(request, env, url) {
 
   const email = String(body.email || '').trim().toLowerCase();
   const password = String(body.password || '');
+  const username = String(body.username || '').trim();
 
   if (!isValidEmail(email)) return json({ ok: false, error: 'invalid_email' }, 400);
   if (password.length < 8 || password.length > 72) return json({ ok: false, error: 'invalid_password' }, 400);
   if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) return json({ ok: false, error: 'weak_password' }, 400);
+  if (username && !isValidUsername(username)) return json({ ok: false, error: 'invalid_username' }, 400);
 
   const existing = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(email).first();
   if (existing) return json({ ok: false, error: 'email_taken' }, 409);
+
+  if (username) {
+    const nameTaken = await env.DB.prepare(
+      'SELECT id FROM users WHERE username = ? COLLATE NOCASE'
+    ).bind(username).first();
+    if (nameTaken) return json({ ok: false, error: 'username_taken' }, 409);
+  }
 
   const salt = randomHex(16);
   const hash = await pbkdf2Hex(password, salt);
@@ -79,9 +88,9 @@ async function register(request, env, url) {
 
   const uid = result.meta && result.meta.last_row_id;
 
-  // 默认用户名取 uid，用户可在个人中心修改
+  // 未填用户名时按 uid 生成默认名，填了就用填的
   await env.DB.prepare('UPDATE users SET username = ? WHERE id = ?')
-    .bind('用户' + uid, uid).run();
+    .bind(username || '用户' + uid, uid).run();
 
   const token = await createSession(env, uid, request);
 

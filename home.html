@@ -70,7 +70,7 @@
         <!-- 身份 -->
         <div class="face__id">
           <div class="face__meta">
-            <span class="face__uid">UID <b id="uidText">000001</b></span>
+            <span class="face__uid">UID <b id="uidText">1</b></span>
             <span class="face__role" id="roleText">用户</span>
           </div>
 
@@ -83,7 +83,9 @@
           </p>
 
           <div class="face__foot">
-            <p class="face__motto" id="bioText"></p>
+            <p class="face__motto" id="bioText" role="textbox" tabindex="0"
+               aria-label="个人简介，点击编辑，回车保存"></p>
+            <span class="face__hint" id="bioHint">点击简介即可编辑</span>
           </div>
         </div>
 
@@ -113,9 +115,13 @@
           <span class="stat__n" id="statDays">1</span>
           <span class="stat__t">注册天数</span>
         </div>
-        <div class="stat">
-          <span class="stat__n" id="statLevel">1</span>
-          <span class="stat__t">当前等级</span>
+        <div class="stat stat--level">
+          <span class="stat__n"><span class="stat__lv">LV</span><span id="statLevel">1</span></span>
+          <div class="stat__row">
+            <span class="stat__t">当前等级</span>
+            <span class="stat__x"><span id="expText">0</span>/<span id="expNext">100</span></span>
+          </div>
+          <div class="stat__bar"><i id="expBar"></i></div>
         </div>
         <div class="stat">
           <span class="stat__n" id="statAff">0</span>
@@ -126,24 +132,13 @@
     </div>
   </section>
 
-  <!-- ============ 等级与公告 ============ -->
+  <!-- ============ 公告 ============ -->
   <section class="prog">
-    <div class="wrap prog__in">
-
-      <div class="prog__exp">
-        <div class="prog__row">
-          <span class="prog__k">经验值 / 距离下一级</span>
-          <b><span id="expText">0</span> <span class="prog__slash">/</span> <span id="expNext">100</span></b>
-        </div>
-        <div class="prog__bar"><i id="expBar"></i></div>
-        <p class="prog__hint" id="expHint">再获得 100 点经验升至 2 级。</p>
-      </div>
-
+    <div class="wrap">
       <div class="prog__note">
         <span class="stamp stamp--red">NOTICE / 公告</span>
         <p>平台处于内测阶段，问卷大厅尚未开放。账户、余额与等级已可正常使用。</p>
       </div>
-
     </div>
   </section>
 

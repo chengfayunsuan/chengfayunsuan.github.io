@@ -124,6 +124,8 @@
   margin-bottom: 22px;
 }
 
+.field[hidden] { display: none; }
+
 .field__l {
   display: block;
   font-family: var(--mono);
