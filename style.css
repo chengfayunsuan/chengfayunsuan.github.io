@@ -1097,7 +1097,7 @@ button { font-family: inherit; cursor: pointer; }
 
 @media (max-width: 1080px) {
   .hero__in { grid-template-columns: 1fr; gap: 28px; }
-  .hero__art { min-height: 280px; justify-content: flex-start; padding-left: 8px; }
+  .hero__art { justify-content: center; padding: 40px 0 32px; }
   .trust { grid-template-columns: repeat(2, 1fr); }
   .trust__i:nth-child(2) { border-right: 0; }
   .source { grid-template-columns: 1fr; gap: 36px; }
