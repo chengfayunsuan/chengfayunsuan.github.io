@@ -386,7 +386,8 @@ button { font-family: inherit; cursor: pointer; }
   color: #6B6558;
 }
 
-/* 右侧：红色圆盘 + 数字 */
+/* 右侧：红色尖锐箭头块
+   构成主义标志性的楔形，右侧收成尖角，指向页面下方内容 */
 .hero__disc {
   position: relative;
   display: flex;
@@ -394,72 +395,89 @@ button { font-family: inherit; cursor: pointer; }
   align-items: center;
 }
 
-.disc {
+.disc-wrap {
   position: relative;
-  width: clamp(250px, 23vw, 330px);
+  width: clamp(268px, 24vw, 348px);
   aspect-ratio: 1;
-  border-radius: 50%;
+  flex: none;
+}
+
+.disc {
+  position: absolute;
+  inset: 0;
   background: var(--red);
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: flex-start;
+  padding-left: 15%;
   color: var(--paper);
-  transform: rotate(-6deg);
-  box-shadow: 16px 16px 0 var(--ink);
-  flex: none;
+  /* 三角形楔子，三条边全部倾斜，尖端刺向右侧 */
+  clip-path: polygon(7% 0, 0 97%, 96% 53%);
+  filter: drop-shadow(14px 14px 0 var(--ink));
+}
+
+/* 内容放在三角形左侧的宽处，不接近尖端 */
+.disc__inner {
+  width: 46%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
 }
 
 .disc__num {
   font-family: var(--black);
-  font-size: clamp(80px, 9.4vw, 122px);
-  line-height: .78;
+  font-size: clamp(58px, 5.8vw, 76px);
+  line-height: .82;
   letter-spacing: -.03em;
+  white-space: nowrap;
 }
 
-.disc__num small {
-  font-size: .32em;
+.disc__num .u {
+  font-size: .34em;
   letter-spacing: 0;
+  margin-left: 2px;
 }
 
 .disc__label {
   margin-top: 10px;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: .1em;
+  letter-spacing: .02em;
+  line-height: 1.5;
 }
 
-/* 圆盘右上角的黑色方块标签 */
+/* 右上角黑色标签，独立于裁剪层之外 */
 .disc__corner {
   position: absolute;
-  top: 2%;
-  right: -8%;
+  top: 4px;
+  right: 10px;
+  z-index: 2;
   background: var(--ink);
   color: var(--paper);
   font-family: var(--mono);
   font-size: 10px;
   letter-spacing: .12em;
-  padding: 5px 10px;
-  transform: rotate(8deg);
+  padding: 6px 11px;
   white-space: nowrap;
+  box-shadow: 4px 4px 0 rgba(224, 41, 30, .45);
 }
 
-/* 圆盘左下：切线箭头，压在圆盘边缘上 */
+/* 左下角方框，骑在楔形左下边缘上 */
 .disc__arrow {
   position: absolute;
-  left: -34px;
-  bottom: 6px;
-  width: 84px;
-  height: 84px;
+  left: 2px;
+  bottom: 8px;
+  z-index: 2;
+  width: 70px;
+  height: 70px;
   border: 3px solid var(--ink);
-  border-radius: 50%;
   display: grid;
   place-items: center;
   background: var(--paper);
   color: var(--ink);
   font-size: 24px;
-  transform: rotate(-8deg);
-  box-shadow: 5px 5px 0 var(--red);
+  box-shadow: 6px 6px 0 var(--ink);
 }
 
 /* Hero 底部的黑色斜带 */
@@ -546,6 +564,7 @@ button { font-family: inherit; cursor: pointer; }
 .sect-head__t {
   margin: 0;
   font-size: clamp(30px, 4.4vw, 52px);
+  font-weight: 700;
   letter-spacing: -.04em;
   line-height: 1.1;
 }
@@ -683,16 +702,16 @@ button { font-family: inherit; cursor: pointer; }
   color: var(--gray);
 }
 
-/* 卡片右上角的几何装饰 */
+/* 卡片右上角的几何装饰：旋转方块，不用圆形 */
 .card__deco {
   position: absolute;
-  right: -38px;
-  top: -38px;
-  width: 132px;
-  height: 132px;
+  right: -46px;
+  top: -46px;
+  width: 118px;
+  height: 118px;
   border: 3px solid var(--ink);
-  border-radius: 50%;
-  opacity: .18;
+  transform: rotate(45deg);
+  opacity: .2;
 }
 
 .card--ink .card__deco { border-color: var(--paper); }
@@ -701,8 +720,8 @@ button { font-family: inherit; cursor: pointer; }
 
 .source {
   display: grid;
-  grid-template-columns: .9fr 1.1fr;
-  gap: 56px;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
   align-items: start;
 }
 
@@ -747,10 +766,10 @@ button { font-family: inherit; cursor: pointer; }
 
 .source__quote p {
   margin: 0;
-  font-size: clamp(20px, 2.4vw, 28px);
+  font-size: clamp(18px, 1.9vw, 22px);
   font-weight: 700;
-  line-height: 1.5;
-  letter-spacing: -.02em;
+  line-height: 1.6;
+  letter-spacing: -.01em;
 }
 
 .source__quote span {
@@ -980,7 +999,7 @@ button { font-family: inherit; cursor: pointer; }
   font-size: 11px;
   letter-spacing: .2em;
   text-transform: uppercase;
-  color: var(--red);
+  color: #F2554A;
 }
 
 .foot__links {
@@ -1067,12 +1086,12 @@ button { font-family: inherit; cursor: pointer; }
   .hero__sub { font-size: 13px; line-height: 1.8; }
   .hero__actions .btn { flex: 1 1 100%; justify-content: center; }
 
-  .hero__disc { justify-content: center; padding: 12px 0 0; }
-  .disc { width: 216px; box-shadow: 9px 9px 0 var(--ink); }
-  .disc__arrow { width: 60px; height: 60px; left: -22px; bottom: 2px; font-size: 19px; }
-  .disc__corner { right: -14%; font-size: 9px; }
-  .disc__num { font-size: 84px; }
-  .disc__label { font-size: 10px; letter-spacing: .04em; }
+  .hero__disc { justify-content: center; padding: 16px 0 4px; }
+  .disc-wrap { width: 208px; margin-left: 6%; }
+  .disc__num { font-size: 50px; }
+  .disc__label { font-size: 10px; margin-top: 8px; }
+  .disc__arrow { width: 52px; height: 52px; left: 0; bottom: 4px; font-size: 18px; box-shadow: 4px 4px 0 var(--ink); }
+  .disc__corner { top: 0; right: 0; font-size: 9px; padding: 5px 8px; }
 
   .belt { padding: 22px 0 26px; clip-path: polygon(0 0, 100% 1.6vw, 100% 100%, 0 100%); }
   .belt__in { gap: 12px 14px; }

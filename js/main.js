@@ -64,7 +64,7 @@
   document.querySelectorAll('[data-soon]').forEach(function (el) {
     el.addEventListener('click', function (ev) {
       ev.preventDefault();
-      showToast('注册通道还在调试，开的第一时间会挂在这里。');
+      showToast('注册通道正在调试，开放后将在此处公布入口。');
     });
   });
 
