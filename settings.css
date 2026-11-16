@@ -73,7 +73,6 @@
   color: var(--paper);
 }
 
-.jump .jump__find { margin-left: auto; }
 
 /* ---------- 区块骨架 ---------- */
 
@@ -740,14 +739,27 @@
   padding-right: 30px;
 }
 
-.find__out {
-  margin: 16px 0 0;
-  font-size: 12.5px;
-  line-height: 1.8;
-  color: var(--gray);
+/* 区块标题右侧的紧凑查找框 */
+.find--mini {
+  width: min(320px, 52vw);
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  align-self: center;
 }
 
-.find__out.is-hit { color: var(--ink); }
+.find--mini .fld {
+  padding: 8px 11px;
+  font-size: 12.5px;
+}
+
+.find--mini .btn {
+  padding: 8px 12px;
+  font-size: 11.5px;
+  letter-spacing: .06em;
+}
 
 /* ---------- 偏好开关的实际效果 ---------- */
 
@@ -819,4 +831,6 @@ body.is-grid {
   .row { gap: 12px; }
   .find { flex-wrap: wrap; }
   .find .btn { width: 100%; }
+  .find--mini { width: min(240px, 54vw); flex-wrap: nowrap; }
+  .find--mini .btn { width: auto; }
 }

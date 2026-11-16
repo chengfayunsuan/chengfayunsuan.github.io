@@ -509,11 +509,12 @@
 
   applyPrefs();
 
-  /* ---------- 09 查找 ---------- */
+  /* ---------- 账户概览右侧：查找用户 ---------- */
 
   var findForm = $('findForm');
   var findInput = $('findInput');
-  var findOut = $('findOut');
+  var findBtn = findForm.querySelector('button[type="submit"]');
+  var findLabel = findBtn.textContent;
   var finding = false;
 
   findForm.addEventListener('submit', function (ev) {
@@ -521,14 +522,14 @@
     if (finding) return;
 
     var q = findInput.value.trim();
-    findOut.classList.remove('is-hit');
     if (!q) {
-      findOut.textContent = '请输入 UID 或用户名。';
+      say('请输入 UID 或用户名。');
       return;
     }
 
     finding = true;
-    findOut.textContent = '查找中…';
+    findBtn.disabled = true;
+    findBtn.textContent = '查找中';
 
     fetch('/api/pub/user?q=' + encodeURIComponent(q), { headers: { Accept: 'application/json' } })
       .then(function (res) {
@@ -537,21 +538,24 @@
       .then(function (r) {
         var err = r.body && r.body.error;
         if (r.status === 200 && r.body.ok && r.body.user) {
-          findOut.textContent =
-            '找到 UID ' + r.body.user.uid + '「' + r.body.user.username + '」，正在进入主页…';
+          say('找到 UID ' + r.body.user.uid + '「' + r.body.user.username + '」，正在进入主页…');
           location.href = '/space?uid=' + r.body.user.uid;
         } else if (err === 'not_found') {
-          findOut.textContent = '没有这个 UID 或用户名，检查一下再试。';
+          say('没有这个 UID 或用户名，检查一下再试。');
         } else if (err === 'gone') {
-          findOut.textContent = '该账户已注销，主页不再公开。';
+          say('该账户已注销，主页不再公开。');
         } else {
-          findOut.textContent = '查找失败，请稍后重试。';
+          say('查找失败，请稍后重试。');
         }
       })
       .catch(function () {
-        findOut.textContent = '网络连接失败，请检查网络后重试。';
+        say('网络连接失败，请检查网络后重试。');
       })
-      .then(function () { finding = false; });
+      .then(function () {
+        finding = false;
+        findBtn.disabled = false;
+        findBtn.textContent = findLabel;
+      });
   });
 
   /* ---------- 本地预览 ---------- */
