@@ -1102,3 +1102,35 @@ button { font-family: inherit; cursor: pointer; }
   .reveal { opacity: 1; transform: none; transition: none; }
   * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
 }
+
+/* ---------- 币种切换按钮（设置页 / 后台用户管理 共用） ---------- */
+
+.cur-seg {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  max-width: 420px;
+}
+
+.cur-seg__b {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background .14s ease, color .14s ease;
+}
+
+.cur-seg__b b { font-size: 13px; font-weight: 700; letter-spacing: .02em; }
+.cur-seg__b i { font-style: normal; font-size: 11px; color: var(--gray); }
+.cur-seg__b:hover { background: var(--paper-2); }
+
+.cur-seg__b.is-on {
+  background: var(--ink);
+  color: var(--paper);
+}
+.cur-seg__b.is-on i { color: #B8B0A0; }

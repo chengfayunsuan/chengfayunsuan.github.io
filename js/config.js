@@ -50,6 +50,14 @@
       try { listeners[j](m); } catch (e) {}
     }
 
+    /* 同步所有币种按钮的选中态 */
+    var segBtns = document.querySelectorAll('.cur-seg__b');
+    for (var k = 0; k < segBtns.length; k++) {
+      var on = segBtns[k].getAttribute('data-cur-mode') === m;
+      segBtns[k].classList.toggle('is-on', on);
+      segBtns[k].setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+
     var nodes = document.querySelectorAll('[data-cur]');
     for (var i = 0; i < nodes.length; i++) {
       var el = nodes[i];
@@ -101,15 +109,30 @@
       try { localStorage.setItem('cf-currency', m); } catch (e) {}
       apply();
     },
+    /* 初始化所有币种切换按钮；任何页面放 .cur-seg 即可，无需单独写 JS */
+    bindCurrencyButtons: function () {
+      var segs = document.querySelectorAll('.cur-seg');
+      for (var i = 0; i < segs.length; i++) {
+        segs[i].addEventListener('click', function (ev) {
+          var b = ev.target.closest ? ev.target.closest('.cur-seg__b') : null;
+          if (b) window.CF.setCurrency(b.getAttribute('data-cur-mode'));
+        });
+      }
+    },
     refresh: apply,
     onChange: function (fn) { if (typeof fn === 'function') listeners.push(fn); },
     loadRate: loadRate
   };
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () { apply(); loadRate(); });
-  } else {
+  function boot() {
     apply();
+    window.CF.bindCurrencyButtons();
     loadRate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
   }
 })();

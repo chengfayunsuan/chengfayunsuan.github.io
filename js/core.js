@@ -142,7 +142,9 @@
         current = route.page;
 
         /* 新换进来的 [data-cur] 节点要重新套用币种显示 */
+        /* 新换进来的币种节点与按钮要重新套用显示并绑定 */
         if (window.CF && CF.refresh) CF.refresh();
+        if (window.CF && CF.bindCurrencyButtons) CF.bindCurrencyButtons();
 
         if (push) history.pushState({ page: route.page, path: path }, '', path);
         window.scrollTo(0, 0);

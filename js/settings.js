@@ -596,26 +596,7 @@
     net: 'CN · 浙江 · 电信'
   };
 
-  /* ---------- 币种显示切换 ---------- */
-
-  var curSeg = document.getElementById('curSeg');
-  if (curSeg && window.CF && window.CF.setCurrency) {
-    var markCur = function (m) {
-      curSeg.querySelectorAll('.cur-seg__b').forEach(function (b) {
-        var on = b.getAttribute('data-cur-mode') === m;
-        b.classList.toggle('is-on', on);
-        b.setAttribute('aria-pressed', on ? 'true' : 'false');
-      });
-    };
-    /* 注册到 CF，任何地方改币种都会同步高亮 */
-    window.CF.onChange(markCur);
-    markCur(window.CF.currency.mode);
-    curSeg.addEventListener('click', function (ev) {
-      var b = ev.target.closest('.cur-seg__b');
-      if (!b) return;
-      window.CF.setCurrency(b.getAttribute('data-cur-mode'));
-    });
-  }
+  /* 币种切换按钮由 config.js 全局绑定，无需此处处理 */
 
   var isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
