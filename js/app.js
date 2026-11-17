@@ -196,9 +196,19 @@
 
   /* ---------- 问卷大厅 ---------- */
 
+  /* 问卷商图标：没有 logo 素材，用名字首字做一个稳定的方块标识 */
+  function providerIcon(name) {
+    var n = String(name || '').trim();
+    var box = document.createElement('span');
+    box.className = 'svc__prov-ico';
+    box.setAttribute('aria-hidden', 'true');
+    box.textContent = n ? n.charAt(0) : '?';
+    return box;
+  }
+
   function cardEl(s, feat) {
     var card = document.createElement('article');
-    card.className = 'svc';
+    card.className = 'svc' + (feat ? ' svc--feat' : '');
 
     if (feat) {
       var flag = document.createElement('span');
@@ -207,7 +217,8 @@
       card.appendChild(flag);
     }
 
-    /* 价格：主角，一律走 CF.amount 以便跟随币种切换 */
+    /* ---------- 顶部：价格（主角）+ 评级星级 ---------- */
+
     var top = document.createElement('div');
     top.className = 'svc__top';
 
@@ -228,7 +239,7 @@
       var g = document.createElement('span');
       g.className = 'svc__grade';
       g.setAttribute('data-grade', s.grade);
-      g.textContent = s.grade + ' 级';
+      g.textContent = s.grade;
       rate.appendChild(g);
     }
 
@@ -246,34 +257,55 @@
     }
 
     top.appendChild(pay);
-    top.appendChild(rate);
+    if (rate.children.length) top.appendChild(rate);
     card.appendChild(top);
 
-    var h = document.createElement('h3');
-    h.className = 'svc__t';
-    h.textContent = s.title;
-    card.appendChild(h);
+    /* ---------- 问卷商：图标 + 名字，右侧耗时 ---------- */
 
-    var meta = document.createElement('div');
-    meta.className = 'svc__meta';
+    if (s.provider || s.durationMin) {
+      var prov = document.createElement('div');
+      prov.className = 'svc__prov';
 
-    function addMeta(label, value) {
-      if (!value) return;
-      var m = document.createElement('span');
-      m.className = 'svc__m';
-      var lab = document.createElement('i');
-      lab.textContent = label;
-      var val = document.createElement('b');
-      val.textContent = value;
-      m.appendChild(lab);
-      m.appendChild(val);
-      meta.appendChild(m);
+      if (s.provider) {
+        prov.appendChild(providerIcon(s.provider));
+        var pn = document.createElement('span');
+        pn.className = 'svc__prov-name';
+        pn.textContent = s.provider;
+        prov.appendChild(pn);
+      }
+
+      if (s.durationMin) {
+        var dt = document.createElement('span');
+        dt.className = 'svc__prov-time';
+        dt.textContent = s.durationMin + ' 分钟';
+        prov.appendChild(dt);
+      }
+
+      card.appendChild(prov);
     }
 
-    addMeta('问卷商', s.provider);
-    addMeta('耗时', s.durationMin ? s.durationMin + ' 分钟' : '');
-    addMeta('主题', s.topic);
-    if (meta.children.length) card.appendChild(meta);
+    /* ---------- 以下三块都可能没有，有才渲染 ---------- */
+
+    if (s.title || s.topic) {
+      var head = document.createElement('div');
+      head.className = 'svc__head';
+
+      if (s.title) {
+        var h = document.createElement('h3');
+        h.className = 'svc__t';
+        h.textContent = s.title;
+        head.appendChild(h);
+      }
+
+      if (s.topic) {
+        var tp = document.createElement('span');
+        tp.className = 'svc__topic';
+        tp.textContent = s.topic;
+        head.appendChild(tp);
+      }
+
+      card.appendChild(head);
+    }
 
     if (s.requirement) {
       var req = document.createElement('p');
@@ -285,15 +317,25 @@
       card.appendChild(req);
     }
 
+    /* ---------- 入口：始终贴卡片底部 ---------- */
+
+    var foot = document.createElement('div');
+    foot.className = 'svc__foot';
+
     var go = document.createElement(s.entry ? 'a' : 'span');
-    go.className = 'btn btn--red btn--s svc__go';
-    go.appendChild(document.createTextNode(s.entry ? '进入问卷' : '暂未开放'));
-    var arrow = document.createElement('span');
-    arrow.setAttribute('aria-hidden', 'true');
-    arrow.textContent = '→';
-    go.appendChild(arrow);
+    go.className = 'svc__go';
+
+    var gt = document.createElement('span');
+    gt.textContent = s.entry ? '进入问卷' : '暂未开放';
+    go.appendChild(gt);
 
     if (s.entry) {
+      var arrow = document.createElement('span');
+      arrow.className = 'svc__go-arrow';
+      arrow.setAttribute('aria-hidden', 'true');
+      arrow.textContent = '→';
+      go.appendChild(arrow);
+
       go.href = s.entry;
       if (/^https?:/i.test(s.entry)) {
         go.target = '_blank';
@@ -303,7 +345,8 @@
       go.classList.add('is-dead');
     }
 
-    card.appendChild(go);
+    foot.appendChild(go);
+    card.appendChild(foot);
     return card;
   }
 

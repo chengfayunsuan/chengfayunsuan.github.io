@@ -7,6 +7,9 @@
 
 .hl-sect { margin-top: clamp(28px, 3.4vw, 44px); }
 
+/* 站长推荐紧接下面的全部问卷，不用再加一个大间隔 */
+.hl-sect--feat + .hl-sect { margin-top: clamp(16px, 2vw, 24px); }
+
 .hl-sect__head {
   display: flex;
   align-items: baseline;
@@ -50,6 +53,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  min-height: 200px;
   padding: 18px 18px 16px;
   border: 2px solid var(--ink);
   background: var(--paper);
@@ -72,14 +76,14 @@
 .svc__pay {
   display: flex;
   align-items: baseline;
-  gap: 5px;
+  gap: 8px;
   min-width: 0;
 }
 
 .svc__pay b {
   font-family: var(--num);
-  font-size: 42px;
-  line-height: .88;
+  font-size: 56px;
+  line-height: .84;
   color: var(--red);
   letter-spacing: .01em;
 }
@@ -87,7 +91,7 @@
 .svc__pay i {
   font-style: normal;
   font-family: var(--num);
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: .1em;
   color: var(--ink);
 }
@@ -103,12 +107,14 @@
 
 .svc__grade {
   font-family: var(--num);
-  font-size: 12px;
-  letter-spacing: .12em;
-  padding: 3px 8px;
+  font-size: 17px;
+  letter-spacing: .04em;
+  min-width: 30px;
+  padding: 4px 7px;
   border: 2px solid var(--ink);
   color: var(--ink);
   line-height: 1;
+  text-align: center;
 }
 
 .svc__grade[data-grade="S"] {
@@ -123,57 +129,96 @@
 }
 
 .svc__stars {
-  font-size: 13px;
-  letter-spacing: .1em;
+  font-size: 14px;
+  letter-spacing: .06em;
   color: var(--red);
   white-space: nowrap;
 }
 
 .svc__stars .off { color: #C9C2B2; }
 
-/* 标题 */
+/* 标题与主题同一行：主题只是一个短标签，没必要单独占一整行 */
+.svc__head {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 6px 9px;
+  margin-top: 13px;
+}
+
 .svc__t {
-  margin: 15px 0 12px;
-  font-size: 16px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin: 0;
+  font-size: 15.5px;
   line-height: 1.45;
   font-weight: 700;
   letter-spacing: .01em;
 }
 
-/* 元信息 */
-.svc__meta {
+/* 问卷商：图标 + 名字，耗时靠右 */
+.svc__prov {
   display: flex;
-  flex-wrap: wrap;
-  gap: 7px 16px;
-  margin-bottom: 12px;
+  align-items: center;
+  gap: 9px;
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--paper-2);
 }
 
-.svc__m {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  font-size: 12px;
-  line-height: 1.4;
-}
-
-.svc__m i {
-  font-style: normal;
-  color: var(--gray);
-  letter-spacing: .04em;
+.svc__prov-ico {
   flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
 }
 
-.svc__m b {
-  font-weight: 700;
+.svc__prov-name {
   min-width: 0;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: .01em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.svc__prov-time {
+  flex: none;
+  margin-left: auto;
+  font-size: 11.5px;
+  letter-spacing: .04em;
+  color: var(--gray);
+}
+
+/* 主题：短标签，与标题同行 */
+.svc__topic {
+  flex: none;
+  margin-top: 1px;
+  padding: 2px 8px;
+  border: 1px solid var(--ink);
+  font-size: 11px;
+  letter-spacing: .06em;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
 /* 要求：没有就整行不渲染 */
 .svc__req {
-  margin: 0 0 13px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin: 11px 0 0;
   padding-left: 9px;
   border-left: 3px solid var(--red);
   font-size: 12px;
@@ -187,30 +232,50 @@
   margin-right: 5px;
 }
 
-/* 入口 */
-.svc__go {
+/* 入口：卡片内次要元素，不做成大红块；底栏吃掉剩余空间，按钮永远贴底 */
+.svc__foot {
   margin-top: auto;
+  padding-top: 16px;
+}
+
+.svc__go {
+  padding-top: 13px;
+  border-top: 2px solid var(--ink);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: var(--ink);
+  transition: color .14s ease;
 }
 
+.svc__go-arrow {
+  font-size: 15px;
+  line-height: 1;
+  color: var(--red);
+  transition: transform .16s ease;
+}
+
+.svc__go:hover { color: var(--red); }
+.svc__go:hover .svc__go-arrow { transform: translateX(4px); }
+
 .svc__go.is-dead {
-  opacity: .45;
+  border-top-color: var(--paper-2);
+  color: var(--gray);
   cursor: not-allowed;
   pointer-events: none;
 }
 
 /* 推荐位 */
-.sv-grid--feat .svc {
+.svc--feat {
   border-color: var(--red);
   box-shadow: 6px 6px 0 rgba(224, 41, 30, .16);
 }
 
-.sv-grid--feat .svc:hover {
-  box-shadow: 8px 8px 0 rgba(224, 41, 30, .3);
-}
+.svc--feat:hover { box-shadow: 8px 8px 0 rgba(224, 41, 30, .3); }
 
 .svc__flag {
   position: absolute;
@@ -229,7 +294,8 @@
 
 @media (max-width: 480px) {
   .sv-grid { grid-template-columns: 1fr; gap: 14px; }
-  .svc { padding: 16px 15px 14px; }
-  .svc__pay b { font-size: 36px; }
+  .svc { min-height: 188px; padding: 16px 15px 14px; }
+  .svc__pay b { font-size: 46px; }
+  .svc__grade { font-size: 15px; min-width: 26px; }
   .svc__t { font-size: 15px; }
 }

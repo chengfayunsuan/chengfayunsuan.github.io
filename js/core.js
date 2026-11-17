@@ -100,7 +100,7 @@
     return '';
   }
 
-  var current = document.body.getAttribute('data-page') || '';
+  var current = (document.body || document.documentElement).getAttribute('data-page') || '';
 
   function ensureCss(list) {
     (list || []).forEach(function (href) {
