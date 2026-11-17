@@ -1129,3 +1129,14 @@
   }
   .ld-hero__fc { font-size: 30px; }
 }
+
+/* 金额容器内的数字节点：继承容器的字体与配色，只承载数值 */
+.lg-row__d > b,
+.lg-row__b > b,
+.ld-fc > b,
+.ld-hero__fc > b,
+.st-rec__p > b {
+  font: inherit;
+  color: inherit;
+  font-weight: inherit;
+}

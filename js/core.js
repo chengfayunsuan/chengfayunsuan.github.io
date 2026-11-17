@@ -82,7 +82,10 @@
     '/admin/users': { page: 'admin-users', js: '/js/admin.js?v=6' },
     '/admin/withdrawals': { page: 'admin-withdrawals', js: '/js/admin.js?v=6' },
     '/admin/tickets': { page: 'admin-tickets', js: '/js/admin.js?v=6' },
-    '/admin/surveys': { page: 'admin-surveys', js: '/js/admin-surveys.js?v=1' }
+    '/admin/surveys': { page: 'admin-surveys', js: '/js/admin-surveys.js?v=1' },
+    '/admin/orders': { page: 'admin-orders', js: '/js/admin-shop.js?v=1' },
+    '/admin/items': { page: 'admin-items', js: '/js/admin-shop.js?v=1' },
+    '/admin/messages': { page: 'admin-messages', js: '/js/admin-msg.js?v=1' }
   };
 
   function normalize(path) {
@@ -173,6 +176,226 @@
     ev.preventDefault();
     swap(to, normalize(href), true);
   });
+
+
+
+  /* ---------- 站内消息未读角标 ---------- */
+
+  function paintMsgBadge() {
+    var dock = document.querySelector('[data-msg-dock]');
+    if (!dock || dock.querySelector('.dock__badge')) return;
+
+    fetch('/api/messages', { headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.ok || !d.unread) return;
+        var b = document.createElement('span');
+        b.className = 'dock__badge';
+        b.textContent = d.unread > 99 ? '99+' : String(d.unread);
+        dock.appendChild(b);
+      })
+      .catch(function () {});
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', paintMsgBadge);
+  } else {
+    paintMsgBadge();
+  }
+
+  /* ---------- 通用弹层 ----------
+     全站统一入口，避免每页各写一套。
+     用法：CF.modal({
+       kicker, title, desc,
+       fields: [{ name, label, type, value, placeholder, hint, options }],
+       submitText, onSubmit(values, api)
+     })
+     onSubmit 里调用 api.setBusy(true/false)、api.setError(text)、api.close()。
+  */
+
+  var modalEl = null;
+
+  function closeModal() {
+    if (!modalEl) return;
+    modalEl.classList.remove('is-on');
+    var node = modalEl;
+    modalEl = null;
+    setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 180);
+  }
+
+  function buildField(f) {
+    var wrap = document.createElement('label');
+    wrap.className = 'mo__f';
+
+    var lab = document.createElement('span');
+    lab.className = 'mo__l';
+    lab.textContent = f.label || '';
+    wrap.appendChild(lab);
+
+    var input;
+    if (f.type === 'textarea') {
+      input = document.createElement('textarea');
+      input.rows = f.rows || 3;
+    } else if (f.type === 'select') {
+      input = document.createElement('select');
+      (f.options || []).forEach(function (o) {
+        var op = document.createElement('option');
+        op.value = o.value;
+        op.textContent = o.label;
+        if (String(o.value) === String(f.value)) op.selected = true;
+        input.appendChild(op);
+      });
+    } else {
+      input = document.createElement('input');
+      input.type = f.type || 'text';
+      if (f.value != null) input.value = f.value;
+      if (f.placeholder) input.placeholder = f.placeholder;
+      if (f.type === 'number') { input.step = f.step || '0.01'; input.min = f.min != null ? f.min : '0'; }
+    }
+
+    if (f.name) input.name = f.name;
+    if (f.maxlength) input.maxLength = f.maxlength;
+    input.className = 'mo__i';
+    wrap.appendChild(input);
+
+    if (f.hint) {
+      var hint = document.createElement('span');
+      hint.className = 'mo__hint';
+      hint.textContent = f.hint;
+      wrap.appendChild(hint);
+    }
+
+    return wrap;
+  }
+
+  function modal(opts) {
+    opts = opts || {};
+    closeModal();
+
+    var back = document.createElement('div');
+    back.className = 'mo-back';
+    back.setAttribute('role', 'dialog');
+    back.setAttribute('aria-modal', 'true');
+
+    var panel = document.createElement('form');
+    panel.className = 'mo';
+
+    var head = document.createElement('div');
+    head.className = 'mo__head';
+
+    if (opts.kicker) {
+      var k = document.createElement('span');
+      k.className = 'mo__k';
+      k.textContent = opts.kicker;
+      head.appendChild(k);
+    }
+
+    var t = document.createElement('h3');
+    t.className = 'mo__t';
+    t.textContent = opts.title || '';
+    head.appendChild(t);
+
+    if (opts.desc) {
+      var d = document.createElement('p');
+      d.className = 'mo__d';
+      d.textContent = opts.desc;
+      head.appendChild(d);
+    }
+
+    var closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'mo__x';
+    closeBtn.setAttribute('aria-label', '关闭');
+    closeBtn.textContent = '×';
+    closeBtn.addEventListener('click', closeModal);
+    head.appendChild(closeBtn);
+
+    panel.appendChild(head);
+
+    var body = document.createElement('div');
+    body.className = 'mo__body';
+    (opts.fields || []).forEach(function (f) { body.appendChild(buildField(f)); });
+    panel.appendChild(body);
+
+    var msg = document.createElement('p');
+    msg.className = 'mo__msg';
+    msg.hidden = true;
+    panel.appendChild(msg);
+
+    var foot = document.createElement('div');
+    foot.className = 'mo__foot';
+
+    var cancel = document.createElement('button');
+    cancel.type = 'button';
+    cancel.className = 'mo__btn mo__btn--ghost';
+    cancel.textContent = opts.cancelText || '取消';
+    cancel.addEventListener('click', closeModal);
+
+    var ok = document.createElement('button');
+    ok.type = 'submit';
+    ok.className = 'mo__btn mo__btn--main';
+    ok.textContent = opts.submitText || '确认';
+
+    if (!opts.hideCancel) foot.appendChild(cancel);
+    foot.appendChild(ok);
+    panel.appendChild(foot);
+
+    var api = {
+      close: closeModal,
+      setBusy: function (busy) {
+        ok.disabled = !!busy;
+        if (cancel) cancel.disabled = !!busy;
+        ok.textContent = busy ? (opts.busyText || '处理中…') : (opts.submitText || '确认');
+      },
+      setError: function (text) {
+        if (!text) { msg.hidden = true; return; }
+        msg.hidden = false;
+        msg.textContent = text;
+      },
+      values: function () {
+        var out = {};
+        (opts.fields || []).forEach(function (f) {
+          var el = panel.querySelector('[name="' + f.name + '"]');
+          out[f.name] = el ? String(el.value).trim() : '';
+        });
+        return out;
+      }
+    };
+
+    panel.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      api.setError('');
+      if (opts.onSubmit) opts.onSubmit(api.values(), api);
+      else closeModal();
+    });
+
+    back.addEventListener('mousedown', function (ev) {
+      if (ev.target === back) closeModal();
+    });
+
+    document.addEventListener('keydown', onEsc);
+
+    function onEsc(ev) {
+      if (ev.key === 'Escape') {
+        closeModal();
+        document.removeEventListener('keydown', onEsc);
+      }
+    }
+
+    back.appendChild(panel);
+    document.body.appendChild(back);
+    modalEl = back;
+
+    /* 进场动画下一帧再加类，避免闪 */
+    requestAnimationFrame(function () { back.classList.add('is-on'); });
+
+    var first = panel.querySelector('.mo__i');
+    if (first) setTimeout(function () { first.focus(); }, 60);
+
+    return api;
+  }
+
+  if (window.CF) CF.modal = modal;
 
   window.addEventListener('popstate', function (ev) {
     var path = location.pathname;

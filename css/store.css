@@ -1,0 +1,271 @@
+/* ============================================================
+   乘法 · 兑换中心
+   商品网格 + 我的记录。钱包与规则沿用 page.css 的 st-* 。
+   ============================================================ */
+
+.st-sec { margin-top: clamp(30px, 3.6vw, 46px); }
+
+.st-sec__h {
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.st-sec__t {
+  margin: 6px 0 0;
+  font-size: clamp(18px, 2.2vw, 24px);
+  font-weight: 700;
+}
+
+.st-sec__d {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--gray);
+}
+
+/* ---------- 商品 ---------- */
+
+.st-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(238px, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.st-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 16px 14px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  transition: box-shadow .14s ease, transform .14s ease;
+}
+
+.st-item:hover {
+  box-shadow: 6px 6px 0 var(--ink);
+  transform: translate(-1px, -1px);
+}
+
+.st-item.is-off {
+  opacity: .5;
+  pointer-events: none;
+}
+
+.st-item__k {
+  font-family: var(--num);
+  font-size: 11px;
+  letter-spacing: .14em;
+  color: var(--red);
+}
+
+.st-item__t {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.st-item__s {
+  font-size: 11.5px;
+  color: var(--gray);
+}
+
+.st-item__p {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--paper-2);
+}
+
+.st-item__p b {
+  font-family: var(--num);
+  font-size: 34px;
+  line-height: .9;
+  color: var(--red);
+}
+
+.st-item__p i {
+  font-style: normal;
+  font-family: var(--num);
+  font-size: 12px;
+  letter-spacing: .1em;
+  color: var(--ink);
+}
+
+.st-item__stock {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--gray);
+}
+
+.st-item__stock.is-low { color: var(--red); }
+
+.st-item__b {
+  width: 100%;
+  margin-top: 4px;
+  padding: 9px 12px;
+  border: 2px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  cursor: pointer;
+  transition: background .14s ease, border-color .14s ease;
+}
+
+.st-item__b:hover { background: var(--red); border-color: var(--red); }
+
+.st-item__b:disabled {
+  background: var(--paper-2);
+  border-color: var(--paper-2);
+  color: var(--gray);
+  cursor: not-allowed;
+}
+
+/* ---------- 记录 ---------- */
+
+.st-tabs {
+  display: flex;
+  margin-top: 18px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.st-tab {
+  padding: 9px 18px;
+  margin-bottom: -2px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--gray);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  cursor: pointer;
+}
+
+.st-tab.is-on {
+  color: var(--ink);
+  border-bottom-color: var(--red);
+}
+
+.st-recs { margin-top: 6px; }
+
+.st-rec {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr) 96px 84px;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--paper-2);
+}
+
+.st-rec__at {
+  font-family: var(--num);
+  font-size: 12px;
+  letter-spacing: .06em;
+  color: var(--gray);
+}
+
+.st-rec__m { min-width: 0; }
+
+.st-rec__t {
+  font-size: 13px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.st-rec__s {
+  margin-top: 3px;
+  font-size: 11.5px;
+  color: var(--gray);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.st-rec__code {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 5px;
+  padding: 3px 8px;
+  border: 1px dashed var(--ink);
+  font-family: var(--num);
+  font-size: 12.5px;
+  letter-spacing: .1em;
+  cursor: pointer;
+}
+
+.st-rec__code:hover { background: var(--paper-2); }
+
+.st-rec__code em {
+  font-style: normal;
+  font-family: var(--sans);
+  font-size: 10.5px;
+  letter-spacing: 0;
+  color: var(--gray);
+}
+
+.st-rec__p {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 5px;
+  text-align: right;
+}
+
+.st-rec__p b {
+  font-family: var(--num);
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.st-rec__p i {
+  font-style: normal;
+  font-family: var(--num);
+  font-size: 10.5px;
+  letter-spacing: .08em;
+  color: var(--gray);
+}
+
+.st-rec__st {
+  justify-self: end;
+  padding: 2px 8px;
+  border: 1px solid var(--ink);
+  font-size: 10.5px;
+  letter-spacing: .04em;
+}
+
+.st-rec__st[data-s="paid"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.st-rec__st[data-s="pending"] { color: var(--red); border-color: var(--red); }
+.st-rec__st[data-s="rejected"],
+.st-rec__st[data-s="refunded"] { color: var(--gray); border-color: var(--paper-2); }
+
+.st-empty {
+  margin: 18px 0 0;
+  padding: 26px 0;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--gray);
+}
+
+@media (max-width: 760px) {
+  .st-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+  .st-item__p b { font-size: 28px; }
+}
+
+@media (max-width: 560px) {
+  .st-rec { grid-template-columns: minmax(0, 1fr) 84px; gap: 8px 12px; }
+  .st-rec__at { grid-column: 1 / -1; }
+  .st-rec__p { justify-content: flex-start; }
+  .st-rec__p b { font-size: 16px; }
+}

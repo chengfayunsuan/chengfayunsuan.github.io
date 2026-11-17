@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>商品与兑换码 · 乘法后台</title>
+<meta name="description" content="乘法运营后台：商品与兑换码。">
+<meta name="theme-color" content="#1D52E2">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=9">
+<link rel="stylesheet" href="/css/home.css?v=8">
+<link rel="stylesheet" href="/css/page.css?v=5">
+<link rel="stylesheet" href="/css/admin.css?v=8">
+<script src="/js/config.js?v=4"></script>
+<script src="/js/core.js?v=8"></script>
+</head>
+<body data-page="admin-items" data-accent="blue">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/home">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><i data-cur="code">CFB</i>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/home">我</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
+    </div>
+  </div>
+</header>
+
+<nav class="dock" aria-label="后台目录">
+  <div class="wrap dock__in">
+    <a class="dock__i" href="/admin">
+      <span class="dock__n">01</span><span class="dock__t">后台概览</span>
+    </a>
+    <a class="dock__i" href="/admin/users">
+      <span class="dock__n">02</span><span class="dock__t">用户管理</span>
+    </a>
+    <a class="dock__i" href="/admin/withdrawals">
+      <span class="dock__n">03</span><span class="dock__t">提现审核</span>
+    </a>
+    <a class="dock__i" href="/admin/orders">
+      <span class="dock__n">04</span><span class="dock__t">兑换订单</span>
+    </a>
+    <a class="dock__i" href="/admin/tickets">
+      <span class="dock__n">05</span><span class="dock__t">工单</span>
+    </a>
+    <a class="dock__i" href="/admin/surveys">
+      <span class="dock__n">06</span><span class="dock__t">问卷管理</span>
+    </a>
+    <a class="dock__i is-on" href="/admin/items" aria-current="page">
+      <span class="dock__n">07</span><span class="dock__t">商品兑换</span>
+    </a>
+    <a class="dock__i" href="/admin/messages">
+      <span class="dock__n">08</span><span class="dock__t">站内消息</span>
+    </a>
+  </div>
+</nav>
+
+<main id="app">
+  <section class="face">
+    <div class="wrap">
+      <div class="face__in">
+        <div class="face__id">
+          <div class="face__meta">
+            <span class="face__uid">ADMIN / 商品兑换</span>
+            <span class="adm-badge">SHOP</span>
+          </div>
+          <h1 class="face__name">商品与兑换码</h1>
+          <p class="face__sub">上架商品 · 定价 · 库存 · 生成卡密</p>
+          <div class="face__foot">
+            <p class="adm-lead">商品类型决定发货方式：兑换码类从卡密池取码即时发；订阅类进待发货由人工处理；现金类直接生成提现申请。</p>
+          </div>
+        </div>
+
+        <div class="face__bal">
+          <div class="face__bal-k">ITEMS / 商品总数</div>
+          <div class="face__bal-n" id="itCount">0</div>
+          <div class="face__bal-f">个商品 · <span id="cdFree">0</span> 个可用卡密</div>
+          <div class="face__acts"><a class="btn btn--ghost" href="/store">查看兑换中心</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="adm-sec">
+    <div class="wrap">
+      <div class="adm-panel">
+        <div class="adm-h">
+          <span class="adm-h__t" id="itFormTitle">新增商品</span>
+          <span class="adm-h__d">价格以 CFB 计；库存填 -1 表示不限量</span>
+        </div>
+
+        <form class="svf" id="itForm" novalidate>
+          <input type="hidden" id="itId" value="">
+
+          <label class="svf__f svf__f--wide">
+            <span class="svf__l">商品名称 <em>*</em></span>
+            <input class="svf__i" id="itTitle" type="text" maxlength="60" placeholder="例如：Steam 充值卡 30 元">
+          </label>
+
+          <label class="svf__f">
+            <span class="svf__l">类型</span>
+            <select class="svf__i" id="itKind">
+              <option value="code">兑换码（即时发码）</option>
+              <option value="sub">订阅（人工发货）</option>
+              <option value="cash">现金（生成提现）</option>
+            </select>
+          </label>
+
+          <label class="svf__f">
+            <span class="svf__l">价格（CFB）</span>
+            <input class="svf__i" id="itPrice" type="number" min="0.01" step="0.01" placeholder="30">
+          </label>
+
+          <label class="svf__f">
+            <span class="svf__l">库存（-1 不限）</span>
+            <input class="svf__i" id="itStock" type="number" step="1" value="-1">
+          </label>
+
+          <label class="svf__f">
+            <span class="svf__l">排序（小的在前）</span>
+            <input class="svf__i" id="itSort" type="number" step="1" value="0">
+          </label>
+
+          <label class="svf__f">
+            <span class="svf__l">副标题</span>
+            <input class="svf__i" id="itSubtitle" type="text" maxlength="40" placeholder="即时发码 / 人工发货">
+          </label>
+
+          <label class="svf__f">
+            <span class="svf__l">状态</span>
+            <select class="svf__i" id="itStatus">
+              <option value="on">上架</option>
+              <option value="off">下架</option>
+            </select>
+          </label>
+
+          <label class="svf__f svf__f--full">
+            <span class="svf__l">商品说明</span>
+            <textarea class="svf__i svf__i--area" id="itNote" rows="2" maxlength="300" placeholder="兑换弹层里展示给用户的说明"></textarea>
+          </label>
+
+          <label class="svf__f svf__f--full">
+            <span class="svf__l">发货说明</span>
+            <textarea class="svf__i svf__i--area" id="itDeliver" rows="2" maxlength="300" placeholder="后台内部备注，用户看不到"></textarea>
+          </label>
+
+          <div class="svf__acts">
+            <button class="btn btn--red" type="submit">保存商品</button>
+            <button class="btn btn--ghost" type="button" id="itReset">清空</button>
+            <span class="svf__msg" id="itMsg" role="status" aria-live="polite"></span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="adm-sec">
+    <div class="wrap">
+      <div class="adm-panel">
+        <div class="adm-h">
+          <span class="adm-h__t">商品列表</span>
+          <span class="adm-h__d">下架后前台立即消失，已产生的订单不受影响</span>
+        </div>
+
+        <div class="adm-list">
+          <div class="adm-tr adm-tr--it adm-head">
+            <span>价格</span><span>商品</span><span>类型</span><span>库存 / 卡密</span><span>已兑</span><span>操作</span>
+          </div>
+          <div id="itList"></div>
+        </div>
+        <p class="adm-empty" id="itEmpty" hidden>还没有商品，用上面的表单加第一个。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="adm-sec adm-sec--last">
+    <div class="wrap">
+      <div class="adm-panel">
+        <div class="adm-h">
+          <span class="adm-h__t">卡密池</span>
+          <span class="adm-h__d">绑定商品的码会按顺序发给兑换者；不绑商品且填了面额的，是通用充值码</span>
+        </div>
+
+        <form class="svf" id="cdForm" novalidate>
+          <label class="svf__f">
+            <span class="svf__l">归属商品</span>
+            <select class="svf__i" id="cdItem"><option value="">通用充值码</option></select>
+          </label>
+
+          <label class="svf__f">
+            <span class="svf__l">面额（仅通用码）</span>
+            <input class="svf__i" id="cdValue" type="number" min="0" step="0.01" placeholder="10">
+          </label>
+
+          <label class="svf__f">
+            <span class="svf__l">生成数量</span>
+            <input class="svf__i" id="cdCount" type="number" min="1" max="200" step="1" value="5">
+          </label>
+
+          <label class="svf__f">
+            <span class="svf__l">批次备注</span>
+            <input class="svf__i" id="cdBatch" type="text" maxlength="30" placeholder="可留空">
+          </label>
+
+          <label class="svf__f svf__f--full">
+            <span class="svf__l">自填卡密（一行一个，留空则自动生成）</span>
+            <textarea class="svf__i svf__i--area" id="cdCodes" rows="3" placeholder="有现成卡密时直接粘进来"></textarea>
+          </label>
+
+          <div class="svf__acts">
+            <button class="btn btn--red" type="submit">生成卡密</button>
+            <span class="svf__msg" id="cdMsg" role="status" aria-live="polite"></span>
+          </div>
+        </form>
+
+        <div class="adm-chips">
+          <span class="adm-chip">可用 <b id="cdStatFree">0</b></span>
+          <span class="adm-chip">已用 <b id="cdStatUsed">0</b></span>
+          <span class="adm-chip">作废 <b id="cdStatVoid">0</b></span>
+        </div>
+
+        <div class="adm-list">
+          <div class="adm-tr adm-tr--cd adm-head">
+            <span>卡密</span><span>归属</span><span>面额</span><span>状态</span><span>使用人</span><span>操作</span>
+          </div>
+          <div id="cdList"></div>
+        </div>
+        <p class="adm-empty" id="cdEmpty" hidden>还没有卡密。</p>
+      </div>
+    </div>
+  </section>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 乘法 CHENGFA</span>
+      <span>运营后台 · 仅限站长与管理员</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/admin-shop.js?v=1" defer></script>
+</body>
+</html>

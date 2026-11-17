@@ -7,11 +7,12 @@
 <meta name="description" content="乘法兑换中心：乘法币提现与数字兑换码。">
 <meta name="theme-color" content="#E0291E">
 <meta name="robots" content="noindex">
-<link rel="stylesheet" href="/css/style.css?v=8">
+<link rel="stylesheet" href="/css/style.css?v=9">
 <link rel="stylesheet" href="/css/home.css?v=8">
 <link rel="stylesheet" href="/css/page.css?v=5">
+<link rel="stylesheet" href="/css/store.css?v=1">
 <script src="/js/config.js?v=4"></script>
-<script src="/js/core.js?v=7"></script>
+<script src="/js/core.js?v=8"></script>
 </head>
 <body data-page="store">
 
@@ -77,53 +78,42 @@
       </div>
 
       <div class="st-wallet__a">
-        <button class="btn btn--red" type="button" data-soon="提现申请">申请提现</button>
-        <button class="btn btn--ghost" type="button" data-soon="兑换码">兑换兑换码</button>
+        <button class="btn btn--red" type="button" id="stWithdrawBtn">申请提现</button>
+        <button class="btn btn--ghost" type="button" id="stCodeBtn">兑换兑换码</button>
       </div>
     </div>
 
-    <div class="st-grid">
+    <section class="st-sec">
+      <div class="st-sec__h">
+        <span class="pg-k">ITEMS</span>
+        <h2 class="st-sec__t">可兑换商品</h2>
+        <p class="st-sec__d">价格与库存实时读取，兑换后立即进入兑换记录。</p>
+      </div>
+      <div class="st-grid" id="stList"></div>
+      <p class="st-empty" id="stEmpty" hidden>暂时没有可兑换的商品，稍后再来看看。</p>
+    </section>
 
-      <article class="st-card">
-        <span class="st-card__k">CASH / 现金</span>
-        <h2 class="st-card__t">提现至支付宝 / 微信</h2>
-        <p class="st-card__d">
-          余额累计至十元即可提交申请，审核通过后七个工作日内到账。
-          收款账户须与注册人实名信息一致，不一致会被驳回。
-        </p>
-        <p class="st-card__p"><b>10</b><span data-cur="code">FC</span><span>起提</span></p>
-        <p class="st-card__s">需人工审核</p>
-      </article>
+    <section class="st-sec">
+      <div class="st-sec__h">
+        <span class="pg-k">RECORDS</span>
+        <h2 class="st-sec__t">我的记录</h2>
+      </div>
 
-      <article class="st-card st-card--ink">
-        <span class="st-card__k">CODE / 兑换码</span>
-        <h2 class="st-card__t">Steam 充值卡</h2>
-        <p class="st-card__d">
-          兑换后即时发放激活码，无需审核等待。库存实时更新，
-          缺货时档位会暂时置灰。
-        </p>
-        <p class="st-card__p"><b>30</b><span data-cur="code">FC</span><span>起兑</span></p>
-        <p class="st-card__s">即时发码</p>
-      </article>
+      <div class="st-tabs" role="tablist">
+        <button class="st-tab is-on" type="button" data-tab="orders">兑换记录</button>
+        <button class="st-tab" type="button" data-tab="withdraw">提现记录</button>
+      </div>
 
-      <article class="st-card">
-        <span class="st-card__k">SUBSCRIPTION / 订阅</span>
-        <h2 class="st-card__t">会员与软件年费</h2>
-        <p class="st-card__d">
-          常用软件的年费会员与订阅码，按档位兑换。
-          具体品类随委托方结算周期调整，以兑换时列表为准。
-        </p>
-        <p class="st-card__p"><b>50</b><span data-cur="code">FC</span><span>起兑</span></p>
-        <p class="st-card__s">按档位发放</p>
-      </article>
-
-    </div>
+      <div class="st-recs" id="stOrders"></div>
+      <div class="st-recs" id="stWithdraws" hidden></div>
+      <p class="st-empty" id="stRecEmpty" hidden>还没有记录。</p>
+    </section>
 
     <div class="pg-note">
       <span class="stamp stamp--red">NOTICE / 公告</span>
       <p>
-        兑换与提现通道处于内测阶段，按钮暂不可用。余额与冻结金额已按真实规则记账，
-        通道开放后可直接提交，无需重新累计。
+        提现申请提交后金额进入冻结，审核通过七个工作日内打款；兑换码类商品即时发放，
+        订阅类商品由人工在两个工作日内开通，结果通过站内消息通知。
       </p>
     </div>
 
@@ -160,6 +150,6 @@
   </div>
 </footer>
 
-<script src="/js/app.js?v=10" defer></script>
+<script src="/js/app.js?v=12" defer></script>
 </body>
 </html>

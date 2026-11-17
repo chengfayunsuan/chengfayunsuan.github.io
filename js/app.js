@@ -262,7 +262,7 @@
 
     /* ---------- 问卷商：图标 + 名字，右侧耗时 ---------- */
 
-    if (s.provider || s.durationMin) {
+    if (s.provider || s.durationMin || s.joined) {
       var prov = document.createElement('div');
       prov.className = 'svc__prov';
 
@@ -279,6 +279,13 @@
         dt.className = 'svc__prov-time';
         dt.textContent = s.durationMin + ' 分钟';
         prov.appendChild(dt);
+      }
+
+      if (s.joined) {
+        var dn = document.createElement('span');
+        dn.className = 'svc__done';
+        dn.textContent = '已参与';
+        prov.appendChild(dn);
       }
 
       card.appendChild(prov);
@@ -341,6 +348,19 @@
         go.target = '_blank';
         go.rel = 'noopener';
       }
+
+      /* 点开就记一次参与，keepalive 保证跳转时请求不被取消 */
+      go.addEventListener('click', function () {
+        if (s.joined) return;
+        try {
+          fetch('/api/surveys/join', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: s.id }),
+            keepalive: true
+          }).catch(function () {});
+        } catch (e) {}
+      });
     } else {
       go.classList.add('is-dead');
     }
@@ -413,28 +433,493 @@
 
   /* ---------- 兑换中心 ---------- */
 
+  var STORE_ERR = {
+    insufficient_balance: '可用余额不足，先去做问卷攒够再来。',
+    has_pending: '已有一笔提现正在审核，等它处理完再提交下一笔。',
+    below_min: '低于起提金额。',
+    bad_amount: '请填写正确的提现金额。',
+    bad_channel: '请选择收款渠道。',
+    account_required: '请填写收款账号。',
+    out_of_stock: '库存不足，暂时无法兑换。',
+    item_off: '该商品已下架。',
+    code_not_found: '兑换码不存在，检查一下有没有输错。',
+    code_used: '这个兑换码已经被用过了。',
+    code_item_only: '这是商品专用码，请到对应商品处兑换。',
+    bad_code: '兑换码格式不对。',
+    account_locked: '账户当前状态无法操作，联系客服确认。',
+    unauthorized: '登录状态已失效，请重新登录。'
+  };
+
+  function storeErr(code) {
+    return STORE_ERR[code] || ('操作失败：' + (code || '未知错误'));
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { say('已复制到剪贴板'); })
+        .catch(function () { say('复制失败，请手动选中'); });
+      return;
+    }
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); say('已复制到剪贴板'); } catch (e) { say('复制失败，请手动选中'); }
+    document.body.removeChild(ta);
+  }
+
   function initStore(me) {
     if (!me) return;
-    var fc = $('stFc');
-    var fr = $('stFrozen');
-    if (fc) setAmt(fc, me.fc);
-    if (fr) setAmt(fr, me.fcFrozen);
 
-    /* 余额不够的档位标灰：内部货币 1 FC 折算 1 元 */
-    var have = Number(trimNum(me.fc)) || 0;
-    document.querySelectorAll('[data-need]').forEach(function (el) {
-      var need = Number(el.getAttribute('data-need')) || 0;
-      if (have >= need) return;
-      el.classList.add('is-locked');
-      el.setAttribute('aria-disabled', 'true');
-    });
+    var walletFc = $('stFc');
+    var walletFrozen = $('stFrozen');
+    var listEl = $('stList');
+    var emptyEl = $('stEmpty');
+    var ordersEl = $('stOrders');
+    var withdrawsEl = $('stWithdraws');
+    var recEmpty = $('stRecEmpty');
 
-    document.querySelectorAll('[data-soon]').forEach(function (el) {
-      el.addEventListener('click', function (ev) {
-        ev.preventDefault();
-        say(el.getAttribute('data-soon') + ' · 内测阶段暂未开放');
+    var items = [];
+    var orders = [];
+    var withdraws = [];
+    var tab = 'orders';
+    var curFc = Number(trimNum(me.fc)) || 0;
+
+    function setWallet(fc, frozen) {
+      if (fc != null) {
+        curFc = Number(fc) || 0;
+        if (walletFc) setAmt(walletFc, fc);
+        var nav = $('navBal');
+        if (nav) setAmt(nav, fc);
+        if (window.CF && CF.cache) {
+          var c = CF.cache.get();
+          if (c) { c.fc = String(fc); CF.cache.set(c); }
+        }
+      }
+      if (frozen != null) {
+        if (walletFrozen) setAmt(walletFrozen, frozen);
+        if (window.CF && CF.cache) {
+          var c2 = CF.cache.get();
+          if (c2) { c2.fcFrozen = String(frozen); CF.cache.set(c2); }
+        }
+      }
+    }
+
+    /* ---------- 商品 ---------- */
+
+    var KIND_LABEL = { code: 'CODE / 兑换码', cash: 'CASH / 现金', sub: 'SUB / 订阅' };
+
+    function stockText(it) {
+      if (it.stock < 0) return '不限量';
+      if (it.stock === 0) return '已兑完';
+      return '剩 ' + it.stock + ' 件';
+    }
+
+    function itemCard(it) {
+      var card = document.createElement('article');
+      card.className = 'st-item' + (it.soldOut ? ' is-off' : '');
+
+      var k = document.createElement('span');
+      k.className = 'st-item__k';
+      k.textContent = KIND_LABEL[it.kind] || 'ITEM';
+      card.appendChild(k);
+
+      var t = document.createElement('h3');
+      t.className = 'st-item__t';
+      t.textContent = it.title;
+      card.appendChild(t);
+
+      if (it.subtitle) {
+        var sub = document.createElement('span');
+        sub.className = 'st-item__s';
+        sub.textContent = it.subtitle;
+        card.appendChild(sub);
+      }
+
+      var p = document.createElement('div');
+      p.className = 'st-item__p';
+
+      var b = document.createElement('b');
+      setAmt(b, it.price);
+      var u = document.createElement('i');
+      u.setAttribute('data-cur', 'code');
+      u.textContent = 'CFB';
+      p.appendChild(b);
+      p.appendChild(u);
+
+      var st = document.createElement('span');
+      st.className = 'st-item__stock' + (it.stock > 0 && it.stock <= 3 ? ' is-low' : '');
+      st.textContent = stockText(it);
+      p.appendChild(st);
+
+      card.appendChild(p);
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'st-item__b';
+
+      if (it.soldOut) {
+        btn.disabled = true;
+        btn.textContent = '已兑完';
+      } else if (curFc < Number(it.price)) {
+        btn.disabled = true;
+        btn.textContent = '余额不足';
+      } else {
+        btn.textContent = it.kind === 'cash' ? '兑换并提现' : it.kind === 'sub' ? '兑换 · 人工发货' : '立即兑换';
+        btn.addEventListener('click', function () { openRedeem(it); });
+      }
+
+      card.appendChild(btn);
+      return card;
+    }
+
+    function paintItems() {
+      listEl.textContent = '';
+      items.forEach(function (it) { listEl.appendChild(itemCard(it)); });
+      if (emptyEl) emptyEl.hidden = items.length > 0;
+    }
+
+    function openRedeem(it) {
+      var fields = [];
+      var desc = it.note || '';
+
+      if (it.kind === 'cash') {
+        fields.push({
+          name: 'account', label: '收款账号',
+          placeholder: '支付宝账号或绑定手机号',
+          hint: '账号需与实名信息一致，不一致会被驳回。'
+        });
+      } else if (it.kind === 'sub') {
+        fields.push({
+          name: 'memo', label: '开通信息',
+          placeholder: '需要开通的手机号 / 账号，可留空',
+          hint: '留空则通过站内消息联系你补填。'
+        });
+      }
+
+      CF.modal({
+        kicker: 'REDEEM',
+        title: '兑换「' + it.title + '」',
+        desc: '将从可用余额扣除 ' + it.price + '，' + desc,
+        fields: fields,
+        submitText: '确认兑换',
+        busyText: '兑换中…',
+        onSubmit: function (v, api) {
+          api.setError('');
+          if (it.kind === 'cash' && (v.account || '').length < 4) {
+            api.setError('请填写完整的收款账号。');
+            return;
+          }
+          api.setBusy(true);
+
+          postJSON('/api/store/redeem', { itemId: it.id, account: v.account || '', memo: v.memo || '' })
+            .then(function (r) {
+              if (r.body && r.body.ok) {
+                api.close();
+                setWallet(r.body.balance, null);
+                loadStore();
+                loadOrders();
+                if (r.body.code) {
+                  CF.modal({
+                    kicker: 'SUCCESS',
+                    title: '兑换成功',
+                    desc: '卡密：' + r.body.code + '\n单号：' + r.body.sn + '\n\n卡密同时写入兑换记录，可随时回来查看。',
+                    submitText: '知道了',
+                    hideCancel: true,
+                    onSubmit: function (_, m) { m.close(); }
+                  });
+                } else {
+                  say(it.kind === 'cash' ? '已提交提现申请，等待审核' : '兑换成功，等待人工发货');
+                }
+              } else {
+                api.setBusy(false);
+                api.setError(storeErr(r.body && r.body.error));
+              }
+            })
+            .catch(function () {
+              api.setBusy(false);
+              api.setError('网络连接失败，请重试。');
+            });
+        }
+      });
+    }
+
+    /* ---------- 提现 ---------- */
+
+    function openWithdraw() {
+      CF.modal({
+        kicker: 'WITHDRAW',
+        title: '申请提现',
+        desc: '可提余额 ' + trimNum(String(curFc)) + '，起提 10。提交后金额进入冻结，审核通过七个工作日内到账。',
+        fields: [
+          { name: 'amount', label: '提现金额', type: 'number', value: '10', min: 10, step: '0.01' },
+          {
+            name: 'channel', label: '收款渠道', type: 'select', value: 'alipay',
+            options: [
+              { value: 'alipay', label: '支付宝' },
+              { value: 'wechat', label: '微信' },
+              { value: 'paypal', label: 'PayPal' },
+              { value: 'payoneer', label: 'Payoneer' }
+            ]
+          },
+          { name: 'account', label: '收款账号', placeholder: '与实名一致的账号或绑定手机号' }
+        ],
+        submitText: '提交申请',
+        busyText: '提交中…',
+        onSubmit: function (v, api) {
+          api.setError('');
+          var amount = Number(v.amount);
+          if (!isFinite(amount) || amount < 10) {
+            api.setError('起提金额为 10，请填写不低于 10 的金额。');
+            return;
+          }
+          if (amount > curFc) {
+            api.setError('超出可用余额，当前最多可提 ' + trimNum(String(curFc)) + '。');
+            return;
+          }
+          if ((v.account || '').length < 4) {
+            api.setError('请填写收款账号。');
+            return;
+          }
+          api.setBusy(true);
+
+          postJSON('/api/withdraw', { amount: amount, channel: v.channel, account: v.account })
+            .then(function (r) {
+              if (r.body && r.body.ok) {
+                api.close();
+                setWallet(r.body.balance, null);
+                loadStore();
+                loadWithdraws();
+                say('提现申请已提交，单号 ' + r.body.ref);
+              } else {
+                api.setBusy(false);
+                api.setError(storeErr(r.body && r.body.error));
+              }
+            })
+            .catch(function () {
+              api.setBusy(false);
+              api.setError('网络连接失败，请重试。');
+            });
+        }
+      });
+    }
+
+    /* ---------- 兑换码 ---------- */
+
+    function openCode() {
+      CF.modal({
+        kicker: 'CDK',
+        title: '兑换充值码',
+        desc: '充值码直接加到可用余额，不区分面额，兑换后即时到账。',
+        fields: [
+          { name: 'code', label: '兑换码', placeholder: 'CF-XXXX-XXXX-XXXX' }
+        ],
+        submitText: '立即兑换',
+        busyText: '兑换中…',
+        onSubmit: function (v, api) {
+          api.setError('');
+          if ((v.code || '').length < 4) {
+            api.setError('请输入兑换码。');
+            return;
+          }
+          api.setBusy(true);
+
+          postJSON('/api/cdk/redeem', { code: v.code })
+            .then(function (r) {
+              if (r.body && r.body.ok) {
+                api.close();
+                setWallet(r.body.balance, null);
+                loadStore();
+                say('充值成功，到账 ' + r.body.amount + ' CFB');
+              } else {
+                api.setBusy(false);
+                api.setError(storeErr(r.body && r.body.error));
+              }
+            })
+            .catch(function () {
+              api.setBusy(false);
+              api.setError('网络连接失败，请重试。');
+            });
+        }
+      });
+    }
+
+    /* ---------- 记录 ---------- */
+
+    var ORDER_ST = { paid: '已完成', pending: '待发货', refunded: '已退款' };
+    var WD_ST = { pending: '审核中', paid: '已打款', rejected: '已驳回' };
+
+    function orderRow(o) {
+      var row = document.createElement('div');
+      row.className = 'st-rec';
+
+      var at = document.createElement('span');
+      at.className = 'st-rec__at';
+      at.textContent = fmtTime(o.at);
+      row.appendChild(at);
+
+      var m = document.createElement('div');
+      m.className = 'st-rec__m';
+
+      var t = document.createElement('div');
+      t.className = 'st-rec__t';
+      t.textContent = o.title;
+      m.appendChild(t);
+
+      var sub = document.createElement('div');
+      sub.className = 'st-rec__s';
+      sub.textContent = o.sn + (o.memo ? ' · ' + o.memo : '');
+      m.appendChild(sub);
+
+      if (o.code) {
+        var cd = document.createElement('span');
+        cd.className = 'st-rec__code';
+        cd.setAttribute('role', 'button');
+        cd.setAttribute('tabindex', '0');
+        cd.title = '点击复制';
+        cd.appendChild(document.createTextNode(o.code));
+        var hint = document.createElement('em');
+        hint.textContent = '复制';
+        cd.appendChild(hint);
+        cd.addEventListener('click', function () { copyText(o.code); });
+        m.appendChild(cd);
+      }
+
+      row.appendChild(m);
+
+      var p = document.createElement('span');
+      p.className = 'st-rec__p';
+      var pb = document.createElement('b');
+      setAmt(pb, o.price);
+      var u = document.createElement('i');
+      u.setAttribute('data-cur', 'code');
+      u.textContent = 'CFB';
+      p.appendChild(pb);
+      p.appendChild(u);
+      row.appendChild(p);
+
+      var st = document.createElement('span');
+      st.className = 'st-rec__st';
+      st.setAttribute('data-s', o.status);
+      st.textContent = ORDER_ST[o.status] || o.status;
+      row.appendChild(st);
+
+      return row;
+    }
+
+    function withdrawRow(w) {
+      var row = document.createElement('div');
+      row.className = 'st-rec';
+
+      var at = document.createElement('span');
+      at.className = 'st-rec__at';
+      at.textContent = fmtTime(w.at);
+      row.appendChild(at);
+
+      var m = document.createElement('div');
+      m.className = 'st-rec__m';
+
+      var t = document.createElement('div');
+      t.className = 'st-rec__t';
+      t.textContent = '提现至' + w.channelText;
+      m.appendChild(t);
+
+      var sub = document.createElement('div');
+      sub.className = 'st-rec__s';
+      sub.textContent = w.account + (w.note ? ' · ' + w.note : '');
+      m.appendChild(sub);
+
+      row.appendChild(m);
+
+      var p = document.createElement('span');
+      p.className = 'st-rec__p';
+      var pb = document.createElement('b');
+      setAmt(pb, w.amount);
+      var u = document.createElement('i');
+      u.setAttribute('data-cur', 'code');
+      u.textContent = 'CFB';
+      p.appendChild(pb);
+      p.appendChild(u);
+      row.appendChild(p);
+
+      var st = document.createElement('span');
+      st.className = 'st-rec__st';
+      st.setAttribute('data-s', w.status);
+      st.textContent = WD_ST[w.status] || w.status;
+      row.appendChild(st);
+
+      return row;
+    }
+
+    function paintRecords() {
+      ordersEl.textContent = '';
+      orders.forEach(function (o) { ordersEl.appendChild(orderRow(o)); });
+
+      withdrawsEl.textContent = '';
+      withdraws.forEach(function (w) { withdrawsEl.appendChild(withdrawRow(w)); });
+
+      var cur = tab === 'orders' ? orders : withdraws;
+      ordersEl.hidden = tab !== 'orders';
+      withdrawsEl.hidden = tab !== 'withdraws' && tab !== 'withdraw';
+      if (recEmpty) {
+        recEmpty.hidden = cur.length > 0;
+        recEmpty.textContent = tab === 'orders' ? '还没有兑换记录。' : '还没有提现记录。';
+      }
+    }
+
+    /* ---------- 取数 ---------- */
+
+    function loadStore() {
+      getJSON('/api/store').then(function (r) {
+        if (r.body && r.body.ok) {
+          items = r.body.items || [];
+          setWallet(r.body.wallet.fc, r.body.wallet.fcFrozen);
+          paintItems();
+        } else {
+          if (emptyEl) { emptyEl.hidden = false; emptyEl.textContent = '商品载入失败，请刷新重试。'; }
+        }
+      });
+    }
+
+    function loadOrders() {
+      getJSON('/api/orders').then(function (r) {
+        if (r.body && r.body.ok) {
+          orders = r.body.items || [];
+          paintRecords();
+        }
+      });
+    }
+
+    function loadWithdraws() {
+      getJSON('/api/withdraw').then(function (r) {
+        if (r.body && r.body.ok) {
+          withdraws = r.body.items || [];
+          paintRecords();
+        }
+      });
+    }
+
+    document.querySelectorAll('.st-tab').forEach(function (t) {
+      t.addEventListener('click', function () {
+        document.querySelectorAll('.st-tab').forEach(function (x) { x.classList.remove('is-on'); });
+        t.classList.add('is-on');
+        tab = t.getAttribute('data-tab');
+        paintRecords();
       });
     });
+
+    var wBtn = $('stWithdrawBtn');
+    if (wBtn) wBtn.addEventListener('click', openWithdraw);
+
+    var cBtn = $('stCodeBtn');
+    if (cBtn) cBtn.addEventListener('click', openCode);
+
+    setWallet(me.fc, me.fcFrozen);
+    loadStore();
+    loadOrders();
+    loadWithdraws();
   }
 
   /* ---------- 收支明细 ---------- */
@@ -482,11 +967,13 @@
 
         var d = document.createElement('span');
         d.className = 'lg-row__d ' + (s.out ? 'is-out' : 'is-in');
-        /* 带符号金额：存 CFB 原值，CF 换算后补回正负号 */
-        d.setAttribute('data-cfb', it.delta);
-        d.setAttribute('data-cur', 'amount');
-        d.textContent = (window.CF && CF.money ? CF.money(it.delta) : s.text);
-        d.setAttribute('data-signed', '1');
+        /* 金额节点与单位节点分开，币种刷新只改金额，不会把单位冲掉 */
+        var dv = document.createElement('b');
+        dv.setAttribute('data-cfb', it.delta);
+        dv.setAttribute('data-cur', 'amount');
+        dv.setAttribute('data-signed', '1');
+        dv.textContent = (window.CF && CF.money ? CF.money(it.delta) : s.text);
+        d.appendChild(dv);
         var du = document.createElement('i');
         du.setAttribute('data-cur', 'code');
         du.textContent = 'FC';
@@ -494,7 +981,9 @@
 
         var b = document.createElement('span');
         b.className = 'lg-row__b';
-        setAmt(b, it.balance);
+        var bb = document.createElement('b');
+        setAmt(bb, it.balance);
+        b.appendChild(bb);
         var bu = document.createElement('i');
         bu.setAttribute('data-cur', 'code');
         bu.textContent = 'FC';
@@ -630,7 +1119,9 @@
 
           var hfc = document.createElement('span');
           hfc.className = 'ld-hero__fc';
-          setAmt(hfc, it.fc);
+          var hfcn = document.createElement('b');
+          setAmt(hfcn, it.fc);
+          hfc.appendChild(hfcn);
           var hfcu = document.createElement('i');
           hfcu.setAttribute('data-cur', 'code');
           hfcu.textContent = 'CFB';
@@ -691,7 +1182,9 @@
 
         var fc = document.createElement('span');
         fc.className = 'ld-fc';
-        setAmt(fc, it.fc);
+        var fcn = document.createElement('b');
+        setAmt(fcn, it.fc);
+        fc.appendChild(fcn);
         var fcu = document.createElement('i');
         fcu.setAttribute('data-cur', 'code');
         fcu.textContent = 'CFB';

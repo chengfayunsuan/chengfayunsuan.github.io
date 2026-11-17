@@ -268,6 +268,10 @@ body[data-accent="blue"] {
 .adm-tr--tk { grid-template-columns: 60px minmax(0, 1fr) 92px minmax(0, 1.6fr) 130px 72px 110px; }
 
 .adm-cell--detail {
+  display: block;
+  margin-top: 3px;
+  font-size: 11.5px;
+  line-height: 1.5;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -605,4 +609,86 @@ body[data-accent="blue"] {
 @media (max-width: 560px) {
   .svf { grid-template-columns: 1fr; }
   .svf__f--wide { grid-column: auto; }
+}
+
+/* ---------- 商品 / 卡密 / 订单 / 消息 ---------- */
+
+.adm-tr--it  { grid-template-columns: 100px minmax(0, 1.8fr) 86px 132px 60px 128px; }
+.adm-tr--ord { grid-template-columns: 132px minmax(0, 1.8fr) 96px 84px 132px 128px; }
+.adm-tr--cd  { grid-template-columns: minmax(0, 1.3fr) 88px 92px 76px 84px 76px; }
+.adm-tr--msg { grid-template-columns: 110px minmax(0, 1.8fr) 76px 70px 132px; }
+
+.adm-code {
+  font-family: var(--num);
+  font-size: 12.5px;
+  letter-spacing: .1em;
+  word-break: break-all;
+}
+
+.adm-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid var(--ink);
+  font-size: 10.5px;
+  letter-spacing: .03em;
+  line-height: 1.5;
+}
+
+.adm-tag[data-s="paid"],
+.adm-tag[data-s="free"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.adm-tag[data-s="pending"] { color: var(--red); border-color: var(--red); }
+.adm-tag[data-s="refunded"],
+.adm-tag[data-s="void"],
+.adm-tag[data-s="used"] { color: var(--gray); border-color: var(--paper-2); }
+
+.adm-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 4px;
+}
+
+.adm-chip {
+  padding: 4px 11px;
+  border: 1px solid var(--ink);
+  font-size: 11.5px;
+  letter-spacing: .03em;
+}
+
+.adm-chip b {
+  font-family: var(--num);
+  font-size: 14px;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.adm-filters { display: flex; gap: 6px; margin-left: auto; }
+
+.adm-f {
+  padding: 5px 12px;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+
+.adm-f.is-on { background: var(--ink); color: var(--paper); }
+
+.adm-check {
+  flex-direction: row;
+  align-items: center;
+  gap: 9px;
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+.adm-check input { width: 16px; height: 16px; accent-color: var(--red); }
+
+@media (max-width: 900px) {
+  .adm-tr--it,
+  .adm-tr--ord,
+  .adm-tr--cd,
+  .adm-tr--msg { grid-template-columns: minmax(0, 1fr); }
 }

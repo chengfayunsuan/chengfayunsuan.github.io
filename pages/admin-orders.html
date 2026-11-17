@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>兑换订单 · 乘法后台</title>
+<meta name="description" content="乘法运营后台：兑换订单。">
+<meta name="theme-color" content="#1D52E2">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=9">
+<link rel="stylesheet" href="/css/home.css?v=8">
+<link rel="stylesheet" href="/css/page.css?v=5">
+<link rel="stylesheet" href="/css/admin.css?v=8">
+<script src="/js/config.js?v=4"></script>
+<script src="/js/core.js?v=8"></script>
+</head>
+<body data-page="admin-orders" data-accent="blue">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/home">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><i data-cur="code">CFB</i>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/home">我</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
+    </div>
+  </div>
+</header>
+
+<nav class="dock" aria-label="后台目录">
+  <div class="wrap dock__in">
+    <a class="dock__i" href="/admin">
+      <span class="dock__n">01</span><span class="dock__t">后台概览</span>
+    </a>
+    <a class="dock__i" href="/admin/users">
+      <span class="dock__n">02</span><span class="dock__t">用户管理</span>
+    </a>
+    <a class="dock__i" href="/admin/withdrawals">
+      <span class="dock__n">03</span><span class="dock__t">提现审核</span>
+    </a>
+    <a class="dock__i is-on" href="/admin/orders" aria-current="page">
+      <span class="dock__n">04</span><span class="dock__t">兑换订单</span>
+    </a>
+    <a class="dock__i" href="/admin/tickets">
+      <span class="dock__n">05</span><span class="dock__t">工单</span>
+    </a>
+    <a class="dock__i" href="/admin/surveys">
+      <span class="dock__n">06</span><span class="dock__t">问卷管理</span>
+    </a>
+    <a class="dock__i" href="/admin/items">
+      <span class="dock__n">07</span><span class="dock__t">商品兑换</span>
+    </a>
+    <a class="dock__i" href="/admin/messages">
+      <span class="dock__n">08</span><span class="dock__t">站内消息</span>
+    </a>
+  </div>
+</nav>
+
+<main id="app">
+  <section class="face">
+    <div class="wrap">
+      <div class="face__in">
+        <div class="face__id">
+          <div class="face__meta">
+            <span class="face__uid">ADMIN / 订单</span>
+            <span class="adm-badge">ORDERS</span>
+          </div>
+          <h1 class="face__name">兑换订单</h1>
+          <p class="face__sub">查看兑换流转 · 人工发货 · 退款</p>
+          <div class="face__foot">
+            <p class="adm-lead">订阅类订单初始为「待发货」，确认开通后点发货；退款会把金额退回可用余额、作废已发出的卡密，并给用户发一条站内消息。</p>
+          </div>
+        </div>
+
+        <div class="face__bal">
+          <div class="face__bal-k">ORDERS / 待发货</div>
+          <div class="face__bal-n" id="ordPending">0</div>
+          <div class="face__bal-f">单待处理 · 共 <span id="ordTotal">0</span> 单</div>
+          <div class="face__acts"><a class="btn btn--ghost" href="/admin/items">商品与卡密</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="adm-sec">
+    <div class="wrap">
+      <div class="adm-panel">
+        <div class="adm-h">
+          <span class="adm-h__t">全部订单</span>
+          <div class="adm-filters" id="ordFilters">
+            <button class="adm-f is-on" type="button" data-s="">全部</button>
+            <button class="adm-f" type="button" data-s="pending">待发货</button>
+            <button class="adm-f" type="button" data-s="paid">已完成</button>
+            <button class="adm-f" type="button" data-s="refunded">已退款</button>
+          </div>
+        </div>
+
+        <div class="adm-list">
+          <div class="adm-tr adm-tr--ord adm-head">
+            <span>单号</span><span>用户 / 商品</span><span>金额</span><span>状态</span><span>时间</span><span>操作</span>
+          </div>
+          <div id="ordList"></div>
+        </div>
+        <p class="adm-empty" id="ordEmpty" hidden>还没有订单。</p>
+      </div>
+    </div>
+  </section>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 乘法 CHENGFA</span>
+      <span>运营后台 · 仅限站长与管理员</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/admin-shop.js?v=1" defer></script>
+</body>
+</html>

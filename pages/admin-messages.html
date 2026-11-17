@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>站内消息 · 乘法后台</title>
+<meta name="description" content="乘法运营后台：站内消息。">
+<meta name="theme-color" content="#1D52E2">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=9">
+<link rel="stylesheet" href="/css/home.css?v=8">
+<link rel="stylesheet" href="/css/page.css?v=5">
+<link rel="stylesheet" href="/css/admin.css?v=8">
+<script src="/js/config.js?v=4"></script>
+<script src="/js/core.js?v=8"></script>
+</head>
+<body data-page="admin-messages" data-accent="blue">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/home">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><i data-cur="code">CFB</i>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/home">我</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
+    </div>
+  </div>
+</header>
+
+<nav class="dock" aria-label="后台目录">
+  <div class="wrap dock__in">
+    <a class="dock__i" href="/admin">
+      <span class="dock__n">01</span><span class="dock__t">后台概览</span>
+    </a>
+    <a class="dock__i" href="/admin/users">
+      <span class="dock__n">02</span><span class="dock__t">用户管理</span>
+    </a>
+    <a class="dock__i" href="/admin/withdrawals">
+      <span class="dock__n">03</span><span class="dock__t">提现审核</span>
+    </a>
+    <a class="dock__i" href="/admin/orders">
+      <span class="dock__n">04</span><span class="dock__t">兑换订单</span>
+    </a>
+    <a class="dock__i" href="/admin/tickets">
+      <span class="dock__n">05</span><span class="dock__t">工单</span>
+    </a>
+    <a class="dock__i" href="/admin/surveys">
+      <span class="dock__n">06</span><span class="dock__t">问卷管理</span>
+    </a>
+    <a class="dock__i" href="/admin/items">
+      <span class="dock__n">07</span><span class="dock__t">商品兑换</span>
+    </a>
+    <a class="dock__i is-on" href="/admin/messages" aria-current="page">
+      <span class="dock__n">08</span><span class="dock__t">站内消息</span>
+    </a>
+  </div>
+</nav>
+
+<main id="app">
+  <section class="face">
+    <div class="wrap">
+      <div class="face__in">
+        <div class="face__id">
+          <div class="face__meta">
+            <span class="face__uid">ADMIN / 消息</span>
+            <span class="adm-badge">MESSAGES</span>
+          </div>
+          <h1 class="face__name">站内消息</h1>
+          <p class="face__sub">定向通知 · 全员公告</p>
+          <div class="face__foot">
+            <p class="adm-lead">全员公告会为每个正常账户各写一条，用户各自的已读状态互不影响。兑换与提现的系统消息由接口自动发出。</p>
+          </div>
+        </div>
+
+        <div class="face__bal">
+          <div class="face__bal-k">SENT / 已发消息</div>
+          <div class="face__bal-n" id="msgCount">0</div>
+          <div class="face__bal-f">条 · 最近 100 条</div>
+          <div class="face__acts"><a class="btn btn--ghost" href="/messages">我的收件箱</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="adm-sec">
+    <div class="wrap">
+      <div class="adm-panel">
+        <div class="adm-h">
+          <span class="adm-h__t">发送消息</span>
+          <span class="adm-h__d">发给单个用户填 UID，全员公告勾选右侧</span>
+        </div>
+
+        <form class="svf" id="msForm" novalidate>
+          <label class="svf__f">
+            <span class="svf__l">目标 UID</span>
+            <input class="svf__i" id="msUid" type="number" min="1" step="1" placeholder="例如 12">
+          </label>
+
+          <label class="svf__f">
+            <span class="svf__l">类型</span>
+            <select class="svf__i" id="msKind">
+              <option value="system">系统</option>
+              <option value="admin">管理员</option>
+              <option value="reward">奖励</option>
+            </select>
+          </label>
+
+          <label class="svf__f svf__f--wide">
+            <span class="svf__l">标题 <em>*</em></span>
+            <input class="svf__i" id="msTitle" type="text" maxlength="60" placeholder="例如：本周兑换码已补货">
+          </label>
+
+          <label class="svf__f svf__f--full">
+            <span class="svf__l">正文</span>
+            <textarea class="svf__i svf__i--area" id="msBody" rows="4" maxlength="1000" placeholder="写给用户的内容"></textarea>
+          </label>
+
+          <label class="svf__f svf__f--full adm-check">
+            <input type="checkbox" id="msAll">
+            <span>发给全部正常账户（忽略上面的 UID）</span>
+          </label>
+
+          <div class="svf__acts">
+            <button class="btn btn--red" type="submit">发送</button>
+            <span class="svf__msg" id="msMsg" role="status" aria-live="polite"></span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="adm-sec adm-sec--last">
+    <div class="wrap">
+      <div class="adm-panel">
+        <div class="adm-h">
+          <span class="adm-h__t">最近发送</span>
+          <span class="adm-h__d">含系统自动发出的兑换与提现通知</span>
+        </div>
+
+        <div class="adm-list">
+          <div class="adm-tr adm-tr--msg adm-head">
+            <span>收件人</span><span>标题</span><span>类型</span><span>状态</span><span>时间</span>
+          </div>
+          <div id="msList"></div>
+        </div>
+        <p class="adm-empty" id="msEmpty" hidden>还没有消息。</p>
+      </div>
+    </div>
+  </section>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 乘法 CHENGFA</span>
+      <span>运营后台 · 仅限站长与管理员</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/admin-msg.js?v=1" defer></script>
+</body>
+</html>

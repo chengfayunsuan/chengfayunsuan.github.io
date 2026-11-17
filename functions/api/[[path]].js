@@ -42,6 +42,15 @@ export async function onRequest(context) {
     if (path === 'ticket' && request.method === 'GET') return await ticketMine(request, env);
     if (path === 'fx' && request.method === 'GET') return await fxRate(env);
     if (path === 'surveys' && request.method === 'GET') return await surveyList(request, env);
+    if (path === 'surveys/join' && request.method === 'POST') return await surveyJoin(request, env);
+    if (path === 'store' && request.method === 'GET') return await storeList(request, env);
+    if (path === 'store/redeem' && request.method === 'POST') return await storeRedeem(request, env);
+    if (path === 'orders' && request.method === 'GET') return await orderList(request, env);
+    if (path === 'withdraw' && request.method === 'GET') return await withdrawMine(request, env);
+    if (path === 'withdraw' && request.method === 'POST') return await withdrawApply(request, env);
+    if (path === 'cdk/redeem' && request.method === 'POST') return await cdkRedeem(request, env);
+    if (path === 'messages' && request.method === 'GET') return await messageList(request, env);
+    if (path === 'messages/read' && request.method === 'POST') return await messageRead(request, env);
     if (path.indexOf('admin/') === 0) return await adminApi(request, env, url, path);
     return json({ ok: false, error: 'not_found' }, 404);
   } catch (err) {
@@ -582,6 +591,7 @@ const SURVEY_COLS = 'id, title, provider, price_units, grade, stars, requirement
 function surveyRow(r) {
   return {
     id: r.id,
+    joined: r.joined === 1 || r.joined === true,
     title: r.title,
     provider: r.provider,
     price: formatFc(r.price_units),
@@ -602,22 +612,35 @@ async function surveyList(request, env) {
   if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
 
   const rows = await env.DB.prepare(
-    `SELECT ${SURVEY_COLS} FROM surveys WHERE status = 'open'
-      ORDER BY featured DESC, (featured_at IS NULL), featured_at DESC, created_at DESC
+    `SELECT s.*, EXISTS(
+        SELECT 1 FROM survey_joins j WHERE j.survey_id = s.id AND j.uid = ?
+      ) AS joined
+       FROM surveys s WHERE s.status = 'open'
+      ORDER BY s.featured DESC, (s.featured_at IS NULL), s.featured_at DESC, s.created_at DESC
       LIMIT 100`
-  ).all();
+  ).bind(session.uid).all();
 
   return json({ ok: true, items: (rows.results || []).map(surveyRow) });
 }
 
 async function adminSurveyList(env) {
   const rows = await env.DB.prepare(
-    `SELECT ${SURVEY_COLS} FROM surveys
-      ORDER BY featured DESC, featured_at DESC, created_at DESC
+    `SELECT s.*, (
+        SELECT COUNT(*) FROM survey_joins j WHERE j.survey_id = s.id
+      ) AS joined_count
+       FROM surveys s
+      ORDER BY s.featured DESC, s.featured_at DESC, s.created_at DESC
       LIMIT 200`
   ).all();
 
-  return json({ ok: true, items: (rows.results || []).map(surveyRow) });
+  return json({
+    ok: true,
+    items: (rows.results || []).map(function (r) {
+      const it = surveyRow(r);
+      it.joinedCount = r.joined_count || 0;
+      return it;
+    })
+  });
 }
 
 async function adminSurveySave(request, env) {
@@ -695,6 +718,733 @@ async function adminSurveyDelete(request, env) {
   return json({ ok: true });
 }
 
+/* ---------------- 兑换中心 / 提现 ---------------- */
+
+const WITHDRAW_MIN = 10;                       // 起提金额，单位 fc
+const WITHDRAW_CHANNELS = ['alipay', 'wechat', 'paypal', 'payoneer'];
+const CHANNEL_TEXT = {
+  alipay: '支付宝', wechat: '微信', paypal: 'PayPal', payoneer: 'Payoneer'
+};
+const ITEM_KINDS = ['code', 'cash', 'sub'];
+
+function orderSn(prefix) {
+  return prefix + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase();
+}
+
+function itemRow(r) {
+  return {
+    id: r.id,
+    title: r.title,
+    subtitle: r.subtitle,
+    kind: r.kind,
+    price: formatFc(r.price_units),
+    stock: r.stock,
+    soldOut: r.stock === 0,
+    note: r.note,
+    deliver: r.deliver,
+    status: r.status
+  };
+}
+
+async function storeList(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+
+  const rows = await env.DB.prepare(
+    "SELECT * FROM store_items WHERE status = 'on' ORDER BY sort ASC, id ASC LIMIT 100"
+  ).all();
+
+  const me = await env.DB.prepare('SELECT fc_units, fc_frozen FROM users WHERE id = ?')
+    .bind(session.uid).first();
+
+  return json({
+    ok: true,
+    items: (rows.results || []).map(itemRow),
+    wallet: {
+      fc: formatFc(me ? me.fc_units : 0),
+      fcFrozen: formatFc(me ? me.fc_frozen : 0)
+    }
+  });
+}
+
+async function storeRedeem(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+
+  const body = await readJson(request);
+  if (!body) return json({ ok: false, error: 'bad_request' }, 400);
+
+  const itemId = Number(body.itemId);
+  if (!itemId) return json({ ok: false, error: 'bad_request' }, 400);
+
+  const item = await env.DB.prepare('SELECT * FROM store_items WHERE id = ?').bind(itemId).first();
+  if (!item || item.status !== 'on') return json({ ok: false, error: 'item_off' }, 404);
+  if (item.stock === 0) return json({ ok: false, error: 'out_of_stock' }, 400);
+
+  const user = await env.DB.prepare('SELECT id, fc_units, fc_frozen, status FROM users WHERE id = ?')
+    .bind(session.uid).first();
+  if (!user) return json({ ok: false, error: 'unauthorized' }, 401);
+  if (user.status !== 'active') return json({ ok: false, error: 'account_locked' }, 403);
+
+  const price = item.price_units;
+  if (user.fc_units < price) return json({ ok: false, error: 'insufficient_balance' }, 400);
+
+  /* 现金档必须有收款账号；订阅档记录用户备注 */
+  const account = String(body.account || '').trim().slice(0, 80);
+  const memo = String(body.memo || '').trim().slice(0, 120);
+  if (item.kind === 'cash' && account.length < 4) {
+    return json({ ok: false, error: 'account_required' }, 400);
+  }
+
+  /* 兑换码类：先锁一个未使用的码，没有就是缺货 */
+  let cdk = null;
+  if (item.kind === 'code') {
+    cdk = await env.DB.prepare(
+      "SELECT id, code FROM cdk_codes WHERE status = 'free' AND item_id = ? ORDER BY id ASC LIMIT 1"
+    ).bind(item.id).first();
+    if (!cdk) return json({ ok: false, error: 'out_of_stock' }, 400);
+  }
+
+  const sn = orderSn('O');
+  const next = user.fc_units - price;
+  const now = "datetime('now')";
+
+  const stmts = [];
+  const orderStatus = item.kind === 'sub' ? 'pending' : 'paid';
+
+  stmts.push(
+    env.DB.prepare(
+      `UPDATE users SET fc_units = ?, updated_at = datetime('now') WHERE id = ?`
+    ).bind(next, user.id)
+  );
+
+  stmts.push(
+    env.DB.prepare(
+      `INSERT INTO orders (sn, uid, item_id, item_title, price_units, status, code, memo)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(sn, user.id, item.id, item.title, price, orderStatus, cdk ? cdk.code : '', memo)
+  );
+
+  stmts.push(
+    env.DB.prepare(
+      `INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, ?, ?, ?)`
+    ).bind(user.id, -price, next, 'cdk_redeem', sn, '兑换 ' + item.title)
+  );
+
+  if (cdk) {
+    stmts.push(
+      env.DB.prepare(
+        `UPDATE cdk_codes SET status = 'used', used_by = ?, used_at = datetime('now')
+          WHERE id = ? AND status = 'free'`
+      ).bind(user.id, cdk.id)
+    );
+  }
+
+  if (item.stock > 0) {
+    stmts.push(
+      env.DB.prepare(
+        `UPDATE store_items SET stock = stock - 1, updated_at = datetime('now')
+          WHERE id = ? AND stock > 0`
+      ).bind(item.id)
+    );
+  }
+
+  /* 现金档：等同于提交一笔提现，钱进冻结等审核 */
+  if (item.kind === 'cash') {
+    stmts.push(
+      env.DB.prepare(
+        `UPDATE users SET fc_frozen = fc_frozen + ? WHERE id = ?`
+      ).bind(price, user.id)
+    );
+    stmts.push(
+      env.DB.prepare(
+        `INSERT INTO withdrawals (uid, amount, channel, account, status, review_note)
+         VALUES (?, ?, ?, ?, 'pending', ?)`
+      ).bind(user.id, price, 'alipay', account, '兑换中心生成 · 单号 ' + sn)
+    );
+  }
+
+  await env.DB.batch(stmts);
+
+  return json({
+    ok: true,
+    sn: sn,
+    status: orderStatus,
+    code: cdk ? cdk.code : '',
+    price: formatFc(price),
+    balance: formatFc(next)
+  });
+}
+
+async function orderList(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+
+  const rows = await env.DB.prepare(
+    `SELECT id, sn, item_title, price_units, status, code, memo, created_at
+       FROM orders WHERE uid = ? ORDER BY id DESC LIMIT 50`
+  ).bind(session.uid).all();
+
+  return json({
+    ok: true,
+    items: (rows.results || []).map(function (r) {
+      return {
+        id: r.id,
+        sn: r.sn,
+        title: r.item_title,
+        price: formatFc(r.price_units),
+        status: r.status,
+        code: r.code,
+        memo: r.memo,
+        at: toIso(r.created_at)
+      };
+    })
+  });
+}
+
+/* ---------------- 提现 ---------------- */
+
+async function withdrawMine(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+
+  const rows = await env.DB.prepare(
+    `SELECT id, amount, channel, account, status, review_note, created_at, reviewed_at
+       FROM withdrawals WHERE uid = ? ORDER BY id DESC LIMIT 30`
+  ).bind(session.uid).all();
+
+  return json({
+    ok: true,
+    items: (rows.results || []).map(function (r) {
+      return {
+        id: r.id,
+        amount: formatFc(r.amount),
+        channel: r.channel,
+        channelText: CHANNEL_TEXT[r.channel] || r.channel,
+        account: r.account,
+        status: r.status,
+        note: r.review_note,
+        at: toIso(r.created_at),
+        reviewedAt: toIso(r.reviewed_at)
+      };
+    }),
+    min: WITHDRAW_MIN
+  });
+}
+
+async function withdrawApply(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+
+  const body = await readJson(request);
+  if (!body) return json({ ok: false, error: 'bad_request' }, 400);
+
+  const amount = Number(body.amount);
+  const channel = String(body.channel || 'alipay');
+  const account = String(body.account || '').trim().slice(0, 80);
+
+  if (!isFinite(amount) || amount <= 0) return json({ ok: false, error: 'bad_amount' }, 400);
+  if (WITHDRAW_CHANNELS.indexOf(channel) < 0) return json({ ok: false, error: 'bad_channel' }, 400);
+  if (account.length < 4) return json({ ok: false, error: 'account_required' }, 400);
+
+  const units = Math.round(amount * FC_SCALE);
+  if (units < WITHDRAW_MIN * FC_SCALE) return json({ ok: false, error: 'below_min' }, 400);
+
+  const user = await env.DB.prepare('SELECT id, fc_units, fc_frozen, status FROM users WHERE id = ?')
+    .bind(session.uid).first();
+  if (!user) return json({ ok: false, error: 'unauthorized' }, 401);
+  if (user.status !== 'active') return json({ ok: false, error: 'account_locked' }, 403);
+
+  const pending = await env.DB.prepare(
+    "SELECT COUNT(*) AS n FROM withdrawals WHERE uid = ? AND status = 'pending'"
+  ).bind(user.id).first();
+  if (pending && pending.n > 0) return json({ ok: false, error: 'has_pending' }, 400);
+
+  if (user.fc_units < units) return json({ ok: false, error: 'insufficient_balance' }, 400);
+
+  const next = user.fc_units - units;
+  const ref = orderSn('W');
+
+  await env.DB.batch([
+    env.DB.prepare(
+      `UPDATE users SET fc_units = ?, fc_frozen = fc_frozen + ?, updated_at = datetime('now') WHERE id = ?`
+    ).bind(next, units, user.id),
+    env.DB.prepare(
+      `INSERT INTO withdrawals (uid, amount, channel, account, status) VALUES (?, ?, ?, ?, 'pending')`
+    ).bind(user.id, units, channel, account),
+    env.DB.prepare(
+      `INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, 'withdraw_lock', ?, ?)`
+    ).bind(user.id, -units, next, ref, '提现申请 · ' + (CHANNEL_TEXT[channel] || channel))
+  ]);
+
+  return json({ ok: true, balance: formatFc(next), ref: ref });
+}
+
+/* ---------------- 兑换码 ---------------- */
+
+function normalizeCode(raw) {
+  return String(raw || '').trim().toUpperCase().replace(/\s+/g, '');
+}
+
+async function cdkRedeem(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+
+  const body = await readJson(request);
+  const code = normalizeCode(body && body.code);
+  if (code.length < 4 || code.length > 64) return json({ ok: false, error: 'bad_code' }, 400);
+
+  const row = await env.DB.prepare(
+    "SELECT id, value_units, status FROM cdk_codes WHERE code = ?"
+  ).bind(code).first();
+  if (!row) return json({ ok: false, error: 'code_not_found' }, 404);
+  if (row.status !== 'free') return json({ ok: false, error: 'code_used' }, 400);
+
+  /* 商品码不能在这里兑换，要按商品下单才发码 */
+  if (!row.value_units || row.value_units <= 0) return json({ ok: false, error: 'code_item_only' }, 400);
+
+  const user = await env.DB.prepare('SELECT id, fc_units, status FROM users WHERE id = ?')
+    .bind(session.uid).first();
+  if (!user) return json({ ok: false, error: 'unauthorized' }, 401);
+  if (user.status !== 'active') return json({ ok: false, error: 'account_locked' }, 403);
+
+  const next = user.fc_units + row.value_units;
+
+  await env.DB.batch([
+    env.DB.prepare(
+      "UPDATE cdk_codes SET status = 'used', used_by = ?, used_at = datetime('now') WHERE id = ? AND status = 'free'"
+    ).bind(user.id, row.id),
+    env.DB.prepare(
+      `UPDATE users SET fc_units = ?, updated_at = datetime('now') WHERE id = ?`
+    ).bind(next, user.id),
+    env.DB.prepare(
+      `INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, 'cdk_redeem', ?, ?)`
+    ).bind(user.id, row.value_units, next, code, '兑换码充值')
+  ]);
+
+  return json({ ok: true, amount: formatFc(row.value_units), balance: formatFc(next) });
+}
+
+/* ---------------- 站内消息 ---------------- */
+
+async function messageList(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+
+  const rows = await env.DB.prepare(
+    `SELECT id, kind, title, body, read_at, created_at
+       FROM messages WHERE uid = ? ORDER BY id DESC LIMIT 80`
+  ).bind(session.uid).all();
+
+  const unread = await env.DB.prepare(
+    'SELECT COUNT(*) AS n FROM messages WHERE uid = ? AND read_at IS NULL'
+  ).bind(session.uid).first();
+
+  return json({
+    ok: true,
+    unread: unread ? unread.n : 0,
+    items: (rows.results || []).map(function (r) {
+      return {
+        id: r.id,
+        kind: r.kind,
+        title: r.title,
+        body: r.body,
+        read: !!r.read_at,
+        at: toIso(r.created_at)
+      };
+    })
+  });
+}
+
+async function messageRead(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+
+  const body = await readJson(request) || {};
+  if (body.all) {
+    await env.DB.prepare(
+      "UPDATE messages SET read_at = datetime('now') WHERE uid = ? AND read_at IS NULL"
+    ).bind(session.uid).run();
+    return json({ ok: true });
+  }
+
+  const id = Number(body.id);
+  if (!id) return json({ ok: false, error: 'bad_request' }, 400);
+
+  await env.DB.prepare(
+    "UPDATE messages SET read_at = datetime('now') WHERE id = ? AND uid = ? AND read_at IS NULL"
+  ).bind(id, session.uid).run();
+
+  return json({ ok: true });
+}
+
+/* ---------------- 问卷参与 ---------------- */
+
+async function surveyJoin(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+
+  const body = await readJson(request);
+  const id = Number(body && body.id);
+  if (!id) return json({ ok: false, error: 'bad_request' }, 400);
+
+  const sv = await env.DB.prepare("SELECT id, entry_url FROM surveys WHERE id = ? AND status = 'open'")
+    .bind(id).first();
+  if (!sv) return json({ ok: false, error: 'not_found' }, 404);
+
+  await env.DB.prepare(
+    'INSERT OR IGNORE INTO survey_joins (uid, survey_id) VALUES (?, ?)'
+  ).bind(session.uid, id).run();
+
+  return json({ ok: true, entry: sv.entry_url || '' });
+}
+
+/* ---------------- 后台：商品 / 兑换码 / 订单 / 消息 ---------------- */
+
+async function adminItemList(env) {
+  const rows = await env.DB.prepare(
+    'SELECT * FROM store_items ORDER BY sort ASC, id ASC LIMIT 200'
+  ).all();
+
+  const sold = await env.DB.prepare(
+    `SELECT item_id, COUNT(*) AS n FROM orders GROUP BY item_id`
+  ).all();
+
+  const soldMap = {};
+  (sold.results || []).forEach(function (r) { soldMap[r.item_id] = r.n; });
+
+  const free = await env.DB.prepare(
+    "SELECT item_id, COUNT(*) AS n FROM cdk_codes WHERE status = 'free' GROUP BY item_id"
+  ).all();
+
+  const freeMap = {};
+  (free.results || []).forEach(function (r) { freeMap[r.item_id] = r.n; });
+
+  return json({
+    ok: true,
+    items: (rows.results || []).map(function (r) {
+      const it = itemRow(r);
+      it.note = r.note;
+      it.deliver = r.deliver;
+      it.sort = r.sort;
+      it.rawPrice = r.price_units;
+      it.sold = soldMap[r.id] || 0;
+      it.freeCodes = freeMap[r.id] || 0;
+      return it;
+    })
+  });
+}
+
+async function adminItemSave(request, env) {
+  const body = await readJson(request);
+  if (!body) return json({ ok: false, error: 'bad_request' }, 400);
+
+  const title = String(body.title || '').trim().slice(0, 60);
+  if (!title) return json({ ok: false, error: 'missing_title' }, 400);
+
+  const kind = ITEM_KINDS.indexOf(body.kind) >= 0 ? body.kind : 'code';
+  const price = Number(body.price);
+  if (!isFinite(price) || price <= 0) return json({ ok: false, error: 'bad_price' }, 400);
+
+  const stockRaw = Number(body.stock);
+  const stock = isFinite(stockRaw) ? Math.round(stockRaw) : -1;
+  const sortRaw = Number(body.sort);
+  const sort = isFinite(sortRaw) ? Math.round(sortRaw) : 0;
+  const status = body.status === 'off' ? 'off' : 'on';
+
+  const args = [
+    title,
+    String(body.subtitle || '').trim().slice(0, 40),
+    kind,
+    Math.round(price * FC_SCALE),
+    stock < -1 ? -1 : stock,
+    String(body.note || '').trim().slice(0, 300),
+    String(body.deliver || '').trim().slice(0, 300),
+    status,
+    sort
+  ];
+
+  if (body.id) {
+    await env.DB.prepare(
+      `UPDATE store_items SET title = ?, subtitle = ?, kind = ?, price_units = ?, stock = ?,
+        note = ?, deliver = ?, status = ?, sort = ?, updated_at = datetime('now') WHERE id = ?`
+    ).bind(...args, Number(body.id)).run();
+    return json({ ok: true, id: Number(body.id) });
+  }
+
+  const res = await env.DB.prepare(
+    `INSERT INTO store_items (title, subtitle, kind, price_units, stock, note, deliver, status, sort)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).bind(...args).run();
+
+  return json({ ok: true, id: res.meta && res.meta.last_row_id });
+}
+
+async function adminItemDelete(request, env) {
+  const body = await readJson(request);
+  const id = Number(body && body.id);
+  if (!id) return json({ ok: false, error: 'bad_request' }, 400);
+
+  const used = await env.DB.prepare('SELECT COUNT(*) AS n FROM orders WHERE item_id = ?').bind(id).first();
+  if (used && used.n > 0) return json({ ok: false, error: 'has_orders' }, 400);
+
+  await env.DB.prepare('DELETE FROM cdk_codes WHERE item_id = ?').bind(id).run();
+  await env.DB.prepare('DELETE FROM store_items WHERE id = ?').bind(id).run();
+  return json({ ok: true });
+}
+
+function randomCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const buf = new Uint8Array(12);
+  crypto.getRandomValues(buf);
+  let out = '';
+  for (let i = 0; i < 12; i++) {
+    if (i > 0 && i % 4 === 0) out += '-';
+    out += chars[buf[i] % chars.length];
+  }
+  return 'CF-' + out;
+}
+
+async function adminCdkList(env, url) {
+  const itemId = Number(url.searchParams.get('itemId') || 0);
+  const status = String(url.searchParams.get('status') || '');
+
+  let sql = 'SELECT * FROM cdk_codes WHERE 1 = 1';
+  const args = [];
+  if (itemId) { sql += ' AND item_id = ?'; args.push(itemId); }
+  if (status && ['free', 'used', 'void'].indexOf(status) >= 0) { sql += ' AND status = ?'; args.push(status); }
+  sql += ' ORDER BY id DESC LIMIT 200';
+
+  const rows = await env.DB.prepare(sql).bind(...args).all();
+
+  const stats = await env.DB.prepare(
+    `SELECT status, COUNT(*) AS n FROM cdk_codes GROUP BY status`
+  ).all();
+
+  const map = { free: 0, used: 0, void: 0 };
+  (stats.results || []).forEach(function (r) { map[r.status] = r.n; });
+
+  return json({
+    ok: true,
+    stats: map,
+    items: (rows.results || []).map(function (r) {
+      return {
+        id: r.id,
+        code: r.code,
+        itemId: r.item_id,
+        value: r.value_units ? formatFc(r.value_units) : '',
+        status: r.status,
+        usedBy: r.used_by,
+        usedAt: toIso(r.used_at),
+        batch: r.batch,
+        at: toIso(r.created_at)
+      };
+    })
+  });
+}
+
+async function adminCdkGenerate(request, env) {
+  const body = await readJson(request);
+  if (!body) return json({ ok: false, error: 'bad_request' }, 400);
+
+  const itemId = Number(body.itemId) || 0;
+  const value = Number(body.value) || 0;
+  const batch = String(body.batch || '').trim().slice(0, 30) || ('B' + Date.now().toString(36).toUpperCase());
+
+  const raw = String(body.codes || '').trim();
+  let list = [];
+
+  if (raw) {
+    list = raw.split(/[\s,;]+/).map(function (x) { return normalizeCode(x); }).filter(Boolean);
+  } else {
+    const count = Math.max(1, Math.min(200, Number(body.count) || 1));
+    for (let i = 0; i < count; i++) list.push(randomCode());
+  }
+
+  list = list.filter(function (v, i, a) { return a.indexOf(v) === i; });
+  if (!list.length) return json({ ok: false, error: 'no_codes' }, 400);
+  if (list.length > 500) return json({ ok: false, error: 'too_many' }, 400);
+
+  /* 商品码必须有归属商品；通用充值码必须有面额 */
+  if (!itemId && value <= 0) return json({ ok: false, error: 'need_value' }, 400);
+
+  const valueUnits = Math.round(value * FC_SCALE);
+
+  const stmts = list.map(function (code) {
+    return env.DB.prepare(
+      `INSERT OR IGNORE INTO cdk_codes (code, item_id, value_units, batch)
+       VALUES (?, ?, ?, ?)`
+    ).bind(code, itemId || null, valueUnits, batch);
+  });
+
+  await env.DB.batch(stmts);
+
+  return json({ ok: true, batch: batch, count: list.length });
+}
+
+async function adminCdkVoid(request, env) {
+  const body = await readJson(request);
+  const id = Number(body && body.id);
+  if (!id) return json({ ok: false, error: 'bad_request' }, 400);
+
+  await env.DB.prepare(
+    "UPDATE cdk_codes SET status = 'void' WHERE id = ? AND status = 'free'"
+  ).bind(id).run();
+
+  return json({ ok: true });
+}
+
+async function adminOrderList(env, url) {
+  const status = String(url.searchParams.get('status') || '');
+  let sql = `SELECT o.*, u.username FROM orders o LEFT JOIN users u ON u.id = o.uid WHERE 1 = 1`;
+  const args = [];
+  if (status && ['paid', 'pending', 'refunded'].indexOf(status) >= 0) {
+    sql += ' AND o.status = ?';
+    args.push(status);
+  }
+  sql += ' ORDER BY o.id DESC LIMIT 120';
+
+  const rows = await env.DB.prepare(sql).bind(...args).all();
+
+  return json({
+    ok: true,
+    items: (rows.results || []).map(function (r) {
+      return {
+        id: r.id,
+        sn: r.sn,
+        uid: r.uid,
+        username: r.username || ('UID ' + r.uid),
+        title: r.item_title,
+        price: formatFc(r.price_units),
+        status: r.status,
+        code: r.code,
+        memo: r.memo,
+        at: toIso(r.created_at)
+      };
+    })
+  });
+}
+
+async function adminOrderDecide(request, env) {
+  const body = await readJson(request);
+  const id = Number(body && body.id);
+  const action = String((body && body.action) || '');
+  if (!id || ['paid', 'refunded'].indexOf(action) < 0) {
+    return json({ ok: false, error: 'bad_request' }, 400);
+  }
+
+  const order = await env.DB.prepare('SELECT * FROM orders WHERE id = ?').bind(id).first();
+  if (!order) return json({ ok: false, error: 'not_found' }, 404);
+  if (order.status === action) return json({ ok: true });
+
+  if (action === 'paid') {
+    await env.DB.prepare(
+      "UPDATE orders SET status = 'paid' WHERE id = ?"
+    ).bind(id).run();
+
+    await env.DB.prepare(
+      `INSERT INTO messages (uid, kind, title, body) VALUES (?, 'system', ?, ?)`
+    ).bind(order.uid, '兑换已发货', '你兑换的「' + order.item_title + '」已完成发货，单号 ' + order.sn + '。').run();
+
+    return json({ ok: true });
+  }
+
+  /* 退款：钱退回可用余额，写流水；码若已发则作废 */
+  const user = await env.DB.prepare('SELECT id, fc_units FROM users WHERE id = ?').bind(order.uid).first();
+  if (!user) return json({ ok: false, error: 'user_not_found' }, 404);
+
+  const next = user.fc_units + order.price_units;
+
+  const stmts = [
+    env.DB.prepare(
+      `UPDATE users SET fc_units = ?, updated_at = datetime('now') WHERE id = ?`
+    ).bind(next, user.id),
+    env.DB.prepare(
+      `INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, 'admin_adjust', ?, ?)`
+    ).bind(user.id, order.price_units, next, order.sn, '兑换退款 · ' + order.item_title),
+    env.DB.prepare(
+      "UPDATE orders SET status = 'refunded' WHERE id = ?"
+    ).bind(id),
+    env.DB.prepare(
+      `INSERT INTO messages (uid, kind, title, body) VALUES (?, 'system', ?, ?)`
+    ).bind(order.uid, '兑换已退款', '「' + order.item_title + '」已退款 ' + formatFc(order.price_units) + ' CFB，金额已回到可用余额。')
+  ];
+
+  if (order.code) {
+    stmts.push(
+      env.DB.prepare(
+        "UPDATE cdk_codes SET status = 'void', used_by = NULL, used_at = NULL WHERE code = ?"
+      ).bind(order.code)
+    );
+  }
+
+  await env.DB.batch(stmts);
+  return json({ ok: true });
+}
+
+async function adminMessageSend(request, env) {
+  const body = await readJson(request);
+  if (!body) return json({ ok: false, error: 'bad_request' }, 400);
+
+  const title = String(body.title || '').trim().slice(0, 60);
+  const text = String(body.body || '').trim().slice(0, 1000);
+  if (!title) return json({ ok: false, error: 'missing_title' }, 400);
+
+  const kind = ['system', 'admin', 'reward'].indexOf(body.kind) >= 0 ? body.kind : 'system';
+
+  if (body.all) {
+    /* 全员公告按用户逐条写入，各自标记已读才成立 */
+    const users = await env.DB.prepare(
+      "SELECT id FROM users WHERE status <> 'banned' AND deleted_at IS NULL"
+    ).all();
+    const list = users.results || [];
+    if (!list.length) return json({ ok: true, count: 0 });
+
+    const stmts = list.map(function (u) {
+      return env.DB.prepare(
+        'INSERT INTO messages (uid, kind, title, body) VALUES (?, ?, ?, ?)'
+      ).bind(u.id, kind, title, text);
+    });
+    await env.DB.batch(stmts);
+    return json({ ok: true, count: list.length });
+  }
+
+  const uid = Number(body.uid);
+  if (!uid) return json({ ok: false, error: 'bad_request' }, 400);
+
+  const user = await env.DB.prepare('SELECT id FROM users WHERE id = ?').bind(uid).first();
+  if (!user) return json({ ok: false, error: 'user_not_found' }, 404);
+
+  await env.DB.prepare(
+    'INSERT INTO messages (uid, kind, title, body) VALUES (?, ?, ?, ?)'
+  ).bind(uid, kind, title, text).run();
+
+  return json({ ok: true, count: 1 });
+}
+
+async function adminMessageList(env, url) {
+  const rows = await env.DB.prepare(
+    `SELECT m.*, u.username FROM messages m LEFT JOIN users u ON u.id = m.uid
+      ORDER BY m.id DESC LIMIT 100`
+  ).all();
+
+  return json({
+    ok: true,
+    items: (rows.results || []).map(function (r) {
+      return {
+        id: r.id,
+        uid: r.uid,
+        username: r.username || ('UID ' + r.uid),
+        kind: r.kind,
+        title: r.title,
+        body: r.body,
+        read: !!r.read_at,
+        at: toIso(r.created_at)
+      };
+    })
+  });
+}
+
 async function adminApi(request, env, url, path) {
   const admin = await requireAdmin(request, env);
   if (!admin) return json({ ok: false, error: 'forbidden' }, 403);
@@ -712,6 +1462,16 @@ async function adminApi(request, env, url, path) {
   if (path === 'admin/surveys/save' && request.method === 'POST') return await adminSurveySave(request, env);
   if (path === 'admin/surveys/feature' && request.method === 'POST') return await adminSurveyFeature(request, env);
   if (path === 'admin/surveys/delete' && request.method === 'POST') return await adminSurveyDelete(request, env);
+  if (path === 'admin/items' && request.method === 'GET') return await adminItemList(env);
+  if (path === 'admin/items/save' && request.method === 'POST') return await adminItemSave(request, env);
+  if (path === 'admin/items/delete' && request.method === 'POST') return await adminItemDelete(request, env);
+  if (path === 'admin/cdk' && request.method === 'GET') return await adminCdkList(env, url);
+  if (path === 'admin/cdk/generate' && request.method === 'POST') return await adminCdkGenerate(request, env);
+  if (path === 'admin/cdk/void' && request.method === 'POST') return await adminCdkVoid(request, env);
+  if (path === 'admin/orders' && request.method === 'GET') return await adminOrderList(env, url);
+  if (path === 'admin/orders/decide' && request.method === 'POST') return await adminOrderDecide(request, env);
+  if (path === 'admin/messages/send' && request.method === 'POST') return await adminMessageSend(request, env);
+  if (path === 'admin/messages' && request.method === 'GET') return await adminMessageList(env, url);
   return json({ ok: false, error: 'not_found' }, 404);
 }
 

@@ -7,12 +7,12 @@
 <meta name="description" content="乘法运营后台：账户、资金与站务管理。">
 <meta name="theme-color" content="#1D52E2">
 <meta name="robots" content="noindex">
-<link rel="stylesheet" href="/css/style.css?v=8">
+<link rel="stylesheet" href="/css/style.css?v=9">
 <link rel="stylesheet" href="/css/home.css?v=8">
 <link rel="stylesheet" href="/css/page.css?v=5">
-<link rel="stylesheet" href="/css/admin.css?v=7">
+<link rel="stylesheet" href="/css/admin.css?v=8">
 <script src="/js/config.js?v=4"></script>
-<script src="/js/core.js?v=7"></script>
+<script src="/js/core.js?v=8"></script>
 </head>
 <body data-page="admin" data-accent="blue">
 
@@ -39,7 +39,7 @@
 <!-- ============ 后台目录：与账户首页同构 ============ -->
 <nav class="dock" aria-label="后台目录">
   <div class="wrap dock__in">
-    <a class="dock__i is-on" href="/admin">
+    <a class="dock__i is-on" href="/admin" aria-current="page">
       <span class="dock__n">01</span><span class="dock__t">后台概览</span>
     </a>
     <a class="dock__i" href="/admin/users">
@@ -48,18 +48,21 @@
     <a class="dock__i" href="/admin/withdrawals">
       <span class="dock__n">03</span><span class="dock__t">提现审核</span>
     </a>
+    <a class="dock__i" href="/admin/orders">
+      <span class="dock__n">04</span><span class="dock__t">兑换订单</span>
+    </a>
     <a class="dock__i" href="/admin/tickets">
-      <span class="dock__n">04</span><span class="dock__t">工单</span>
+      <span class="dock__n">05</span><span class="dock__t">工单</span>
     </a>
     <a class="dock__i" href="/admin/surveys">
-      <span class="dock__n">05</span><span class="dock__t">问卷管理</span>
+      <span class="dock__n">06</span><span class="dock__t">问卷管理</span>
     </a>
-    <button class="dock__i" type="button" data-soon="兑换码">
-      <span class="dock__n">06</span><span class="dock__t">兑换码</span>
-    </button>
-    <button class="dock__i" type="button" data-soon="站内消息">
-      <span class="dock__n">07</span><span class="dock__t">站内消息</span>
-    </button>
+    <a class="dock__i" href="/admin/items">
+      <span class="dock__n">07</span><span class="dock__t">商品兑换</span>
+    </a>
+    <a class="dock__i" href="/admin/messages">
+      <span class="dock__n">08</span><span class="dock__t">站内消息</span>
+    </a>
   </div>
 </nav>
 
@@ -139,26 +142,26 @@
           <p class="adm-q__t">提现审核</p>
           <p class="adm-q__d">通过打款或驳回退回，资金自动回到账户。</p>
         </a>
-        <button class="adm-q is-off" type="button" data-soon="问卷管理">
+        <a class="adm-q" href="/admin/surveys">
           <span class="adm-q__n">03</span>
           <p class="adm-q__t">问卷管理</p>
-          <p class="adm-q__d">问卷上线后在此发布与结算。</p>
-        </button>
-        <button class="adm-q is-off" type="button" data-soon="兑换码">
+          <p class="adm-q__d">录入问卷、定价评级、提拔到站长推荐。</p>
+        </a>
+        <a class="adm-q" href="/admin/items">
           <span class="adm-q__n">04</span>
-          <p class="adm-q__t">兑换码</p>
-          <p class="adm-q__d">兑换码发放与核销记录待建。</p>
-        </button>
+          <p class="adm-q__t">商品与兑换码</p>
+          <p class="adm-q__d">上架商品、补充卡密、查看兑换情况。</p>
+        </a>
         <a class="adm-q" href="/admin/tickets">
           <span class="adm-q__n">05</span>
           <p class="adm-q__t">工单</p>
           <p class="adm-q__d">查看用户提交的工单，标记处理或重开。</p>
         </a>
-        <button class="adm-q is-off" type="button" data-soon="站内消息">
+        <a class="adm-q" href="/admin/messages">
           <span class="adm-q__n">06</span>
           <p class="adm-q__t">站内消息</p>
-          <p class="adm-q__d">事件通知中心待建。</p>
-        </button>
+          <p class="adm-q__d">给单个用户或全体用户发送通知。</p>
+        </a>
       </div>
     </div>
   </section>

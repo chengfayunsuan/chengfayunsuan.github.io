@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>站内消息 · 乘法</title>
+<meta name="description" content="乘法站内消息：兑换发货、提现审核与系统通知。">
+<meta name="theme-color" content="#E0291E">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=9">
+<link rel="stylesheet" href="/css/home.css?v=8">
+<link rel="stylesheet" href="/css/page.css?v=5">
+<link rel="stylesheet" href="/css/msg.css?v=1">
+<script src="/js/config.js?v=4"></script>
+<script src="/js/core.js?v=8"></script>
+</head>
+<body data-page="messages">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><i data-cur="code">FC</i>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/home">我</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
+    </div>
+  </div>
+</header>
+
+<nav class="dock" aria-label="功能目录">
+  <div class="wrap dock__in">
+    <a class="dock__i" href="/hall">
+      <span class="dock__n">01</span><span class="dock__t">问卷大厅</span>
+    </a>
+    <a class="dock__i" href="/store">
+      <span class="dock__n">02</span><span class="dock__t">兑换中心</span>
+    </a>
+    <a class="dock__i" href="/ledger">
+      <span class="dock__n">03</span><span class="dock__t">收支明细</span>
+    </a>
+    <a class="dock__i" href="/ladder">
+      <span class="dock__n">04</span><span class="dock__t">天梯榜</span>
+    </a>
+    <a class="dock__i is-on" href="/messages" aria-current="page">
+      <span class="dock__n">05</span><span class="dock__t">站内消息</span>
+    </a>
+    <a class="dock__i" href="/support">
+      <span class="dock__n">06</span><span class="dock__t">联系客服</span>
+    </a>
+    <a class="dock__i" href="/settings">
+      <span class="dock__n">07</span><span class="dock__t">账户设置</span>
+    </a>
+  </div>
+</nav>
+
+<main class="pg">
+  <div class="wrap">
+
+    <div class="pg-head">
+      <div>
+        <span class="pg-k">INBOX</span>
+        <h1 class="pg-t">站内消息</h1>
+        <p class="pg-d">
+          兑换发货、提现审核结果与系统通知都会发到这里，点击任意一条可以展开全文并标记已读。
+        </p>
+      </div>
+
+      <div class="pg-side">
+        <b id="msgUnread">0</b>
+        <span>条未读</span>
+      </div>
+    </div>
+
+    <div class="msg-bar">
+      <div class="msg-bar__tabs" role="tablist">
+        <button class="msg-tab is-on" type="button" data-f="all">全部</button>
+        <button class="msg-tab" type="button" data-f="unread">未读</button>
+      </div>
+      <button class="msg-readall" type="button" id="msgReadAll">全部标为已读</button>
+    </div>
+
+    <div class="msg-list" id="msgList"></div>
+    <p class="msg-empty" id="msgEmpty" hidden>还没有任何消息。</p>
+
+  </div>
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 乘法 CHENGFA</span>
+      <span>参与调研 · 累计余额 · 兑换回报</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/messages.js?v=1" defer></script>
+</body>
+</html>

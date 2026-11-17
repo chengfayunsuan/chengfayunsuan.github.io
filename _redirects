@@ -16,3 +16,7 @@
 /admin/withdrawals /pages/admin-withdrawals 200
 /admin/tickets     /pages/admin-tickets     200
 /admin/surveys     /pages/admin-surveys     200
+/messages /pages/messages 200
+/admin/orders   /pages/admin-orders   200
+/admin/items    /pages/admin-items    200
+/admin/messages /pages/admin-messages 200

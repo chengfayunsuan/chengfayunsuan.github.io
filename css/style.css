@@ -1137,3 +1137,173 @@ button { font-family: inherit; cursor: pointer; }
   color: var(--paper);
 }
 .cur-seg__b.is-on i { color: #B8B0A0; }
+
+/* ---------- 通用弹层（全站共用，由 CF.modal 生成） ---------- */
+
+.mo-back {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  background: rgba(20, 19, 15, .58);
+  opacity: 0;
+  transition: opacity .18s ease;
+  overflow-y: auto;
+}
+
+.mo-back.is-on { opacity: 1; }
+
+.mo {
+  position: relative;
+  width: 100%;
+  max-width: 470px;
+  margin: auto;
+  padding: 22px 22px 20px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  box-shadow: 10px 10px 0 var(--ink);
+  transform: translateY(12px);
+  transition: transform .18s ease;
+}
+
+.mo-back.is-on .mo { transform: none; }
+
+.mo__head { padding-right: 30px; }
+
+.mo__k {
+  display: block;
+  font-family: var(--num);
+  font-size: 11px;
+  letter-spacing: .16em;
+  color: var(--red);
+}
+
+.mo__t {
+  margin: 6px 0 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+
+.mo__d {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--gray);
+  white-space: pre-line;
+}
+
+.mo__x {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.mo__x:hover { background: var(--ink); color: var(--paper); }
+
+.mo__body {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  margin-top: 18px;
+}
+
+.mo__f { display: flex; flex-direction: column; gap: 6px; }
+
+.mo__l {
+  font-size: 11px;
+  letter-spacing: .08em;
+  color: var(--gray);
+}
+
+.mo__i {
+  width: 100%;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 13.5px;
+  color: var(--ink);
+  outline: none;
+  resize: vertical;
+}
+
+.mo__i:focus {
+  border-color: var(--red);
+  box-shadow: 4px 4px 0 var(--red);
+}
+
+.mo__hint { font-size: 11px; line-height: 1.5; color: var(--gray); }
+
+.mo__msg {
+  margin: 12px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--red);
+}
+
+.mo__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.mo__btn {
+  padding: 10px 20px;
+  border: 2px solid var(--ink);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  cursor: pointer;
+}
+
+.mo__btn--main {
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: 4px 4px 0 var(--red);
+}
+
+.mo__btn--main:hover { transform: translate(-1px, -1px); box-shadow: 6px 6px 0 var(--red); }
+.mo__btn--main:disabled { opacity: .55; cursor: progress; transform: none; box-shadow: 4px 4px 0 var(--red); }
+
+.mo__btn--ghost { background: transparent; color: var(--ink); }
+.mo__btn--ghost:hover { background: var(--paper-2); }
+.mo__btn--ghost:disabled { opacity: .5; cursor: not-allowed; }
+
+@media (max-width: 480px) {
+  .mo { padding: 18px 16px 16px; box-shadow: 6px 6px 0 var(--ink); }
+  .mo__t { font-size: 18px; }
+  .mo__foot { flex-direction: column-reverse; }
+  .mo__btn { width: 100%; }
+}
+
+/* 目录项未读角标 */
+.dock__badge {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  background: var(--red);
+  color: var(--paper);
+  font-family: var(--num);
+  font-size: 11px;
+  line-height: 17px;
+  text-align: center;
+}
+
+.dock__i { position: relative; }
