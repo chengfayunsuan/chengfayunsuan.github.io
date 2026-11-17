@@ -56,6 +56,15 @@ body[data-accent="blue"] {
 
 .stat__s b { color: var(--ink); font-weight: 700; }
 
+.stat__u {
+  margin-left: 6px;
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: .12em;
+  color: var(--gray);
+}
+
 /* ---------- 区块 ---------- */
 
 .adm-sec { margin-top: clamp(34px, 4.4vw, 58px); }

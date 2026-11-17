@@ -40,6 +40,7 @@ export async function onRequest(context) {
     if (path === 'ladder' && request.method === 'GET') return await ladder(request, env, url);
     if (path === 'ticket' && request.method === 'POST') return await ticketSubmit(request, env);
     if (path === 'ticket' && request.method === 'GET') return await ticketMine(request, env);
+    if (path === 'fx' && request.method === 'GET') return await fxRate(env);
     if (path.indexOf('admin/') === 0) return await adminApi(request, env, url, path);
     return json({ ok: false, error: 'not_found' }, 404);
   } catch (err) {
@@ -369,6 +370,52 @@ async function requireAdmin(request, env) {
     .bind(session.uid).first();
   if (!row || row.status !== 'active' || ADMIN_ROLES.indexOf(row.role) < 0) return null;
   return { uid: session.uid, role: row.role };
+}
+
+/* ---------------- 汇率 ---------------- */
+
+const FX_FALLBACK = 7.0;
+const FX_TTL_MS = 60 * 60 * 1000; // 1 小时
+
+// 1 USD = ? CNY。缓存写在 D1，过期才拉外部接口。
+async function fxRate(env) {
+  let rate = FX_FALLBACK;
+  let updated = '';
+  let stale = true;
+
+  try {
+    const row = await env.DB.prepare('SELECT usd_cny, updated_at FROM fx_rate WHERE id = 1').first();
+    if (row && Number(row.usd_cny) > 0) {
+      rate = Number(row.usd_cny);
+      updated = row.updated_at;
+      const t = Date.parse(String(updated).replace(' ', 'T') + 'Z');
+      stale = !isFinite(t) || (Date.now() - t) > FX_TTL_MS;
+    }
+  } catch (e) {}
+
+  if (stale) {
+    try {
+      const res = await fetch('https://open.er-api.com/v6/latest/USD', {
+        headers: { Accept: 'application/json' },
+        cf: { cacheTtl: 1800 }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const v = Number(data && data.rates && data.rates.CNY);
+        if (v > 0 && v < 100) {
+          rate = v;
+          try {
+            await env.DB.prepare(
+              `INSERT INTO fx_rate (id, usd_cny, updated_at) VALUES (1, ?, datetime('now'))
+               ON CONFLICT(id) DO UPDATE SET usd_cny = excluded.usd_cny, updated_at = datetime('now')`
+            ).bind(v).run();
+          } catch (e) {}
+        }
+      }
+    } catch (e) {}
+  }
+
+  return json({ ok: true, usdCny: rate, updatedAt: updated });
 }
 
 /* ---------------- 工单 ---------------- */

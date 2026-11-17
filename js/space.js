@@ -33,6 +33,13 @@
 
   function $(id) { return document.getElementById(id); }
 
+
+  /* 金额显示统一走 CF，切换币种时由 CF.refresh 重刷所有 data-cfb 节点 */
+  function setAmt(el, v) {
+    if (window.CF && CF.amount) CF.amount(el, v);
+    else if (el) el.textContent = trimNum(v);
+  }
+
   function pad(n) { return n < 10 ? '0' + n : String(n); }
 
   /* 余额小数末尾的 0 不显示：0.0000 -> 0，128.4500 -> 128.45 */
@@ -418,7 +425,7 @@
     var data = p || { count: 0, total: '0.0000', lastAt: null, items: [] };
 
     $('poCount').textContent = data.count || 0;
-    $('poTotal').textContent = trimNum(data.total || '0');
+    setAmt($('poTotal'), data.total || '0');
     $('poLast').textContent = data.lastAt ? fmtDate(data.lastAt) : '—';
 
     var list = $('poList');
@@ -432,7 +439,7 @@
 
       var amt = document.createElement('span');
       amt.className = 'po__amt';
-      amt.textContent = trimNum(it.amount);
+      setAmt(amt, it.amount);
       var unit = document.createElement('i');
       unit.setAttribute('data-cur', 'code');
       unit.textContent = 'FC';
@@ -507,7 +514,7 @@
     fcEl.textContent = fcText;
     fcEl.classList.toggle('is-long', fcText.length > 7);
 
-    $('fcFrozen').textContent = trimNum(u.fcFrozen == null ? '0' : u.fcFrozen);
+    setAmt($('fcFrozen'), u.fcFrozen == null ? '0' : u.fcFrozen);
 
     $('lv').textContent = lv;
     $('expNow').textContent = exp;
@@ -663,7 +670,7 @@
     if (me) {
       $('navGuest').hidden = true;
       $('navAuthed').hidden = false;
-      $('navBal').textContent = trimNum(me.fc);
+      setAmt($('navBal'), me.fc);
       $('navName').textContent = me.username || '我';
 
       /* 站长与管理员点左上角乘法进后台 */

@@ -8,6 +8,12 @@
 
   var $ = function (id) { return document.getElementById(id); };
 
+  /* 金额显示统一走 CF，切换币种时由 CF.refresh 重刷所有 data-cfb 节点 */
+  function setAmt(el, v) {
+    if (window.CF && CF.amount) CF.amount(el, v);
+    else if (el) el.textContent = trimNum(v);
+  }
+
   function pad(n) { return n < 10 ? '0' + n : String(n); }
 
   /* 金额末尾的 0 不显示：0.0000 -> 0，128.4500 -> 128.45 */
@@ -106,7 +112,7 @@
     if (!me) return;
     var bal = $('navBal');
     var name = $('navName');
-    if (bal) bal.textContent = trimNum(me.fc);
+    if (bal) setAmt(bal, me.fc);
     if (name) {
       name.textContent = me.username || '我';
       if (me.uid) name.href = '/space?uid=' + encodeURIComponent(me.uid);
@@ -217,8 +223,8 @@
     if (!me) return;
     var fc = $('stFc');
     var fr = $('stFrozen');
-    if (fc) fc.textContent = trimNum(me.fc);
-    if (fr) fr.textContent = trimNum(me.fcFrozen);
+    if (fc) setAmt(fc, me.fc);
+    if (fr) setAmt(fr, me.fcFrozen);
 
     /* 余额不够的档位标灰：内部货币 1 FC 折算 1 元 */
     var have = Number(trimNum(me.fc)) || 0;
@@ -241,7 +247,7 @@
 
   function initLedger(me) {
     var now = $('lgNow');
-    if (now && me) now.textContent = trimNum(me.fc);
+    if (now && me) setAmt(now, me.fc);
 
     var body = $('lgBody');
     var empty = $('lgEmpty');
@@ -282,7 +288,11 @@
 
         var d = document.createElement('span');
         d.className = 'lg-row__d ' + (s.out ? 'is-out' : 'is-in');
-        d.textContent = (s.out ? '−' : '+') + s.text;
+        /* 带符号金额：存 CFB 原值，CF 换算后补回正负号 */
+        d.setAttribute('data-cfb', it.delta);
+        d.setAttribute('data-cur', 'amount');
+        d.textContent = (window.CF && CF.money ? CF.money(it.delta) : s.text);
+        d.setAttribute('data-signed', '1');
         var du = document.createElement('i');
         du.setAttribute('data-cur', 'code');
         du.textContent = 'FC';
@@ -290,7 +300,7 @@
 
         var b = document.createElement('span');
         b.className = 'lg-row__b';
-        b.textContent = trimNum(it.balance);
+        setAmt(b, it.balance);
         var bu = document.createElement('i');
         bu.setAttribute('data-cur', 'code');
         bu.textContent = 'FC';
@@ -337,8 +347,8 @@
       var inc = $('lgIn');
       var out = $('lgOut');
       var cnt = $('lgCount');
-      if (inc) inc.textContent = trimNum(sum.income);
-      if (out) out.textContent = trimNum(sum.outcome);
+      if (inc) setAmt(inc, sum.income);
+      if (out) setAmt(out, sum.outcome);
       if (cnt) cnt.textContent = sum.count || 0;
     }
 
@@ -426,7 +436,7 @@
 
           var hfc = document.createElement('span');
           hfc.className = 'ld-hero__fc';
-          hfc.textContent = trimNum(it.fc);
+          setAmt(hfc, it.fc);
           var hfcu = document.createElement('i');
           hfcu.setAttribute('data-cur', 'code');
           hfcu.textContent = 'CFB';
@@ -487,7 +497,7 @@
 
         var fc = document.createElement('span');
         fc.className = 'ld-fc';
-        fc.textContent = trimNum(it.fc);
+        setAmt(fc, it.fc);
         var fcu = document.createElement('i');
         fcu.setAttribute('data-cur', 'code');
         fcu.textContent = 'CFB';

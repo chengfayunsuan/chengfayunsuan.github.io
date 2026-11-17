@@ -188,7 +188,8 @@
 
   function render(user) {
     $('navName').textContent = user.username || '未命名';
-    $('navBal').textContent = trimNum(user.fc);
+    if (window.CF && CF.amount) CF.amount($('navBal'), user.fc);
+    else $('navBal').textContent = trimNum(user.fc);
 
     /* 站长与管理员点左上角乘法进后台 */
     var brand = document.querySelector('.brand');
@@ -206,10 +207,14 @@
     paintBio(user.bio || '');
 
     var fcEl = $('fcText');
-    fcEl.textContent = trimNum(user.fc);
+    var fcShown = window.CF && CF.money ? CF.money(user.fc) : trimNum(user.fc);
+    fcEl.textContent = fcShown;
     /* 位数多时收一号字，避免大额余额把小窗口入口挤掉 */
-    fcEl.classList.toggle('is-long', trimNum(user.fc).length > 8);
-    $('fcFrozen').textContent = trimNum(user.fcFrozen);
+    fcEl.classList.toggle('is-long', fcShown.length > 8);
+    fcEl.setAttribute('data-cfb', user.fc);
+    fcEl.setAttribute('data-cur', 'amount');
+    if (window.CF && CF.amount) CF.amount($('fcFrozen'), user.fcFrozen);
+    else $('fcFrozen').textContent = trimNum(user.fcFrozen);
 
     $('statDays').textContent = daysSince(user.createdAt);
     $('statLevel').textContent = user.level;

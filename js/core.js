@@ -78,10 +78,10 @@
   var ROUTES = {
     '/home': { page: 'home', js: '/js/home.js?v=8' },
     '/settings': { page: 'settings', js: '/js/settings.js?v=9', css: ['/css/settings.css?v=11', '/css/relation.css?v=1'] },
-    '/admin': { page: 'admin', js: '/js/admin.js?v=4' },
-    '/admin/users': { page: 'admin-users', js: '/js/admin.js?v=4' },
-    '/admin/withdrawals': { page: 'admin-withdrawals', js: '/js/admin.js?v=4' },
-    '/admin/tickets': { page: 'admin-tickets', js: '/js/admin.js?v=4' }
+    '/admin': { page: 'admin', js: '/js/admin.js?v=5' },
+    '/admin/users': { page: 'admin-users', js: '/js/admin.js?v=5' },
+    '/admin/withdrawals': { page: 'admin-withdrawals', js: '/js/admin.js?v=5' },
+    '/admin/tickets': { page: 'admin-tickets', js: '/js/admin.js?v=5' }
   };
 
   function normalize(path) {

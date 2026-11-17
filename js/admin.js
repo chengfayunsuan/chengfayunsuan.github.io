@@ -14,6 +14,13 @@
     return s.replace(/0+$/, '').replace(/\.$/, '');
   }
 
+
+  /* 金额显示统一走 CF，切换币种时由 CF.refresh 重刷所有 data-cfb 节点 */
+  function setAmt(el, v) {
+    if (window.CF && CF.amount) CF.amount(el, v);
+    else if (el) el.textContent = trimNum(v);
+  }
+
   function pad(n) { return n < 10 ? '0' + n : String(n); }
 
   function fmtTime(iso) {
@@ -108,11 +115,9 @@
   function paintNav(me) {
     var bal = $('navBal');
     var name = $('navName');
-    if (bal) bal.textContent = trimNum(me.fc);
+    if (bal) setAmt(bal, me.fc);
     if (name) name.textContent = me.username || '我';
-    /* 站长与管理员点左上角乘法进后台，其余保持原跳转 */
-    var brand = document.querySelector('.brand');
-    if (brand && (me.role === 'owner' || me.role === 'admin')) brand.setAttribute('href', '/admin');
+    /* 后台页左上角「乘法」始终回主站，HTML 里已是 /，这里不覆盖 */
   }
 
   var logoutBtn = $('logoutBtn');
@@ -149,10 +154,10 @@
       $('stUsers').textContent = d.users.total;
       $('stToday').textContent = d.users.today;
       var money = Number(d.money.available) + Number(d.money.frozen);
-      $('stMoney').textContent = trimNum(String(money));
-      $('stFrozen').textContent = trimNum(d.money.frozen) + ' CFB';
+      setAmt($('stMoney'), String(money));
+      setAmt($('stFrozen'), d.money.frozen);
       $('stWd').textContent = d.withdrawals.pending;
-      $('stWdAmount').textContent = trimNum(d.withdrawals.amount) + ' CFB';
+      setAmt($('stWdAmount'), d.withdrawals.amount);
       $('stActive').textContent = d.users.active;
       $('stFrozenN').textContent = d.users.frozen;
       $('stBanned').textContent = d.users.banned;
@@ -250,7 +255,7 @@
 
         var fc = document.createElement('span');
         fc.className = 'adm-cell adm-cell--num';
-        fc.textContent = trimNum(u.fc);
+        setAmt(fc, u.fc);
         var fu = document.createElement('i');
         fu.setAttribute('data-cur', 'code');
         fu.textContent = 'CFB';
@@ -258,7 +263,7 @@
 
         var fr = document.createElement('span');
         fr.className = 'adm-cell adm-cell--num';
-        fr.textContent = trimNum(u.fcFrozen);
+        setAmt(fr, u.fcFrozen);
         var fru = document.createElement('i');
         fru.setAttribute('data-cur', 'code');
         fru.textContent = 'CFB';
@@ -422,7 +427,7 @@
 
         var amt = document.createElement('span');
         amt.className = 'adm-cell adm-cell--num';
-        amt.textContent = trimNum(w.amount);
+        setAmt(amt, w.amount);
         var au = document.createElement('i');
         au.setAttribute('data-cur', 'code');
         au.textContent = 'CFB';

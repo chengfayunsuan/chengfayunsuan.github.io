@@ -16,6 +16,12 @@
   function pad(n, len) { var s = String(n); while (s.length < len) s = '0' + s; return s; }
 
   /* 余额小数末尾的 0 不显示：0.0000 -> 0，128.4500 -> 128.45 */
+  /* 金额显示统一走 CF，切换币种时由 CF.refresh 重刷所有 data-cfb 节点 */
+  function setAmt(el, v) {
+    if (window.CF && CF.amount) CF.amount(el, v);
+    else if (el) el.textContent = trimNum(v);
+  }
+
   function trimNum(v) {
     var s = String(v == null ? '' : v);
     if (s.indexOf('.') < 0) return s;
@@ -85,7 +91,7 @@
     current = u;
 
     $('navName').textContent = u.username || '未命名';
-    $('navBal').textContent = trimNum(u.fc);
+    setAmt($('navBal'), u.fc);
 
     /* 站长与管理员点左上角乘法进后台 */
     var brand = document.querySelector('.brand');
@@ -103,8 +109,8 @@
     $('curName').textContent = u.username || '—';
     $('curEmail').textContent = u.email || '—';
 
-    $('setFc').textContent = trimNum(u.fc);
-    $('setFrozen').textContent = trimNum(u.fcFrozen);
+    setAmt($('setFc'), u.fc);
+    setAmt($('setFrozen'), u.fcFrozen);
 
     $('stDone').textContent = u.done || 0;
     $('stDays').textContent = daysSince(u.createdAt);
@@ -596,16 +602,18 @@
   if (curSeg && window.CF && window.CF.setCurrency) {
     var markCur = function (m) {
       curSeg.querySelectorAll('.cur-seg__b').forEach(function (b) {
-        b.classList.toggle('is-on', b.getAttribute('data-cur-mode') === m);
+        var on = b.getAttribute('data-cur-mode') === m;
+        b.classList.toggle('is-on', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
       });
     };
+    /* 注册到 CF，任何地方改币种都会同步高亮 */
+    window.CF.onChange(markCur);
     markCur(window.CF.currency.mode);
     curSeg.addEventListener('click', function (ev) {
       var b = ev.target.closest('.cur-seg__b');
       if (!b) return;
-      var m = b.getAttribute('data-cur-mode');
-      window.CF.setCurrency(m);
-      markCur(m);
+      window.CF.setCurrency(b.getAttribute('data-cur-mode'));
     });
   }
 

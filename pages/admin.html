@@ -10,8 +10,8 @@
 <link rel="stylesheet" href="/css/style.css?v=6">
 <link rel="stylesheet" href="/css/home.css?v=8">
 <link rel="stylesheet" href="/css/page.css?v=5">
-<link rel="stylesheet" href="/css/admin.css?v=4">
-<script src="/js/config.js?v=2"></script>
+<link rel="stylesheet" href="/css/admin.css?v=5">
+<script src="/js/config.js?v=3"></script>
 <script src="/js/core.js?v=3"></script>
 </head>
 <body data-page="admin" data-accent="blue">
@@ -19,7 +19,7 @@
 <!-- ============ 导航 ============ -->
 <header class="nav">
   <div class="wrap nav__in">
-    <a class="brand" href="/admin">
+    <a class="brand" href="/">
       <span class="brand__mark" aria-hidden="true"></span>
       乘法
       <span class="brand__en">CHENGFA</span>
@@ -112,10 +112,10 @@
         <div class="stat stat--pending">
           <span class="stat__n" id="stWd">—</span>
           <span class="stat__t">待审提现</span>
-          <span class="stat__s">涉及 <b id="stWdAmount">—</b></span>
+          <span class="stat__s">涉及 <b id="stWdAmount">—</b> <i data-cur="code">CFB</i></span>
         </div>
         <div class="stat">
-          <span class="stat__n" id="stFrozen">—</span>
+          <span class="stat__n" id="stFrozen">—</span><i class="stat__u" data-cur="code">CFB</i>
           <span class="stat__t">法币冻结</span>
           <span class="stat__s">已锁定待结算</span>
         </div>
@@ -190,6 +190,6 @@
   </div>
 </footer>
 
-<script src="/js/admin.js?v=4" defer></script>
+<script src="/js/admin.js?v=5" defer></script>
 </body>
 </html>
