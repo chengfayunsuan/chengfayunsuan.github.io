@@ -47,6 +47,11 @@
   margin-top: 20px;
 }
 
+/* 推荐位通常只有两三张，拉伸铺满一行比留白好看 */
+.hl-sect--feat .sv-grid {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
 /* ---------- 卡片 ---------- */
 
 .svc {
@@ -271,6 +276,7 @@
 
 /* 推荐位 */
 .svc--feat {
+  padding-top: 34px;
   border-color: var(--red);
   box-shadow: 6px 6px 0 rgba(224, 41, 30, .16);
 }
