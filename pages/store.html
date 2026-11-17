@@ -8,11 +8,11 @@
 <meta name="theme-color" content="#E0291E">
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="/css/style.css?v=9">
-<link rel="stylesheet" href="/css/home.css?v=8">
+<link rel="stylesheet" href="/css/home.css?v=10">
 <link rel="stylesheet" href="/css/page.css?v=5">
 <link rel="stylesheet" href="/css/store.css?v=1">
-<script src="/js/config.js?v=4"></script>
-<script src="/js/core.js?v=8"></script>
+<script src="/js/config.js?v=6"></script>
+<script src="/js/core.js?v=9"></script>
 </head>
 <body data-page="store">
 
@@ -26,7 +26,7 @@
 
     <div class="hm-nav">
       <span class="hm-nav__bal">
-        <b id="navBal">0</b><i data-cur="code">FC</i>
+        <b id="navBal">0</b><button class="hm-nav__cur" type="button" data-cur-toggle aria-label="切换显示币种" title="点击在乘法币与乘法刀之间切换"><span data-cur="code">CFB</span></button>
       </span>
       <span class="hm-nav__sep" aria-hidden="true"></span>
       <a class="hm-nav__name" id="navName" href="/home">我</a>
@@ -57,7 +57,7 @@
 
       <div class="pg-side">
         <b>1:1</b>
-        <span>CFB 折人民币</span>
+        <span><span data-cur="code">CFB</span> 折<span data-cur="cash">人民币</span></span>
       </div>
     </div>
 
@@ -120,7 +120,7 @@
     <ul class="st-rule">
       <li>
         <b>折算比例</b>
-        <span>1 CFB 折 1 元人民币、1 CFD 折 1 美元，两者数值相同，可在设置中切换显示；提现与兑换码采用同一比例，不额外收取手续费。</span>
+        <span>1 乘法币折 1 元人民币、1 乘法刀折 1 美元，两者数值相同，可点导航栏余额后的币种切换；提现与兑换码采用同一比例，不额外收取手续费。</span>
       </li>
       <li>
         <b>到账时间</b>

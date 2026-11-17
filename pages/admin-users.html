@@ -8,11 +8,11 @@
 <meta name="theme-color" content="#1D52E2">
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="/css/style.css?v=9">
-<link rel="stylesheet" href="/css/home.css?v=8">
+<link rel="stylesheet" href="/css/home.css?v=10">
 <link rel="stylesheet" href="/css/page.css?v=5">
 <link rel="stylesheet" href="/css/admin.css?v=8">
-<script src="/js/config.js?v=4"></script>
-<script src="/js/core.js?v=8"></script>
+<script src="/js/config.js?v=6"></script>
+<script src="/js/core.js?v=9"></script>
 </head>
 <body data-page="admin-users" data-accent="blue">
 
@@ -26,7 +26,7 @@
 
     <div class="hm-nav">
       <span class="hm-nav__bal">
-        <b id="navBal">0</b><i data-cur="code">CFB</i>
+        <b id="navBal">0</b><button class="hm-nav__cur" type="button" data-cur-toggle aria-label="切换显示币种" title="点击在乘法币与乘法刀之间切换"><span data-cur="code">CFB</span></button>
       </span>
       <span class="hm-nav__sep" aria-hidden="true"></span>
       <a class="hm-nav__name" id="navName" href="/home">我</a>
@@ -90,21 +90,6 @@
           </div>
         </div>
       </div>
-    </div>
-  </section>
-
-  <section class="adm-curbar">
-    <div class="wrap adm-curbar__in">
-      <span class="adm-curbar__k">CURRENCY / 金额显示</span>
-      <div class="cur-seg">
-        <button class="cur-seg__b" type="button" data-cur-mode="CNY">
-          <b>CFB · 乘法币</b><i>按人民币显示</i>
-        </button>
-        <button class="cur-seg__b" type="button" data-cur-mode="USD">
-          <b>CFD · 乘法刀</b><i>按美元显示</i>
-        </button>
-      </div>
-      <span class="adm-curbar__hint">切换后下方法币金额按实时汇率换算</span>
     </div>
   </section>
 

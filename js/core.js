@@ -77,7 +77,7 @@
 
   var ROUTES = {
     '/home': { page: 'home', js: '/js/home.js?v=9' },
-    '/settings': { page: 'settings', js: '/js/settings.js?v=12', css: ['/css/settings.css?v=12', '/css/relation.css?v=1'] },
+    '/settings': { page: 'settings', js: '/js/settings.js?v=13', css: ['/css/settings.css?v=13', '/css/relation.css?v=1'] },
     '/admin': { page: 'admin', js: '/js/admin.js?v=6' },
     '/admin/users': { page: 'admin-users', js: '/js/admin.js?v=6' },
     '/admin/withdrawals': { page: 'admin-withdrawals', js: '/js/admin.js?v=6' },
@@ -148,7 +148,8 @@
         /* 新换进来的 [data-cur] 节点要重新套用币种显示 */
         /* 新换进来的币种节点与按钮要重新套用显示并绑定 */
         if (window.CF && CF.refresh) CF.refresh();
-        if (window.CF && CF.bindCurrencyButtons) CF.bindCurrencyButtons();
+        if (window.CF && CF.bindToggles) CF.bindToggles();
+        if (window.CF && CF.bindStyleButtons) CF.bindStyleButtons();
 
         if (push) history.pushState({ page: route.page, path: path }, '', path);
         window.scrollTo(0, 0);

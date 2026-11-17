@@ -9,11 +9,11 @@
   <meta name="theme-color" content="#E0291E">
   <meta name="robots" content="noindex">
   <link rel="stylesheet" href="/css/style.css?v=9">
-  <link rel="stylesheet" href="/css/home.css?v=8">
-  <link rel="stylesheet" href="/css/settings.css?v=12">
+  <link rel="stylesheet" href="/css/home.css?v=10">
+  <link rel="stylesheet" href="/css/settings.css?v=13">
   <link rel="stylesheet" href="/css/relation.css?v=1">
-  <script src="/js/config.js?v=4"></script>
-  <script src="/js/core.js?v=8"></script>
+  <script src="/js/config.js?v=6"></script>
+  <script src="/js/core.js?v=9"></script>
 </head>
 
 <body data-page="settings">
@@ -28,7 +28,7 @@
 
       <div class="hm-nav">
         <span class="hm-nav__bal">
-          <b id="navBal">0</b><i data-cur="code">FC</i>
+          <b id="navBal">0</b><button class="hm-nav__cur" type="button" data-cur-toggle aria-label="切换显示币种" title="点击在乘法币与乘法刀之间切换"><span data-cur="code">CFB</span></button>
         </span>
         <span class="hm-nav__sep" aria-hidden="true"></span>
         <span class="hm-nav__name" id="navName">载入中</span>
@@ -379,17 +379,17 @@
         <div class="pref">
 
           <fieldset class="pref__g pref__g--wide">
-            <legend class="pref__gt">币种显示</legend>
+            <legend class="pref__gt">单位显示</legend>
             <div class="cur-row">
-              <div class="cur-seg" id="curSeg">
-                <button class="cur-seg__b" type="button" data-cur-mode="CNY">
-                  <b>CFB · 乘法币</b><i>按人民币显示</i>
+              <div class="cur-seg" id="styleSeg">
+                <button class="cur-seg__b" type="button" data-cur-style="code">
+                  <b>CFB / CFD</b><i>字母写法</i>
                 </button>
-                <button class="cur-seg__b" type="button" data-cur-mode="USD">
-                  <b>CFD · 乘法刀</b><i>按美元显示</i>
+                <button class="cur-seg__b" type="button" data-cur-style="name">
+                  <b>乘法币 / 乘法刀</b><i>汉字写法</i>
                 </button>
               </div>
-              <p class="pref__hint">按实时汇率换算，切换立即生效；账户以乘法币记账。</p>
+              <p class="pref__hint">只改单位的写法，不改数值。按人民币还是按美元显示，点导航栏余额后面的币种即可切换。</p>
             </div>
           </fieldset>
 
@@ -507,7 +507,7 @@
     </div>
   </footer>
 
-  <script src="/js/settings.js?v=12" defer></script>
+  <script src="/js/settings.js?v=13" defer></script>
 </body>
 
 </html>

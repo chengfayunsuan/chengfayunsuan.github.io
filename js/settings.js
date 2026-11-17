@@ -83,6 +83,84 @@
     return n < 1 ? 1 : n;
   }
 
+  /* ---------- 兑换记录 ---------- */
+
+  var ORDER_ST = { paid: '已完成', pending: '待发货', refunded: '已退款' };
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { say('已复制'); })
+        .catch(function () { say('复制失败，请手动选中'); });
+      return;
+    }
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); say('已复制'); } catch (e) { say('复制失败，请手动选中'); }
+    document.body.removeChild(ta);
+  }
+
+  function loadRedeems() {
+    var body = $('redeemBody');
+    if (!body) return;
+
+    fetch('/api/orders', { headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.ok) return;
+        var items = d.items || [];
+        if (!items.length) return;
+
+        body.textContent = '';
+
+        items.forEach(function (o) {
+          var tr = document.createElement('tr');
+
+          var t = document.createElement('td');
+          t.textContent = fmtFull(o.at);
+          tr.appendChild(t);
+
+          var name = document.createElement('td');
+          var nb = document.createElement('b');
+          nb.textContent = o.title;
+          name.appendChild(nb);
+          tr.appendChild(name);
+
+          var amount = document.createElement('td');
+          amount.className = 'ta-r';
+          var num = document.createElement('b');
+          setAmt(num, o.price);
+          var unit = document.createElement('i');
+          unit.setAttribute('data-cur', 'code');
+          unit.textContent = 'CFB';
+          amount.appendChild(num);
+          amount.appendChild(unit);
+          tr.appendChild(amount);
+
+          var code = document.createElement('td');
+          if (o.code) {
+            code.className = 'tb__code';
+            code.textContent = o.code;
+            code.title = '点击复制';
+            code.addEventListener('click', function () { copyText(o.code); });
+          } else {
+            code.textContent = o.sn;
+          }
+          tr.appendChild(code);
+
+          var st = document.createElement('td');
+          st.textContent = ORDER_ST[o.status] || o.status;
+          tr.appendChild(st);
+
+          body.appendChild(tr);
+        });
+      })
+      .catch(function () {});
+  }
+
   /* ---------- 渲染 ---------- */
 
   var current = null;
@@ -638,6 +716,7 @@
       }
       if (window.CF && CF.cache) CF.cache.set(data.user);
       show(data.user);
+      loadRedeems();
     })
     .catch(function () {
       loading.hidden = true;

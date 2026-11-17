@@ -695,3 +695,33 @@
 
 }
 
+
+/* 导航栏币种开关：点一下在乘法币 / 乘法刀之间切换 */
+.hm-nav__cur {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  padding: 4px 9px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  opacity: .72;
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: .06em;
+  cursor: pointer;
+  transition: opacity .14s ease, color .14s ease, border-color .14s ease;
+}
+
+.hm-nav__cur:hover {
+  opacity: 1;
+  color: var(--red);
+  border-color: var(--red);
+}
+
+.hm-nav__cur:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+}
