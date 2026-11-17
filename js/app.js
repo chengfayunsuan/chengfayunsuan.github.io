@@ -359,8 +359,7 @@
       if (count) count.textContent = String(all.length);
 
       if (!all.length) {
-        var allSect = document.querySelector('.hl-sect');
-        if (allSect) allSect.hidden = true;
+        document.querySelectorAll('.hl-sect').forEach(function (sec) { sec.hidden = true; });
         if (empty) empty.hidden = false;
         return;
       }
