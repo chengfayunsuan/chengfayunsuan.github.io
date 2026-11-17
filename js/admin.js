@@ -117,7 +117,7 @@
     var name = $('navName');
     if (bal) setAmt(bal, me.fc);
     if (name) name.textContent = me.username || '我';
-    /* 后台页左上角「乘法」始终回主站，HTML 里已是 /，这里不覆盖 */
+    /* 后台页左上角「乘法」回账户首页 /home，HTML 里已是 /home，这里不覆盖 */
   }
 
   var logoutBtn = $('logoutBtn');
