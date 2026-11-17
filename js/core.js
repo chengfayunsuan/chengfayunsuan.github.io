@@ -81,7 +81,8 @@
     '/admin': { page: 'admin', js: '/js/admin.js?v=6' },
     '/admin/users': { page: 'admin-users', js: '/js/admin.js?v=6' },
     '/admin/withdrawals': { page: 'admin-withdrawals', js: '/js/admin.js?v=6' },
-    '/admin/tickets': { page: 'admin-tickets', js: '/js/admin.js?v=6' }
+    '/admin/tickets': { page: 'admin-tickets', js: '/js/admin.js?v=6' },
+    '/admin/surveys': { page: 'admin-surveys', js: '/js/admin-surveys.js?v=1' }
   };
 
   function normalize(path) {

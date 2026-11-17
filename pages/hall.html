@@ -10,8 +10,9 @@
 <link rel="stylesheet" href="/css/style.css?v=8">
 <link rel="stylesheet" href="/css/home.css?v=8">
 <link rel="stylesheet" href="/css/page.css?v=5">
+<link rel="stylesheet" href="/css/hall.css?v=1">
 <script src="/js/config.js?v=4"></script>
-<script src="/js/core.js?v=5"></script>
+<script src="/js/core.js?v=6"></script>
 </head>
 <body data-page="hall">
 
@@ -64,26 +65,24 @@
       </div>
     </div>
 
-    <!-- 伪问卷卡：想改造就改这里，接口上线后由数据接管 -->
-    <div class="sv-list">
-      <article class="sv-card">
-        <div class="sv-card__main">
-          <div class="sv-card__top">
-            <span class="sv-card__star">★★★★★</span>
-            <span class="sv-card__flag">SAMPLE / 样例</span>
-          </div>
-          <h2 class="sv-card__t">样例问卷 · 城市通勤与消费习惯调研</h2>
-          <p class="sv-card__d">题目 18 · 预计 6 分钟 · 单次提交 · 通过核验后即时入账</p>
-          <div class="sv-card__tags">
-            <span>18–35 岁</span><span>一二线城市</span><span>答卷时长校验</span>
-          </div>
-        </div>
-        <div class="sv-card__side">
-          <div class="sv-card__pay"><b>12</b><i data-cur="code">CFB</i></div>
-          <button class="btn btn--red btn--s" type="button" data-soon="答卷通道">开始答卷</button>
-        </div>
-      </article>
-    </div>
+    <!-- 站长推荐 -->
+    <section class="hl-sect hl-sect--feat" id="featWrap" hidden>
+      <div class="hl-sect__head">
+        <span class="hl-sect__k">EDITOR'S PICK</span>
+        <h2 class="hl-sect__t">站长推荐</h2>
+        <span class="hl-sect__d">站长从当前开放的问卷里挑出来的几份</span>
+      </div>
+      <div class="sv-grid sv-grid--feat" id="featList"></div>
+    </section>
+
+    <!-- 全部问卷 -->
+    <section class="hl-sect">
+      <div class="hl-sect__head">
+        <span class="hl-sect__k">ALL SURVEYS</span>
+        <h2 class="hl-sect__t">全部问卷</h2>
+      </div>
+      <div class="sv-grid" id="svList"></div>
+    </section>
 
     <div class="pg-empty" hidden>
       <p class="pg-empty__k">NO SURVEY OPEN</p>
@@ -135,6 +134,6 @@
   </div>
 </footer>
 
-<script src="/js/app.js?v=6" defer></script>
+<script src="/js/app.js?v=7" defer></script>
 </body>
 </html>

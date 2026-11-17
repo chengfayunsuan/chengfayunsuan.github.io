@@ -196,24 +196,176 @@
 
   /* ---------- 问卷大厅 ---------- */
 
+  function cardEl(s, feat) {
+    var card = document.createElement('article');
+    card.className = 'svc';
+
+    if (feat) {
+      var flag = document.createElement('span');
+      flag.className = 'svc__flag';
+      flag.textContent = 'PICK';
+      card.appendChild(flag);
+    }
+
+    /* 价格：主角，一律走 CF.amount 以便跟随币种切换 */
+    var top = document.createElement('div');
+    top.className = 'svc__top';
+
+    var pay = document.createElement('div');
+    pay.className = 'svc__pay';
+    var num = document.createElement('b');
+    setAmt(num, s.price);
+    var unit = document.createElement('i');
+    unit.setAttribute('data-cur', 'code');
+    unit.textContent = 'CFB';
+    pay.appendChild(num);
+    pay.appendChild(unit);
+
+    var rate = document.createElement('div');
+    rate.className = 'svc__rate';
+
+    if (s.grade) {
+      var g = document.createElement('span');
+      g.className = 'svc__grade';
+      g.setAttribute('data-grade', s.grade);
+      g.textContent = s.grade + ' 级';
+      rate.appendChild(g);
+    }
+
+    if (s.stars) {
+      var st = document.createElement('span');
+      st.className = 'svc__stars';
+      st.title = s.stars + ' 星';
+      for (var i = 1; i <= 5; i++) {
+        var star = document.createElement('span');
+        if (i > s.stars) star.className = 'off';
+        star.textContent = '★';
+        st.appendChild(star);
+      }
+      rate.appendChild(st);
+    }
+
+    top.appendChild(pay);
+    top.appendChild(rate);
+    card.appendChild(top);
+
+    var h = document.createElement('h3');
+    h.className = 'svc__t';
+    h.textContent = s.title;
+    card.appendChild(h);
+
+    var meta = document.createElement('div');
+    meta.className = 'svc__meta';
+
+    function addMeta(label, value) {
+      if (!value) return;
+      var m = document.createElement('span');
+      m.className = 'svc__m';
+      var lab = document.createElement('i');
+      lab.textContent = label;
+      var val = document.createElement('b');
+      val.textContent = value;
+      m.appendChild(lab);
+      m.appendChild(val);
+      meta.appendChild(m);
+    }
+
+    addMeta('问卷商', s.provider);
+    addMeta('耗时', s.durationMin ? s.durationMin + ' 分钟' : '');
+    addMeta('主题', s.topic);
+    if (meta.children.length) card.appendChild(meta);
+
+    if (s.requirement) {
+      var req = document.createElement('p');
+      req.className = 'svc__req';
+      var em = document.createElement('em');
+      em.textContent = '要求';
+      req.appendChild(em);
+      req.appendChild(document.createTextNode(s.requirement));
+      card.appendChild(req);
+    }
+
+    var go = document.createElement(s.entry ? 'a' : 'span');
+    go.className = 'btn btn--red btn--s svc__go';
+    go.appendChild(document.createTextNode(s.entry ? '进入问卷' : '暂未开放'));
+    var arrow = document.createElement('span');
+    arrow.setAttribute('aria-hidden', 'true');
+    arrow.textContent = '→';
+    go.appendChild(arrow);
+
+    if (s.entry) {
+      go.href = s.entry;
+      if (/^https?:/i.test(s.entry)) {
+        go.target = '_blank';
+        go.rel = 'noopener';
+      }
+    } else {
+      go.classList.add('is-dead');
+    }
+
+    card.appendChild(go);
+    return card;
+  }
+
   function initHall(me) {
-    /* 问卷接口尚未上线；列表里的样例卡是占位，接接口后由数据接管 */
-    var n = $('hallCount');
-    if (n) n.textContent = '0';
+    var featWrap = $('featWrap');
+    var featList = $('featList');
+    var list = $('svList');
+    var empty = document.querySelector('.pg-empty');
+    var count = $('hallCount');
+    if (!list) return;
+
+    var all = [];
+    var sort = 'fc';
+
+    function paint() {
+      var sorted = all.slice();
+      if (sort === 'fc') {
+        sorted.sort(function (a, b) { return Number(b.price) - Number(a.price); });
+      } else if (sort === 'time') {
+        sorted.sort(function (a, b) { return String(b.createdAt).localeCompare(String(a.createdAt)); });
+      } else if (sort === 'star') {
+        sorted.sort(function (a, b) { return (b.stars - a.stars) || (Number(b.price) - Number(a.price)); });
+      }
+
+      list.innerHTML = '';
+      sorted.forEach(function (s) { list.appendChild(cardEl(s, false)); });
+
+      var picks = all.filter(function (s) { return s.featured; });
+      if (featWrap && featList) {
+        featList.innerHTML = '';
+        if (picks.length) {
+          picks.forEach(function (s) { featList.appendChild(cardEl(s, true)); });
+          featWrap.hidden = false;
+        } else {
+          featWrap.hidden = true;
+        }
+      }
+    }
 
     document.querySelectorAll('.pg-tab').forEach(function (tab) {
       tab.addEventListener('click', function () {
         document.querySelectorAll('.pg-tab').forEach(function (t) { t.classList.remove('is-on'); });
         tab.classList.add('is-on');
-        say('排序将在问卷开放后生效');
+        sort = tab.getAttribute('data-sort') || 'fc';
+        paint();
       });
     });
 
-    document.querySelectorAll('[data-soon]').forEach(function (el) {
-      el.addEventListener('click', function (ev) {
-        ev.preventDefault();
-        say(el.getAttribute('data-soon') + ' · 内测阶段暂未开放');
-      });
+    getJSON('/api/surveys').then(function (r) {
+      if (r.status === 200 && r.body && r.body.ok) {
+        all = r.body.items || [];
+      }
+      if (count) count.textContent = String(all.length);
+
+      if (!all.length) {
+        var allSect = document.querySelector('.hl-sect');
+        if (allSect) allSect.hidden = true;
+        if (empty) empty.hidden = false;
+        return;
+      }
+
+      paint();
     });
   }
 

@@ -41,6 +41,7 @@ export async function onRequest(context) {
     if (path === 'ticket' && request.method === 'POST') return await ticketSubmit(request, env);
     if (path === 'ticket' && request.method === 'GET') return await ticketMine(request, env);
     if (path === 'fx' && request.method === 'GET') return await fxRate(env);
+    if (path === 'surveys' && request.method === 'GET') return await surveyList(request, env);
     if (path.indexOf('admin/') === 0) return await adminApi(request, env, url, path);
     return json({ ok: false, error: 'not_found' }, 404);
   } catch (err) {
@@ -574,6 +575,126 @@ async function adminTicketDecide(request, env, admin) {
   return json({ ok: true });
 }
 
+/* ---------------- 问卷大厅 ---------------- */
+
+const SURVEY_COLS = 'id, title, provider, price_units, grade, stars, requirement, topic, duration_min, entry_url, featured, status, created_at';
+
+function surveyRow(r) {
+  return {
+    id: r.id,
+    title: r.title,
+    provider: r.provider,
+    price: formatFc(r.price_units),
+    grade: r.grade,
+    stars: r.stars,
+    requirement: r.requirement,
+    topic: r.topic,
+    durationMin: r.duration_min,
+    entry: r.entry_url,
+    featured: r.featured === 1,
+    status: r.status,
+    createdAt: r.created_at
+  };
+}
+
+async function surveyList(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+
+  const rows = await env.DB.prepare(
+    `SELECT ${SURVEY_COLS} FROM surveys WHERE status = 'open'
+      ORDER BY featured DESC, (featured_at IS NULL), featured_at DESC, created_at DESC
+      LIMIT 100`
+  ).all();
+
+  return json({ ok: true, items: (rows.results || []).map(surveyRow) });
+}
+
+async function adminSurveyList(env) {
+  const rows = await env.DB.prepare(
+    `SELECT ${SURVEY_COLS} FROM surveys
+      ORDER BY featured DESC, featured_at DESC, created_at DESC
+      LIMIT 200`
+  ).all();
+
+  return json({ ok: true, items: (rows.results || []).map(surveyRow) });
+}
+
+async function adminSurveySave(request, env) {
+  const body = await readJson(request);
+  if (!body) return json({ ok: false, error: 'bad_request' }, 400);
+
+  const title = String(body.title || '').trim();
+  if (!title) return json({ ok: false, error: 'missing_title' }, 400);
+
+  const price = Number(body.price);
+  const priceUnits = Number.isFinite(price) && price >= 0 ? Math.round(price * FC_SCALE) : 0;
+
+  const starsRaw = Number(body.stars);
+  const stars = Number.isFinite(starsRaw) ? Math.max(0, Math.min(5, Math.round(starsRaw))) : 0;
+
+  const durRaw = Number(body.durationMin);
+  const durationMin = Number.isFinite(durRaw) && durRaw > 0 ? Math.round(durRaw) : 0;
+
+  const status = ['open', 'paused', 'closed'].indexOf(body.status) >= 0 ? body.status : 'open';
+
+  const args = [
+    title,
+    String(body.provider || '').trim(),
+    priceUnits,
+    String(body.grade || '').trim().toUpperCase().slice(0, 4),
+    stars,
+    String(body.requirement || '').trim(),
+    String(body.topic || '').trim(),
+    durationMin,
+    String(body.entry || '').trim(),
+    status
+  ];
+
+  if (body.id) {
+    await env.DB.prepare(
+      `UPDATE surveys SET title = ?, provider = ?, price_units = ?, grade = ?, stars = ?,
+        requirement = ?, topic = ?, duration_min = ?, entry_url = ?, status = ?, updated_at = datetime('now')
+        WHERE id = ?`
+    ).bind(...args, Number(body.id)).run();
+    return json({ ok: true, id: Number(body.id) });
+  }
+
+  const res = await env.DB.prepare(
+    `INSERT INTO surveys (title, provider, price_units, grade, stars, requirement, topic, duration_min, entry_url, status)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).bind(...args).run();
+
+  return json({ ok: true, id: res.meta && res.meta.last_row_id });
+}
+
+async function adminSurveyFeature(request, env) {
+  const body = await readJson(request);
+  const id = Number(body && body.id);
+  if (!id) return json({ ok: false, error: 'bad_request' }, 400);
+
+  if (body.featured) {
+    await env.DB.prepare(
+      "UPDATE surveys SET featured = 1, featured_at = datetime('now'), updated_at = datetime('now') WHERE id = ?"
+    ).bind(id).run();
+  } else {
+    await env.DB.prepare(
+      "UPDATE surveys SET featured = 0, featured_at = NULL, updated_at = datetime('now') WHERE id = ?"
+    ).bind(id).run();
+  }
+
+  return json({ ok: true });
+}
+
+async function adminSurveyDelete(request, env) {
+  const body = await readJson(request);
+  const id = Number(body && body.id);
+  if (!id) return json({ ok: false, error: 'bad_request' }, 400);
+
+  await env.DB.prepare('DELETE FROM surveys WHERE id = ?').bind(id).run();
+  return json({ ok: true });
+}
+
 async function adminApi(request, env, url, path) {
   const admin = await requireAdmin(request, env);
   if (!admin) return json({ ok: false, error: 'forbidden' }, 403);
@@ -587,6 +708,10 @@ async function adminApi(request, env, url, path) {
   if (path === 'admin/withdrawals/decide' && request.method === 'POST') return await adminWithdrawDecide(request, env, admin);
   if (path === 'admin/tickets' && request.method === 'GET') return await adminTickets(env, url);
   if (path === 'admin/tickets/decide' && request.method === 'POST') return await adminTicketDecide(request, env, admin);
+  if (path === 'admin/surveys' && request.method === 'GET') return await adminSurveyList(env);
+  if (path === 'admin/surveys/save' && request.method === 'POST') return await adminSurveySave(request, env);
+  if (path === 'admin/surveys/feature' && request.method === 'POST') return await adminSurveyFeature(request, env);
+  if (path === 'admin/surveys/delete' && request.method === 'POST') return await adminSurveyDelete(request, env);
   return json({ ok: false, error: 'not_found' }, 404);
 }
 

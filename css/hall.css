@@ -1,0 +1,235 @@
+/* ============================================================
+   乘法 · 问卷大厅
+   卡片网格：价格是主角，评级（印章）与星级（星号）分开表达
+   ============================================================ */
+
+/* ---------- 区块 ---------- */
+
+.hl-sect { margin-top: clamp(28px, 3.4vw, 44px); }
+
+.hl-sect__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.hl-sect__k {
+  font-family: var(--num);
+  font-size: 12px;
+  letter-spacing: .16em;
+  color: var(--red);
+}
+
+.hl-sect__t {
+  margin: 0;
+  font-size: clamp(18px, 2.2vw, 24px);
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+
+.hl-sect__d {
+  font-size: 12px;
+  color: var(--gray);
+}
+
+/* ---------- 网格 ---------- */
+
+.sv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+
+/* ---------- 卡片 ---------- */
+
+.svc {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 18px 16px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  transition: box-shadow .14s ease, transform .14s ease;
+}
+
+.svc:hover {
+  box-shadow: 6px 6px 0 var(--ink);
+  transform: translate(-1px, -1px);
+}
+
+/* 价格：视觉上的绝对主角 */
+.svc__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.svc__pay {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+}
+
+.svc__pay b {
+  font-family: var(--num);
+  font-size: 42px;
+  line-height: .88;
+  color: var(--red);
+  letter-spacing: .01em;
+}
+
+.svc__pay i {
+  font-style: normal;
+  font-family: var(--num);
+  font-size: 13px;
+  letter-spacing: .1em;
+  color: var(--ink);
+}
+
+/* 评级 + 星级：两个不同的东西，视觉上也要分开 */
+.svc__rate {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 7px;
+  flex: none;
+}
+
+.svc__grade {
+  font-family: var(--num);
+  font-size: 12px;
+  letter-spacing: .12em;
+  padding: 3px 8px;
+  border: 2px solid var(--ink);
+  color: var(--ink);
+  line-height: 1;
+}
+
+.svc__grade[data-grade="S"] {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--paper);
+}
+
+.svc__grade[data-grade="A"] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.svc__stars {
+  font-size: 13px;
+  letter-spacing: .1em;
+  color: var(--red);
+  white-space: nowrap;
+}
+
+.svc__stars .off { color: #C9C2B2; }
+
+/* 标题 */
+.svc__t {
+  margin: 15px 0 12px;
+  font-size: 16px;
+  line-height: 1.45;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+
+/* 元信息 */
+.svc__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 16px;
+  margin-bottom: 12px;
+}
+
+.svc__m {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.svc__m i {
+  font-style: normal;
+  color: var(--gray);
+  letter-spacing: .04em;
+  flex: none;
+}
+
+.svc__m b {
+  font-weight: 700;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 要求：没有就整行不渲染 */
+.svc__req {
+  margin: 0 0 13px;
+  padding-left: 9px;
+  border-left: 3px solid var(--red);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.svc__req em {
+  font-style: normal;
+  color: var(--gray);
+  margin-right: 5px;
+}
+
+/* 入口 */
+.svc__go {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.svc__go.is-dead {
+  opacity: .45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* 推荐位 */
+.sv-grid--feat .svc {
+  border-color: var(--red);
+  box-shadow: 6px 6px 0 rgba(224, 41, 30, .16);
+}
+
+.sv-grid--feat .svc:hover {
+  box-shadow: 8px 8px 0 rgba(224, 41, 30, .3);
+}
+
+.svc__flag {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  padding: 4px 9px;
+  background: var(--red);
+  color: var(--paper);
+  font-family: var(--num);
+  font-size: 11px;
+  letter-spacing: .14em;
+  line-height: 1;
+}
+
+/* ---------- 窄屏 ---------- */
+
+@media (max-width: 480px) {
+  .sv-grid { grid-template-columns: 1fr; gap: 14px; }
+  .svc { padding: 16px 15px 14px; }
+  .svc__pay b { font-size: 36px; }
+  .svc__t { font-size: 15px; }
+}

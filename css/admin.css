@@ -505,3 +505,104 @@ body[data-accent="blue"] {
 @media (max-width: 560px) {
   .adm-quick { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ---------- 问卷管理 ---------- */
+
+.adm-h {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 18px;
+  padding-bottom: 12px;
+  border-bottom: 3px solid var(--ink);
+}
+
+.adm-h__t { font-size: 15px; font-weight: 700; }
+.adm-h__d { font-size: 12px; color: var(--gray); }
+
+.svf {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+.svf__f { display: flex; flex-direction: column; gap: 6px; }
+.svf__f--wide { grid-column: span 2; }
+.svf__f--wide3 { grid-column: span 3; }
+.svf__f--full { grid-column: 1 / -1; }
+
+.svf__l {
+  font-size: 11px;
+  letter-spacing: .06em;
+  color: var(--gray);
+}
+
+.svf__l em { font-style: normal; color: var(--red); }
+
+.svf__i {
+  width: 100%;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  padding: 9px 11px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  outline: none;
+}
+
+.svf__i:focus {
+  border-color: var(--red);
+  box-shadow: 4px 4px 0 var(--red);
+}
+
+.svf__i--area { resize: vertical; min-height: 62px; line-height: 1.6; }
+
+.svf__acts {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.svf__msg { font-size: 12px; color: var(--gray); }
+.svf__msg.is-error { color: var(--red); }
+
+/* 问卷表格 */
+.adm-tr--sv { grid-template-columns: 92px minmax(0, 1.8fr) 116px 66px 72px 186px; }
+
+.adm-sv__ops { display: flex; gap: 7px; flex-wrap: wrap; }
+
+.adm-sv__op {
+  border: 2px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 11px;
+  padding: 3px 7px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.adm-sv__op:hover { background: var(--ink); color: var(--paper); }
+
+.adm-sv__op.is-on {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--paper);
+}
+
+@media (max-width: 900px) {
+  .svf { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .svf__f--wide,
+  .svf__f--wide3,
+  .svf__f--full { grid-column: 1 / -1; }
+  .adm-tr--sv { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 560px) {
+  .svf { grid-template-columns: 1fr; }
+  .svf__f--wide { grid-column: auto; }
+}
