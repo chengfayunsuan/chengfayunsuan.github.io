@@ -38,6 +38,8 @@ export async function onRequest(context) {
     if (path === 'user/profile' && request.method === 'PATCH') return await updateProfile(request, env);
     if (path === 'ledger' && request.method === 'GET') return await ledger(request, env, url);
     if (path === 'ladder' && request.method === 'GET') return await ladder(request, env, url);
+    if (path === 'ticket' && request.method === 'POST') return await ticketSubmit(request, env);
+    if (path === 'ticket' && request.method === 'GET') return await ticketMine(request, env);
     if (path.indexOf('admin/') === 0) return await adminApi(request, env, url, path);
     return json({ ok: false, error: 'not_found' }, 404);
   } catch (err) {
@@ -369,6 +371,87 @@ async function requireAdmin(request, env) {
   return { uid: session.uid, role: row.role };
 }
 
+/* ---------------- 工单 ---------------- */
+
+const TICKET_TYPES = ['account', 'balance', 'survey', 'report', 'other'];
+
+// 取提交人 uid：优先会话；封禁用户会话失效时，接受前端带的 uid（界面不显示输入框）
+async function ticketActor(request, env, body) {
+  const session = await currentSession(request, env);
+  if (session && session.uid) return Number(session.uid);
+  const uid = Number(body && body.uid);
+  return uid > 0 ? uid : 0;
+}
+
+// 提交工单
+async function ticketSubmit(request, env) {
+  const body = await readJson(request);
+  if (!body) return json({ ok: false, error: 'bad_request' }, 400);
+
+  const type = String(body.type || '').trim();
+  const detail = String(body.detail || '').trim();
+  if (TICKET_TYPES.indexOf(type) < 0) return json({ ok: false, error: 'invalid_type' }, 400);
+  if (detail.length < 5 || detail.length > 2000) return json({ ok: false, error: 'invalid_detail' }, 400);
+
+  const uid = await ticketActor(request, env, body);
+
+  /* 用户名由服务端按 uid 查真实资料，不信任前端自报 */
+  let username = '';
+  if (uid > 0) {
+    const row = await env.DB.prepare('SELECT username FROM users WHERE id = ? AND deleted_at IS NULL')
+      .bind(uid).first();
+    username = row && row.username ? row.username : '';
+  }
+
+  await env.DB.prepare(
+    'INSERT INTO tickets (uid, username, type, detail, status, created_at) VALUES (?, ?, ?, ?, ?, datetime(\'now\'))'
+  ).bind(uid, username, type, detail, 'open').run();
+
+  return json({ ok: true });
+}
+
+// 我的工单
+async function ticketMine(request, env) {
+  const session = await currentSession(request, env);
+  if (!session || !session.uid) return json({ ok: false, error: 'unauthorized' }, 401);
+  const rows = await env.DB.prepare(
+    'SELECT id, type, detail, status, reply, created_at, reviewed_at FROM tickets WHERE uid = ? ORDER BY id DESC LIMIT 100'
+  ).bind(session.uid).all();
+  return json({ ok: true, items: rows.results || [] });
+}
+
+// 后台：工单列表
+async function adminTickets(env, url) {
+  const status = String(url.searchParams.get('status') || 'all');
+  let sql = 'SELECT t.id, t.uid, t.username, t.type, t.detail, t.status, t.reply, t.created_at, t.reviewed_at FROM tickets t';
+  const args = [];
+  if (status === 'open' || status === 'closed') {
+    sql += ' WHERE t.status = ?';
+    args.push(status);
+  }
+  sql += ' ORDER BY t.id DESC LIMIT 200';
+  const stmt = env.DB.prepare(sql);
+  const rows = await (args.length ? stmt.bind.apply(stmt, args) : stmt).all();
+  return json({ ok: true, items: rows.results || [] });
+}
+
+// 后台：标记处理 / 重开
+async function adminTicketDecide(request, env, admin) {
+  const body = await readJson(request);
+  if (!body) return json({ ok: false, error: 'bad_request' }, 400);
+  const id = Number(body.id);
+  const action = String(body.action || '');
+  if (!(id > 0) || (action !== 'closed' && action !== 'open')) {
+    return json({ ok: false, error: 'bad_request' }, 400);
+  }
+  const reply = String(body.reply || '').trim().slice(0, 1000);
+  const reviewedAt = action === 'closed' ? "datetime('now')" : 'NULL';
+  await env.DB.prepare(
+    `UPDATE tickets SET status = ?, reply = ?, reviewed_at = ${reviewedAt} WHERE id = ?`
+  ).bind(action, reply, id).run();
+  return json({ ok: true });
+}
+
 async function adminApi(request, env, url, path) {
   const admin = await requireAdmin(request, env);
   if (!admin) return json({ ok: false, error: 'forbidden' }, 403);
@@ -380,6 +463,8 @@ async function adminApi(request, env, url, path) {
   if (path === 'admin/users/role' && request.method === 'POST') return await adminRole(request, env, admin);
   if (path === 'admin/withdrawals' && request.method === 'GET') return await adminWithdrawals(request, env, url);
   if (path === 'admin/withdrawals/decide' && request.method === 'POST') return await adminWithdrawDecide(request, env, admin);
+  if (path === 'admin/tickets' && request.method === 'GET') return await adminTickets(env, url);
+  if (path === 'admin/tickets/decide' && request.method === 'POST') return await adminTicketDecide(request, env, admin);
   return json({ ok: false, error: 'not_found' }, 404);
 }
 

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>工单管理 · 乘法后台</title>
+<meta name="description" content="乘法运营后台：工单管理。">
+<meta name="theme-color" content="#1D52E2">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=6">
+<link rel="stylesheet" href="/css/home.css?v=8">
+<link rel="stylesheet" href="/css/page.css?v=5">
+<link rel="stylesheet" href="/css/admin.css?v=3">
+<script src="/js/config.js?v=2"></script>
+<script src="/js/core.js?v=2"></script>
+</head>
+<body data-page="admin-tickets" data-accent="blue">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/admin">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><i data-cur="code">CFB</i>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/home">我</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
+    </div>
+  </div>
+</header>
+
+<nav class="dock" aria-label="后台目录">
+  <div class="wrap dock__in">
+    <a class="dock__i" href="/admin">
+      <span class="dock__n">01</span><span class="dock__t">后台概览</span>
+    </a>
+    <a class="dock__i" href="/admin/users">
+      <span class="dock__n">02</span><span class="dock__t">用户管理</span>
+    </a>
+    <a class="dock__i" href="/admin/withdrawals">
+      <span class="dock__n">03</span><span class="dock__t">提现审核</span>
+    </a>
+    <a class="dock__i is-on" href="/admin/tickets">
+      <span class="dock__n">04</span><span class="dock__t">工单</span>
+    </a>
+    <button class="dock__i" type="button" data-soon="问卷管理">
+      <span class="dock__n">05</span><span class="dock__t">问卷管理</span>
+    </button>
+    <button class="dock__i" type="button" data-soon="兑换码">
+      <span class="dock__n">06</span><span class="dock__t">兑换码</span>
+    </button>
+  </div>
+</nav>
+
+<main id="app">
+
+  <section class="face">
+    <div class="wrap">
+      <div class="face__in">
+        <div class="face__id">
+          <div class="face__meta">
+            <span class="face__uid">ADMIN / 工单管理</span>
+            <span class="adm-badge">客服</span>
+          </div>
+          <h1 class="face__name">工单管理</h1>
+          <p class="face__sub">查看反馈 · 标记处理 · 必要时重开</p>
+          <div class="face__foot">
+            <p class="adm-lead">提交人与用户名由系统记录，不采信用户自填。处理意见可选填，会展示给提交人。</p>
+          </div>
+        </div>
+
+        <div class="face__bal">
+          <div class="face__bal-k">OPEN / 待处理</div>
+          <div class="face__bal-n" id="tkOpen">—</div>
+          <div class="face__bal-f">笔工单待处理</div>
+          <div class="face__acts">
+            <a class="btn btn--ghost" href="/admin">返回概览</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="adm-sec adm-sec--last">
+    <div class="wrap">
+      <div class="adm-panel">
+        <div class="adm-tools">
+          <div class="pg-tabs">
+            <button class="pg-tab is-on" type="button" data-tk="open">待处理</button>
+            <button class="pg-tab" type="button" data-tk="closed">已处理</button>
+            <button class="pg-tab" type="button" data-tk="all">全部</button>
+          </div>
+        </div>
+
+        <div class="adm-list">
+          <div class="adm-tr adm-tr--tk adm-head">
+            <span>编号</span><span>提交人</span><span>类型</span><span>描述</span><span>时间</span><span>状态</span><span>操作</span>
+          </div>
+          <div id="tkList"></div>
+        </div>
+        <p class="adm-empty" id="tkEmpty" hidden>当前筛选下没有工单。</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 乘法 CHENGFA</span>
+      <span>运营后台 · 仅限站长与管理员</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/admin.js?v=3" defer></script>
+</body>
+</html>

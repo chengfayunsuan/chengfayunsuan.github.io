@@ -54,6 +54,18 @@
       .catch(function () { return { status: 0, body: null }; });
   }
 
+  function postJSON(url, data) {
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(data || {})
+    })
+      .then(function (r) {
+        return r.json().then(function (d) { return { status: r.status, body: d }; });
+      })
+      .catch(function () { return { status: 0, body: null }; });
+  }
+
   var isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
   var preview = isLocal && /[?&]preview\b/.test(location.search);
 
@@ -526,21 +538,39 @@
   /* ---------- 联系客服 ---------- */
 
   function initSupport(me) {
-    /* 会话可用时预填，不可用（含封禁）时留空由用户自填 */
-    var uid = $('spUid');
-    var name = $('spName');
-    if (uid && me && me.uid) uid.value = me.uid;
-    if (name && me && me.username) name.value = me.username;
-
     var form = $('spForm');
     if (!form) return;
 
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
-      var uidVal = (uid && uid.value || '').trim();
-      var nameVal = (name && name.value || '').trim();
-      if (!uidVal && !nameVal) { say('请填写 UID 或用户名，至少填一项'); return; }
-      say('工单通道内测中，请先发邮件至 support@chengfa.cc');
+      var btn = form.querySelector('button[type="submit"]');
+      var type = form.querySelector('[name="type"]');
+      var detail = form.querySelector('[name="detail"]');
+      var text = (detail && detail.value || '').trim();
+
+      if (text.length < 5) { say('请填写详细描述，至少 5 个字'); return; }
+      if (btn) { btn.disabled = true; btn.textContent = '提交中…'; }
+
+      /* uid 由会话决定；封禁用户会话失效时，用本地缓存的身份兜底 */
+      var uid = me && me.uid ? me.uid : 0;
+      if (!uid && window.CF && CF.cache) {
+        var cached = CF.cache.get();
+        if (cached && cached.uid) uid = cached.uid;
+      }
+
+      postJSON('/api/ticket', { type: type ? type.value : 'other', detail: text, uid: uid })
+        .then(function (r) {
+          if (r.body && r.body.ok) {
+            form.reset();
+            say('工单已提交，可在「我的工单」查看进度');
+          } else {
+            say('提交失败：' + (r.body && r.body.error || '网络错误'));
+          }
+        })
+        .catch(function () { say('网络连接失败，请重试'); })
+        .then(function () {
+          if (btn) { btn.disabled = false; btn.textContent = '提交工单'; }
+        });
     });
   }
 

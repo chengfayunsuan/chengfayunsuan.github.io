@@ -219,6 +219,16 @@ body[data-accent="blue"] {
 /* 最近流水 */
 .adm-tr--lg { grid-template-columns: 150px 120px 90px 110px minmax(0, 1fr); }
 
+/* 工单管理 */
+.adm-tr--tk { grid-template-columns: 60px minmax(0, 1fr) 92px minmax(0, 1.6fr) 130px 72px 110px; }
+
+.adm-cell--detail {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #5C564A;
+}
+
 .adm-cell {
   min-width: 0;
   font-size: 13px;
@@ -354,7 +364,8 @@ body[data-accent="blue"] {
 @media (max-width: 860px) {
   .adm-tr--user,
   .adm-tr--wd,
-  .adm-tr--lg { grid-template-columns: minmax(0, 1fr) auto; }
+  .adm-tr--lg,
+  .adm-tr--tk { grid-template-columns: minmax(0, 1fr) auto; }
 
   .adm-head { display: none; }
 

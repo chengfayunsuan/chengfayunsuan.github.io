@@ -9,9 +9,9 @@
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="/css/style.css?v=6">
 <link rel="stylesheet" href="/css/home.css?v=8">
-<link rel="stylesheet" href="/css/page.css?v=4">
+<link rel="stylesheet" href="/css/page.css?v=5">
 <script src="/js/config.js?v=2"></script>
-<script src="/js/core.js?v=1"></script>
+<script src="/js/core.js?v=2"></script>
 </head>
 <body data-page="support">
 
@@ -49,7 +49,7 @@
         <span class="pg-k">SUPPORT</span>
         <h1 class="pg-t">联系客服</h1>
         <p class="pg-d">
-          账户、余额、问卷与提现的问题都可以在这里提交。附上账户 UID 与相关单号，
+          账户、余额、问卷与提现的问题都可以在这里提交。附上相关单号，
           处理会快很多；涉及资金的争议请在描述中写明金额与时间。
         </p>
       </div>
@@ -64,7 +64,7 @@
 
       <form class="sp-form" id="spForm" novalidate>
         <h2 class="sp-form__t">提交工单</h2>
-        <p class="sp-form__d">填写账户 UID 与用户名，便于核对身份。</p>
+        <p class="sp-form__d">提交时自动记录账户，便于核对身份。</p>
 
         <label class="sp-field">
           <span>问题类型</span>
@@ -77,17 +77,6 @@
           </select>
         </label>
 
-        <div class="sp-row">
-          <label class="sp-field">
-            <span>账户 UID</span>
-            <input type="text" name="uid" id="spUid" inputmode="numeric" placeholder="数字，从 1 开始" autocomplete="off">
-          </label>
-          <label class="sp-field">
-            <span>用户名</span>
-            <input type="text" name="username" id="spName" placeholder="账户显示名" autocomplete="off">
-          </label>
-        </div>
-
         <label class="sp-field">
           <span>详细描述</span>
           <textarea name="detail" placeholder="发生了什么、什么时候发生、涉及多少金额或哪个单号。"></textarea>
@@ -95,14 +84,14 @@
 
         <div class="sp-form__a">
           <button class="btn btn--red" type="submit">提交工单</button>
-          <span class="sp-form__h">内测阶段先走邮件，工单系统开放后此处直连。</span>
+          <span class="sp-form__h">提交后可在「我的工单」查看处理进度。</span>
         </div>
       </form>
 
       <aside class="sp-box">
         <p class="sp-box__t">DIRECT / 直接联系</p>
         <a class="sp-box__m" href="mailto:support@chengfa.cc">support@chengfa.cc</a>
-        <p class="sp-box__d">邮件标题写明账户 UID，正文附截图或单号，处理时不用再来回确认身份。</p>
+        <p class="sp-box__d">正文附截图或单号，并写明账户 UID，处理时不用再来回确认身份。</p>
 
         <a class="sp-box__m" href="/settings#sec-ticket">我的工单 →</a>
         <p class="sp-box__d">已提交的工单与处理进度在账户设置的工单区块查看。</p>

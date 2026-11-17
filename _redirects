@@ -14,3 +14,4 @@
 /admin             /pages/admin             200
 /admin/users       /pages/admin-users       200
 /admin/withdrawals /pages/admin-withdrawals 200
+/admin/tickets     /pages/admin-tickets     200

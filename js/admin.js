@@ -66,6 +66,7 @@
     cdk_redeem: '兑换 CDK', admin_adjust: '人工调整', penalty: '违规扣罚'
   };
   var CHANNEL = { alipay: '支付宝', wechat: '微信', paypal: 'PayPal', payoneer: 'Payoneer' };
+  var TICKET_TYPE = { account: '账户与登录', balance: '余额与提现', survey: '问卷与奖励', report: '举报与申诉', other: '其他' };
 
   /* ---------- 预览数据 ---------- */
 
@@ -552,10 +553,117 @@
     return verify;
   }
 
+  /* ---------- 工单管理 ---------- */
+
+  function initTickets(me) {
+    var list = $('tkList');
+    var empty = $('tkEmpty');
+    var status = 'open';
+    var items = [];
+
+    function fmt(d) { return fmtTime(d); }
+
+    function tagEl(text, cls) {
+      var s = document.createElement('span');
+      s.className = 'adm-tag' + (cls ? ' ' + cls : '');
+      s.textContent = text;
+      return s;
+    }
+
+    function paint() {
+      list.textContent = '';
+      $('tkOpen').textContent = items.filter(function (it) { return it.status === 'open'; }).length;
+
+      items.forEach(function (t) {
+        var row = document.createElement('div');
+        row.className = 'adm-tr adm-tr--tk';
+
+        var id = document.createElement('span');
+        id.className = 'adm-cell adm-cell--mono';
+        id.textContent = '#' + t.id;
+
+        var who = document.createElement('span');
+        who.className = 'adm-cell';
+        who.textContent = (t.username || '未命名') + (t.uid ? ' · ' + t.uid : ' · 未登录');
+
+        var type = document.createElement('span');
+        type.className = 'adm-cell';
+        type.textContent = TICKET_TYPE[t.type] || t.type;
+
+        var detail = document.createElement('span');
+        detail.className = 'adm-cell adm-cell--detail';
+        detail.textContent = t.detail;
+        detail.title = t.detail;
+
+        var at = document.createElement('span');
+        at.className = 'adm-cell adm-cell--mono adm-cell--hide-s';
+        at.textContent = fmt(t.created_at);
+
+        var st = document.createElement('span');
+        st.appendChild(tagEl(t.status === 'open' ? '待处理' : '已处理',
+          t.status === 'open' ? 'is-pending' : 'is-paid'));
+
+        var acts = document.createElement('span');
+        acts.className = 'adm-acts';
+        var btn = document.createElement('button');
+        btn.className = 'btn ' + (t.status === 'open' ? 'btn--red' : 'btn--ghost') + ' btn--s';
+        btn.type = 'button';
+        btn.textContent = t.status === 'open' ? '标记已处理' : '重开';
+        btn.addEventListener('click', function () {
+          btn.disabled = true;
+          postJSON('/api/admin/tickets/decide', {
+            id: t.id,
+            action: t.status === 'open' ? 'closed' : 'open'
+          }).then(function (r) {
+            if (r.body && r.body.ok) { say(t.status === 'open' ? '已标记处理' : '已重开'); load(); }
+            else { say('操作失败：' + (r.body && r.body.error || '网络错误')); btn.disabled = false; }
+          });
+        });
+        acts.appendChild(btn);
+
+        row.appendChild(id); row.appendChild(who); row.appendChild(type);
+        row.appendChild(detail); row.appendChild(at); row.appendChild(st); row.appendChild(acts);
+        list.appendChild(row);
+      });
+
+      empty.hidden = items.length > 0;
+    }
+
+    function load() {
+      if (preview) {
+        items = [
+          { id: 3, uid: 17, username: '沈知白', type: 'balance', detail: '提现申请提交后一直显示审核中，想确认到账时间。', status: 'open', created_at: '2026-11-17T01:20:00Z' },
+          { id: 2, uid: 9, username: '顾南舟', type: 'survey', detail: '完成的问卷奖励没有到账，答卷编号记不清了。', status: 'open', created_at: '2026-11-16T22:10:00Z' },
+          { id: 1, uid: 23, username: '许临', type: 'account', detail: '无法登录，提示密码错误，确认密码没有输错。', status: 'closed', created_at: '2026-11-15T09:00:00Z' }
+        ].filter(function (t) { return status === 'all' || t.status === status; });
+        paint();
+        return;
+      }
+
+      getJSON('/api/admin/tickets?status=' + status).then(function (r) {
+        if (r.body && r.body.ok) { items = r.body.items || []; paint(); return; }
+        say('工单载入失败，请刷新重试');
+        empty.hidden = false;
+      });
+    }
+
+    document.querySelectorAll('[data-tk]').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        document.querySelectorAll('[data-tk]').forEach(function (t) { t.classList.remove('is-on'); });
+        tab.classList.add('is-on');
+        status = tab.getAttribute('data-tk');
+        load();
+      });
+    });
+
+    load();
+  }
+
   boot().then(function (me) {
     if (!isAdmin(me)) { location.replace('/home'); return; }
     if (page === 'admin') initOverview(me);
     else if (page === 'admin-users') initUsers(me);
     else if (page === 'admin-withdrawals') initWithdrawals(me);
+    else if (page === 'admin-tickets') initTickets(me);
   });
 })();
