@@ -187,8 +187,29 @@
     bad_request: '请求格式有误，请刷新页面后重试。',
     unauthorized: '登录状态已失效，请重新登录。',
     db_unbound: '服务端数据库尚未就绪。',
-    server_error: '服务器出错，请稍后重试。'
+    server_error: '服务器出错，请稍后重试。',
+    turnstile_failed: '人机验证未通过，请重新验证后再试。',
+    verify_unavailable: '人机验证服务暂时不可用，请联系站长。'
   };
+
+  /* ---------- 人机验证 ---------- */
+
+  /* 组件在表单内会自动注入隐藏域；两种方式都兜一下，避免拿不到 token */
+  function turnstileToken() {
+    var hidden = form.querySelector('[name="cf-turnstile-response"]');
+    if (hidden && hidden.value) return hidden.value;
+    if (window.turnstile && typeof window.turnstile.getResponse === 'function') {
+      try { return window.turnstile.getResponse() || ''; } catch (e) { return ''; }
+    }
+    return '';
+  }
+
+  /* token 一次性，失败后必须换新的，否则重试永远不过 */
+  function resetTurnstile() {
+    if (window.turnstile && typeof window.turnstile.reset === 'function') {
+      try { window.turnstile.reset(); } catch (e) {}
+    }
+  }
 
   var busy = false;
 
@@ -202,6 +223,14 @@
       return;
     }
 
+    /* 验证组件可能还没渲染完，没有 token 就别提交，免得白发一次请求 */
+    var tsToken = turnstileToken();
+    if (!tsToken) {
+      noteEl.textContent = '人机验证尚未完成，请稍候再试。';
+      noteEl.classList.add('is-error');
+      return;
+    }
+
     busy = true;
     var prev = submitEl.innerHTML;
     submitEl.disabled = true;
@@ -209,7 +238,7 @@
     noteEl.classList.remove('is-error');
 
     try {
-      var payload = { email: emailEl.value.trim(), password: pwEl.value };
+      var payload = { email: emailEl.value.trim(), password: pwEl.value, turnstileToken: tsToken };
       if (mode === 'signup') payload.username = usernameEl.value.trim();
 
       var res = await fetch(mode === 'signup' ? '/api/auth/register' : '/api/auth/login', {
@@ -230,6 +259,9 @@
       noteEl.textContent = ERRORS[data.error] || '操作失败，请稍后重试。';
       noteEl.classList.add('is-error');
 
+      /* 服务端是先校验 token 再比对密码，所以只要没成功，token 一定已被消费 */
+      resetTurnstile();
+
       if (data.error === 'invalid_credentials') {
         fail(pwEl, pwErr, '邮箱或密码不正确。');
         pwEl.focus();
@@ -237,6 +269,7 @@
     } catch (err) {
       noteEl.textContent = '网络连接失败，请检查网络后重试。';
       noteEl.classList.add('is-error');
+      resetTurnstile();
     } finally {
       busy = false;
       submitEl.disabled = false;

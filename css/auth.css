@@ -378,3 +378,14 @@
 @keyframes authPanelReveal {
   to { visibility: visible; }
 }
+
+/* ---------- 人机验证 ---------- */
+
+.auth__verify {
+  display: flex;
+  justify-content: center;
+  margin: 4px 0 18px;
+  min-height: 65px;
+}
+
+.auth__verify .cf-turnstile { max-width: 100%; }

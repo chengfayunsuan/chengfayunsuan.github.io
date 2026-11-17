@@ -51,9 +51,63 @@ export async function onRequest(context) {
 
 /* ---------------- 路由实现 ---------------- */
 
+/* ---------------- 人机验证 ---------------- */
+
+/* 只放行自家域名：生产域 + Pages 预览子域；其余一律拒 */
+const TURNSTILE_HOSTS = ['chengfa-761.pages.dev'];
+
+function hostAllowed(host) {
+  if (!host) return false;
+  const h = String(host).toLowerCase();
+  return TURNSTILE_HOSTS.some(function (base) {
+    return h === base || h.endsWith('.' + base);
+  });
+}
+
+/* 返回空串表示通过，否则返回错误码 */
+async function verifyTurnstile(request, env, token) {
+  const secret = env.TURNSTILE_SECRET;
+  if (!secret) return 'verify_unavailable';
+  if (typeof token !== 'string' || !token || token.length > 2048) return 'turnstile_failed';
+
+  let data;
+  try {
+    const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(4000),
+      body: JSON.stringify({
+        secret,
+        response: token,
+        remoteip: request.headers.get('CF-Connecting-IP') || undefined,
+        idempotency_key: crypto.randomUUID()
+      })
+    });
+    data = await res.json();
+  } catch (err) {
+    console.error('turnstile verify failed:', err && err.message);
+    return 'verify_unavailable';
+  }
+
+  if (!data || data.success !== true) return 'turnstile_failed';
+
+  /* 测试钥匙固定返回 example.com，本地开发跳过域名校验 */
+  const isTest = !!(data.metadata && data.metadata.result_with_testing_key);
+  if (!isTest && !hostAllowed(data.hostname)) {
+    console.error('turnstile hostname rejected:', data.hostname);
+    return 'turnstile_failed';
+  }
+
+  return '';
+}
+
 async function register(request, env, url) {
   const body = await readJson(request);
   if (!body) return json({ ok: false, error: 'bad_request' }, 400);
+
+  // 先过机器验证，再碰密码和数据库
+  const tsErr = await verifyTurnstile(request, env, body.turnstileToken);
+  if (tsErr) return json({ ok: false, error: tsErr }, tsErr === 'verify_unavailable' ? 503 : 400);
 
   const email = String(body.email || '').trim().toLowerCase();
   const password = String(body.password || '');
@@ -110,6 +164,10 @@ async function register(request, env, url) {
 async function login(request, env, url) {
   const body = await readJson(request);
   if (!body) return json({ ok: false, error: 'bad_request' }, 400);
+
+  // 先过机器验证，再查失败计数和密码
+  const tsErr = await verifyTurnstile(request, env, body.turnstileToken);
+  if (tsErr) return json({ ok: false, error: tsErr }, tsErr === 'verify_unavailable' ? 503 : 400);
 
   const email = String(body.email || '').trim().toLowerCase();
   const password = String(body.password || '');

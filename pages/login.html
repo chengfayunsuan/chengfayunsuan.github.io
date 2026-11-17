@@ -6,7 +6,7 @@
 <title>账户入口 · 乘法</title>
 <meta name="description" content="登录或注册乘法账户。创建账户后可浏览公开问卷，参与市场调研并累积积分。">
 <link rel="stylesheet" href="/css/style.css?v=8">
-<link rel="stylesheet" href="/css/auth.css?v=4">
+<link rel="stylesheet" href="/css/auth.css?v=5">
 </head>
 <body class="auth-page">
 
@@ -72,6 +72,10 @@
           <p class="field__e" id="agreeErr" hidden></p>
         </div>
 
+        <div class="auth__verify">
+          <div class="cf-turnstile" data-language="zh-cn" data-theme="light" data-size="flexible"></div>
+        </div>
+
         <button class="btn auth__submit" type="submit" id="authSubmit">
           登录 <span aria-hidden="true">→</span>
         </button>
@@ -105,6 +109,17 @@
 
 <script src="/js/config.js?v=4"></script>
 <script src="/js/core.js?v=5"></script>
-<script src="/js/auth.js?v=3" defer></script>
+<script src="/js/auth.js?v=4" defer></script>
+
+<!-- Turnstile：本地开发换用官方测试钥匙，免得真 key 被本地调试消耗 -->
+<script>
+(function () {
+  var box = document.querySelector('.cf-turnstile');
+  if (!box) return;
+  var dev = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  box.setAttribute('data-sitekey', dev ? '1x00000000000000000000AA' : '0x4AAAAAAGElp7Rel6PYL9UW');
+})();
+</script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </body>
 </html>
