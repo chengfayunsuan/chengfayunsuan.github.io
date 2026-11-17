@@ -189,7 +189,8 @@
     db_unbound: '服务端数据库尚未就绪。',
     server_error: '服务器出错，请稍后重试。',
     turnstile_failed: '人机验证未通过，请重新验证后再试。',
-    verify_unavailable: '人机验证服务暂时不可用，请联系站长。'
+    verify_unavailable: '人机验证服务暂时不可用，请联系站长。',
+    verify_unconfigured: '人机验证服务尚未配置完成，请联系站长。'
   };
 
   /* ---------- 人机验证 ---------- */

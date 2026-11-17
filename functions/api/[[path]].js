@@ -67,7 +67,7 @@ function hostAllowed(host) {
 /* 返回空串表示通过，否则返回错误码 */
 async function verifyTurnstile(request, env, token) {
   const secret = env.TURNSTILE_SECRET;
-  if (!secret) return 'verify_unavailable';
+  if (!secret) return 'verify_unconfigured';
   if (typeof token !== 'string' || !token || token.length > 2048) return 'turnstile_failed';
 
   let data;
