@@ -128,14 +128,24 @@
       paintNav(DEMO_ME);
       return Promise.resolve(DEMO_ME);
     }
+
+    /* 先用缓存把导航条与页面点亮，不等接口 */
+    var cached = window.CF && CF.cache ? CF.cache.get() : null;
+    if (cached) paintNav(cached);
+
     return getJSON('/api/auth/me').then(function (r) {
       if (r.status === 200 && r.body && r.body.ok) {
+        if (window.CF && CF.cache) CF.cache.set(r.body.user);
         paintNav(r.body.user);
         return r.body.user;
       }
-      if (r.status === 401) { toLogin(); return null; }
-      say('账户信息载入失败，请刷新重试');
-      return null;
+      if (r.status === 401) {
+        if (window.CF && CF.cache) CF.cache.clear();
+        toLogin();
+        return null;
+      }
+      if (!cached) say('账户信息载入失败，请刷新重试');
+      return cached || null;
     });
   }
 

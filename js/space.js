@@ -621,12 +621,32 @@
 
   /* ---------- 启动 ---------- */
 
-  var meReq = fetch('/api/auth/me', { headers: { Accept: 'application/json' } })
-    .then(function (res) {
-      if (!res.ok) return null;
-      return res.json().then(function (d) { return d && d.ok ? d.user : null; });
-    })
-    .catch(function () { return null; });
+  var cachedMe = window.CF && CF.cache ? CF.cache.get() : null;
+
+  var meReq;
+  if (cachedMe) {
+    /* 缓存里的访客身份直接用，不占一个网络往返 */
+    meReq = Promise.resolve(cachedMe);
+    fetch('/api/auth/me', { headers: { Accept: 'application/json' } })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (d) {
+        var user = d && d.ok ? d.user : null;
+        if (window.CF && CF.cache) {
+          if (user) CF.cache.set(user); else CF.cache.clear();
+        }
+      })
+      .catch(function () {});
+  } else {
+    meReq = fetch('/api/auth/me', { headers: { Accept: 'application/json' } })
+      .then(function (res) {
+        if (!res.ok) return null;
+        return res.json().then(function (d) {
+          if (d && d.ok && window.CF && CF.cache) CF.cache.set(d.user);
+          return d && d.ok ? d.user : null;
+        });
+      })
+      .catch(function () { return null; });
+  }
 
   var userReq = fetch('/api/pub/user?uid=' + encodeURIComponent(uid), {
     headers: { Accept: 'application/json' }

@@ -619,23 +619,39 @@
     return;
   }
 
-  /* ---------- 启动 ---------- */
+  /* ---------- 启动：缓存秒显，后台校验 ---------- */
+
+  function show(user) {
+    render(user);
+    setupSocial(user.uid);
+    loading.hidden = true;
+    app.hidden = false;
+  }
+
+  var cached = window.CF && CF.cache ? CF.cache.get() : null;
+  if (cached) show(cached);
 
   fetch('/api/auth/me', { headers: { Accept: 'application/json' } })
     .then(function (res) {
-      if (res.status === 401) { location.replace('/login'); return null; }
+      if (res.status === 401) {
+        if (window.CF && CF.cache) CF.cache.clear();
+        location.replace('/login');
+        return null;
+      }
       return res.json();
     })
     .then(function (data) {
       if (!data) return;
-      loading.hidden = true;
-      if (!data.ok || !data.user) { say('账户载入失败，请刷新页面重试。'); return; }
-      render(data.user);
-      setupSocial(data.user.uid);
-      app.hidden = false;
+      if (!data.ok || !data.user) {
+        loading.hidden = true;
+        if (!cached) say('账户载入失败，请刷新页面重试。');
+        return;
+      }
+      if (window.CF && CF.cache) CF.cache.set(data.user);
+      show(data.user);
     })
     .catch(function () {
       loading.hidden = true;
-      say('网络连接失败，请检查网络后刷新。');
+      if (!cached) say('网络连接失败，请检查网络后刷新。');
     });
 })();

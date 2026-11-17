@@ -199,6 +199,8 @@
       var data = await res.json().catch(function () { return {}; });
 
       if (res.ok && data.ok) {
+        /* 登录/注册返回的资料先写缓存，落地页可立即秒显 */
+        if (data.user && window.CF && CF.cache) CF.cache.set(data.user);
         noteEl.textContent = (mode === 'signup' ? '账户已创建' : '登录成功') + '，正在进入…';
         location.href = nextPath();
         return;
