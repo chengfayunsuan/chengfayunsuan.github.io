@@ -89,12 +89,21 @@ async function verifyTurnstile(request, env, token) {
     return 'verify_unavailable';
   }
 
-  if (!data || data.success !== true) return 'turnstile_failed';
+  if (!data || data.success !== true) {
+    const codes = (data && data['error-codes']) || [];
+    console.error('turnstile rejected:', codes.join(',') || 'no-codes');
+
+    /* 秘钥本身有问题属于服务端配置，别让用户以为是自己的错 */
+    if (codes.indexOf('invalid-input-secret') >= 0 || codes.indexOf('missing-input-secret') >= 0) {
+      return 'verify_unavailable';
+    }
+    return 'turnstile_failed';
+  }
 
   /* 测试钥匙固定返回 example.com，本地开发跳过域名校验 */
   const isTest = !!(data.metadata && data.metadata.result_with_testing_key);
   if (!isTest && !hostAllowed(data.hostname)) {
-    console.error('turnstile hostname rejected:', data.hostname);
+    console.error('turnstile hostname rejected:', data.hostname, 'expected:', TURNSTILE_HOSTS.join(','));
     return 'turnstile_failed';
   }
 
