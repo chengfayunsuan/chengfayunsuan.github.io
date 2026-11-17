@@ -68,4 +68,28 @@
     });
   });
 
+  /* ---------- 3. 登录态：已登录就不再给「登录」，直接进账户页 ---------- */
+  var navCta = document.querySelector('.nav__cta');
+
+  if (navCta) {
+    fetch('/api/auth/me', { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (data) {
+        if (!data || !data.ok || !data.user) return;
+
+        var authed = navCta.querySelector('[data-auth]');
+        navCta.querySelectorAll('[data-guest]').forEach(function (el) { el.hidden = true; });
+        if (authed) authed.hidden = false;
+
+        /* 页内其它注册入口一并改成进账户，不再绕登录页 */
+        ['heroCta', 'ctaCta'].forEach(function (id) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          el.setAttribute('href', '/home');
+          el.innerHTML = '进入我的账户 <span aria-hidden="true">→</span>';
+        });
+      })
+      .catch(function () {});
+  }
+
 })();

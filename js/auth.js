@@ -8,6 +8,27 @@
   var form = document.getElementById('authForm');
   if (!form) return;
 
+  /* ---------- 已登录就不再停在入口页，直接进账户 ---------- */
+  var revealAuth = function () {
+    document.documentElement.classList.remove('auth-checking');
+  };
+
+  fetch('/api/auth/me', { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
+    .then(function (res) { return res.ok ? res.json() : null; })
+    .then(function (data) {
+      if (data && data.ok && data.user) {
+        /* 资料先写缓存，落地页可秒显 */
+        if (window.CF && CF.cache) CF.cache.set(data.user);
+        location.replace(nextPath());
+        return;
+      }
+      revealAuth();
+    })
+    .catch(revealAuth);
+
+  /* 接口卡住时也要把表单放出来，不能留空白 */
+  setTimeout(revealAuth, 1600);
+
   var tabs = Array.prototype.slice.call(document.querySelectorAll('.auth__tab'));
   var titleEl = document.getElementById('authTitle');
   var descEl = document.getElementById('authDesc');

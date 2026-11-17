@@ -312,6 +312,9 @@ button { font-family: inherit; cursor: pointer; }
   margin-left: 8px;
 }
 
+/* 登录态切换：.btn 自带 display，需显式压过 UA 的 [hidden] */
+.nav__cta [hidden] { display: none !important; }
+
 .nav__cta .btn {
   padding: 10px 20px;
   font-size: 13px;

@@ -367,3 +367,14 @@
   border-left-color: var(--red);
   color: var(--red-deep);
 }
+
+/* 登录态预检：已登录会直接跳账户页，先藏表单避免闪一下登录框。
+   1.6s 后无论 JS 是否到位都自动显形，不会把页面卡成空白。 */
+.auth-checking .auth__panel {
+  visibility: hidden;
+  animation: authPanelReveal 0s linear 1.6s forwards;
+}
+
+@keyframes authPanelReveal {
+  to { visibility: visible; }
+}
