@@ -123,6 +123,8 @@
     location.replace('/login?next=' + encodeURIComponent(next));
   }
 
+  var page = document.body.getAttribute('data-page');
+
   function boot() {
     if (preview) {
       paintNav(DEMO_ME);
@@ -141,6 +143,8 @@
       }
       if (r.status === 401) {
         if (window.CF && CF.cache) CF.cache.clear();
+        /* 工单页对封禁/未登录也开放，不在此跳登录 */
+        if (page === 'support') return null;
         toLogin();
         return null;
       }
@@ -522,28 +526,33 @@
   /* ---------- 联系客服 ---------- */
 
   function initSupport(me) {
-    var mail = $('spMail');
-    if (mail && me && me.email) mail.value = me.email;
+    /* 会话可用时预填，不可用（含封禁）时留空由用户自填 */
+    var uid = $('spUid');
+    var name = $('spName');
+    if (uid && me && me.uid) uid.value = me.uid;
+    if (name && me && me.username) name.value = me.username;
 
     var form = $('spForm');
     if (!form) return;
 
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
+      var uidVal = (uid && uid.value || '').trim();
+      var nameVal = (name && name.value || '').trim();
+      if (!uidVal && !nameVal) { say('请填写 UID 或用户名，至少填一项'); return; }
       say('工单通道内测中，请先发邮件至 support@chengfa.cc');
     });
   }
 
   /* ---------- 启动 ---------- */
 
-  var page = document.body.getAttribute('data-page');
-
   boot().then(function (me) {
+    /* 工单页即使没有有效会话也要能提交，me 为 null 时表单留空 */
+    if (page === 'support') { initSupport(me); return; }
     if (!me) return;
     if (page === 'hall') initHall(me);
     else if (page === 'store') initStore(me);
     else if (page === 'ledger') initLedger(me);
     else if (page === 'ladder') initLadder(me);
-    else if (page === 'support') initSupport(me);
   });
 })();

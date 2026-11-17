@@ -692,6 +692,16 @@
   color: var(--gray);
 }
 
+/* UID 与用户名并排 */
+.sp-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.sp-row .sp-field { margin-top: 0; }
+
 .sp-field {
   display: block;
   margin-top: 18px;

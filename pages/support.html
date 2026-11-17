@@ -9,7 +9,7 @@
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="/css/style.css?v=6">
 <link rel="stylesheet" href="/css/home.css?v=8">
-<link rel="stylesheet" href="/css/page.css?v=3">
+<link rel="stylesheet" href="/css/page.css?v=4">
 <script src="/js/config.js?v=2"></script>
 <script src="/js/core.js?v=1"></script>
 </head>
@@ -64,7 +64,7 @@
 
       <form class="sp-form" id="spForm" novalidate>
         <h2 class="sp-form__t">提交工单</h2>
-        <p class="sp-form__d">表单会记录提交时的账户与时间，便于核对。</p>
+        <p class="sp-form__d">填写账户 UID 与用户名，便于核对身份。</p>
 
         <label class="sp-field">
           <span>问题类型</span>
@@ -77,10 +77,16 @@
           </select>
         </label>
 
-        <label class="sp-field">
-          <span>联系邮箱</span>
-          <input type="email" name="email" id="spMail" placeholder="name@example.com" autocomplete="email">
-        </label>
+        <div class="sp-row">
+          <label class="sp-field">
+            <span>账户 UID</span>
+            <input type="text" name="uid" id="spUid" inputmode="numeric" placeholder="数字，从 1 开始" autocomplete="off">
+          </label>
+          <label class="sp-field">
+            <span>用户名</span>
+            <input type="text" name="username" id="spName" placeholder="账户显示名" autocomplete="off">
+          </label>
+        </div>
 
         <label class="sp-field">
           <span>详细描述</span>
@@ -178,6 +184,6 @@
   </div>
 </footer>
 
-<script src="/js/app.js?v=4" defer></script>
+<script src="/js/app.js?v=5" defer></script>
 </body>
 </html>
