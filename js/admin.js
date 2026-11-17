@@ -558,8 +558,10 @@
   function initTickets(me) {
     var list = $('tkList');
     var empty = $('tkEmpty');
+    var sheet = $('tkSheet');
     var status = 'open';
     var items = [];
+    var current = null;
 
     function fmt(d) { return fmtTime(d); }
 
@@ -570,6 +572,23 @@
       return s;
     }
 
+    function decide(t, done) {
+      done.disabled = true;
+      postJSON('/api/admin/tickets/decide', {
+        id: t.id,
+        action: t.status === 'open' ? 'closed' : 'open'
+      }).then(function (r) {
+        if (r.body && r.body.ok) {
+          say(t.status === 'open' ? '已标记处理' : '已重开');
+          closeSheet();
+          load();
+        } else {
+          say('操作失败：' + (r.body && r.body.error || '网络错误'));
+          done.disabled = false;
+        }
+      });
+    }
+
     function paint() {
       list.textContent = '';
       $('tkOpen').textContent = items.filter(function (it) { return it.status === 'open'; }).length;
@@ -577,6 +596,7 @@
       items.forEach(function (t) {
         var row = document.createElement('div');
         row.className = 'adm-tr adm-tr--tk';
+        row.style.cursor = 'pointer';
 
         var id = document.createElement('span');
         id.className = 'adm-cell adm-cell--mono';
@@ -609,32 +629,193 @@
         btn.className = 'btn ' + (t.status === 'open' ? 'btn--red' : 'btn--ghost') + ' btn--s';
         btn.type = 'button';
         btn.textContent = t.status === 'open' ? '标记已处理' : '重开';
-        btn.addEventListener('click', function () {
-          btn.disabled = true;
-          postJSON('/api/admin/tickets/decide', {
-            id: t.id,
-            action: t.status === 'open' ? 'closed' : 'open'
-          }).then(function (r) {
-            if (r.body && r.body.ok) { say(t.status === 'open' ? '已标记处理' : '已重开'); load(); }
-            else { say('操作失败：' + (r.body && r.body.error || '网络错误')); btn.disabled = false; }
-          });
+        btn.addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          decide(t, btn);
         });
         acts.appendChild(btn);
 
         row.appendChild(id); row.appendChild(who); row.appendChild(type);
         row.appendChild(detail); row.appendChild(at); row.appendChild(st); row.appendChild(acts);
+
+        row.addEventListener('click', function (ev) {
+          if (ev.target.closest('button')) return;
+          openSheet(t);
+        });
+
         list.appendChild(row);
       });
 
       empty.hidden = items.length > 0;
     }
 
+    /* ---------- 详情弹窗 ---------- */
+
+    function openSheet(t) {
+      current = t;
+      $('tkdTitle').textContent = '工单 #' + t.id + ' · ' + (TICKET_TYPE[t.type] || t.type);
+      $('tkdMeta').textContent = '';
+
+      [
+        ['提交人', (t.username || '未命名') + (t.uid ? '（UID ' + t.uid + '）' : '（未登录）')],
+        ['提交时间', fmt(t.created_at)],
+        ['状态', t.status === 'open' ? '待处理' : '已处理'],
+        ['当前等级', t.level ? 'LV ' + t.level : '—']
+      ].forEach(function (pair) {
+        var s = document.createElement('span');
+        s.textContent = pair[0] + ' ';
+        var b = document.createElement('b');
+        b.textContent = pair[1];
+        s.appendChild(b);
+        $('tkdMeta').appendChild(s);
+      });
+
+      $('tkdDetail').textContent = t.detail || '';
+      var replyBox = $('tkdReply');
+      if (t.reply) {
+        replyBox.hidden = false;
+        replyBox.textContent = '处理意见：' + t.reply;
+      } else {
+        replyBox.hidden = true;
+        replyBox.textContent = '';
+      }
+
+      var done = $('tkdDone');
+      done.textContent = t.status === 'open' ? '标记已处理' : '重开工单';
+      done.className = 'btn ' + (t.status === 'open' ? 'btn--red' : 'btn--ghost') + ' btn--s';
+      done.disabled = false;
+      done.onclick = function () { decide(t, done); };
+
+      renderUser(t);
+
+      sheet.hidden = false;
+      document.body.classList.add('is-locked');
+    }
+
+    function closeSheet() {
+      sheet.hidden = true;
+      document.body.classList.remove('is-locked');
+      current = null;
+    }
+
+    function g(label) {
+      var wrap = document.createElement('div');
+      wrap.className = 'adm-exp__g';
+      var k = document.createElement('span');
+      k.className = 'adm-exp__k';
+      k.textContent = label;
+      wrap.appendChild(k);
+      return wrap;
+    }
+
+    /* 账号操作：与用户管理共用同一批接口 */
+    function renderUser(t) {
+      var box = $('tkdUserBody');
+      box.textContent = '';
+
+      if (!t.uid) {
+        var none = document.createElement('p');
+        none.className = 'tkd__none';
+        none.textContent = '该工单为未登录提交，没有关联账户。';
+        $('tkdUser').hidden = true;
+        box.appendChild(none);
+        return;
+      }
+      $('tkdUser').hidden = false;
+
+      /* 余额概览 */
+      var info = document.createElement('p');
+      info.className = 'tkd__none';
+      info.textContent = '当前法币 ' + (t.userFc || '0') + ' CFB · 冻结 ' + (t.userFrozen || '0') +
+        ' CFB · 状态 ' + (STATUS[t.userStatus] || t.userStatus || '—') +
+        ' · 角色 ' + (ROLE[t.userRole] || t.userRole || '—');
+      box.appendChild(info);
+
+      /* 法币调整 */
+      var g1 = g('调整法币');
+      var inN = document.createElement('input');
+      inN.type = 'number'; inN.step = '0.0001'; inN.placeholder = '±金额';
+      inN.style.width = '130px';
+      var inM = document.createElement('input');
+      inM.type = 'text'; inM.placeholder = '备注（写入流水）';
+      inM.style.flex = '1 1 180px';
+      var btnAdj = document.createElement('button');
+      btnAdj.className = 'btn btn--red btn--s';
+      btnAdj.type = 'button';
+      btnAdj.textContent = '执行调整';
+      btnAdj.addEventListener('click', function () {
+        var delta = Number(inN.value);
+        if (!delta) { say('请先填调整金额，正加负减'); return; }
+        btnAdj.disabled = true;
+        postJSON('/api/admin/users/adjust', { uid: t.uid, delta: delta, memo: inM.value })
+          .then(function (r) {
+            if (r.body && r.body.ok) { say('已调整，最新余额 ' + r.body.fc + ' CFB'); load(); }
+            else say('操作失败：' + (r.body && r.body.error || '网络错误'));
+            btnAdj.disabled = false;
+          });
+      });
+      g1.appendChild(inN); g1.appendChild(inM); g1.appendChild(btnAdj);
+      box.appendChild(g1);
+
+      /* 账户状态 */
+      var g2 = g('账户状态');
+      ['active', 'frozen', 'banned'].forEach(function (s) {
+        var btn = document.createElement('button');
+        btn.className = 'btn btn--ghost btn--s';
+        btn.type = 'button';
+        btn.textContent = STATUS[s];
+        if (t.userStatus === s) btn.disabled = true;
+        btn.addEventListener('click', function () {
+          btn.disabled = true;
+          postJSON('/api/admin/users/status', { uid: t.uid, status: s }).then(function (r) {
+            if (r.body && r.body.ok) { say('状态已改为 ' + STATUS[s]); load(); }
+            else { say('操作失败：' + (r.body && r.body.error || '网络错误')); btn.disabled = false; }
+          });
+        });
+        g2.appendChild(btn);
+      });
+      box.appendChild(g2);
+
+      /* 角色（仅站长可改） */
+      var g3 = g('角色');
+      var sel = document.createElement('select');
+      Object.keys(ROLE).forEach(function (rk) {
+        var opt = document.createElement('option');
+        opt.value = rk;
+        opt.textContent = ROLE[rk];
+        if (t.userRole === rk) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      if (me.role !== 'owner') { sel.disabled = true; sel.title = '仅站长可修改角色'; }
+      var btnRole = document.createElement('button');
+      btnRole.className = 'btn btn--ghost btn--s';
+      btnRole.type = 'button';
+      btnRole.textContent = '应用角色';
+      if (me.role !== 'owner') btnRole.disabled = true;
+      btnRole.addEventListener('click', function () {
+        btnRole.disabled = true;
+        postJSON('/api/admin/users/role', { uid: t.uid, role: sel.value }).then(function (r) {
+          if (r.body && r.body.ok) { say('角色已改为 ' + ROLE[sel.value]); load(); }
+          else { say('操作失败：' + (r.body && r.body.error || '网络错误')); btnRole.disabled = false; }
+        });
+      });
+      g3.appendChild(sel); g3.appendChild(btnRole);
+      box.appendChild(g3);
+    }
+
+    sheet.querySelectorAll('[data-tk-close]').forEach(function (el) {
+      el.addEventListener('click', closeSheet);
+    });
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape' && !sheet.hidden) closeSheet();
+    });
+
     function load() {
       if (preview) {
         items = [
-          { id: 3, uid: 17, username: '沈知白', type: 'balance', detail: '提现申请提交后一直显示审核中，想确认到账时间。', status: 'open', created_at: '2026-11-17T01:20:00Z' },
-          { id: 2, uid: 9, username: '顾南舟', type: 'survey', detail: '完成的问卷奖励没有到账，答卷编号记不清了。', status: 'open', created_at: '2026-11-16T22:10:00Z' },
-          { id: 1, uid: 23, username: '许临', type: 'account', detail: '无法登录，提示密码错误，确认密码没有输错。', status: 'closed', created_at: '2026-11-15T09:00:00Z' }
+          { id: 3, uid: 17, username: '沈知白', type: 'balance', detail: '提现申请提交后一直显示审核中，想确认到账时间。', status: 'open', created_at: '2026-11-17T01:20:00Z', userStatus: 'active', userRole: 'premium', userFc: '864.2', userFrozen: '20', level: 7 },
+          { id: 2, uid: 9, username: '顾南舟', type: 'survey', detail: '完成的问卷奖励没有到账，答卷编号记不清了。', status: 'open', created_at: '2026-11-16T22:10:00Z', userStatus: 'active', userRole: 'admin', userFc: '512', userFrozen: '0', level: 6 },
+          { id: 1, uid: 23, username: '许临', type: 'account', detail: '无法登录，提示密码错误，确认密码没有输错。', status: 'closed', created_at: '2026-11-15T09:00:00Z', userStatus: 'frozen', userRole: 'user', userFc: '96.4', userFrozen: '0', level: 2 }
         ].filter(function (t) { return status === 'all' || t.status === status; });
         paint();
         return;

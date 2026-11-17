@@ -423,7 +423,9 @@ async function ticketMine(request, env) {
 // 后台：工单列表
 async function adminTickets(env, url) {
   const status = String(url.searchParams.get('status') || 'all');
-  let sql = 'SELECT t.id, t.uid, t.username, t.type, t.detail, t.status, t.reply, t.created_at, t.reviewed_at FROM tickets t';
+  let sql = `SELECT t.id, t.uid, t.username, t.type, t.detail, t.status, t.reply, t.created_at, t.reviewed_at,
+    u.role AS userRole, u.status AS userStatus, u.fc_units, u.fc_frozen, u.level
+    FROM tickets t LEFT JOIN users u ON u.id = t.uid`;
   const args = [];
   if (status === 'open' || status === 'closed') {
     sql += ' WHERE t.status = ?';
@@ -432,7 +434,13 @@ async function adminTickets(env, url) {
   sql += ' ORDER BY t.id DESC LIMIT 200';
   const stmt = env.DB.prepare(sql);
   const rows = await (args.length ? stmt.bind.apply(stmt, args) : stmt).all();
-  return json({ ok: true, items: rows.results || [] });
+  const items = (rows.results || []).map(function (r) {
+    return Object.assign({}, r, {
+      userFc: r.fc_units == null ? '' : formatFc(r.fc_units),
+      userFrozen: r.fc_frozen == null ? '' : formatFc(r.fc_frozen)
+    });
+  });
+  return json({ ok: true, items: items });
 }
 
 // 后台：标记处理 / 重开

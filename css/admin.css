@@ -342,6 +342,83 @@ body[data-accent="blue"] {
 .adm-exp__g input:focus,
 .adm-exp__g select:focus { outline: 3px solid var(--red); outline-offset: -1px; }
 
+/* ---------- 工单详情弹窗 ---------- */
+
+.sheet__box--tk {
+  width: min(680px, 100%);
+  max-height: min(86vh, 820px);
+}
+
+.tkd {
+  padding: 18px 22px 24px;
+  overflow-y: auto;
+}
+
+.tkd__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--ink);
+  font-size: 12px;
+  color: var(--gray);
+}
+
+.tkd__meta b { color: var(--ink); }
+
+.tkd__detail {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-left: 5px solid var(--red);
+  background: var(--paper-2);
+  font-size: 14px;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.tkd__reply {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border: 2px solid var(--red);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.tkd__reply[hidden] { display: none; }
+
+.tkd__act {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.tkd__user {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 3px solid var(--ink);
+}
+
+.tkd__user[hidden] { display: none; }
+
+.tkd__user-t {
+  margin: 0 0 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .18em;
+  color: var(--red-deep);
+}
+
+.tkd__user .adm-exp__g { margin-top: 12px; }
+.tkd__user .adm-exp__g:first-child { margin-top: 0; }
+
+.tkd__none {
+  margin: 0;
+  font-size: 13px;
+  color: var(--gray);
+}
+
 /* ---------- 空态 ---------- */
 
 .adm-empty {
