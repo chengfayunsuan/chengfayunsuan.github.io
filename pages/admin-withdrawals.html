@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="/css/style.css?v=6">
 <link rel="stylesheet" href="/css/home.css?v=8">
 <link rel="stylesheet" href="/css/page.css?v=3">
-<link rel="stylesheet" href="/css/admin.css?v=1">
+<link rel="stylesheet" href="/css/admin.css?v=2">
 <script src="/js/config.js?v=2"></script>
 </head>
 <body data-page="admin-withdrawals" data-accent="blue">
@@ -34,44 +34,80 @@
   </div>
 </header>
 
-<div class="pg-bar">
-  <div class="wrap pg-bar__in">
-    <a class="pg-bar__a" href="/admin">← 返回后台首页</a>
-    <span class="pg-bar__k">ADMIN / 提现审核</span>
+<nav class="dock" aria-label="后台目录">
+  <div class="wrap dock__in">
+    <a class="dock__i" href="/admin">
+      <span class="dock__n">01</span><span class="dock__t">后台概览</span>
+    </a>
+    <a class="dock__i" href="/admin/users">
+      <span class="dock__n">02</span><span class="dock__t">用户管理</span>
+    </a>
+    <a class="dock__i is-on" href="/admin/withdrawals">
+      <span class="dock__n">03</span><span class="dock__t">提现审核</span>
+    </a>
+    <button class="dock__i" type="button" data-soon="问卷管理">
+      <span class="dock__n">04</span><span class="dock__t">问卷管理</span>
+    </button>
+    <button class="dock__i" type="button" data-soon="兑换码">
+      <span class="dock__n">05</span><span class="dock__t">兑换码</span>
+    </button>
+    <button class="dock__i" type="button" data-soon="站内消息">
+      <span class="dock__n">06</span><span class="dock__t">站内消息</span>
+    </button>
   </div>
-</div>
+</nav>
 
-<main class="pg">
-  <div class="wrap">
+<main id="app">
 
-    <div class="pg-head">
-      <div>
-        <span class="pg-k">WITHDRAWALS</span>
-        <h1 class="pg-t">提现审核</h1>
-      </div>
-      <div class="pg-side">
-        <b id="wdPending">—</b>
-        <span>笔待审</span>
+  <section class="face">
+    <div class="wrap">
+      <div class="face__in">
+        <div class="face__id">
+          <div class="face__meta">
+            <span class="face__uid">ADMIN / 提现审核</span>
+            <span class="adm-badge">资金</span>
+          </div>
+          <h1 class="face__name">提现审核</h1>
+          <p class="face__sub">通过打款 · 驳回退回 · 资金自动结算</p>
+          <div class="face__foot">
+            <p class="adm-lead">通过打款划走冻结额度，驳回退回可用余额。每笔处置都写入流水，可追溯。</p>
+          </div>
+        </div>
+
+        <div class="face__bal">
+          <div class="face__bal-k">PENDING / 待审笔数</div>
+          <div class="face__bal-n" id="wdPending">—</div>
+          <div class="face__bal-f">笔申请待处理</div>
+          <div class="face__acts">
+            <a class="btn btn--ghost" href="/admin">返回概览</a>
+          </div>
+        </div>
       </div>
     </div>
+  </section>
 
-    <div class="pg-tools">
-      <div class="pg-tabs">
-        <button class="pg-tab is-on" type="button" data-wd="pending">待审</button>
-        <button class="pg-tab" type="button" data-wd="all">全部</button>
+  <section class="adm-sec adm-sec--last">
+    <div class="wrap">
+      <div class="adm-panel">
+        <div class="adm-tools">
+          <div class="pg-tabs">
+            <button class="pg-tab is-on" type="button" data-wd="pending">待审</button>
+            <button class="pg-tab" type="button" data-wd="all">全部</button>
+          </div>
+          <span class="adm-tools__r">通过打款划走冻结；驳回退回可用余额</span>
+        </div>
+
+        <div class="adm-list">
+          <div class="adm-tr adm-tr--wd adm-head">
+            <span>单号</span><span>用户</span><span>金额</span><span>渠道 / 收款账号</span><span>申请时间</span><span>状态</span><span>操作</span>
+          </div>
+          <div id="wdList"></div>
+        </div>
+        <p class="adm-empty" id="wdEmpty" hidden>当前筛选下没有提现申请。</p>
       </div>
-      <span class="pg-tools__r">通过打款划走冻结；驳回退回可用余额</span>
     </div>
+  </section>
 
-    <div class="adm-list">
-      <div class="adm-tr adm-tr--wd adm-head">
-        <span>单号</span><span>用户</span><span>金额</span><span>渠道 / 收款账号</span><span>申请时间</span><span>状态</span><span>操作</span>
-      </div>
-      <div id="wdList"></div>
-    </div>
-    <p class="adm-empty" id="wdEmpty" hidden>当前筛选下没有提现申请。</p>
-
-  </div>
 </main>
 
 <div class="hm-toast" id="toast" role="status" aria-live="polite"></div>

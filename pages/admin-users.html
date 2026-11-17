@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="/css/style.css?v=6">
 <link rel="stylesheet" href="/css/home.css?v=8">
 <link rel="stylesheet" href="/css/page.css?v=3">
-<link rel="stylesheet" href="/css/admin.css?v=1">
+<link rel="stylesheet" href="/css/admin.css?v=2">
 <script src="/js/config.js?v=2"></script>
 </head>
 <body data-page="admin-users" data-accent="blue">
@@ -34,46 +34,78 @@
   </div>
 </header>
 
-<div class="pg-bar">
-  <div class="wrap pg-bar__in">
-    <a class="pg-bar__a" href="/admin">← 返回后台首页</a>
-    <span class="pg-bar__k">ADMIN / 用户管理</span>
+<nav class="dock" aria-label="后台目录">
+  <div class="wrap dock__in">
+    <a class="dock__i" href="/admin">
+      <span class="dock__n">01</span><span class="dock__t">后台概览</span>
+    </a>
+    <a class="dock__i is-on" href="/admin/users">
+      <span class="dock__n">02</span><span class="dock__t">用户管理</span>
+    </a>
+    <a class="dock__i" href="/admin/withdrawals">
+      <span class="dock__n">03</span><span class="dock__t">提现审核</span>
+    </a>
+    <button class="dock__i" type="button" data-soon="问卷管理">
+      <span class="dock__n">04</span><span class="dock__t">问卷管理</span>
+    </button>
+    <button class="dock__i" type="button" data-soon="兑换码">
+      <span class="dock__n">05</span><span class="dock__t">兑换码</span>
+    </button>
+    <button class="dock__i" type="button" data-soon="站内消息">
+      <span class="dock__n">06</span><span class="dock__t">站内消息</span>
+    </button>
   </div>
-</div>
+</nav>
 
-<main class="pg">
-  <div class="wrap">
+<main id="app">
 
-    <div class="pg-head">
-      <div>
-        <span class="pg-k">USERS</span>
-        <h1 class="pg-t">用户管理</h1>
-      </div>
-      <div class="pg-side">
-        <b id="usCount">0</b>
-        <span>个结果</span>
+  <section class="face">
+    <div class="wrap">
+      <div class="face__in">
+        <div class="face__id">
+          <div class="face__meta">
+            <span class="face__uid">ADMIN / 用户管理</span>
+            <span class="adm-badge">账户</span>
+          </div>
+          <h1 class="face__name">用户管理</h1>
+          <p class="face__sub">查找账户 · 调整法币 · 冻结封禁 · 修改角色</p>
+          <div class="face__foot">
+            <p class="adm-lead">点击任意一行展开操作。资金调整与状态变更都会写入流水，修改角色仅站长可用。</p>
+          </div>
+        </div>
+
+        <div class="face__bal">
+          <div class="face__bal-k">RESULTS / 查找结果</div>
+          <div class="face__bal-n" id="usCount">0</div>
+          <div class="face__bal-f">个账户</div>
+          <div class="face__acts">
+            <a class="btn btn--ghost" href="/admin">返回概览</a>
+          </div>
+        </div>
       </div>
     </div>
+  </section>
 
-    <div class="adm-search">
-      <input id="usQ" type="text" placeholder="UID / 用户名 / 邮箱" autocomplete="off">
-      <button class="btn btn--red" id="usGo" type="button">查找</button>
-      <span class="adm-search__hint">留空时列出最新注册的 20 个账户</span>
-    </div>
+  <section class="adm-sec adm-sec--last">
+    <div class="wrap">
+      <div class="adm-panel">
+        <div class="adm-search">
+          <input id="usQ" type="text" placeholder="UID / 用户名 / 邮箱" autocomplete="off">
+          <button class="btn btn--red" id="usGo" type="button">查找</button>
+          <span class="adm-search__hint">留空时列出最新注册的 20 个账户</span>
+        </div>
 
-    <div class="adm-list">
-      <div class="adm-tr adm-tr--user adm-head">
-        <span>UID</span><span>用户</span><span>角色</span><span>状态</span><span>法币</span><span>冻结</span>
+        <div class="adm-list">
+          <div class="adm-tr adm-tr--user adm-head">
+            <span>UID</span><span>用户</span><span>角色</span><span>状态</span><span>法币</span><span>冻结</span>
+          </div>
+          <div id="usList"></div>
+        </div>
+        <p class="adm-empty" id="usEmpty" hidden>没有找到匹配的账户。</p>
       </div>
-      <div id="usList"></div>
     </div>
-    <p class="adm-empty" id="usEmpty" hidden>没有找到匹配的账户。</p>
+  </section>
 
-    <p class="adm-search__hint" style="margin-top:14px">
-      点击任意一行展开操作：调整法币、冻结 / 封禁 / 恢复、修改角色。修改角色仅站长可用。
-    </p>
-
-  </div>
 </main>
 
 <div class="hm-toast" id="toast" role="status" aria-live="polite"></div>

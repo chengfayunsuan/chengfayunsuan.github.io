@@ -1,7 +1,7 @@
 /* ============================================================
-   乘法 · 后台
-   后台页面在 <body data-accent="blue"> 上把主题红整体换蓝，
-   其余变量与前台共用，风格保持一致。
+   乘法 · 运营后台
+   与账户首页同构：导航 + 黑色目录条 + 门面大卡 + 分格数据条。
+   主题色把红色换成蓝色，其余变量与前台共用。
    ============================================================ */
 
 body[data-accent="blue"] {
@@ -9,103 +9,156 @@ body[data-accent="blue"] {
   --red-deep: #1439A6;
 }
 
-/* ---------- 概览统计 ---------- */
+/* 当前目录项：蓝底强调 */
+.dock__i.is-on { background: var(--red); }
+.dock__i.is-on .dock__n { color: rgba(244, 240, 230, .85); }
 
-.adm-stats {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-  margin: 26px 0 0;
+/* ---------- 门面补件 ---------- */
+
+.adm-badge {
+  display: inline-block;
+  padding: 3px 11px 3px 10px;
+  background: var(--red);
+  color: var(--paper);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  transform: rotate(-2deg);
 }
 
-.adm-stat {
-  padding: 16px 18px 14px;
-  border: 3px solid var(--ink);
-  background: var(--paper);
-  min-width: 0;
+.adm-lead {
+  margin: 0;
+  max-width: 54ch;
+  padding-left: 14px;
+  border-left: 4px solid var(--red);
+  font-size: 14px;
+  line-height: 1.8;
+  color: #5C564A;
 }
 
-.adm-stat__k {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: .18em;
+/* 门面右侧蓝色数字 */
+.face__bal-k { color: var(--red-deep); }
+.face__bal-n { color: var(--red-deep); }
+.face__bal-n::after { width: 92px; height: 10px; }
+
+/* ---------- 数据条：与 home 同一个大门面 ---------- */
+
+.stat--pending .stat__n { color: var(--red); }
+
+.stat__s {
+  display: block;
+  margin-top: 5px;
+  font-size: 11px;
+  letter-spacing: .03em;
   color: var(--gray);
+  white-space: nowrap;
 }
 
-.adm-stat__v {
-  margin: 10px 0 0;
-  font-family: var(--black);
+.stat__s b { color: var(--ink); font-weight: 700; }
+
+/* ---------- 区块 ---------- */
+
+.adm-sec { margin-top: clamp(34px, 4.4vw, 58px); }
+.adm-sec--last { padding-bottom: clamp(44px, 6vw, 84px); }
+
+.adm-h2 {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0 0 22px;
+  padding-bottom: 12px;
+  border-bottom: 4px solid var(--ink);
+  font-size: clamp(21px, 2.4vw, 30px);
+  font-weight: 700;
+  letter-spacing: -.03em;
+}
+
+.adm-h2 span {
+  font-family: var(--mono);
+  font-size: 11px;
   font-weight: 400;
-  font-size: clamp(34px, 3.6vw, 52px);
-  line-height: .9;
-  word-break: break-all;
+  letter-spacing: .2em;
+  color: var(--red-deep);
 }
 
-.adm-stat__s {
-  margin: 8px 0 0;
+/* 大卡：与主站同款粗边框 */
+.adm-panel {
+  border: var(--edge);
+  background: var(--paper);
+  padding: clamp(18px, 2.6vw, 32px);
+}
+
+/* 提现页工具条 */
+.adm-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.adm-tools__r {
+  margin-left: auto;
   font-size: 11.5px;
   color: var(--gray);
 }
 
-.adm-stat__s b { color: var(--ink); font-weight: 700; }
+/* 小按钮（原定义在 settings.css，此处独立保留） */
+.btn--s {
+  padding: 9px 18px;
+  font-size: 13px;
+  flex: 0 0 auto;
+}
 
-.adm-stat.is-warn { border-color: var(--red); }
-.adm-stat.is-warn .adm-stat__v { color: var(--red); }
-
-/* ---------- 快捷入口 ---------- */
+/* ---------- 功能入口 ---------- */
 
 .adm-quick {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin: 26px 0 0;
+  gap: 16px;
 }
 
 .adm-q {
   display: block;
-  padding: 16px 20px;
+  position: relative;
+  width: 100%;
+  padding: 20px 22px 18px;
   border: 3px solid var(--ink);
+  border-top: 6px solid var(--red);
   background: var(--paper);
   color: var(--ink);
+  font-family: inherit;
+  text-align: left;
   text-decoration: none;
-  transition: background .14s ease;
+  transition: background .14s ease, transform .14s ease;
   min-width: 0;
 }
 
-.adm-q:hover { background: var(--paper-2); }
+.adm-q:hover { background: var(--paper-2); transform: translate(0, -2px); }
+.adm-q.is-off:hover { background: var(--paper); transform: none; }
 
-.adm-q.is-off { opacity: .45; }
+.adm-q.is-off { opacity: .5; }
 
 .adm-q__n {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: .16em;
-  color: var(--gray);
+  font-family: var(--black);
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 1;
+  color: var(--red);
 }
 
 .adm-q__t {
-  margin: 8px 0 0;
-  font-size: 17px;
+  margin: 10px 0 0;
+  font-size: 18px;
   font-weight: 700;
   letter-spacing: -.02em;
 }
 
 .adm-q__d {
   margin: 6px 0 0;
-  font-size: 11.5px;
+  font-size: 12px;
   line-height: 1.7;
   color: var(--gray);
-}
-
-/* ---------- 区块标题 ---------- */
-
-.adm-h2 {
-  margin: clamp(26px, 3.4vw, 44px) 0 0;
-  padding-bottom: 10px;
-  border-bottom: 3px solid var(--ink);
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -.02em;
 }
 
 /* ---------- 查找条 ---------- */
@@ -115,7 +168,6 @@ body[data-accent="blue"] {
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
-  margin: 22px 0 0;
 }
 
 .adm-search input {
@@ -138,10 +190,7 @@ body[data-accent="blue"] {
 
 /* ---------- 列表 ---------- */
 
-.adm-list {
-  margin: 22px 0 0;
-  border-top: 4px solid var(--ink);
-}
+.adm-list { margin-top: 22px; }
 
 .adm-tr {
   display: grid;
@@ -154,7 +203,7 @@ body[data-accent="blue"] {
 
 .adm-head {
   padding: 0 10px 8px 0;
-  border-bottom: 2px solid var(--ink);
+  border-bottom: 3px solid var(--ink);
   font-family: var(--mono);
   font-size: 10px;
   letter-spacing: .14em;
@@ -166,6 +215,9 @@ body[data-accent="blue"] {
 
 /* 提现审核 */
 .adm-tr--wd { grid-template-columns: 128px minmax(0, .8fr) 92px minmax(0, 1.1fr) 146px 72px auto; }
+
+/* 最近流水 */
+.adm-tr--lg { grid-template-columns: 150px 120px 90px 110px minmax(0, 1fr); }
 
 .adm-cell {
   min-width: 0;
@@ -277,18 +329,13 @@ body[data-accent="blue"] {
   min-width: 0;
 }
 
-.adm-exp__g input--n { width: 120px; }
-
 .adm-exp__g input:focus,
 .adm-exp__g select:focus { outline: 3px solid var(--red); outline-offset: -1px; }
-
-/* 最近流水 */
-.adm-tr--lg { grid-template-columns: 150px 120px 90px 110px minmax(0, 1fr); }
 
 /* ---------- 空态 ---------- */
 
 .adm-empty {
-  margin: 26px 0 0;
+  margin: 22px 0 0;
   padding: 30px 20px;
   border: 2px dashed var(--hair);
   text-align: center;
@@ -296,10 +343,11 @@ body[data-accent="blue"] {
   color: var(--gray);
 }
 
+.adm-empty[hidden] { display: none; }
+
 /* ---------- 响应式 ---------- */
 
 @media (max-width: 1080px) {
-  .adm-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .adm-quick { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
@@ -317,9 +365,10 @@ body[data-accent="blue"] {
   .adm-expand { grid-column: 1 / -1; }
 
   .adm-acts { justify-content: flex-start; }
+
+  .adm-tools__r { margin-left: 0; }
 }
 
 @media (max-width: 560px) {
-  .adm-stats,
   .adm-quick { grid-template-columns: minmax(0, 1fr); }
 }

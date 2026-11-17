@@ -10,11 +10,12 @@
 <link rel="stylesheet" href="/css/style.css?v=6">
 <link rel="stylesheet" href="/css/home.css?v=8">
 <link rel="stylesheet" href="/css/page.css?v=3">
-<link rel="stylesheet" href="/css/admin.css?v=1">
+<link rel="stylesheet" href="/css/admin.css?v=2">
 <script src="/js/config.js?v=2"></script>
 </head>
 <body data-page="admin" data-accent="blue">
 
+<!-- ============ 导航 ============ -->
 <header class="nav">
   <div class="wrap nav__in">
     <a class="brand" href="/admin">
@@ -34,93 +35,144 @@
   </div>
 </header>
 
-<div class="pg-bar">
-  <div class="wrap pg-bar__in">
-    <a class="pg-bar__a" href="/home">← 返回账户首页</a>
-    <span class="pg-bar__k">ADMIN PANEL / 运营后台</span>
+<!-- ============ 后台目录：与账户首页同构 ============ -->
+<nav class="dock" aria-label="后台目录">
+  <div class="wrap dock__in">
+    <a class="dock__i is-on" href="/admin">
+      <span class="dock__n">01</span><span class="dock__t">后台概览</span>
+    </a>
+    <a class="dock__i" href="/admin/users">
+      <span class="dock__n">02</span><span class="dock__t">用户管理</span>
+    </a>
+    <a class="dock__i" href="/admin/withdrawals">
+      <span class="dock__n">03</span><span class="dock__t">提现审核</span>
+    </a>
+    <button class="dock__i" type="button" data-soon="问卷管理">
+      <span class="dock__n">04</span><span class="dock__t">问卷管理</span>
+    </button>
+    <button class="dock__i" type="button" data-soon="兑换码">
+      <span class="dock__n">05</span><span class="dock__t">兑换码</span>
+    </button>
+    <button class="dock__i" type="button" data-soon="站内消息">
+      <span class="dock__n">06</span><span class="dock__t">站内消息</span>
+    </button>
   </div>
-</div>
+</nav>
 
-<main class="pg">
-  <div class="wrap">
+<main id="app">
 
-    <div class="pg-head">
-      <div>
-        <span class="pg-k">ADMIN PANEL</span>
-        <h1 class="pg-t">运营后台</h1>
+  <!-- ============ 门面：操作者 + 全站法币 ============ -->
+  <section class="face">
+    <div class="wrap">
+
+      <div class="face__in">
+        <div class="face__id">
+          <div class="face__meta">
+            <span class="face__uid">OPERATOR / 当前操作者</span>
+            <span class="adm-badge" id="ovRole">站长</span>
+          </div>
+
+          <h1 class="face__name" id="ovWho">—</h1>
+
+          <p class="face__sub">运营后台 · 仅限站长与管理员</p>
+
+          <div class="face__foot">
+            <p class="adm-lead">用户、资金与站务数据集中在此。任何余额调整与提现处置都会写入流水，可追溯。</p>
+          </div>
+        </div>
+
+        <div class="face__bal">
+          <div class="face__bal-k">GLOBAL / 全站法币总量</div>
+          <div class="face__bal-n" id="stMoney">—</div>
+          <div class="face__bal-f">可用与冻结合计</div>
+
+          <div class="face__acts">
+            <a class="btn btn--red" href="/admin/users">用户管理</a>
+            <a class="btn btn--ghost" href="/admin/withdrawals">提现审核</a>
+          </div>
+        </div>
       </div>
-      <div class="pg-side">
-        <b id="ovRole">—</b>
-        <span id="ovWho">当前操作者</span>
+
+      <!-- 数据条：与 home 同一个大门面 -->
+      <div class="face__strip adm-strip">
+        <div class="stat">
+          <span class="stat__n" id="stUsers">—</span>
+          <span class="stat__t">用户总量</span>
+          <span class="stat__s">今日新增 <b id="stToday">—</b></span>
+        </div>
+        <div class="stat">
+          <span class="stat__n" id="stActive">—</span>
+          <span class="stat__t">正常账户</span>
+          <span class="stat__s">冻结 <b id="stFrozenN">—</b> · 封禁 <b id="stBanned">—</b></span>
+        </div>
+        <div class="stat stat--pending">
+          <span class="stat__n" id="stWd">—</span>
+          <span class="stat__t">待审提现</span>
+          <span class="stat__s">涉及 <b id="stWdAmount">—</b></span>
+        </div>
+        <div class="stat">
+          <span class="stat__n" id="stFrozen">—</span>
+          <span class="stat__t">法币冻结</span>
+          <span class="stat__s">已锁定待结算</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 功能入口 ============ -->
+  <section class="adm-sec">
+    <div class="wrap">
+      <h2 class="adm-h2">功能入口 <span>FUNCTIONS</span></h2>
+      <div class="adm-quick">
+        <a class="adm-q" href="/admin/users">
+          <span class="adm-q__n">01</span>
+          <p class="adm-q__t">用户管理</p>
+          <p class="adm-q__d">查找账户、调整法币、冻结与封禁、修改角色。</p>
+        </a>
+        <a class="adm-q" href="/admin/withdrawals">
+          <span class="adm-q__n">02</span>
+          <p class="adm-q__t">提现审核</p>
+          <p class="adm-q__d">通过打款或驳回退回，资金自动回到账户。</p>
+        </a>
+        <button class="adm-q is-off" type="button" data-soon="问卷管理">
+          <span class="adm-q__n">03</span>
+          <p class="adm-q__t">问卷管理</p>
+          <p class="adm-q__d">问卷上线后在此发布与结算。</p>
+        </button>
+        <button class="adm-q is-off" type="button" data-soon="兑换码">
+          <span class="adm-q__n">04</span>
+          <p class="adm-q__t">兑换码</p>
+          <p class="adm-q__d">兑换码发放与核销记录待建。</p>
+        </button>
+        <button class="adm-q is-off" type="button" data-soon="工单">
+          <span class="adm-q__n">05</span>
+          <p class="adm-q__t">工单</p>
+          <p class="adm-q__d">客服工单流转待建。</p>
+        </button>
+        <button class="adm-q is-off" type="button" data-soon="站内消息">
+          <span class="adm-q__n">06</span>
+          <p class="adm-q__t">站内消息</p>
+          <p class="adm-q__d">事件通知中心待建。</p>
+        </button>
       </div>
     </div>
+  </section>
 
-    <div class="adm-stats">
-      <div class="adm-stat">
-        <span class="adm-stat__k">USERS / 用户总数</span>
-        <p class="adm-stat__v" id="stUsers">—</p>
-        <p class="adm-stat__s">今日新增 <b id="stToday">—</b></p>
+  <!-- ============ 最近流水 ============ -->
+  <section class="adm-sec adm-sec--last">
+    <div class="wrap">
+      <h2 class="adm-h2">最近流水 <span>RECENT LEDGER</span></h2>
+      <div class="adm-list">
+        <div class="adm-tr adm-tr--lg adm-head">
+          <span>时间</span><span>用户</span><span>类型</span><span>变动</span><span>备注</span>
+        </div>
+        <div id="ovLedger"></div>
       </div>
-      <div class="adm-stat">
-        <span class="adm-stat__k">MONEY / 法币总量</span>
-        <p class="adm-stat__v" id="stMoney">—</p>
-        <p class="adm-stat__s">其中冻结 <b id="stFrozen">—</b></p>
-      </div>
-      <div class="adm-stat is-warn">
-        <span class="adm-stat__k">PENDING / 待审提现</span>
-        <p class="adm-stat__v" id="stWd">—</p>
-        <p class="adm-stat__s">涉及金额 <b id="stWdAmount">—</b></p>
-      </div>
-      <div class="adm-stat">
-        <span class="adm-stat__k">STATUS / 账户状态</span>
-        <p class="adm-stat__v" id="stActive">—</p>
-        <p class="adm-stat__s">冻结 <b id="stFrozenN">—</b> · 封禁 <b id="stBanned">—</b></p>
-      </div>
+      <p class="adm-empty" id="ovEmpty" hidden>还没有任何流水。</p>
     </div>
+  </section>
 
-    <div class="adm-quick">
-      <a class="adm-q" href="/admin/users">
-        <span class="adm-q__n">01</span>
-        <p class="adm-q__t">用户管理</p>
-        <p class="adm-q__d">查找账户、调整法币、冻结与封禁、修改角色。</p>
-      </a>
-      <a class="adm-q" href="/admin/withdrawals">
-        <span class="adm-q__n">02</span>
-        <p class="adm-q__t">提现审核</p>
-        <p class="adm-q__d">通过打款或驳回退回，资金自动回到账户。</p>
-      </a>
-      <button class="adm-q is-off" type="button" data-soon="问卷管理">
-        <span class="adm-q__n">03</span>
-        <p class="adm-q__t">问卷管理</p>
-        <p class="adm-q__d">问卷上线后在此发布与结算。</p>
-      </button>
-      <button class="adm-q is-off" type="button" data-soon="兑换码">
-        <span class="adm-q__n">04</span>
-        <p class="adm-q__t">兑换码</p>
-        <p class="adm-q__d">兑换码发放与核销记录待建。</p>
-      </button>
-      <button class="adm-q is-off" type="button" data-soon="工单">
-        <span class="adm-q__n">05</span>
-        <p class="adm-q__t">工单</p>
-        <p class="adm-q__d">客服工单流转待建。</p>
-      </button>
-      <button class="adm-q is-off" type="button" data-soon="站内消息">
-        <span class="adm-q__n">06</span>
-        <p class="adm-q__t">站内消息</p>
-        <p class="adm-q__d">事件通知中心待建。</p>
-      </button>
-    </div>
-
-    <h2 class="adm-h2">最近流水</h2>
-    <div class="adm-list">
-      <div class="adm-tr adm-tr--lg adm-head">
-        <span>时间</span><span>用户</span><span>类型</span><span>变动</span><span>备注</span>
-      </div>
-      <div id="ovLedger"></div>
-    </div>
-    <p class="adm-empty" id="ovEmpty" hidden>还没有任何流水。</p>
-
-  </div>
 </main>
 
 <div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
