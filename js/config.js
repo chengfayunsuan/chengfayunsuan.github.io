@@ -103,14 +103,6 @@
       styleBtns[s].setAttribute('aria-pressed', onStyle ? 'true' : 'false');
     }
 
-    /* 旧式币种按钮若还存在，一并维护选中态 */
-    var segBtns = document.querySelectorAll('.cur-seg__b[data-cur-mode]');
-    for (var k = 0; k < segBtns.length; k++) {
-      var on = segBtns[k].getAttribute('data-cur-mode') === m;
-      segBtns[k].classList.toggle('is-on', on);
-      segBtns[k].setAttribute('aria-pressed', on ? 'true' : 'false');
-    }
-
     var nodes = (root || document).querySelectorAll('[data-cur]');
     for (var i = 0; i < nodes.length; i++) applyOne(nodes[i]);
   }
