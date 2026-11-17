@@ -622,7 +622,7 @@ async function adminStatus(request, env, admin) {
 
   await env.DB.prepare(
     "UPDATE users SET status = ?, updated_at = datetime('now') WHERE id = ?"
-  ).bind(status, uid);
+  ).bind(status, uid).run();
 
   return json({ ok: true });
 }
@@ -642,7 +642,7 @@ async function adminRole(request, env, admin) {
 
   await env.DB.prepare(
     "UPDATE users SET role = ?, updated_at = datetime('now') WHERE id = ?"
-  ).bind(role, uid);
+  ).bind(role, uid).run();
 
   return json({ ok: true });
 }
