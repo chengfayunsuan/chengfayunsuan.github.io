@@ -1,0 +1,112 @@
+/* ============================================================
+   乘法 · 法律文档页（隐私政策 / 用户协议）
+   长文阅读优先：窄栏、大行距、层级清楚。
+   ============================================================ */
+
+.legal {
+  max-width: 800px;
+  margin: 0 auto;
+  padding-bottom: clamp(40px, 6vw, 80px);
+}
+
+.legal__head {
+  padding-bottom: 20px;
+  border-bottom: 3px solid var(--ink);
+}
+
+.legal__meta {
+  margin: 10px 0 0;
+  font-family: var(--num);
+  font-size: 12px;
+  letter-spacing: .1em;
+  color: var(--gray);
+}
+
+.legal__lead {
+  margin: 26px 0 8px;
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--ink);
+}
+
+.legal h2 {
+  margin: 38px 0 14px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--paper-2);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+
+.legal h3 {
+  margin: 24px 0 8px;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.legal p {
+  margin: 12px 0;
+  font-size: 13.5px;
+  line-height: 1.9;
+  color: #3A362D;
+}
+
+.legal ul {
+  margin: 12px 0;
+  padding-left: 20px;
+  list-style: none;
+}
+
+.legal li {
+  position: relative;
+  margin: 9px 0;
+  padding-left: 12px;
+  font-size: 13.5px;
+  line-height: 1.85;
+  color: #3A362D;
+}
+
+.legal li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 5px;
+  height: 5px;
+  background: var(--red);
+}
+
+.legal b { color: var(--ink); font-weight: 700; }
+.legal em { font-style: normal; color: var(--red); }
+
+.legal code {
+  padding: 1px 5px;
+  border: 1px solid var(--paper-2);
+  background: var(--paper-2);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .02em;
+}
+
+.legal a {
+  color: var(--ink);
+  border-bottom: 1px solid var(--red);
+}
+
+.legal a:hover { color: var(--red); }
+
+.legal__foot {
+  margin-top: 46px;
+  padding-top: 18px;
+  border-top: 2px solid var(--ink);
+  font-size: 12.5px;
+  color: var(--gray);
+}
+
+
+@media (max-width: 560px) {
+  .legal p,
+  .legal li { font-size: 13px; }
+  .legal h2 { font-size: 16.5px; }
+}

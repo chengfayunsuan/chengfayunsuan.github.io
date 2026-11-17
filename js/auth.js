@@ -274,6 +274,11 @@
   }
 
   if (verifyBox) {
+  /* 点同意条款里的链接时，别把复选框一起切换了 */
+  document.querySelectorAll('.check__t a').forEach(function (a) {
+    a.addEventListener('click', function (ev) { ev.stopPropagation(); });
+  });
+
     verifyBox.addEventListener('click', function () {
       var st = verifyBox.getAttribute('data-state');
       if (st === 'checking' || st === 'ok' || st === 'action') return;

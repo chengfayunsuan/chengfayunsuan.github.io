@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>账户入口 · 乘法</title>
 <meta name="description" content="登录或注册乘法账户。创建账户后可浏览公开问卷，参与市场调研并累积积分。">
-<link rel="stylesheet" href="/css/style.css?v=9">
-<link rel="stylesheet" href="/css/auth.css?v=8">
+<link rel="stylesheet" href="/css/style.css?v=10">
+<link rel="stylesheet" href="/css/auth.css?v=9">
 </head>
 <body class="auth-page">
 
@@ -67,7 +67,7 @@
           <label class="check">
             <input type="checkbox" id="agree" name="agree">
             <span class="check__box" aria-hidden="true"></span>
-            <span class="check__t">我已阅读并同意《用户协议》与《隐私说明》，了解积分规则与提现条件。</span>
+            <span class="check__t">我已阅读并同意 <a class="check__a" href="/terms" target="_blank" rel="noopener">《用户协议》</a> 与 <a class="check__a" href="/privacy" target="_blank" rel="noopener">《隐私政策》</a>，了解积分规则与提现条件。</span>
           </label>
           <p class="field__e" id="agreeErr" hidden></p>
         </div>
@@ -107,12 +107,13 @@
   <div class="wrap auth-foot__in">
     <span>© 2026 乘法 CHENGFA</span>
     <span>参与调研 · 累计积分 · 兑换回报</span>
+    <p class="foot__legal"><a href="/privacy">隐私政策</a> · <a href="/terms">用户协议</a> · <a href="/support">联系客服</a></p>
   </div>
 </footer>
 
 <script src="/js/config.js?v=7"></script>
 <script src="/js/core.js?v=9"></script>
-<script src="/js/auth.js?v=6" defer></script>
+<script src="/js/auth.js?v=7" defer></script>
 
 <!-- Turnstile：显式渲染 + 隐形模式，官方控件不占版面；本地换测试钥匙 -->
 <script>
