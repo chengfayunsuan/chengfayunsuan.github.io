@@ -204,11 +204,88 @@
     return '';
   }
 
-  /* token 一次性，失败后必须换新的，否则重试永远不过 */
-  function resetTurnstile() {
-    if (window.turnstile && typeof window.turnstile.reset === 'function') {
-      try { window.turnstile.reset(); } catch (e) {}
+  /* ---------- 验证条：自绘按钮 + 隐形控件，官方控件不渲染 ---------- */
+
+  var verifyBox = document.getElementById('verifyBox');
+  var verifyText = document.getElementById('verifyText');
+  var verifyTag = document.getElementById('verifyTag');
+  var tsSlot = document.getElementById('tsSlot');
+  var tsWidget = null;
+
+  var VERIFY_TEXT = {
+    idle: ['点击完成人机验证', 'VERIFY'],
+    checking: ['正在校验请求来源…', 'CHECKING'],
+    action: ['请在下方确认你是真人', 'ACTION'],
+    ok: ['已验证，可以提交', 'HUMAN OK'],
+    error: ['验证未通过，点此重试', 'RETRY'],
+    expired: ['验证已超时，点此重试', 'RETRY']
+  };
+
+  function setVerifyState(state) {
+    if (!verifyBox) return;
+    verifyBox.setAttribute('data-state', state);
+    var t = VERIFY_TEXT[state];
+    if (t && verifyText) verifyText.textContent = t[0];
+    if (t && verifyTag) verifyTag.textContent = t[1];
+  }
+
+  function mountTurnstile() {
+    if (!tsSlot || tsWidget !== null || !window.turnstile) return;
+    tsWidget = window.turnstile.render(tsSlot, {
+      sitekey: window.CF_SITEKEY,
+      language: 'zh-cn',
+      theme: 'light',
+      size: 'flexible',
+      appearance: 'interaction-only',
+      execution: 'execute',
+      callback: function () { setVerifyState('ok'); },
+      'error-callback': function () { setVerifyState('error'); },
+      'expired-callback': function () { setVerifyState('expired'); },
+      'timeout-callback': function () { setVerifyState('expired'); },
+      /* 真需要人工点时，把官方控件在条内展开，不能藏着不让人点 */
+      'before-interactive-callback': function () { setVerifyState('action'); },
+      'after-interactive-callback': function () {
+        if (!turnstileToken()) setVerifyState('checking');
+      }
+    });
+  }
+
+  function executeTurnstile() {
+    if (!window.turnstile || tsWidget === null) {
+      setVerifyState('error');
+      return;
     }
+    setVerifyState('checking');
+    try {
+      window.turnstile.execute(tsWidget);
+    } catch (e) {
+      setVerifyState('error');
+    }
+  }
+
+  /* token 一次性，用掉必须换新的；again=true 时自动再跑一次，省得用户重点 */
+  function resetTurnstile(again) {
+    if (window.turnstile && tsWidget !== null) {
+      try { window.turnstile.reset(tsWidget); } catch (e) {}
+    }
+    setVerifyState('idle');
+    if (again) setTimeout(executeTurnstile, 60);
+  }
+
+  if (verifyBox) {
+    verifyBox.addEventListener('click', function () {
+      var st = verifyBox.getAttribute('data-state');
+      if (st === 'checking' || st === 'ok' || st === 'action') return;
+      executeTurnstile();
+    });
+
+    /* 等 api.js 就绪再渲染；被网络挡掉就给出可点的失败态 */
+    var tsTries = 0;
+    (function waitTurnstile() {
+      if (window.turnstile) return mountTurnstile();
+      if (++tsTries > 100) return setVerifyState('error');
+      setTimeout(waitTurnstile, 100);
+    })();
   }
 
   var busy = false;
@@ -223,11 +300,12 @@
       return;
     }
 
-    /* 验证组件可能还没渲染完，没有 token 就别提交，免得白发一次请求 */
+    /* 还没点验证条就没 token，直接拦下，别白发一次请求 */
     var tsToken = turnstileToken();
     if (!tsToken) {
-      noteEl.textContent = '人机验证尚未完成，请稍候再试。';
+      noteEl.textContent = '请先点击上方「点击完成人机验证」。';
       noteEl.classList.add('is-error');
+      if (verifyBox) verifyBox.focus();
       return;
     }
 
@@ -260,7 +338,7 @@
       noteEl.classList.add('is-error');
 
       /* 服务端是先校验 token 再比对密码，所以只要没成功，token 一定已被消费 */
-      resetTurnstile();
+      resetTurnstile(true);
 
       if (data.error === 'invalid_credentials') {
         fail(pwEl, pwErr, '邮箱或密码不正确。');
@@ -269,7 +347,7 @@
     } catch (err) {
       noteEl.textContent = '网络连接失败，请检查网络后重试。';
       noteEl.classList.add('is-error');
-      resetTurnstile();
+      resetTurnstile(true);
     } finally {
       busy = false;
       submitEl.disabled = false;

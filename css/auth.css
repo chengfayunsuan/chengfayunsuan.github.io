@@ -379,13 +379,125 @@
   to { visibility: visible; }
 }
 
-/* ---------- 人机验证 ---------- */
+/* ---------- 人机验证（自绘按钮，官方控件不渲染） ---------- */
 
 .auth__verify {
+  position: relative;
   display: flex;
-  justify-content: center;
-  margin: 4px 0 18px;
-  min-height: 65px;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin: 2px 0 18px;
+  padding: 12px 13px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  font-family: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: background .14s ease, border-color .14s ease, box-shadow .14s ease;
 }
 
-.auth__verify .cf-turnstile { max-width: 100%; }
+.auth__verify:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 3px;
+}
+
+.auth__verify[data-state="idle"]:hover { background: var(--paper-2); }
+
+.auth__verify__mark {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  background: var(--red);
+  transition: background .14s ease;
+}
+
+.auth__verify__text {
+  flex: 1;
+  font-size: 12.5px;
+  line-height: 1.4;
+  letter-spacing: .02em;
+  color: var(--ink);
+  transition: color .14s ease;
+}
+
+.auth__verify__tag {
+  flex: none;
+  font-family: var(--num);
+  font-size: 12px;
+  letter-spacing: .14em;
+  color: var(--gray);
+  transition: color .14s ease, background .14s ease;
+}
+
+/* 隐形控件完全让位，不参与布局 */
+.auth__verify .cf-turnstile {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* 校验中 */
+.auth__verify[data-state="checking"] { cursor: progress; }
+.auth__verify[data-state="checking"] .auth__verify__text { color: var(--gray); }
+.auth__verify[data-state="checking"] .auth__verify__mark {
+  animation: cfMarkPulse 1.1s steps(2, end) infinite;
+}
+
+@keyframes cfMarkPulse {
+  50% { opacity: .15; }
+}
+
+/* 通过：整块翻黑，和站内选中态一致 */
+.auth__verify[data-state="ok"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  cursor: default;
+}
+
+.auth__verify[data-state="ok"] .auth__verify__text { color: var(--paper); }
+
+.auth__verify[data-state="ok"] .auth__verify__tag {
+  color: var(--paper);
+  background: var(--red);
+  padding: 2px 6px;
+}
+
+.auth__verify[data-state="ok"] .auth__verify__mark { background: var(--paper); }
+
+/* 失败 / 超时：红框 + 硬阴影，点一下重来 */
+.auth__verify[data-state="error"],
+.auth__verify[data-state="expired"] {
+  border-color: var(--red);
+  box-shadow: 4px 4px 0 var(--red);
+}
+
+.auth__verify[data-state="error"] .auth__verify__text,
+.auth__verify[data-state="expired"] .auth__verify__text { color: var(--red); }
+
+.auth__verify[data-state="error"] .auth__verify__tag,
+.auth__verify[data-state="expired"] .auth__verify__tag { color: var(--red); }
+
+/* 需要人工确认：把官方控件在条内展开，绝不能藏着不让人点 */
+.auth__verify[data-state="action"] {
+  cursor: default;
+  flex-wrap: wrap;
+}
+
+.auth__verify[data-state="action"] .auth__verify__text { color: var(--ink); }
+.auth__verify[data-state="action"] .auth__verify__tag { color: var(--red); }
+
+.auth__verify[data-state="action"] .cf-turnstile {
+  position: static;
+  flex: 1 0 100%;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  margin-top: 10px;
+}
