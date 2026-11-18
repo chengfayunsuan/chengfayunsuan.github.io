@@ -19,7 +19,8 @@
       if (data && data.ok && data.user) {
         /* 资料先写缓存，落地页可秒显 */
         if (window.CF && CF.cache) CF.cache.set(data.user);
-        location.replace(nextPath());
+        /* 已登录但账户受限，直接送去工单页 */
+        location.replace(data.user.status && data.user.status !== 'active' ? '/support' : nextPath());
         return;
       }
       revealAuth();
@@ -41,13 +42,15 @@
   var pwErr = document.getElementById('pwErr');
   var agreeErr = document.getElementById('agreeErr');
   var userRow = document.getElementById('userRow');
+  var emailRow = document.getElementById('emailRow');
+  var userHint = document.getElementById('userHint');
   var usernameEl = document.getElementById('username');
   var userErr = document.getElementById('userErr');
 
   var MODES = {
     login: {
       title: '登录',
-      desc: '使用注册时填写的邮箱与密码进入账户。',
+      desc: '使用用户名与密码进入账户，忘了用户名就填注册邮箱。',
       submit: '登录',
       note: '登录状态保持 30 天。在公共设备上使用后请退出。',
       pwAuto: 'current-password'
@@ -82,7 +85,12 @@
     submitEl.innerHTML = cfg.submit + ' <span aria-hidden="true">→</span>';
     noteEl.textContent = cfg.note;
     pwEl.setAttribute('autocomplete', cfg.pwAuto);
-    userRow.hidden = mode !== 'signup';
+    /* 登录用用户名；注册才需要邮箱 */
+    userRow.hidden = false;
+    emailRow.hidden = mode !== 'signup';
+    emailEl.required = mode === 'signup';
+    usernameEl.setAttribute('autocomplete', mode === 'signup' ? 'nickname' : 'username');
+    if (userHint) userHint.hidden = mode === 'signup';
 
     tabs.forEach(function (tab) {
       var on = tab.getAttribute('data-mode') === mode;
@@ -123,27 +131,38 @@
     var ok = true;
     var email = emailEl.value.trim();
     var pw = pwEl.value;
+    var account = usernameEl.value.trim();
 
-    if (mode === 'signup') {
-      var name = usernameEl.value.trim();
-      if (!name) {
-        fail(usernameEl, userErr, '请填写用户名。');
-        ok = false;
-      } else if (!NAME_RE.test(name)) {
+    if (!account) {
+      fail(usernameEl, userErr, mode === 'signup' ? '请填写用户名。' : '请填写用户名，或填注册邮箱。');
+      ok = false;
+    } else if (mode === 'signup') {
+      if (!NAME_RE.test(account)) {
         fail(usernameEl, userErr, '用户名限 2 至 20 字，可用中文、字母、数字、下划线与连字符。');
         ok = false;
-      } else if (/^\d+$/.test(name)) {
+      } else if (/^\d+$/.test(account)) {
         fail(usernameEl, userErr, '用户名不能全部为数字。');
         ok = false;
       }
+    } else if (account.indexOf('@') >= 0) {
+      /* 登录时允许直接填注册邮箱 */
+      if (!EMAIL_RE.test(account)) {
+        fail(usernameEl, userErr, '邮箱格式不正确，请检查后重试。');
+        ok = false;
+      }
+    } else if (!NAME_RE.test(account)) {
+      fail(usernameEl, userErr, '用户名限 2 至 20 字，可用中文、字母、数字、下划线与连字符。');
+      ok = false;
     }
 
-    if (!email) {
-      fail(emailEl, emailErr, '请填写邮箱地址。');
-      ok = false;
-    } else if (!EMAIL_RE.test(email)) {
-      fail(emailEl, emailErr, '邮箱格式不正确，请检查后重试。');
-      ok = false;
+    if (mode === 'signup') {
+      if (!email) {
+        fail(emailEl, emailErr, '请填写邮箱地址。');
+        ok = false;
+      } else if (!EMAIL_RE.test(email)) {
+        fail(emailEl, emailErr, '邮箱格式不正确，请检查后重试。');
+        ok = false;
+      }
     }
 
     if (!pw) {
@@ -182,7 +201,7 @@
     invalid_username: '用户名限 2 至 20 字，可用中文、字母、数字、下划线与连字符。',
     username_taken: '该用户名已被使用，请换一个。',
     email_taken: '该邮箱已注册，请直接登录。',
-    invalid_credentials: '邮箱或密码不正确。',
+    invalid_credentials: '用户名或密码不正确。',
     too_many_attempts: '尝试次数过多，请二十分钟后再试。',
     bad_request: '请求格式有误，请刷新页面后重试。',
     unauthorized: '登录状态已失效，请重新登录。',
@@ -322,8 +341,9 @@
     noteEl.classList.remove('is-error');
 
     try {
-      var payload = { email: emailEl.value.trim(), password: pwEl.value, turnstileToken: tsToken };
-      if (mode === 'signup') payload.username = usernameEl.value.trim();
+      var payload = mode === 'signup'
+        ? { username: usernameEl.value.trim(), email: emailEl.value.trim(), password: pwEl.value, turnstileToken: tsToken }
+        : { username: usernameEl.value.trim(), password: pwEl.value, turnstileToken: tsToken };
 
       var res = await fetch(mode === 'signup' ? '/api/auth/register' : '/api/auth/login', {
         method: 'POST',
@@ -335,6 +355,15 @@
       if (res.ok && data.ok) {
         /* 登录/注册返回的资料先写缓存，落地页可立即秒显 */
         if (data.user && window.CF && CF.cache) CF.cache.set(data.user);
+
+        /* 被封禁或冻结的号也能进来，但只能做工单与看消息 */
+        if (data.restricted) {
+          noteEl.classList.remove('is-error');
+          noteEl.textContent = '账户当前受限，正在进入客服页…';
+          location.replace('/support');
+          return;
+        }
+
         noteEl.textContent = (mode === 'signup' ? '账户已创建' : '登录成功') + '，正在进入…';
         location.href = nextPath();
         return;
@@ -347,7 +376,7 @@
       resetTurnstile(true);
 
       if (data.error === 'invalid_credentials') {
-        fail(pwEl, pwErr, '邮箱或密码不正确。');
+        fail(pwEl, pwErr, '用户名或密码不正确。');
         pwEl.focus();
       }
     } catch (err) {

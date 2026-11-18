@@ -204,6 +204,49 @@
     paintMsgBadge();
   }
 
+  /* ---------- 受限账户提示条 ----------
+     封禁与冻结的号能登录，但只能做工单与看消息。
+     登录时缓存的资料里带 status，这里直接读，不再多发请求。 */
+
+  function paintRestrictedBar() {
+    if (document.querySelector('.res-bar')) return;
+
+    var me = null;
+    try { me = (window.CF && CF.cache) ? CF.cache.get() : null; } catch (e) {}
+    if (!me || !me.status || me.status === 'active') return;
+
+    var banned = me.status === 'banned';
+
+    var bar = document.createElement('div');
+    bar.className = 'res-bar';
+
+    var tag = document.createElement('span');
+    tag.className = 'res-bar__k';
+    tag.textContent = banned ? 'BANNED' : 'FROZEN';
+    bar.appendChild(tag);
+
+    var text = document.createElement('span');
+    text.className = 'res-bar__t';
+    text.textContent = banned
+      ? '账户已被封禁：参与问卷、兑换与提现均已停用，只能提交工单与查看消息。'
+      : '账户已被冻结：参与问卷、兑换与提现均已暂停，可提交工单说明情况。';
+    bar.appendChild(text);
+
+    var link = document.createElement('a');
+    link.className = 'res-bar__a';
+    link.href = '/support';
+    link.textContent = '提交工单 →';
+    bar.appendChild(link);
+
+    document.body.insertBefore(bar, document.body.firstChild);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', paintRestrictedBar);
+  } else {
+    paintRestrictedBar();
+  }
+
   /* ---------- 通用弹层 ----------
      全站统一入口，避免每页各写一套。
      用法：CF.modal({

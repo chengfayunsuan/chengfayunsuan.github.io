@@ -189,37 +189,49 @@ async function login(request, env, url) {
   const tsErr = await verifyTurnstile(request, env, body.turnstileToken);
   if (tsErr) return json({ ok: false, error: tsErr }, tsErr === 'verify_unavailable' ? 503 : 400);
 
-  const email = String(body.email || '').trim().toLowerCase();
+  // 登录标识是用户名；老用户习惯填邮箱，也一并认
+  const account = String(body.username || body.email || body.account || '').trim();
   const password = String(body.password || '');
+  if (!account || account.length > 254) return json({ ok: false, error: 'invalid_credentials' }, 401);
 
-  // 同一邮箱 20 分钟内失败达 10 次即拒绝，挡在线爆破
+  const accountKey = account.toLowerCase();
+
+  // 同一账号 20 分钟内失败达 10 次即拒绝，挡在线爆破
   const fails = await env.DB.prepare(
-    "SELECT COUNT(*) AS n FROM login_fails WHERE email = ? AND ts > datetime('now','-20 minutes')"
-  ).bind(email).first();
+    "SELECT COUNT(*) AS n FROM login_fails WHERE lower(email) = ? AND ts > datetime('now','-20 minutes')"
+  ).bind(accountKey).first();
 
   if (fails && fails.n >= 10) {
     return json({ ok: false, error: 'too_many_attempts' }, 429);
   }
 
-  const user = await env.DB.prepare(
-    'SELECT id, email, pw_hash, pw_salt, pw_algo, pw_iter, status, deleted_at FROM users WHERE email = ?'
-  ).bind(email).first();
+  const byEmail = accountKey.indexOf('@') > 0;
+  const user = byEmail
+    ? await env.DB.prepare(
+        `SELECT id, email, username, pw_hash, pw_salt, pw_algo, pw_iter, status, deleted_at
+           FROM users WHERE email = ?`
+      ).bind(accountKey).first()
+    : await env.DB.prepare(
+        `SELECT id, email, username, pw_hash, pw_salt, pw_algo, pw_iter, status, deleted_at
+           FROM users WHERE username = ? COLLATE NOCASE`
+      ).bind(account).first();
 
-  if (!user || user.status !== 'active' || user.deleted_at) {
-    // 该邮箱不存在时也走一次派生，避免通过响应时间判断账号是否存在
+  // 已注销的号彻底不放；密码错与账号不存在走同一条路，别让人试出谁注册过
+  if (!user || user.deleted_at) {
     await pbkdf2Hex(password, '00000000000000000000000000000000');
-    await recordFail(env, email);
+    await recordFail(env, accountKey);
     return json({ ok: false, error: 'invalid_credentials' }, 401);
   }
 
   const hash = await pbkdf2Hex(password, user.pw_salt, user.pw_iter || PBKDF2_ITER);
   if (!timingSafeEqual(hash, user.pw_hash)) {
-    await recordFail(env, email);
+    await recordFail(env, accountKey);
     return json({ ok: false, error: 'invalid_credentials' }, 401);
   }
 
-  // 登录成功：清掉该邮箱的失败计数，并顺手清理两天前的旧记录
-  await env.DB.prepare('DELETE FROM login_fails WHERE email = ?').bind(email).run();
+  /* 密码对了就发会话：封禁与冻结的账号也能进来，
+     但只能在工单、消息这类页面上活动，钱和问卷接口另行拦住 */
+  await env.DB.prepare('DELETE FROM login_fails WHERE lower(email) = ?').bind(accountKey).run();
   await env.DB.prepare("DELETE FROM login_fails WHERE ts < datetime('now','-2 days')").run();
 
   await env.DB.prepare('DELETE FROM sessions WHERE expires_at < ?')
@@ -231,7 +243,7 @@ async function login(request, env, url) {
   const token = await createSession(env, user.id, request);
 
   return json(
-    { ok: true, user: await profileOf(env, user.id) },
+    { ok: true, restricted: user.status !== 'active', user: await profileOf(env, user.id) },
     200,
     { 'Set-Cookie': buildCookie(token, url.protocol === 'https:') }
   );
@@ -272,6 +284,7 @@ function clientInfo(request) {
 async function updateProfile(request, env) {
   const session = await currentSession(request, env);
   if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+  if (!isActive(session)) return locked();
 
   const body = await readJson(request);
   if (!body) return json({ ok: false, error: 'bad_request' }, 400);
@@ -412,9 +425,20 @@ async function currentSession(request, env) {
     return null;
   }
 
-  if (row.status !== 'active' || row.deleted_at) return null;
+  /* 注销的号彻底失效；封禁与冻结仍然保留会话，
+     只是受限操作由各接口用 isActive 单独拦 */
+  if (row.deleted_at) return null;
 
-  return { uid: row.user_id, tokenHash };
+  return { uid: row.user_id, tokenHash, status: row.status };
+}
+
+/* 受限账号（冻结 / 封禁）能登录、能发工单，但不能动钱、不能接新问卷 */
+function isActive(session) {
+  return !!session && session.status === 'active';
+}
+
+function locked() {
+  return json({ ok: false, error: 'account_locked' }, 403);
 }
 
 async function createSession(env, uid, request) {
@@ -990,6 +1014,7 @@ function normalizeCode(raw) {
 async function cdkRedeem(request, env) {
   const session = await currentSession(request, env);
   if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+  if (!isActive(session)) return locked();
 
   const body = await readJson(request);
   const code = normalizeCode(body && body.code);
@@ -1084,6 +1109,7 @@ async function messageRead(request, env) {
 async function surveyJoin(request, env) {
   const session = await currentSession(request, env);
   if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+  if (!isActive(session)) return locked();
 
   const body = await readJson(request);
   const id = Number(body && body.id);

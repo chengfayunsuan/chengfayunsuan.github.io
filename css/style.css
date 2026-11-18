@@ -1333,3 +1333,38 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 .foot__legal a:hover { color: var(--ink); border-bottom-color: var(--red); }
+
+/* ---------- 受限账户提示条（封禁 / 冻结） ---------- */
+
+.res-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  padding: 11px clamp(16px, 4vw, 40px);
+  background: var(--red);
+  color: var(--paper);
+  font-size: 12.5px;
+  line-height: 1.5;
+  letter-spacing: .01em;
+}
+
+.res-bar__k {
+  flex: none;
+  padding: 2px 7px;
+  border: 1px solid var(--paper);
+  font-family: var(--num);
+  font-size: 10.5px;
+  letter-spacing: .14em;
+}
+
+.res-bar__t { flex: 1; min-width: 200px; }
+
+.res-bar__a {
+  flex: none;
+  color: var(--paper);
+  font-weight: 700;
+  border-bottom: 1px solid var(--paper);
+}
+
+.res-bar__a:hover { opacity: .8; }

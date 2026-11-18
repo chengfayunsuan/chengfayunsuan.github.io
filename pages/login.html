@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>账户入口 · 乘法</title>
 <meta name="description" content="登录或注册乘法账户。创建账户后可浏览公开问卷，参与市场调研并累积积分。">
-<link rel="stylesheet" href="/css/style.css?v=10">
+<link rel="stylesheet" href="/css/style.css?v=11">
 <link rel="stylesheet" href="/css/auth.css?v=9">
 </head>
 <body class="auth-page">
@@ -40,20 +40,22 @@
 
       <form class="auth__form" id="authForm" novalidate>
 
-        <div class="field" id="userRow" hidden>
-          <label class="field__l" for="username">用户名</label>
+        <div class="field" id="userRow">
+          <label class="field__l" for="username" id="userLabel">用户名</label>
           <input class="field__i" id="username" name="username" type="text"
-                 autocomplete="nickname" placeholder="2 至 20 字，中文、字母、数字"
-                 spellcheck="false" maxlength="20">
+                 autocomplete="username" placeholder="你的用户名"
+                 spellcheck="false" maxlength="20" required>
           <p class="field__e" id="userErr" hidden></p>
+          <p class="field__h" id="userHint">忘了用户名的话，填注册邮箱也能登。</p>
         </div>
 
-        <div class="field">
+        <div class="field" id="emailRow" hidden>
           <label class="field__l" for="email">邮箱</label>
           <input class="field__i" id="email" name="email" type="email"
                  autocomplete="email" placeholder="name@example.com"
-                 spellcheck="false" required>
+                 spellcheck="false">
           <p class="field__e" id="emailErr" hidden></p>
+          <p class="field__h">用于找回账号和接收通知，不会公开显示。</p>
         </div>
 
         <div class="field">
@@ -112,8 +114,8 @@
 </footer>
 
 <script src="/js/config.js?v=7"></script>
-<script src="/js/core.js?v=10"></script>
-<script src="/js/auth.js?v=7" defer></script>
+<script src="/js/core.js?v=11"></script>
+<script src="/js/auth.js?v=8" defer></script>
 
 <!-- Turnstile：显式渲染 + 隐形模式，官方控件不占版面；本地换测试钥匙 -->
 <script>
