@@ -463,6 +463,12 @@
     return STORE_ERR[code] || ('操作失败：' + (code || '未知错误'));
   }
 
+  /* 弹层文案里的金额：按当前显示币种换算并带单位，避免说「扣 20」而界面是 CFD */
+  function curText(v) {
+    if (!window.CF || !CF.money) return trimNum(String(v));
+    return CF.money(v) + ' ' + CF.currency.code;
+  }
+
   function copyText(text) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(function () { say('已复制到剪贴板'); })
@@ -611,7 +617,7 @@
       CF.modal({
         kicker: 'REDEEM',
         title: '兑换「' + it.title + '」',
-        desc: '将从可用余额扣除 ' + it.price + '，' + desc,
+        desc: '将从可用余额扣除 ' + curText(it.price) + '，' + desc,
         fields: fields,
         submitText: '确认兑换',
         busyText: '兑换中…',
@@ -658,12 +664,24 @@
     /* ---------- 提现 ---------- */
 
     function openWithdraw() {
+      /* 输入框跟着当前显示币种走，提交前再换回 CFB；否则显示 CFD 时输入「10」实际扣的是 10 CFB */
+      var usd = !!(window.CF && CF.currency && CF.currency.mode === 'USD');
+      var unit = window.CF ? CF.currency.code : 'CFB';
+      var MIN_CFB = 10;
+      var minShow = usd ? CF.money(MIN_CFB) : '10';
+
+      function toCfb(v) { return usd ? v * CF.rate : v; }
+
       CF.modal({
         kicker: 'WITHDRAW',
         title: '申请提现',
-        desc: '可提余额 ' + trimNum(String(curFc)) + '，起提 10。提交后金额进入冻结，审核通过七个工作日内到账。',
+        desc: '可提余额 ' + curText(curFc) + '，起提 ' + minShow + ' ' + unit +
+          '。提交后金额进入冻结，审核通过七个工作日内到账。',
         fields: [
-          { name: 'amount', label: '提现金额', type: 'number', value: '10', min: 10, step: '0.01' },
+          {
+            name: 'amount', label: '提现金额（' + unit + '）', type: 'number',
+            value: minShow, min: minShow, step: usd ? '0.0001' : '0.01'
+          },
           {
             name: 'channel', label: '收款渠道', type: 'select', value: 'alipay',
             options: [
@@ -679,13 +697,14 @@
         busyText: '提交中…',
         onSubmit: function (v, api) {
           api.setError('');
-          var amount = Number(v.amount);
-          if (!isFinite(amount) || amount < 10) {
-            api.setError('起提金额为 10，请填写不低于 10 的金额。');
+          var typed = Number(v.amount);
+          var amount = Math.round(toCfb(typed) * 10000) / 10000;
+          if (!isFinite(typed) || amount < MIN_CFB) {
+            api.setError('起提金额为 ' + minShow + ' ' + unit + '，请填写不低于该数值的金额。');
             return;
           }
           if (amount > curFc) {
-            api.setError('超出可用余额，当前最多可提 ' + trimNum(String(curFc)) + '。');
+            api.setError('超出可用余额，当前最多可提 ' + curText(curFc) + '。');
             return;
           }
           if ((v.account || '').length < 4) {
@@ -741,7 +760,7 @@
                 api.close();
                 setWallet(r.body.balance, null);
                 loadStore();
-                say('充值成功，到账 ' + r.body.amount + ' CFB');
+                say('充值成功，到账 ' + curText(r.body.amount));
               } else {
                 api.setBusy(false);
                 api.setError(storeErr(r.body && r.body.error));
@@ -1257,14 +1276,8 @@
       if (text.length < 5) { say('请填写详细描述，至少 5 个字'); return; }
       if (btn) { btn.disabled = true; btn.textContent = '提交中…'; }
 
-      /* uid 由会话决定；封禁用户会话失效时，用本地缓存的身份兜底 */
-      var uid = me && me.uid ? me.uid : 0;
-      if (!uid && window.CF && CF.cache) {
-        var cached = CF.cache.get();
-        if (cached && cached.uid) uid = cached.uid;
-      }
-
-      postJSON('/api/ticket', { type: type ? type.value : 'other', detail: text, uid: uid })
+      /* uid 完全由服务端按会话认定，前端不再传，避免冒名 */
+      postJSON('/api/ticket', { type: type ? type.value : 'other', detail: text })
         .then(function (r) {
           if (r.body && r.body.ok) {
             form.reset();

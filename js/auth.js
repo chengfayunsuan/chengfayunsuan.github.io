@@ -53,14 +53,16 @@
       desc: '使用用户名与密码进入账户，忘了用户名就填注册邮箱。',
       submit: '登录',
       note: '登录状态保持 30 天。在公共设备上使用后请退出。',
-      pwAuto: 'current-password'
+      pwAuto: 'current-password',
+      pwPh: '你的密码'
     },
     signup: {
       title: '注册',
       desc: '创建账户后可浏览全部公开问卷，参与市场调研并累积积分。',
       submit: '创建账户',
       note: '注册不收取任何费用，无需绑定银行卡。',
-      pwAuto: 'new-password'
+      pwAuto: 'new-password',
+      pwPh: '至少 8 位，含字母与数字'
     }
   };
 
@@ -85,12 +87,15 @@
     submitEl.innerHTML = cfg.submit + ' <span aria-hidden="true">→</span>';
     noteEl.textContent = cfg.note;
     pwEl.setAttribute('autocomplete', cfg.pwAuto);
+    if (cfg.pwPh) pwEl.setAttribute('placeholder', cfg.pwPh);
     /* 登录用用户名；注册才需要邮箱 */
     userRow.hidden = false;
     emailRow.hidden = mode !== 'signup';
     emailEl.required = mode === 'signup';
     usernameEl.setAttribute('autocomplete', mode === 'signup' ? 'nickname' : 'username');
     if (userHint) userHint.hidden = mode === 'signup';
+    var pwHint = document.getElementById('pwHint');
+    if (pwHint) pwHint.hidden = mode === 'signup';
 
     tabs.forEach(function (tab) {
       var on = tab.getAttribute('data-mode') === mode;

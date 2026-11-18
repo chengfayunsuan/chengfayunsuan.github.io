@@ -528,18 +528,106 @@
       });
   });
 
-  /* 邮箱与密码：接口尚未接入，提交后给出明确说明 */
+  /* 邮箱：换绑要当前密码确认，换完视为未验证 */
 
-  function notReady(formId, errId) {
-    var form = $(formId);
-    form.addEventListener('submit', function (ev) {
-      ev.preventDefault();
-      showErr(errId, '该功能的后端接口尚未接入，提交不会生效。用户名可以现在改。');
-    });
-  }
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  notReady('formEmail', 'emailErr');
-  notReady('formPw', 'pwErr');
+  $('formEmail').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var email = $('newEmail').value.trim();
+    var pw = $('emailPw').value;
+    $('emailErr').hidden = true;
+
+    if (!EMAIL_RE.test(email)) { showErr('emailErr', '邮箱格式不对，检查一下。'); return; }
+    if (!pw) { showErr('emailErr', '请输入当前密码确认身份。'); return; }
+
+    var btn = $('saveEmail');
+    btn.disabled = true;
+    btn.textContent = '保存中';
+
+    fetch('/api/user/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: pw })
+    })
+      .then(function (res) { return res.json().then(function (d) { return { ok: res.ok, body: d }; }); })
+      .then(function (r) {
+        var code = r.body && r.body.error;
+        if (r.ok && r.body.ok) {
+          var u = r.body.user || {};
+          if (u.email) { current.email = u.email; render(current); }
+          $('emailPw').value = '';
+          closeAll();
+          say('邮箱已更新，新邮箱待验证');
+          return;
+        }
+        if (code === 'wrong_password') showErr('emailErr', '当前密码不正确。');
+        else if (code === 'email_taken') showErr('emailErr', '这个邮箱已被其他账号使用。');
+        else if (code === 'same_email') showErr('emailErr', '这就是当前邮箱，不用改。');
+        else if (code === 'invalid_email') showErr('emailErr', '邮箱格式不对，检查一下。');
+        else if (code === 'account_locked') showErr('emailErr', '账户当前状态不能修改资料，先提交工单。');
+        else if (code === 'unauthorized') showErr('emailErr', '登录状态已失效，请刷新页面。');
+        else showErr('emailErr', '保存失败，请稍后重试。');
+      })
+      .catch(function () { showErr('emailErr', '网络连接失败，未保存。'); })
+      .then(function () {
+        btn.disabled = false;
+        btn.textContent = '保存';
+      });
+  });
+
+  /* 密码：旧密码验证通过才允许改，改完其它设备下线 */
+
+  var PW_ERR = {
+    invalid_password: '新密码需 8 至 72 位。',
+    weak_password: '新密码要同时包含字母和数字。',
+    wrong_password: '当前密码不正确。',
+    same_password: '新密码和当前密码一样，换一个。',
+    password_required: '请输入当前密码。',
+    account_locked: '账户当前状态不能修改密码，先提交工单。',
+    unauthorized: '登录状态已失效，请刷新页面。'
+  };
+
+  $('formPw').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var oldPw = $('oldPw').value;
+    var a = $('newPw').value;
+    var b = $('newPw2').value;
+    $('pwErr').hidden = true;
+
+    if (!oldPw) { showErr('pwErr', '请输入当前密码。'); return; }
+    if (a.length < 8 || a.length > 72) { showErr('pwErr', '新密码需 8 至 72 位。'); return; }
+    if (!/[a-zA-Z]/.test(a) || !/[0-9]/.test(a)) { showErr('pwErr', '新密码要同时包含字母和数字。'); return; }
+    if (a !== b) { showErr('pwErr', '两次输入的新密码不一致。'); return; }
+
+    var btn = $('savePw');
+    btn.disabled = true;
+    btn.textContent = '保存中';
+
+    fetch('/api/user/password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ old: oldPw, new: a })
+    })
+      .then(function (res) { return res.json().then(function (d) { return { ok: res.ok, body: d }; }); })
+      .then(function (r) {
+        if (r.ok && r.body.ok) {
+          $('oldPw').value = '';
+          $('newPw').value = '';
+          $('newPw2').value = '';
+          closeAll();
+          say('密码已更新，其它设备已下线');
+          return;
+        }
+        var code = r.body && r.body.error;
+        showErr('pwErr', PW_ERR[code] || '保存失败，请稍后重试。');
+      })
+      .catch(function () { showErr('pwErr', '网络连接失败，未保存。'); })
+      .then(function () {
+        btn.disabled = false;
+        btn.textContent = '保存';
+      });
+  });
 
   /* ---------- 08 自定义设置 ---------- */
 

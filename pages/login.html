@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>账户入口 · 乘法</title>
 <meta name="description" content="登录或注册乘法账户。创建账户后可浏览公开问卷，参与市场调研并累积积分。">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/css/style.css?v=11">
 <link rel="stylesheet" href="/css/auth.css?v=9">
 </head>
@@ -61,8 +62,9 @@
         <div class="field">
           <label class="field__l" for="password">密码</label>
           <input class="field__i" id="password" name="password" type="password"
-                 autocomplete="current-password" placeholder="至少 8 位，含字母与数字" required>
+                 autocomplete="current-password" placeholder="你的密码" required>
           <p class="field__e" id="pwErr" hidden></p>
+          <p class="field__h" id="pwHint">忘了密码？到「联系客服」提交工单，注明注册邮箱，由站长核对后重置。</p>
         </div>
 
         <div class="field" id="agreeRow">
@@ -114,8 +116,8 @@
 </footer>
 
 <script src="/js/config.js?v=7"></script>
-<script src="/js/core.js?v=12"></script>
-<script src="/js/auth.js?v=8" defer></script>
+<script src="/js/core.js?v=13"></script>
+<script src="/js/auth.js?v=9" defer></script>
 
 <!-- Turnstile：显式渲染 + 隐形模式，官方控件不占版面；本地换测试钥匙 -->
 <script>

@@ -36,6 +36,8 @@ export async function onRequest(context) {
     if (path === 'auth/logout' && request.method === 'POST') return await logout(request, env, url);
     if (path === 'auth/me' && request.method === 'GET') return await me(request, env);
     if (path === 'user/profile' && request.method === 'PATCH') return await updateProfile(request, env);
+    if (path === 'user/email' && request.method === 'POST') return await updateEmail(request, env);
+    if (path === 'user/password' && request.method === 'POST') return await updatePassword(request, env);
     if (path === 'ledger' && request.method === 'GET') return await ledger(request, env, url);
     if (path === 'ladder' && request.method === 'GET') return await ladder(request, env, url);
     if (path === 'ticket' && request.method === 'POST') return await ticketSubmit(request, env);
@@ -322,6 +324,99 @@ async function updateProfile(request, env) {
   return json({ ok: true, user: await profileOf(env, session.uid) });
 }
 
+/* ---------------- 账户安全：改邮箱 / 改密码 ---------------- */
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function randomSaltHex(bytes) {
+  const buf = new Uint8Array(bytes);
+  crypto.getRandomValues(buf);
+  let out = '';
+  for (let i = 0; i < buf.length; i++) out += buf[i].toString(16).padStart(2, '0');
+  return out;
+}
+
+/* 密码规则与注册一致：8-72 位，且字母数字都要有 */
+function pwProblem(pw) {
+  if (pw.length < 8 || pw.length > 72) return 'invalid_password';
+  if (!/[a-zA-Z]/.test(pw) || !/[0-9]/.test(pw)) return 'weak_password';
+  return '';
+}
+
+// 改邮箱：要当前密码确认，换绑后视为未验证
+async function updateEmail(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+  if (!isActive(session)) return locked();
+
+  const body = await readJson(request);
+  if (!body) return json({ ok: false, error: 'bad_request' }, 400);
+
+  const email = String(body.email || '').trim().toLowerCase();
+  const password = String(body.password || '');
+  if (!EMAIL_RE.test(email) || email.length > 120) return json({ ok: false, error: 'invalid_email' }, 400);
+  if (!password) return json({ ok: false, error: 'password_required' }, 400);
+
+  const user = await env.DB.prepare(
+    'SELECT id, email, pw_hash, pw_salt, pw_iter FROM users WHERE id = ? AND deleted_at IS NULL'
+  ).bind(session.uid).first();
+  if (!user) return json({ ok: false, error: 'unauthorized' }, 401);
+
+  const hash = await pbkdf2Hex(password, user.pw_salt, user.pw_iter || PBKDF2_ITER);
+  if (hash !== user.pw_hash) return json({ ok: false, error: 'wrong_password' }, 403);
+
+  if (email === String(user.email || '').toLowerCase()) return json({ ok: false, error: 'same_email' }, 400);
+
+  const taken = await env.DB.prepare(
+    'SELECT id FROM users WHERE email = ? COLLATE NOCASE AND id <> ? AND deleted_at IS NULL'
+  ).bind(email, user.id).first();
+  if (taken) return json({ ok: false, error: 'email_taken' }, 409);
+
+  await env.DB.prepare(
+    "UPDATE users SET email = ?, email_verified = 0, updated_at = datetime('now') WHERE id = ?"
+  ).bind(email, user.id).run();
+
+  return json({ ok: true, user: await profileOf(env, user.id) });
+}
+
+// 改密码：要旧密码，改完把其它设备上的会话全部踢掉
+async function updatePassword(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+  if (!isActive(session)) return locked();
+
+  const body = await readJson(request);
+  if (!body) return json({ ok: false, error: 'bad_request' }, 400);
+
+  const oldPw = String(body.old || '');
+  const newPw = String(body.new || '');
+  if (!oldPw) return json({ ok: false, error: 'password_required' }, 400);
+  const bad = pwProblem(newPw);
+  if (bad) return json({ ok: false, error: bad }, 400);
+  if (oldPw === newPw) return json({ ok: false, error: 'same_password' }, 400);
+
+  const user = await env.DB.prepare(
+    'SELECT id, pw_hash, pw_salt, pw_iter FROM users WHERE id = ? AND deleted_at IS NULL'
+  ).bind(session.uid).first();
+  if (!user) return json({ ok: false, error: 'unauthorized' }, 401);
+
+  const hash = await pbkdf2Hex(oldPw, user.pw_salt, user.pw_iter || PBKDF2_ITER);
+  if (hash !== user.pw_hash) return json({ ok: false, error: 'wrong_password' }, 403);
+
+  const salt = randomSaltHex(16);
+  const next = await pbkdf2Hex(newPw, salt, PBKDF2_ITER);
+
+  await env.DB.batch([
+    env.DB.prepare(
+      "UPDATE users SET pw_hash = ?, pw_salt = ?, pw_iter = ?, updated_at = datetime('now') WHERE id = ?"
+    ).bind(next, salt, PBKDF2_ITER, user.id),
+    /* 保留当前这条会话，其余下线（sessions 的用户列名是 user_id） */
+    env.DB.prepare('DELETE FROM sessions WHERE user_id = ? AND token_hash <> ?').bind(user.id, session.tokenHash)
+  ]);
+
+  return json({ ok: true });
+}
+
 /* ---------------- 收支明细 ---------------- */
 
 const LEDGER_KINDS = [
@@ -524,12 +619,12 @@ async function fxRate(env) {
 
 const TICKET_TYPES = ['account', 'balance', 'survey', 'report', 'other'];
 
-// 取提交人 uid：优先会话；封禁用户会话失效时，接受前端带的 uid（界面不显示输入框）
-async function ticketActor(request, env, body) {
+// 取提交人 uid：只认会话。
+// 封禁/冻结账号现在也能登录并持有会话，所以不再需要「无会话时读前端 uid」的兜底；
+// 那个兜底会让任何人拿别人的 uid 冒名提工单。无会话即匿名工单（uid 0）。
+async function ticketActor(request, env) {
   const session = await currentSession(request, env);
-  if (session && session.uid) return Number(session.uid);
-  const uid = Number(body && body.uid);
-  return uid > 0 ? uid : 0;
+  return session && session.uid ? Number(session.uid) : 0;
 }
 
 // 提交工单
@@ -542,7 +637,7 @@ async function ticketSubmit(request, env) {
   if (TICKET_TYPES.indexOf(type) < 0) return json({ ok: false, error: 'invalid_type' }, 400);
   if (detail.length < 5 || detail.length > 2000) return json({ ok: false, error: 'invalid_detail' }, 400);
 
-  const uid = await ticketActor(request, env, body);
+  const uid = await ticketActor(request, env);
 
   /* 用户名由服务端按 uid 查真实资料，不信任前端自报 */
   let username = '';
@@ -1304,9 +1399,13 @@ async function adminCdkGenerate(request, env) {
     ).bind(code, itemId || null, valueUnits, batch);
   });
 
-  await env.DB.batch(stmts);
+  const results = await env.DB.batch(stmts);
+  /* 重复的码被 INSERT OR IGNORE 跳过，返回实际写入条数，避免「生成了 N 条」但列表没变 */
+  const added = results.reduce(function (n, r) {
+    return n + ((r && r.meta && r.meta.changes) || 0);
+  }, 0);
 
-  return json({ ok: true, batch: batch, count: list.length });
+  return json({ ok: true, batch: batch, count: list.length, added: added });
 }
 
 async function adminCdkVoid(request, env) {

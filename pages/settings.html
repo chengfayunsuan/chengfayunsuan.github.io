@@ -7,13 +7,14 @@
   <title>账户设置 · 乘法</title>
   <meta name="description" content="乘法账户设置。查看身份、余额、安全与偏好。">
   <meta name="theme-color" content="#E0291E">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <meta name="robots" content="noindex">
   <link rel="stylesheet" href="/css/style.css?v=11">
   <link rel="stylesheet" href="/css/home.css?v=10">
   <link rel="stylesheet" href="/css/settings.css?v=13">
-  <link rel="stylesheet" href="/css/relation.css?v=1">
+  <link rel="stylesheet" href="/css/relation.css?v=2">
   <script src="/js/config.js?v=7"></script>
-  <script src="/js/core.js?v=12"></script>
+  <script src="/js/core.js?v=13"></script>
 </head>
 
 <body data-page="settings">
@@ -111,10 +112,10 @@
 
             <div class="card__side">
               <div class="card__money">
-                <p class="card__frz">冻结 <b id="setFrozen">0</b> <i data-cur="code">FC</i></p>
+                <p class="card__frz">冻结 <b id="setFrozen">0</b> <i data-cur="code">CFB</i></p>
                 <p class="card__bal">
                   <span class="card__n" id="setFc">0</span>
-                  <i class="card__cur" data-cur="code">FC</i>
+                  <i class="card__cur" data-cur="code">CFB</i>
                 </p>
               </div>
 
@@ -243,7 +244,7 @@
               <div class="row__l">
                 <span class="row__k">登录密码</span>
                 <span class="row__v">••••••••</span>
-                <span class="row__h">最近一次修改时间暂未记录。建议与其他站点使用不同密码。</span>
+                <span class="row__h">建议与其他站点使用不同密码，怀疑泄露时立即更换。</span>
               </div>
               <button class="btn btn--ghost btn--s" type="button" data-edit="pw">更改</button>
             </div>
@@ -363,7 +364,7 @@
 
         <div class="tk__act">
           <a class="btn btn--red" href="/support">提交工单 <span aria-hidden="true">→</span></a>
-          <span class="tk__h">工单系统尚未开放，暂时可以通过联系客服反馈。</span>
+          <span class="tk__h">回复会同时发到站内消息，可在上方列表查看处理进度。</span>
         </div>
       </div>
     </section>
@@ -507,7 +508,7 @@
     </div>
   </footer>
 
-  <script src="/js/settings.js?v=13" defer></script>
+  <script src="/js/settings.js?v=14" defer></script>
 </body>
 
 </html>

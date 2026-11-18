@@ -373,7 +373,10 @@
         }).then(function (r) {
           btn.disabled = false;
           if (r.body && r.body.ok) {
-            setMsg(msg, '已生成 ' + r.body.count + ' 个，批次 ' + r.body.batch);
+            var added = r.body.added == null ? r.body.count : r.body.added;
+            var dup = r.body.count - added;
+            setMsg(msg, '已生成 ' + added + ' 个，批次 ' + r.body.batch +
+              (dup > 0 ? '（' + dup + ' 个重复已跳过）' : ''));
             $('cdCodes').value = '';
             loadCdk();
             loadItems();

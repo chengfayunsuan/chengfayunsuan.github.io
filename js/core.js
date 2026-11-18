@@ -77,14 +77,14 @@
 
   var ROUTES = {
     '/home': { page: 'home', js: '/js/home.js?v=11' },
-    '/settings': { page: 'settings', js: '/js/settings.js?v=13', css: ['/css/settings.css?v=13', '/css/relation.css?v=1'] },
+    '/settings': { page: 'settings', js: '/js/settings.js?v=14', css: ['/css/settings.css?v=13', '/css/relation.css?v=2'] },
     '/admin': { page: 'admin', js: '/js/admin.js?v=6' },
     '/admin/users': { page: 'admin-users', js: '/js/admin.js?v=6' },
     '/admin/withdrawals': { page: 'admin-withdrawals', js: '/js/admin.js?v=6' },
     '/admin/tickets': { page: 'admin-tickets', js: '/js/admin.js?v=6' },
     '/admin/surveys': { page: 'admin-surveys', js: '/js/admin-surveys.js?v=1' },
-    '/admin/orders': { page: 'admin-orders', js: '/js/admin-shop.js?v=1' },
-    '/admin/items': { page: 'admin-items', js: '/js/admin-shop.js?v=1' },
+    '/admin/orders': { page: 'admin-orders', js: '/js/admin-shop.js?v=2' },
+    '/admin/items': { page: 'admin-items', js: '/js/admin-shop.js?v=2' },
     '/admin/messages': { page: 'admin-messages', js: '/js/admin-msg.js?v=4' }
   };
 
@@ -104,6 +104,17 @@
   }
 
   var current = (document.body || document.documentElement).getAttribute('data-page') || '';
+
+  /* 后台页面的左上角乘法回账户首页。
+     其它页面由各页脚本按角色把 brand 指到 /admin，后台里再指后台就成了死循环。 */
+  function fixBrand() {
+    var pg = (document.body || document.documentElement).getAttribute('data-page') || '';
+    if (pg.indexOf('admin') !== 0) return;
+    var b = document.querySelector('.brand');
+    if (b) b.setAttribute('href', '/home');
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fixBrand);
+  else fixBrand();
 
   function ensureCss(list) {
     (list || []).forEach(function (href) {
@@ -172,7 +183,11 @@
     var to = routeOf(href);
     if (!to) return;
     if (normalize(href) === normalize(location.pathname)) return;
-    if (groupOf(current) !== groupOf(to.page)) return;
+
+    /* 每次点击实时读 data-page：core.js 在 head 同步执行，此时 body 还没解析出来，
+       常量 current 初值是空的，会导致第一次组内点击走整页刷新。 */
+    var nowPage = (document.body || document.documentElement).getAttribute('data-page') || current;
+    if (groupOf(nowPage) !== groupOf(to.page)) return;
 
     ev.preventDefault();
     swap(to, normalize(href), true);
