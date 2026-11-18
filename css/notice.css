@@ -1,0 +1,131 @@
+/* ============================================================
+   乘法 · 公告页与首页公告区
+   ============================================================ */
+
+.nt-list {
+  margin-top: 28px;
+}
+
+.nt {
+  position: relative;
+  padding: 20px 22px 20px 24px;
+  margin-bottom: 18px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+
+.nt::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: -2px;
+  bottom: -2px;
+  width: 6px;
+  background: var(--paper-2);
+}
+
+.nt[data-lv="warn"]::before { background: var(--red); }
+.nt[data-lv="critical"]::before { background: var(--ink); }
+
+.nt.is-pinned { box-shadow: 5px 5px 0 rgba(224, 41, 30, .16); }
+
+.nt__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.nt__pin {
+  flex: none;
+  padding: 2px 7px;
+  background: var(--red);
+  color: var(--paper);
+  font-family: var(--num);
+  font-size: 10.5px;
+  letter-spacing: .12em;
+  line-height: 1.5;
+}
+
+.nt__t {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+
+.nt__at {
+  margin-left: auto;
+  font-family: var(--num);
+  font-size: 11.5px;
+  letter-spacing: .08em;
+  color: var(--gray);
+}
+
+.nt__b {
+  margin: 12px 0 0;
+  font-size: 13.5px;
+  line-height: 1.9;
+  color: #3A362D;
+  white-space: pre-line;
+}
+
+.nt-empty {
+  margin: 30px 0 0;
+  padding: 40px 0;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--gray);
+}
+
+/* ---------- 首页公告条 ---------- */
+
+.hm-notice {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hm-notice__i {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: #3A362D;
+}
+
+.hm-notice__i::before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  margin-top: 8px;
+  background: var(--paper-2);
+}
+
+.hm-notice__i[data-lv="warn"]::before,
+.hm-notice__i[data-lv="critical"]::before { background: var(--red); }
+
+.hm-notice__t {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.hm-notice__more {
+  display: inline-block;
+  margin-top: 2px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--ink);
+  border-bottom: 1px solid var(--red);
+}
+
+.hm-notice__more:hover { color: var(--red); }
+
+@media (max-width: 560px) {
+  .nt { padding: 16px 16px 16px 20px; }
+  .nt__t { font-size: 15px; }
+  .nt__at { margin-left: 0; width: 100%; }
+}

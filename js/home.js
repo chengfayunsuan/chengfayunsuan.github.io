@@ -261,8 +261,57 @@
 
   /* ---------- 启动：缓存秒显，后台校验 ---------- */
 
+
+  /* ---------- 公告 ---------- */
+
+  function loadNotices() {
+    var box = document.getElementById('homeNotice');
+    if (!box) return;
+
+    fetch('/api/announcements', { headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.ok) { box.textContent = ''; return; }
+
+        var items = d.items || [];
+        box.textContent = '';
+
+        if (!items.length) {
+          var p0 = document.createElement('p');
+          p0.className = 'hm-notice__i';
+          p0.textContent = '暂时没有公告。';
+          box.appendChild(p0);
+          return;
+        }
+
+        items.slice(0, 2).forEach(function (n) {
+          var p = document.createElement('p');
+          p.className = 'hm-notice__i';
+          p.setAttribute('data-lv', n.level || 'info');
+
+          if (n.title) {
+            var t = document.createElement('span');
+            t.className = 'hm-notice__t';
+            t.textContent = n.title + '：';
+            p.appendChild(t);
+          }
+
+          p.appendChild(document.createTextNode(n.body));
+          box.appendChild(p);
+        });
+
+        var more = document.createElement('a');
+        more.className = 'hm-notice__more';
+        more.href = '/notices';
+        more.textContent = items.length > 2 ? '查看全部 ' + items.length + ' 条公告 →' : '查看公告 →';
+        box.appendChild(more);
+      })
+      .catch(function () { box.textContent = ''; });
+  }
+
   function show(user) {
     render(user);
+    loadNotices();
     loading.hidden = true;
     app.hidden = false;
   }

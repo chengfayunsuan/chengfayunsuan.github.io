@@ -692,3 +692,36 @@ body[data-accent="blue"] {
   .adm-tr--cd,
   .adm-tr--msg { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ---------- 行政公告 ---------- */
+
+.adm-tr--nt { grid-template-columns: 108px minmax(0, 2fr) 70px 132px 178px; }
+
+.adm-tag--pin {
+  margin-left: 5px;
+  color: var(--red);
+  border-color: var(--red);
+}
+
+.adm-lv {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid var(--paper-2);
+  font-size: 10.5px;
+  color: var(--gray);
+}
+
+.adm-lv[data-lv="warn"] {
+  color: var(--red);
+  border-color: var(--red);
+}
+
+.adm-lv[data-lv="critical"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+@media (max-width: 900px) {
+  .adm-tr--nt { grid-template-columns: minmax(0, 1fr); }
+}

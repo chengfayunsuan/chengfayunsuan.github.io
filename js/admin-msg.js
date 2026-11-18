@@ -1,5 +1,7 @@
 /* ============================================================
-   乘法 · 后台站内消息
+   乘法 · 后台公告与消息
+   公告是公开文本（谁都能看），消息是提醒（有已读状态）。
+   全员提醒在后台按批次合并成一条「提醒所有人」。
    ============================================================ */
 (function () {
   'use strict';
@@ -49,59 +51,283 @@
     return el;
   }
 
+  var LEVEL = { info: '普通', warn: '提醒', critical: '重要' };
   var KIND = { system: '系统', admin: '管理员', reward: '奖励' };
 
-  function load() {
+  /* ============================================================
+     公告
+     ============================================================ */
+
+  var notices = [];
+
+  function setMsg(el, text, bad) {
+    if (!el) return;
+    el.textContent = text || '';
+    el.classList.toggle('is-error', !!bad);
+  }
+
+  function noticeRow(n) {
+    var row = document.createElement('div');
+    row.className = 'adm-tr adm-tr--nt';
+
+    var st = document.createElement('span');
+    st.className = 'adm-cell';
+    var tag = document.createElement('span');
+    tag.className = 'adm-tag';
+    tag.setAttribute('data-s', n.status === 'published' ? 'paid' : 'void');
+    tag.textContent = n.status === 'published' ? '已发布' : '草稿';
+    st.appendChild(tag);
+    if (n.pinned) {
+      var pin = document.createElement('span');
+      pin.className = 'adm-tag adm-tag--pin';
+      pin.textContent = '置顶';
+      st.appendChild(pin);
+    }
+    row.appendChild(st);
+
+    var main = document.createElement('span');
+    main.className = 'adm-cell';
+    var b = document.createElement('b');
+    b.textContent = n.title || (n.body.length > 24 ? n.body.slice(0, 24) + '…' : n.body);
+    main.appendChild(b);
+    var d = document.createElement('span');
+    d.className = 'adm-cell--detail';
+    d.textContent = n.body;
+    main.appendChild(d);
+    row.appendChild(main);
+
+    var lv = document.createElement('span');
+    lv.className = 'adm-cell';
+    var lvTag = document.createElement('span');
+    lvTag.className = 'adm-lv';
+    lvTag.setAttribute('data-lv', n.level);
+    lvTag.textContent = LEVEL[n.level] || n.level;
+    lv.appendChild(lvTag);
+    row.appendChild(lv);
+
+    row.appendChild(cell(fmtTime(n.at)));
+
+    var ops = document.createElement('span');
+    ops.className = 'adm-sv__ops';
+
+    var edit = document.createElement('button');
+    edit.type = 'button';
+    edit.className = 'adm-sv__op';
+    edit.textContent = '编辑';
+    edit.addEventListener('click', function () {
+      fillNoticeForm(n);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    var toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'adm-sv__op';
+    toggle.textContent = n.status === 'published' ? '转为草稿' : '发布';
+    toggle.addEventListener('click', function () {
+      postJSON('/api/admin/announcements/save', {
+        id: n.id,
+        title: n.title,
+        body: n.body,
+        level: n.level,
+        pinned: n.pinned,
+        status: n.status === 'published' ? 'draft' : 'published'
+      }).then(function (r) {
+        if (r.body && r.body.ok) {
+          say(n.status === 'published' ? '已转为草稿，前台不再显示' : '已发布');
+          loadNotices();
+        } else {
+          say('操作失败');
+        }
+      });
+    });
+
+    var del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'adm-sv__op';
+    del.textContent = '删除';
+    del.addEventListener('click', function () {
+      if (!window.confirm('删除后无法恢复，确定？')) return;
+      postJSON('/api/admin/announcements/delete', { id: n.id }).then(function (r) {
+        if (r.body && r.body.ok) { say('已删除'); loadNotices(); }
+        else say('删除失败');
+      });
+    });
+
+    ops.appendChild(edit);
+    ops.appendChild(toggle);
+    ops.appendChild(del);
+    row.appendChild(ops);
+
+    return row;
+  }
+
+  function fillNoticeForm(n) {
+    $('ntId').value = n ? n.id : '';
+    $('ntTitle').value = n ? n.title : '';
+    $('ntBody').value = n ? n.body : '';
+    $('ntLevel').value = n ? n.level : 'info';
+    $('ntPinned').checked = n ? n.pinned : false;
+    $('ntFormTitle').textContent = n ? '编辑公告 #' + n.id : '发布公告';
+    setMsg($('ntMsg'), '');
+  }
+
+  function paintNotices() {
+    var list = $('ntList');
+    if (!list) return;
+    list.textContent = '';
+    notices.forEach(function (n) { list.appendChild(noticeRow(n)); });
+
+    var empty = $('ntEmpty');
+    if (empty) empty.hidden = notices.length > 0;
+
+    var cnt = $('ntCount');
+    if (cnt) {
+      cnt.textContent = String(notices.filter(function (n) { return n.status === 'published'; }).length);
+    }
+  }
+
+  function loadNotices() {
+    getJSON('/api/admin/announcements').then(function (r) {
+      if (r.body && r.body.ok) {
+        notices = r.body.items || [];
+        paintNotices();
+      } else {
+        say('公告载入失败');
+      }
+    });
+  }
+
+  function submitNotice(status) {
+    var body = $('ntBody').value.trim();
+    var msg = $('ntMsg');
+    setMsg(msg, '');
+
+    if (!body) {
+      setMsg(msg, '正文不能为空', true);
+      return;
+    }
+
+    var payload = {
+      id: $('ntId').value || 0,
+      title: $('ntTitle').value.trim(),
+      body: body,
+      level: $('ntLevel').value,
+      pinned: $('ntPinned').checked,
+      status: status
+    };
+
+    var btns = [$('ntPublish'), $('ntDraft')];
+    btns.forEach(function (b) { if (b) b.disabled = true; });
+
+    postJSON('/api/admin/announcements/save', payload).then(function (r) {
+      btns.forEach(function (b) { if (b) b.disabled = false; });
+      if (r.body && r.body.ok) {
+        fillNoticeForm(null);
+        setMsg(msg, status === 'published' ? '已发布，前台立即可见' : '已存为草稿');
+        loadNotices();
+      } else {
+        var e = (r.body && r.body.error) || '网络错误';
+        setMsg(msg, e === 'empty_body' ? '正文不能为空' : ('保存失败：' + e), true);
+      }
+    });
+  }
+
+  /* ============================================================
+     提醒（站内消息）
+     ============================================================ */
+
+  function loadMessages() {
     getJSON('/api/admin/messages').then(function (r) {
       if (!r.body || !r.body.ok) { say('消息载入失败'); return; }
-      var rows = r.body.items || [];
+
+      var items = r.body.items || [];
       var list = $('msList');
       list.textContent = '';
 
-      rows.forEach(function (m) {
+      /* 全员提醒按批次合并，一条批次只显示一行「提醒所有人」 */
+      var groups = [];
+      var byBatch = {};
+
+      items.forEach(function (m) {
+        if (m.batch) {
+          if (!byBatch[m.batch]) {
+            byBatch[m.batch] = {
+              mode: 'all', title: m.title, body: m.body, kind: m.kind,
+              at: m.at, total: 0, read: 0
+            };
+            groups.push(byBatch[m.batch]);
+          }
+          byBatch[m.batch].total++;
+          if (m.read) byBatch[m.batch].read++;
+        } else {
+          groups.push({
+            mode: 'single', username: m.username, title: m.title,
+            body: m.body, kind: m.kind, at: m.at, read: m.read
+          });
+        }
+      });
+
+      groups.forEach(function (g) {
         var row = document.createElement('div');
         row.className = 'adm-tr adm-tr--msg';
 
-        row.appendChild(cell(m.username));
+        var who = document.createElement('span');
+        who.className = 'adm-cell';
+        var wn = document.createElement('b');
+        wn.textContent = g.mode === 'all' ? '所有人' : g.username;
+        who.appendChild(wn);
+        if (g.mode === 'all') {
+          var wd = document.createElement('span');
+          wd.className = 'adm-cell--detail';
+          wd.textContent = '共 ' + g.total + ' 人 · 已读 ' + g.read;
+          who.appendChild(wd);
+        }
+        row.appendChild(who);
 
         var main = document.createElement('span');
         main.className = 'adm-cell';
         var b = document.createElement('b');
-        b.textContent = m.title;
+        b.textContent = g.title;
         main.appendChild(b);
-        if (m.body) {
+        if (g.body) {
           var d = document.createElement('span');
           d.className = 'adm-cell--detail';
-          d.textContent = m.body;
+          d.textContent = g.body;
           main.appendChild(d);
         }
         row.appendChild(main);
 
-        row.appendChild(cell(KIND[m.kind] || m.kind));
+        row.appendChild(cell(KIND[g.kind] || g.kind));
 
         var st = document.createElement('span');
         st.className = 'adm-cell';
         var tag = document.createElement('span');
         tag.className = 'adm-tag';
-        tag.setAttribute('data-s', m.read ? 'paid' : 'pending');
-        tag.textContent = m.read ? '已读' : '未读';
+        if (g.mode === 'all') {
+          tag.setAttribute('data-s', g.read === g.total ? 'paid' : 'pending');
+          tag.textContent = g.read === g.total ? '全部已读' : '待读';
+        } else {
+          tag.setAttribute('data-s', g.read ? 'paid' : 'pending');
+          tag.textContent = g.read ? '已读' : '未读';
+        }
         st.appendChild(tag);
         row.appendChild(st);
 
-        row.appendChild(cell(fmtTime(m.at)));
-
+        row.appendChild(cell(fmtTime(g.at)));
         list.appendChild(row);
       });
 
       var empty = $('msEmpty');
-      if (empty) empty.hidden = rows.length > 0;
+      if (empty) empty.hidden = groups.length > 0;
 
-      if ($('msgCount')) $('msgCount').textContent = String(rows.length);
+      if ($('msgCount')) $('msgCount').textContent = String(items.length);
     });
   }
 
-  var form = $('msForm');
-  if (form) {
+  function sendMessage() {
+    var form = $('msForm');
+    if (!form) return;
+
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
       var msg = $('msMsg');
@@ -119,7 +345,7 @@
         return;
       }
       if (!all && !uid) {
-        msg.textContent = '填 UID，或者勾选发给全部';
+        msg.textContent = '填 UID，或者勾选「提醒所有人」';
         msg.classList.add('is-error');
         return;
       }
@@ -136,12 +362,14 @@
       }).then(function (r) {
         btn.disabled = false;
         if (r.body && r.body.ok) {
-          msg.textContent = '已发送 ' + r.body.count + ' 条';
+          msg.textContent = r.body.mode === 'all'
+            ? '已提醒所有人（' + r.body.count + ' 个账户）'
+            : '已发送';
           $('msTitle').value = '';
           $('msBody').value = '';
           $('msUid').value = '';
           $('msAll').checked = false;
-          load();
+          loadMessages();
         } else {
           var e = (r.body && r.body.error) || '网络错误';
           msg.textContent = e === 'user_not_found' ? '这个 UID 不存在' : ('发送失败：' + e);
@@ -150,6 +378,10 @@
       });
     });
   }
+
+  /* ============================================================
+     启动
+     ============================================================ */
 
   getJSON('/api/auth/me').then(function (r) {
     if (r.status !== 200 || !r.body || !r.body.ok) {
@@ -164,6 +396,20 @@
     if (window.CF && CF.cache) CF.cache.set(me);
     if ($('navName')) $('navName').textContent = me.username || '我';
     if ($('navBal') && me.fc && window.CF) CF.amount($('navBal'), me.fc);
-    load();
+
+    var ntForm = $('ntForm');
+    if (ntForm) {
+      ntForm.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        submitNotice('published');
+      });
+    }
+    if ($('ntDraft')) $('ntDraft').addEventListener('click', function () { submitNotice('draft'); });
+    if ($('ntReset')) $('ntReset').addEventListener('click', function () { fillNoticeForm(null); });
+
+    sendMessage();
+    fillNoticeForm(null);
+    loadNotices();
+    loadMessages();
   });
 })();

@@ -50,6 +50,7 @@ export async function onRequest(context) {
     if (path === 'withdraw' && request.method === 'POST') return await withdrawApply(request, env);
     if (path === 'cdk/redeem' && request.method === 'POST') return await cdkRedeem(request, env);
     if (path === 'messages' && request.method === 'GET') return await messageList(request, env);
+    if (path === 'announcements' && request.method === 'GET') return await noticeList(env);
     if (path === 'messages/read' && request.method === 'POST') return await messageRead(request, env);
     if (path.indexOf('admin/') === 0) return await adminApi(request, env, url, path);
     return json({ ok: false, error: 'not_found' }, 404);
@@ -1400,13 +1401,17 @@ async function adminMessageSend(request, env) {
     const list = users.results || [];
     if (!list.length) return json({ ok: true, count: 0 });
 
+    /* 同一个批次号，后台聚合成一条「提醒所有人」 */
+    const batch = 'A' + Date.now().toString(36).toUpperCase();
+
     const stmts = list.map(function (u) {
       return env.DB.prepare(
-        'INSERT INTO messages (uid, kind, title, body) VALUES (?, ?, ?, ?)'
-      ).bind(u.id, kind, title, text);
+        'INSERT INTO messages (uid, kind, title, body, batch) VALUES (?, ?, ?, ?, ?)'
+      ).bind(u.id, kind, title, text, batch);
     });
     await env.DB.batch(stmts);
-    return json({ ok: true, count: list.length });
+
+    return json({ ok: true, count: list.length, mode: 'all', batch: batch });
   }
 
   const uid = Number(body.uid);
@@ -1419,13 +1424,13 @@ async function adminMessageSend(request, env) {
     'INSERT INTO messages (uid, kind, title, body) VALUES (?, ?, ?, ?)'
   ).bind(uid, kind, title, text).run();
 
-  return json({ ok: true, count: 1 });
+  return json({ ok: true, count: 1, mode: 'single' });
 }
 
 async function adminMessageList(env, url) {
   const rows = await env.DB.prepare(
     `SELECT m.*, u.username FROM messages m LEFT JOIN users u ON u.id = m.uid
-      ORDER BY m.id DESC LIMIT 100`
+      ORDER BY m.id DESC LIMIT 200`
   ).all();
 
   return json({
@@ -1438,11 +1443,98 @@ async function adminMessageList(env, url) {
         kind: r.kind,
         title: r.title,
         body: r.body,
+        batch: r.batch || '',
         read: !!r.read_at,
         at: toIso(r.created_at)
       };
     })
   });
+}
+
+/* ---------------- 行政公告 ---------------- */
+
+const NOTICE_LEVELS = ['info', 'warn', 'critical'];
+
+function noticeRow(r) {
+  return {
+    id: r.id,
+    title: r.title || '',
+    body: r.body || '',
+    level: r.level || 'info',
+    status: r.status || 'draft',
+    pinned: r.pinned === 1,
+    at: toIso(r.published_at || r.created_at),
+    updatedAt: toIso(r.updated_at)
+  };
+}
+
+/* 公开：任何人（含未登录访客）都能看已发布的公告 */
+async function noticeList(env) {
+  const rows = await env.DB.prepare(
+    `SELECT * FROM announcements WHERE status = 'published'
+      ORDER BY pinned DESC, published_at DESC, id DESC LIMIT 30`
+  ).all();
+
+  return json({ ok: true, items: (rows.results || []).map(noticeRow) });
+}
+
+/* 后台：草稿和已发布全都要 */
+async function adminNoticeList(env) {
+  const rows = await env.DB.prepare(
+    'SELECT * FROM announcements ORDER BY pinned DESC, id DESC LIMIT 100'
+  ).all();
+
+  return json({ ok: true, items: (rows.results || []).map(noticeRow) });
+}
+
+async function adminNoticeSave(request, env) {
+  const body = await readJson(request);
+  if (!body) return json({ ok: false, error: 'bad_request' }, 400);
+
+  const text = String(body.body || '').trim();
+  if (!text) return json({ ok: false, error: 'empty_body' }, 400);
+  if (text.length > 2000) return json({ ok: false, error: 'too_long' }, 400);
+
+  const title = String(body.title || '').trim().slice(0, 60);
+  const level = NOTICE_LEVELS.indexOf(body.level) >= 0 ? body.level : 'info';
+  const status = body.status === 'published' ? 'published' : 'draft';
+  const pinned = body.pinned ? 1 : 0;
+
+  if (body.id) {
+    const id = Number(body.id);
+    const old = await env.DB.prepare('SELECT published_at FROM announcements WHERE id = ?').bind(id).first();
+    if (!old) return json({ ok: false, error: 'not_found' }, 404);
+
+    const publishedAt = status === 'published'
+      ? (old.published_at || new Date().toISOString())
+      : old.published_at;
+
+    await env.DB.prepare(
+      `UPDATE announcements SET title = ?, body = ?, level = ?, status = ?, pinned = ?,
+        published_at = ?, updated_at = datetime('now') WHERE id = ?`
+    ).bind(title, text, level, status, pinned, publishedAt, id).run();
+
+    return json({ ok: true, id: id });
+  }
+
+  const res = await env.DB.prepare(
+    `INSERT INTO announcements (title, body, level, status, pinned, published_at)
+     VALUES (?, ?, ?, ?, ?, ?)`
+  ).bind(
+    title, text, level, status, pinned,
+    status === 'published' ? new Date().toISOString() : null
+  ).run();
+
+  return json({ ok: true, id: res.meta && res.meta.last_row_id });
+}
+
+async function adminNoticeDelete(request, env) {
+  const body = await readJson(request);
+  const id = Number(body && body.id);
+  if (!id) return json({ ok: false, error: 'bad_request' }, 400);
+
+  await env.DB.prepare('DELETE FROM announcements WHERE id = ?').bind(id).run();
+  return json({ ok: true });
 }
 
 async function adminApi(request, env, url, path) {
@@ -1472,6 +1564,9 @@ async function adminApi(request, env, url, path) {
   if (path === 'admin/orders/decide' && request.method === 'POST') return await adminOrderDecide(request, env);
   if (path === 'admin/messages/send' && request.method === 'POST') return await adminMessageSend(request, env);
   if (path === 'admin/messages' && request.method === 'GET') return await adminMessageList(env, url);
+  if (path === 'admin/announcements' && request.method === 'GET') return await adminNoticeList(env);
+  if (path === 'admin/announcements/save' && request.method === 'POST') return await adminNoticeSave(request, env);
+  if (path === 'admin/announcements/delete' && request.method === 'POST') return await adminNoticeDelete(request, env);
   return json({ ok: false, error: 'not_found' }, 404);
 }
 

@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="/css/style.css?v=10">
 <link rel="stylesheet" href="/css/home.css?v=10">
 <link rel="stylesheet" href="/css/page.css?v=5">
-<link rel="stylesheet" href="/css/admin.css?v=8">
+<link rel="stylesheet" href="/css/admin.css?v=9">
 <script src="/js/config.js?v=7"></script>
 <script src="/js/core.js?v=9"></script>
 </head>
@@ -59,7 +59,7 @@
       <span class="dock__n">07</span><span class="dock__t">商品兑换</span>
     </a>
     <a class="dock__i is-on" href="/admin/messages" aria-current="page">
-      <span class="dock__n">08</span><span class="dock__t">站内消息</span>
+      <span class="dock__n">08</span><span class="dock__t">公告</span>
     </a>
   </div>
 </nav>
@@ -70,21 +70,21 @@
       <div class="face__in">
         <div class="face__id">
           <div class="face__meta">
-            <span class="face__uid">ADMIN / 消息</span>
-            <span class="adm-badge">MESSAGES</span>
+            <span class="face__uid">ADMIN / 公告与消息</span>
+            <span class="adm-badge">NOTICE</span>
           </div>
-          <h1 class="face__name">站内消息</h1>
-          <p class="face__sub">定向通知 · 全员公告</p>
+          <h1 class="face__name">公告与消息</h1>
+          <p class="face__sub">行政公告 · 定向提醒</p>
           <div class="face__foot">
-            <p class="adm-lead">全员公告会为每个正常账户各写一条，用户各自的已读状态互不影响。兑换与提现的系统消息由接口自动发出。</p>
+            <p class="adm-lead">公告是公开文本，发布后出现在首页与公告页，谁都能看；站内消息是提醒，勾选「提醒所有人」就是一次全站提醒，后台只记一条。</p>
           </div>
         </div>
 
         <div class="face__bal">
-          <div class="face__bal-k">SENT / 已发消息</div>
-          <div class="face__bal-n" id="msgCount">0</div>
-          <div class="face__bal-f">条 · 最近 100 条</div>
-          <div class="face__acts"><a class="btn btn--ghost" href="/messages">我的收件箱</a></div>
+          <div class="face__bal-k">NOTICES / 已发公告</div>
+          <div class="face__bal-n" id="ntCount">0</div>
+          <div class="face__bal-f">条 · <span id="msgCount">0</span> 条站内消息</div>
+          <div class="face__acts"><a class="btn btn--ghost" href="/notices">查看公告页</a></div>
         </div>
       </div>
     </div>
@@ -94,8 +94,62 @@
     <div class="wrap">
       <div class="adm-panel">
         <div class="adm-h">
-          <span class="adm-h__t">发送消息</span>
-          <span class="adm-h__d">发给单个用户填 UID，全员公告勾选右侧</span>
+          <span class="adm-h__t" id="ntFormTitle">发布公告</span>
+          <span class="adm-h__d">发布后立刻出现在首页公告区与 /notices</span>
+        </div>
+
+        <form class="svf" id="ntForm" novalidate>
+          <input type="hidden" id="ntId" value="">
+
+          <label class="svf__f svf__f--wide">
+            <span class="svf__l">标题</span>
+            <input class="svf__i" id="ntTitle" type="text" maxlength="60" placeholder="可留空，只发正文也行">
+          </label>
+
+          <label class="svf__f">
+            <span class="svf__l">级别</span>
+            <select class="svf__i" id="ntLevel">
+              <option value="info">普通</option>
+              <option value="warn">提醒</option>
+              <option value="critical">重要</option>
+            </select>
+          </label>
+
+          <label class="svf__f adm-check">
+            <input type="checkbox" id="ntPinned">
+            <span>置顶</span>
+          </label>
+
+          <label class="svf__f svf__f--full">
+            <span class="svf__l">正文 <em>*</em></span>
+            <textarea class="svf__i svf__i--area" id="ntBody" rows="4" maxlength="2000" placeholder="写清楚发生了什么、影响什么、需要用户做什么"></textarea>
+          </label>
+
+          <div class="svf__acts">
+            <button class="btn btn--red" type="submit" id="ntPublish">发布</button>
+            <button class="btn btn--ghost" type="button" id="ntDraft">存草稿</button>
+            <button class="btn btn--ghost" type="button" id="ntReset">清空</button>
+            <span class="svf__msg" id="ntMsg" role="status" aria-live="polite"></span>
+          </div>
+        </form>
+
+        <div class="adm-list">
+          <div class="adm-tr adm-tr--nt adm-head">
+            <span>状态</span><span>标题 / 正文</span><span>级别</span><span>时间</span><span>操作</span>
+          </div>
+          <div id="ntList"></div>
+        </div>
+        <p class="adm-empty" id="ntEmpty" hidden>还没有公告，用上面的表单发第一条。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="adm-sec">
+    <div class="wrap">
+      <div class="adm-panel">
+        <div class="adm-h">
+          <span class="adm-h__t">发送提醒</span>
+          <span class="adm-h__d">发给单个用户填 UID；勾选右侧就是提醒所有人</span>
         </div>
 
         <form class="svf" id="msForm" novalidate>
@@ -125,7 +179,7 @@
 
           <label class="svf__f svf__f--full adm-check">
             <input type="checkbox" id="msAll">
-            <span>发给全部正常账户（忽略上面的 UID）</span>
+            <span>提醒所有人（忽略上面的 UID）</span>
           </label>
 
           <div class="svf__acts">
@@ -141,8 +195,8 @@
     <div class="wrap">
       <div class="adm-panel">
         <div class="adm-h">
-          <span class="adm-h__t">最近发送</span>
-          <span class="adm-h__d">含系统自动发出的兑换与提现通知</span>
+          <span class="adm-h__t">最近提醒</span>
+          <span class="adm-h__d">全员提醒合并为一条，含系统自动发出的兑换与提现通知</span>
         </div>
 
         <div class="adm-list">
@@ -168,6 +222,6 @@
   </div>
 </footer>
 
-<script src="/js/admin-msg.js?v=1" defer></script>
+<script src="/js/admin-msg.js?v=3" defer></script>
 </body>
 </html>

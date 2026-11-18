@@ -22,3 +22,4 @@
 /admin/messages /pages/admin-messages 200
 /privacy /pages/privacy 200
 /terms   /pages/terms   200
+/notices /pages/notices 200
