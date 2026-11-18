@@ -329,14 +329,23 @@
     var foot = document.createElement('div');
     foot.className = 'svc__foot';
 
-    var go = document.createElement(s.entry ? 'a' : 'span');
+    /* 封禁 / 冻结的号不能接问卷，入口直接置灰，替它把话说清楚 */
+    var restricted = false;
+    try {
+      var meNow = (window.CF && CF.cache) ? CF.cache.get() : null;
+      restricted = !!(meNow && meNow.status && meNow.status !== 'active');
+    } catch (e) {}
+
+    var usable = !!s.entry && !restricted;
+
+    var go = document.createElement(usable ? 'a' : 'span');
     go.className = 'svc__go';
 
     var gt = document.createElement('span');
-    gt.textContent = s.entry ? '进入问卷' : '暂未开放';
+    gt.textContent = restricted ? '账户受限' : (s.entry ? '进入问卷' : '暂未开放');
     go.appendChild(gt);
 
-    if (s.entry) {
+    if (usable) {
       var arrow = document.createElement('span');
       arrow.className = 'svc__go-arrow';
       arrow.setAttribute('aria-hidden', 'true');

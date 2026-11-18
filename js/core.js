@@ -213,6 +213,25 @@
 
     var me = null;
     try { me = (window.CF && CF.cache) ? CF.cache.get() : null; } catch (e) {}
+
+    if (me) {
+      renderRestrictedBar(me);
+      return;
+    }
+
+    /* 缓存被清过（换标签页、浏览器回收）时补查一次，别让提示条凭空消失 */
+    fetch('/api/auth/me', { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.ok || !d.user) return;
+        if (window.CF && CF.cache) CF.cache.set(d.user);
+        renderRestrictedBar(d.user);
+      })
+      .catch(function () {});
+  }
+
+  function renderRestrictedBar(me) {
+    if (document.querySelector('.res-bar')) return;
     if (!me || !me.status || me.status === 'active') return;
 
     var banned = me.status === 'banned';
