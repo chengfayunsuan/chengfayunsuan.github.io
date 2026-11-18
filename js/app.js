@@ -182,7 +182,9 @@
     withdraw_paid: '提现完成',
     cdk_redeem: '兑换 CDK',
     admin_adjust: '人工调整',
-    penalty: '违规扣罚'
+    penalty: '违规扣罚',
+    moonetix_reward: '广告墙奖励',
+    moonetix_reverse: '广告墙冲正'
   };
 
   function kindText(k) { return KIND[k] || k || '其他'; }

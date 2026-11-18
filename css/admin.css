@@ -617,6 +617,31 @@ body[data-accent="blue"] {
 .adm-tr--ord { grid-template-columns: 132px minmax(0, 1.8fr) 96px 84px 132px 128px; }
 .adm-tr--cd  { grid-template-columns: minmax(0, 1.3fr) 88px 92px 76px 84px 76px; }
 .adm-tr--msg { grid-template-columns: 110px minmax(0, 1.8fr) 76px 70px 132px; }
+.adm-tr--mtx { grid-template-columns: 118px minmax(0, 1.9fr) 92px 80px minmax(0, 170px); }
+
+/* 面板右上角的说明文字（广告墙接入状态等） */
+.adm-h__r {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .08em;
+  color: var(--gray);
+}
+
+.adm-tid {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--gray);
+  overflow-wrap: anywhere;
+}
+
+/* 表格里「主标题 + 副标题」两行（广告墙用） */
+.adm-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--gray);
+}
 
 .adm-code {
   font-family: var(--num);
@@ -690,7 +715,8 @@ body[data-accent="blue"] {
   .adm-tr--it,
   .adm-tr--ord,
   .adm-tr--cd,
-  .adm-tr--msg { grid-template-columns: minmax(0, 1fr); }
+  .adm-tr--msg,
+  .adm-tr--mtx { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* ---------- 行政公告 ---------- */

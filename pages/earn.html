@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>赚积分 · 乘法</title>
+<meta name="description" content="乘法赚积分：在广告墙完成第三方任务，奖励经服务端回调入账。">
+<meta name="theme-color" content="#E0291E">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=12">
+<link rel="stylesheet" href="/css/home.css?v=10">
+<link rel="stylesheet" href="/css/page.css?v=5">
+<link rel="stylesheet" href="/css/store.css?v=1">
+<link rel="stylesheet" href="/css/earn.css?v=2">
+<script src="/js/config.js?v=7"></script>
+<script src="/js/core.js?v=14"></script>
+</head>
+<body data-page="earn">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><button class="hm-nav__cur" type="button" data-cur-toggle aria-label="切换显示币种" title="点击在乘法币与乘法刀之间切换"><span data-cur="code">CFB</span></button>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/home">我</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
+    </div>
+  </div>
+</header>
+
+<div class="pg-bar">
+  <div class="wrap pg-bar__in">
+    <a class="pg-bar__a" href="/home">← 返回账户首页</a>
+    <span class="pg-bar__k">EARN / 赚积分</span>
+  </div>
+</div>
+
+<main class="pg">
+  <div class="wrap">
+
+    <div class="pg-head">
+      <div>
+        <span class="pg-k">EARN</span>
+        <h1 class="pg-t">赚积分</h1>
+        <p class="pg-d">
+          广告主把推广任务放在 Moonetix 广告墙上：试用一个应用、看一段演示、注册一个试用账号。
+          完成一项，广告主付钱，我们按约定比例折成乘法币发给你。奖励由服务商回调入账，
+          不是前端自己加的——所以到账会晚几十秒，也可能被冲正。
+        </p>
+      </div>
+
+      <div class="pg-side">
+        <b>3</b>
+        <span>步走完一笔</span>
+      </div>
+    </div>
+
+    <div class="st-wallet">
+      <div>
+        <span class="st-wallet__k">可用余额</span>
+        <div class="st-wallet__n">
+          <b id="erFc">0</b><i data-cur="code">CFB</i>
+        </div>
+      </div>
+
+      <div>
+        <span class="st-wallet__k">冻结中</span>
+        <div class="st-wallet__n st-wallet__n--sm">
+          <b id="erFrozen">0</b><i data-cur="code">CFB</i>
+        </div>
+        <p class="st-wallet__f">提现审核期间不可动用</p>
+      </div>
+
+      <div class="st-wallet__a">
+        <button class="btn btn--red" type="button" id="mtxOpen">打开广告墙</button>
+        <a class="btn btn--ghost" href="/store">去兑换</a>
+      </div>
+    </div>
+
+    <!-- ============ 01 广告墙 ============ -->
+    <section class="blk" id="sec-wall">
+      <div class="blk__h">
+        <span class="blk__n">01</span>
+        <h2 class="blk__t">Moonetix 广告墙</h2>
+      </div>
+
+      <div class="er-wall">
+        <div class="er-wall__l">
+          <span class="er-wall__k">MOONETIX / OFFERWALL</span>
+          <h3 class="er-wall__t" id="erTitle">正在检查接入状态…</h3>
+          <p class="er-wall__d" id="erDesc">
+            墙由第三方托管，在你的账号名下展开任务列表；同一个账号 ID 每次打开都是同一个人，
+            所以奖励不会串号。
+          </p>
+          <p class="er-wall__st" id="erState"><span class="er-dot"></span>检查中</p>
+        </div>
+
+        <div class="er-wall__r">
+          <p class="er-wall__h">奖励怎么走</p>
+          <ol class="er-steps">
+            <li><b>打开墙</b><span>服务端用你的 UID 和签名盐生成一次性链接</span></li>
+            <li><b>完成任务</b><span>广告主确认后，服务商回调本站</span></li>
+            <li><b>入账</b><span>校验签名与交易号，重复只入一次</span></li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 02 任务记录 ============ -->
+    <section class="blk" id="sec-tasks">
+      <div class="blk__h">
+        <span class="blk__n">02</span>
+        <h2 class="blk__t">任务记录</h2>
+        <span class="blk__s" id="erSum">—</span>
+      </div>
+
+      <div class="er-list" id="erList"></div>
+      <p class="st-empty" id="erEmpty" hidden>还没有广告墙记录。完成第一项任务后，这里会出现交易号、面额与状态。</p>
+    </section>
+
+    <!-- ============ 03 规则 ============ -->
+    <section class="blk" id="sec-rule">
+      <div class="blk__h">
+        <span class="blk__n">03</span>
+        <h2 class="blk__t">几条规矩</h2>
+      </div>
+
+      <div class="er-notes">
+        <div class="er-note">
+          <span class="er-note__k">到账不是即时的</span>
+          <p>广告主要先校验任务有没有真的完成，通常几十秒到几分钟。刚做完没看到余额变化，先等一会儿。</p>
+        </div>
+        <div class="er-note">
+          <span class="er-note__k">会被冲正</span>
+          <p>如果任务被判定无效（卸载太快、资料造假），服务商会发一条冲正回调，已发的奖励会被扣回。</p>
+        </div>
+        <div class="er-note">
+          <span class="er-note__k">网络环境有要求</span>
+          <p>走 VPN、代理、机房网络的用户会被广告墙直接拦掉，这是服务商的规则，不是本站的限制。</p>
+        </div>
+        <div class="er-note">
+          <span class="er-note__k">与合作方的关系</span>
+          <p>任务由第三方广告主发布，本站只做展示与结算。遇到不到账，带上交易号提交工单查。</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar">
+      <span>© 2026 乘法 CHENGFA</span>
+      <span>参与调研 · 累计积分 · 兑换回报</span>
+    </div>
+    <p class="foot__legal">本站为个人独立项目，广告墙任务由第三方广告主提供。</p>
+  </div>
+</footer>
+
+<script src="/js/earn.js?v=2" defer></script>
+</body>
+</html>

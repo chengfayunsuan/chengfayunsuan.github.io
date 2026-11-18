@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>广告墙（模拟） · 乘法</title>
+<meta name="description" content="站内模拟的广告墙，用于在没有接入真实服务商前验证回调入账链路。">
+<meta name="theme-color" content="#0B1B33">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="/css/style.css?v=12">
+<link rel="stylesheet" href="/css/mock-wall.css?v=1">
+</head>
+<body data-page="mockwall" class="mw">
+
+<div class="mw-bar">
+  <span class="mw-bar__brand">MOONETIX <i>模拟墙</i></span>
+  <a class="mw-bar__back" href="/earn">← 回到赚积分</a>
+</div>
+
+<main class="mw-main">
+
+  <div class="mw-head">
+    <span class="mw-k">OFFERS / 可做的任务</span>
+    <h1 class="mw-t">选一项，做完入账</h1>
+    <p class="mw-d">
+      这页不是第三方网站，是本站照着广告墙的样子做的模拟版。点「标记完成」，
+      浏览器会请求本站接口，接口再按真实回调的那套逻辑入账——所以走的是和正式接入完全相同的代码路径。
+    </p>
+    <p class="mw-uid">账户 UID <b id="mwUid">—</b> · 每一笔都会生成独立的交易号</p>
+  </div>
+
+  <div class="mw-grid" id="mwGrid"></div>
+
+  <p class="mw-note" id="mwNote">加载中…</p>
+
+  <div class="mw-foot">
+    <a class="mw-btn mw-btn--ghost" href="/earn">回到赚积分看记录</a>
+    <a class="mw-btn mw-btn--ghost" href="/ledger">去收支明细</a>
+  </div>
+
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="/js/config.js?v=7"></script>
+<script src="/js/mock-wall.js?v=1" defer></script>
+</body>
+</html>

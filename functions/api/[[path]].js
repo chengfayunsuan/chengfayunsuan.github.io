@@ -54,6 +54,10 @@ export async function onRequest(context) {
     if (path === 'messages' && request.method === 'GET') return await messageList(request, env);
     if (path === 'announcements' && request.method === 'GET') return await noticeList(env);
     if (path === 'messages/read' && request.method === 'POST') return await messageRead(request, env);
+    if (path === 'moonetix/link' && request.method === 'GET') return await mtxLink(request, env);
+    if (path === 'moonetix/tasks' && request.method === 'GET') return await mtxTasks(request, env);
+    if (path === 'moonetix/postback') return await mtxPostback(request, env, url);
+    if (path === 'moonetix/mock/complete' && request.method === 'POST') return await mtxMockComplete(request, env);
     if (path.indexOf('admin/') === 0) return await adminApi(request, env, url, path);
     return json({ ok: false, error: 'not_found' }, 404);
   } catch (err) {
@@ -417,12 +421,317 @@ async function updatePassword(request, env) {
   return json({ ok: true });
 }
 
+/* ---------------- Moonetix 广告墙 ----------------
+ *
+ * Moonetix 是 offerwall 联盟（不是问卷商）：用户完成广告主的任务，服务商给发布方
+ * 结算美元，我们按自定汇率折成 CFB 发给用户。奖励只能来自服务端回调，不能信前端。
+ *
+ * 两种模式：
+ *   live —— 配齐 MOONETIX_APP_ID / MOONETIX_LINK_SALT / MOONETIX_POSTBACK_KEY，
+ *           墙链接按官方规则签名，回调按签名校验
+ *   demo —— 三者缺任一项即进入，改用站内模拟墙（/mock-wall），
+ *           回调由本站自己造一条走同一套入账逻辑，先把链路跑通
+ *
+ * 密钥只在服务端读，永不下发浏览器。
+ */
+
+const MTX_WALL = 'https://wall.moonetix.com/';
+
+/* 模拟墙里的任务，仅 demo 模式使用；面额是人话，单位 CFB */
+const MTX_DEMO_OFFERS = [
+  { id: 'demo-video', name: '看完 30 秒产品视频', reward: 1.5 },
+  { id: 'demo-install', name: '安装并打开一款应用', reward: 4 },
+  { id: 'demo-signup', name: '注册试用账号并完成引导', reward: 8 },
+  { id: 'demo-level', name: '把游戏玩到第 5 关', reward: 12 }
+];
+
+function mtxConf(env) {
+  const appId = String(env.MOONETIX_APP_ID || '').trim();
+  const salt = String(env.MOONETIX_LINK_SALT || '').trim();
+  const key = String(env.MOONETIX_POSTBACK_KEY || '').trim();
+  const live = !!(appId && salt && key);
+  return { appId, salt, key, live, demo: !live };
+}
+
+function mtxText(body, status) {
+  return new Response(body, {
+    status: status || 200,
+    headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' }
+  });
+}
+
+async function hmacHex(secret, msg) {
+  const enc = new TextEncoder();
+  const k = await crypto.subtle.importKey(
+    'raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const sig = await crypto.subtle.sign('HMAC', k, enc.encode(msg));
+  let out = '';
+  const buf = new Uint8Array(sig);
+  for (let i = 0; i < buf.length; i++) out += buf[i].toString(16).padStart(2, '0');
+  return out;
+}
+
+function mtxFc(units) {
+  const s = (Number(units) / FC_SCALE).toFixed(4).replace(/0+$/, '').replace(/\.$/, '');
+  return s === '' ? '0' : s;
+}
+
+/* 生成墙链接：user_id 用本站 uid，hash 是 user_id 的 HMAC-SHA256（小写 hex） */
+async function mtxLink(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+  if (!isActive(session)) return locked();
+
+  const c = mtxConf(env);
+  const uid = Number(session.uid);
+
+  if (!c.live) {
+    /* 演示模式只有站长/管理员能进模拟墙，否则普通用户看到墙却点不动，不如直接说还没开放 */
+    const admin = await requireAdmin(request, env);
+    return json({
+      ok: true,
+      demo: true,
+      canTest: !!admin,
+      url: admin ? '/mock-wall?uid=' + uid : '',
+      offers: admin ? MTX_DEMO_OFFERS : [],
+      note: admin
+        ? '未配置 Moonetix 密钥，当前是站内模拟墙'
+        : '广告墙尚未开放，等接入服务商后在这里放出入口'
+    });
+  }
+
+  const hash = await hmacHex(c.salt, String(uid));
+  return json({
+    ok: true,
+    demo: false,
+    url: MTX_WALL + encodeURIComponent(c.appId) +
+      '?user_id=' + uid + '&hash=' + hash
+  });
+}
+
+/* 回调参数：GET 查询串与 POST 表单/JSON 都收 */
+async function mtxParams(request, url) {
+  const p = {};
+  url.searchParams.forEach(function (v, k) { p[k] = v; });
+  if (request.method !== 'POST') return p;
+
+  const ct = String(request.headers.get('content-type') || '');
+  try {
+    if (ct.indexOf('application/json') >= 0) {
+      const b = await request.json();
+      Object.keys(b || {}).forEach(function (k) { p[k] = String(b[k]); });
+    } else {
+      const form = await request.formData();
+      form.forEach(function (v, k) { p[k] = String(v); });
+    }
+  } catch (e) {}
+  return p;
+}
+
+/* 签名：除签名字段外所有参数按名字升序拼 k=v&k=v，用 postback key 做 HMAC-SHA256
+   注意·正式接入时按官网 postbacks 页核对一遍签名串的拼法，改这里即可 */
+async function mtxSignatureOk(c, p) {
+  if (!c.live) return true;   // 演示模式不校验，入账口只对站长开放
+
+  const given = String(p.signature || p.sig || p.hash || '').trim().toLowerCase();
+  if (!given) return false;
+
+  const skip = { signature: 1, sig: 1, hash: 1 };
+  const keys = Object.keys(p).filter(function (k) { return !skip[k]; }).sort();
+  const raw = keys.map(function (k) { return k + '=' + p[k]; }).join('&');
+  const want = await hmacHex(c.key, raw);
+  return want === given;
+}
+
+/* 入账 / 冲正，两个模式共用 */
+async function mtxApply(env, args) {
+  const uid = Number(args.uid);
+  const tid = String(args.tid);
+  const status = Number(args.status);
+  const units = Number(args.units);
+  const meta = args.meta || {};
+
+  if (status === 1) {
+    const seen = await env.DB.prepare('SELECT id FROM mo_task WHERE transaction_id = ?').bind(tid).first();
+    if (seen) return { ok: true, duplicated: true };
+
+    const user = await env.DB.prepare(
+      'SELECT id, fc_units FROM users WHERE id = ? AND deleted_at IS NULL'
+    ).bind(uid).first();
+    if (!user) return { ok: false, error: 'no_user' };
+
+    const next = Number(user.fc_units) + units;
+    try {
+      await env.DB.batch([
+        env.DB.prepare(
+          `INSERT INTO mo_task (uid, transaction_id, event_id, offer_id, offer_name,
+             reward_units, payout_usd, currency, status, ip)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)`
+        ).bind(uid, tid, meta.eventId || '', meta.offerId || '', meta.offerName || '',
+          units, meta.payout || '', meta.currency || '', meta.ip || ''),
+        env.DB.prepare('UPDATE users SET fc_units = ?, updated_at = datetime(\'now\') WHERE id = ?')
+          .bind(next, uid),
+        env.DB.prepare(
+          `INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, ?, ?, ?)`
+        ).bind(uid, units, next, 'moonetix_reward', tid,
+          meta.offerName ? '广告墙 · ' + meta.offerName : '广告墙奖励')
+      ]);
+    } catch (err) {
+      /* transaction_id 撞唯一索引 = 同一个回调打了两次，按成功回，别让对方重试 */
+      const again = await env.DB.prepare('SELECT id FROM mo_task WHERE transaction_id = ?').bind(tid).first();
+      if (again) return { ok: true, duplicated: true };
+      throw err;
+    }
+    return { ok: true, credited: mtxFc(units), balance: mtxFc(next) };
+  }
+
+  /* status 2：冲正，把当初发的扣回来；找不到原单就当场认了，避免对方一直重试 */
+  const row = await env.DB.prepare(
+    'SELECT id, uid, reward_units, status FROM mo_task WHERE transaction_id = ?'
+  ).bind(tid).first();
+  if (!row) return { ok: true, unknown: true };
+  if (row.status === 2) return { ok: true, duplicated: true };
+  if (Number(row.uid) !== uid) return { ok: false, error: 'uid_mismatch' };
+
+  const user = await env.DB.prepare(
+    'SELECT id, fc_units FROM users WHERE id = ? AND deleted_at IS NULL'
+  ).bind(uid).first();
+  if (!user) return { ok: true, no_user: true };
+
+  const want = Number(row.reward_units);
+  const deduct = Math.min(want, Math.max(0, Number(user.fc_units)));
+  const next = Number(user.fc_units) - deduct;
+
+  await env.DB.batch([
+    env.DB.prepare(
+      "UPDATE mo_task SET status = 2, reversed_at = datetime('now') WHERE id = ? AND status = 1"
+    ).bind(row.id),
+    env.DB.prepare('UPDATE users SET fc_units = ?, updated_at = datetime(\'now\') WHERE id = ?')
+      .bind(next, uid),
+    env.DB.prepare(
+      `INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, ?, ?, ?)`
+    ).bind(uid, -deduct, next, 'moonetix_reverse', tid,
+      deduct < want ? '广告墙冲正（余额不足，实际扣 ' + mtxFc(deduct) + '）' : '广告墙冲正')
+  ]);
+
+  return { ok: true, reversed: mtxFc(deduct), balance: mtxFc(next) };
+}
+
+async function mtxPostback(request, env, url) {
+  const c = mtxConf(env);
+  const p = await mtxParams(request, url);   /* body 只能读一次，签名和入账共用这一份 */
+
+  if (c.live && !(await mtxSignatureOk(c, p))) {
+    /* 只打键名，不打值，方便对接时排查又不把用户数据写进日志 */
+    console.error('mtx postback signature mismatch, keys:', Object.keys(p).join(','));
+    return mtxText('bad signature', 401);
+  }
+
+  const uid = Number(p.user_id || 0);
+  const tid = String(p.transaction_id || '').trim();
+  const status = Number(p.status || 1);
+  const reward = Number(p.reward || 0);
+
+  if (!(uid > 0) || !tid) return mtxText('bad request', 400);
+  if (status !== 1 && status !== 2) return mtxText('bad status', 400);
+  if (!isFinite(reward) || reward < 0) return mtxText('bad reward', 400);
+
+  const res = await mtxApply(env, {
+    uid: uid,
+    tid: tid,
+    status: status,
+    units: Math.round(reward * FC_SCALE),
+    meta: {
+      eventId: p.event_id || '',
+      offerId: p.offer_id || '',
+      offerName: p.offer_name || '',
+      payout: p.payout || '',
+      currency: p.currency || '',
+      ip: request.headers.get('CF-Connecting-IP') || ''
+    }
+  });
+
+  if (!res.ok) return mtxText(res.error || 'error', 400);
+  return mtxText('ok', 200);
+}
+
+/* 本站模拟墙点「完成」时调用，只在 demo 模式、且只有站长/管理员能用 */
+async function mtxMockComplete(request, env) {
+  const c = mtxConf(env);
+  if (!c.demo) return json({ ok: false, error: 'live_mode' }, 400);
+
+  const admin = await requireAdmin(request, env);
+  if (!admin) return json({ ok: false, error: 'forbidden' }, 403);
+
+  const body = await readJson(request);
+  if (!body) return json({ ok: false, error: 'bad_request' }, 400);
+
+  const offerId = String(body.offerId || '').trim();
+  const offer = MTX_DEMO_OFFERS.filter(function (o) { return o.id === offerId; })[0];
+  if (!offer) return json({ ok: false, error: 'unknown_offer' }, 400);
+
+  const uid = Number(body.uid) > 0 ? Number(body.uid) : Number(admin.uid);
+  const tid = 'demo-' + uid + '-' + Date.now().toString(36);
+
+  const res = await mtxApply(env, {
+    uid: uid,
+    tid: tid,
+    status: 1,
+    units: Math.round(offer.reward * FC_SCALE),
+    meta: {
+      offerId: offer.id,
+      offerName: offer.name,
+      currency: 'CFB',
+      payout: '0',
+      ip: request.headers.get('CF-Connecting-IP') || ''
+    }
+  });
+
+  if (!res.ok) return json({ ok: false, error: res.error || 'error' }, 400);
+  return json({ ok: true, tid: tid, reward: offer.reward, balance: res.balance });
+}
+
+/* 自己的广告墙记录 */
+async function mtxTasks(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+
+  const rows = await env.DB.prepare(
+    `SELECT transaction_id, offer_name, reward_units, status, created_at, reversed_at
+       FROM mo_task WHERE uid = ? ORDER BY id DESC LIMIT 50`
+  ).bind(session.uid).all();
+
+  const items = (rows.results || []).map(function (r) {
+    return {
+      tid: r.transaction_id,
+      name: r.offer_name || '广告任务',
+      reward: mtxFc(r.reward_units),
+      status: Number(r.status),
+      at: toIso(r.created_at),
+      reversedAt: r.reversed_at ? toIso(r.reversed_at) : null
+    };
+  });
+
+  const sum = await env.DB.prepare(
+    `SELECT COALESCE(SUM(CASE WHEN status = 1 THEN reward_units ELSE 0 END), 0) AS live,
+            COUNT(*) AS n FROM mo_task WHERE uid = ?`
+  ).bind(session.uid).first();
+
+  return json({
+    ok: true,
+    items: items,
+    summary: { total: mtxFc(sum ? sum.live : 0), count: sum ? sum.n : 0 }
+  });
+}
+
 /* ---------------- 收支明细 ---------------- */
 
 const LEDGER_KINDS = [
   'signup_bonus', 'survey_reward', 'survey_reject',
   'withdraw_lock', 'withdraw_refund', 'withdraw_paid',
-  'cdk_redeem', 'admin_adjust', 'penalty'
+  'cdk_redeem', 'admin_adjust', 'penalty',
+  'moonetix_reward', 'moonetix_reverse'
 ];
 
 async function ledger(request, env, url) {
@@ -1662,6 +1971,46 @@ async function adminNoticeDelete(request, env) {
   return json({ ok: true });
 }
 
+// 后台：广告墙任务流水与汇总
+async function adminMtxList(env, url) {
+  const limit = Math.min(200, Math.max(1, Number(url.searchParams.get('limit')) || 80));
+
+  const rows = await env.DB.prepare(
+    `SELECT t.id, t.uid, t.transaction_id, t.offer_name, t.reward_units, t.status,
+            t.created_at, t.reversed_at, u.username
+       FROM mo_task t LEFT JOIN users u ON u.id = t.uid
+      ORDER BY t.id DESC LIMIT ?`
+  ).bind(limit).all();
+
+  const sum = await env.DB.prepare(
+    `SELECT COUNT(*) AS n,
+            COALESCE(SUM(CASE WHEN status = 1 THEN reward_units ELSE 0 END), 0) AS live,
+            COALESCE(SUM(CASE WHEN status = 2 THEN reward_units ELSE 0 END), 0) AS rev,
+            COUNT(DISTINCT uid) AS users
+       FROM mo_task`
+  ).first();
+
+  const items = (rows.results || []).map(function (r) {
+    return {
+      id: r.id, uid: r.uid, username: r.username || '',
+      tid: r.transaction_id, name: r.offer_name || '广告任务',
+      reward: mtxFc(r.reward_units), status: Number(r.status),
+      at: toIso(r.created_at), reversedAt: r.reversed_at ? toIso(r.reversed_at) : null
+    };
+  });
+
+  return json({
+    ok: true,
+    items: items,
+    summary: {
+      count: sum ? sum.n : 0,
+      users: sum ? sum.users : 0,
+      live: mtxFc(sum ? sum.live : 0),
+      reversed: mtxFc(sum ? sum.rev : 0)
+    }
+  });
+}
+
 async function adminApi(request, env, url, path) {
   const admin = await requireAdmin(request, env);
   if (!admin) return json({ ok: false, error: 'forbidden' }, 403);
@@ -1692,6 +2041,7 @@ async function adminApi(request, env, url, path) {
   if (path === 'admin/announcements' && request.method === 'GET') return await adminNoticeList(env);
   if (path === 'admin/announcements/save' && request.method === 'POST') return await adminNoticeSave(request, env);
   if (path === 'admin/announcements/delete' && request.method === 'POST') return await adminNoticeDelete(request, env);
+  if (path === 'admin/moonetix' && request.method === 'GET') return await adminMtxList(env, url);
   return json({ ok: false, error: 'not_found' }, 404);
 }
 

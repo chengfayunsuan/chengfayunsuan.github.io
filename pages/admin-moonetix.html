@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>广告墙 · 乘法后台</title>
+<meta name="description" content="乘法运营后台：广告墙任务与结算记录。">
+<meta name="theme-color" content="#1D52E2">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/style.css?v=12">
+<link rel="stylesheet" href="/css/home.css?v=10">
+<link rel="stylesheet" href="/css/page.css?v=5">
+<link rel="stylesheet" href="/css/admin.css?v=11">
+<script src="/js/config.js?v=7"></script>
+<script src="/js/core.js?v=14"></script>
+</head>
+<body data-page="admin-moonetix" data-accent="blue">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/home">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><button class="hm-nav__cur" type="button" data-cur-toggle aria-label="切换显示币种" title="点击在乘法币与乘法刀之间切换"><span data-cur="code">CFB</span></button>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/home">我</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
+    </div>
+  </div>
+</header>
+
+<nav class="dock" aria-label="后台目录">
+  <div class="wrap dock__in">
+    <a class="dock__i" href="/admin">
+      <span class="dock__n">01</span><span class="dock__t">后台概览</span>
+    </a>
+    <a class="dock__i" href="/admin/users">
+      <span class="dock__n">02</span><span class="dock__t">用户管理</span>
+    </a>
+    <a class="dock__i" href="/admin/withdrawals">
+      <span class="dock__n">03</span><span class="dock__t">提现审核</span>
+    </a>
+    <a class="dock__i" href="/admin/orders">
+      <span class="dock__n">04</span><span class="dock__t">兑换订单</span>
+    </a>
+    <a class="dock__i" href="/admin/tickets">
+      <span class="dock__n">05</span><span class="dock__t">工单</span>
+    </a>
+    <a class="dock__i" href="/admin/surveys">
+      <span class="dock__n">06</span><span class="dock__t">问卷管理</span>
+    </a>
+    <a class="dock__i" href="/admin/items">
+      <span class="dock__n">07</span><span class="dock__t">商品兑换</span>
+    </a>
+    <a class="dock__i" href="/admin/messages">
+      <span class="dock__n">08</span><span class="dock__t">公告</span>
+    </a>
+    <a class="dock__i is-on" href="/admin/moonetix" aria-current="page">
+      <span class="dock__n">09</span><span class="dock__t">广告墙</span>
+    </a>
+  </div>
+</nav>
+
+<main id="app">
+  <section class="face">
+    <div class="wrap">
+      <div class="face__in">
+        <div class="face__id">
+          <div class="face__meta">
+            <span class="face__uid">ADMIN / 广告墙</span>
+            <span class="adm-badge">OFFERWALL</span>
+          </div>
+          <h1 class="face__name">广告墙</h1>
+          <p class="face__sub">Moonetix 任务流水 · 回调入账与冲正</p>
+          <div class="face__foot">
+            <p class="adm-lead">每一笔都对应服务商的一条回调：status 1 入账、status 2 冲正，按交易号去重。配齐 App ID、签名盐与回调密钥后自动切到真实广告墙，之前在这里的都是模拟数据。</p>
+          </div>
+        </div>
+
+        <div class="face__bal">
+          <div class="face__bal-k">IN ACCOUNT / 在账总额</div>
+          <div class="face__bal-n" id="mtxLive">0</div>
+          <div class="face__bal-f">共 <span id="mtxCount">0</span> 笔 · <span id="mtxUsers">0</span> 个账户 · 已冲正 <span id="mtxRev">0</span></div>
+          <div class="face__acts"><a class="btn btn--ghost" href="/earn">去前台看</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="adm-sec">
+    <div class="wrap">
+      <div class="adm-panel">
+        <div class="adm-h">
+          <span class="adm-h__t">全部任务</span>
+          <span class="adm-h__r">只读 · 按交易号去重</span>
+        </div>
+
+        <div class="adm-list">
+          <div class="adm-tr adm-tr--mtx adm-head">
+            <span>时间</span><span>用户 / 任务</span><span>面额</span><span>状态</span><span>交易号</span>
+          </div>
+          <div id="mtxRows"></div>
+        </div>
+        <p class="adm-empty" id="mtxEmpty" hidden>还没有广告墙记录。到前台「赚积分」页完成一次模拟任务就会出现。</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 乘法 CHENGFA</span>
+      <span>运营后台 · 仅限站长与管理员</span>
+    </div>
+    <p class="foot__legal"><a href="/privacy">隐私政策</a> · <a href="/terms">用户协议</a> · <a href="/support">联系客服</a></p>
+  </div>
+</footer>
+
+<script src="/js/admin-mtx.js?v=1" defer></script>
+</body>
+</html>

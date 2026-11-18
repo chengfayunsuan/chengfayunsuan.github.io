@@ -1,0 +1,281 @@
+/* ============================================================
+   乘法 · 赚积分（Moonetix 广告墙）
+   页面骨架、钱包、按钮沿用 page.css / store.css，这里只补墙卡片与记录行
+   ============================================================ */
+
+/* ---------- 区块标题 ----------
+   settings.css 不在本页加载，这里给一份同款精简定义 */
+.blk { padding: clamp(20px, 2.6vw, 36px) 0 0; }
+
+.blk__h {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding-bottom: 12px;
+  border-bottom: 3px solid var(--ink);
+  margin-bottom: 18px;
+}
+
+.blk__n {
+  font-family: var(--num);
+  font-size: 12px;
+  letter-spacing: .12em;
+  color: var(--red);
+}
+
+.blk__t {
+  margin: 0;
+  font-size: clamp(19px, 2.2vw, 26px);
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+.blk__s {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--gray);
+  text-align: right;
+}
+
+/* ---------- 广告墙卡片 ---------- */
+
+.er-wall {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 0;
+  margin-top: 16px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+
+.er-wall__l {
+  padding: 22px 24px 20px;
+  border-right: 2px solid var(--ink);
+}
+
+.er-wall__k {
+  font-family: var(--num);
+  font-size: 11px;
+  letter-spacing: .16em;
+  color: var(--red);
+}
+
+.er-wall__t {
+  margin: 10px 0 0;
+  font-size: clamp(20px, 2.4vw, 27px);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.er-wall__d {
+  margin: 10px 0 0;
+  max-width: 46em;
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--gray);
+}
+
+.er-wall__st {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 5px 11px;
+  border: 2px solid var(--ink);
+  font-family: var(--num);
+  font-size: 11px;
+  letter-spacing: .1em;
+  background: var(--paper2, #EDE8DA);
+}
+
+.er-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gray);
+}
+
+.er-wall__st.is-live .er-dot { background: #1E8E3E; }
+.er-wall__st.is-demo .er-dot { background: var(--red); }
+
+.er-wall__r {
+  padding: 22px 24px 20px;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.er-wall__h {
+  margin: 0;
+  font-family: var(--num);
+  font-size: 11px;
+  letter-spacing: .16em;
+  color: var(--red);
+}
+
+.er-steps {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: er;
+}
+
+.er-steps li {
+  position: relative;
+  padding: 0 0 14px 34px;
+  counter-increment: er;
+}
+
+.er-steps li:last-child { padding-bottom: 0; }
+
+.er-steps li::before {
+  content: "0" counter(er);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  font-family: var(--num);
+  font-size: 12px;
+  color: var(--red);
+}
+
+.er-steps b {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.er-steps span {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(244, 240, 230, .62);
+}
+
+/* ---------- 任务记录 ---------- */
+
+.er-list {
+  margin-top: 14px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+
+.er-row {
+  display: grid;
+  grid-template-columns: 118px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px dashed rgba(20, 19, 15, .28);
+}
+
+.er-row:last-child { border-bottom: 0; }
+
+.er-row__at {
+  font-family: var(--num);
+  font-size: 11px;
+  letter-spacing: .04em;
+  color: var(--gray);
+  white-space: nowrap;
+}
+
+.er-row__m { min-width: 0; }
+
+.er-row__t {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.er-row__s {
+  margin-top: 3px;
+  font-family: var(--num);
+  font-size: 11px;
+  color: var(--gray);
+  overflow-wrap: anywhere;
+}
+
+.er-row__p {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.er-row__p b {
+  font-family: var(--num);
+  font-size: 19px;
+  color: var(--red);
+}
+
+.er-row__p b.is-out {
+  color: var(--gray);
+  text-decoration: line-through;
+}
+
+.er-row__p i {
+  font-style: normal;
+  font-family: var(--num);
+  font-size: 11px;
+  color: var(--gray);
+}
+
+.er-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border: 1.5px solid var(--ink);
+  font-family: var(--num);
+  font-size: 10px;
+  letter-spacing: .06em;
+  vertical-align: 2px;
+}
+
+.er-tag.is-rev {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+/* ---------- 规则 ---------- */
+
+.er-notes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.er-note {
+  padding: 14px 16px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+
+.er-note__k {
+  display: block;
+  font-family: var(--num);
+  font-size: 11px;
+  letter-spacing: .12em;
+  color: var(--red);
+}
+
+.er-note p {
+  margin: 7px 0 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--gray);
+}
+
+/* ---------- 窄屏 ---------- */
+
+@media (max-width: 760px) {
+  .er-wall { grid-template-columns: 1fr; }
+  .er-wall__l { border-right: 0; border-bottom: 2px solid var(--ink); }
+  .er-row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "m p" "at at";
+    row-gap: 6px;
+  }
+  .er-row__m { grid-area: m; }
+  .er-row__p { grid-area: p; }
+  .er-row__at { grid-area: at; }
+}
