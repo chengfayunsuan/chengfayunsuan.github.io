@@ -103,6 +103,63 @@
     document.body.removeChild(ta);
   }
 
+  /* 封禁记录：后台每次改状态都会留痕，见 /api/user/bans */
+  var BAN_LABEL = { banned: '封禁', frozen: '冻结', active: '解除' };
+
+  function loadBans() {
+    var list = $('banList');
+    var cnt = $('banCount');
+    if (!list || !cnt) return;
+
+    fetch('/api/user/bans', { headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.ok) return;
+        cnt.textContent = String(d.count || 0);
+
+        var items = d.items || [];
+        if (!items.length) return;
+
+        list.textContent = '';
+
+        items.forEach(function (it) {
+          var li = document.createElement('li');
+          li.className = 'ban__i';
+
+          var hd = document.createElement('div');
+          hd.className = 'ban__hd';
+
+          var tag = document.createElement('b');
+          tag.className = 'ban__tag ' +
+            (it.to === 'banned' ? 'is-ban' : it.to === 'frozen' ? 'is-frz' : 'is-act');
+          tag.textContent = BAN_LABEL[it.to] || it.to;
+          hd.appendChild(tag);
+
+          var when = document.createElement('span');
+          when.className = 'ban__t';
+          when.textContent = fmtFull(it.at);
+          hd.appendChild(when);
+
+          var who = document.createElement('span');
+          who.className = 'ban__t';
+          who.textContent = '由' + (it.by || '管理员') + '操作';
+          hd.appendChild(who);
+
+          li.appendChild(hd);
+
+          var why = document.createElement('p');
+          why.className = 'ban__r';
+          why.textContent = it.reason
+            ? it.reason
+            : (it.to === 'active' ? '账户已恢复正常。' : '未填写原因。');
+          li.appendChild(why);
+
+          list.appendChild(li);
+        });
+      })
+      .catch(function () {});
+  }
+
   function loadRedeems() {
     var body = $('redeemBody');
     if (!body) return;
@@ -805,6 +862,7 @@
       if (window.CF && CF.cache) CF.cache.set(data.user);
       show(data.user);
       loadRedeems();
+      loadBans();
     })
     .catch(function () {
       loading.hidden = true;

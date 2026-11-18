@@ -618,6 +618,54 @@
   color: var(--gray);
 }
 
+.ban__i {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ban__hd {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ban__tag {
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  line-height: 1.6;
+  border: 2px solid var(--ink);
+}
+
+.ban__tag.is-ban {
+  background: var(--red);
+  border-color: var(--red);
+  color: #F4F0E6;
+}
+
+.ban__tag.is-frz {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.ban__tag.is-act {
+  color: var(--ink);
+}
+
+.ban__t {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--gray);
+}
+
+.ban__r {
+  margin: 0;
+  color: var(--ink);
+}
+
 /* ---------- 07 工单 ---------- */
 
 .tk {

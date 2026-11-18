@@ -38,6 +38,7 @@ export async function onRequest(context) {
     if (path === 'user/profile' && request.method === 'PATCH') return await updateProfile(request, env);
     if (path === 'user/email' && request.method === 'POST') return await updateEmail(request, env);
     if (path === 'user/password' && request.method === 'POST') return await updatePassword(request, env);
+    if (path === 'user/bans' && request.method === 'GET') return await userBans(request, env);
     if (path === 'ledger' && request.method === 'GET') return await ledger(request, env, url);
     if (path === 'ladder' && request.method === 'GET') return await ladder(request, env, url);
     if (path === 'ticket' && request.method === 'POST') return await ticketSubmit(request, env);
@@ -2180,6 +2181,7 @@ async function adminStatus(request, env, admin) {
   const body = await readJson(request);
   const uid = Number(body && body.uid);
   const status = String((body && body.status) || '');
+  const reason = String((body && body.reason) || '').trim().slice(0, 200);
   if (!uid || USER_STATUSES.indexOf(status) < 0) return json({ ok: false, error: 'bad_request' }, 400);
 
   const target = await adminTarget(env, uid);
@@ -2189,11 +2191,42 @@ async function adminStatus(request, env, admin) {
   if (target.role === 'owner' && status !== 'active') return json({ ok: false, error: 'owner_lock' }, 400);
   if (target.status === status) return json({ ok: true });
 
-  await env.DB.prepare(
-    "UPDATE users SET status = ?, updated_at = datetime('now') WHERE id = ?"
-  ).bind(status, uid).run();
+  /* 状态变更与留痕一起写，避免改了状态却没记录 */
+  await env.DB.batch([
+    env.DB.prepare(
+      "UPDATE users SET status = ?, updated_at = datetime('now') WHERE id = ?"
+    ).bind(status, uid),
+    env.DB.prepare(
+      `INSERT INTO user_bans (uid, from_status, to_status, reason, by_uid, by_role)
+       VALUES (?, ?, ?, ?, ?, ?)`
+    ).bind(uid, target.status || '', status, reason, admin.uid || 0, admin.role || '')
+  ]);
 
   return json({ ok: true });
+}
+
+/* 本人能看到自己的状态变更记录，供设置页「封禁记录」使用 */
+async function userBans(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+
+  const rows = await env.DB.prepare(
+    `SELECT from_status, to_status, reason, by_role, created_at
+       FROM user_bans WHERE uid = ? ORDER BY id DESC LIMIT 50`
+  ).bind(session.uid).all();
+
+  const items = (rows.results || []).map(function (r) {
+    return {
+      from: r.from_status || '',
+      to: r.to_status || '',
+      reason: r.reason || '',
+      by: r.by_role === 'owner' ? '站长' : '管理员',
+      at: r.created_at || ''
+    };
+  });
+
+  const banned = items.filter(function (x) { return x.to === 'banned'; }).length;
+  return json({ ok: true, count: banned, total: items.length, items: items });
 }
 
 async function adminRole(request, env, admin) {

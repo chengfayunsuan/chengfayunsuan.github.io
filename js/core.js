@@ -77,11 +77,11 @@
 
   var ROUTES = {
     '/home': { page: 'home', js: '/js/home.js?v=11' },
-    '/settings': { page: 'settings', js: '/js/settings.js?v=14', css: ['/css/settings.css?v=13', '/css/relation.css?v=2'] },
-    '/admin': { page: 'admin', js: '/js/admin.js?v=6' },
-    '/admin/users': { page: 'admin-users', js: '/js/admin.js?v=6' },
-    '/admin/withdrawals': { page: 'admin-withdrawals', js: '/js/admin.js?v=6' },
-    '/admin/tickets': { page: 'admin-tickets', js: '/js/admin.js?v=6' },
+    '/settings': { page: 'settings', js: '/js/settings.js?v=16', css: ['/css/settings.css?v=14', '/css/relation.css?v=2'] },
+    '/admin': { page: 'admin', js: '/js/admin.js?v=7' },
+    '/admin/users': { page: 'admin-users', js: '/js/admin.js?v=7' },
+    '/admin/withdrawals': { page: 'admin-withdrawals', js: '/js/admin.js?v=7' },
+    '/admin/tickets': { page: 'admin-tickets', js: '/js/admin.js?v=7' },
     '/admin/surveys': { page: 'admin-surveys', js: '/js/admin-surveys.js?v=1' },
     '/admin/orders': { page: 'admin-orders', js: '/js/admin-shop.js?v=2' },
     '/admin/items': { page: 'admin-items', js: '/js/admin-shop.js?v=2' },

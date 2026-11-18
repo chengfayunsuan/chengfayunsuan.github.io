@@ -67,6 +67,51 @@
 
   var ROLE = { owner: '站长', admin: '管理员', premium: '大会员', user: '用户' };
   var STATUS = { active: '正常', frozen: '冻结', banned: '封禁' };
+
+  /* 改状态：封禁 / 冻结要填原因（会进对方的封禁记录），解除不填 */
+  function askStatus(uid, status, done) {
+    if (status === 'active') {
+      postJSON('/api/admin/users/status', { uid: uid, status: status, reason: '' })
+        .then(function (r) {
+          if (r.body && r.body.ok) { say('状态已改为 ' + STATUS[status]); done(); }
+          else say('操作失败：' + ((r.body && r.body.error) || '网络错误'));
+        });
+      return;
+    }
+
+    CF.modal({
+      kicker: 'STATUS',
+      title: '将账户改为「' + STATUS[status] + '」',
+      desc: '原因会记进对方的封禁记录，他能在设置页看到。留空也行，但对方只会看到「未填写原因」。',
+      fields: [{
+        name: 'reason',
+        label: '原因',
+        placeholder: '例如：批量注册小号 / 机器刷答卷',
+        hint: '最多 200 字'
+      }],
+      submitText: '确认' + STATUS[status],
+      busyText: '提交中…',
+      onSubmit: function (v, api) {
+        api.setError('');
+        api.setBusy(true);
+        postJSON('/api/admin/users/status', {
+          uid: uid, status: status, reason: String(v.reason || '').trim()
+        }).then(function (r) {
+          if (r.body && r.body.ok) {
+            api.close();
+            say('状态已改为 ' + STATUS[status]);
+            done();
+          } else {
+            api.setBusy(false);
+            api.setError('操作失败：' + ((r.body && r.body.error) || '网络错误'));
+          }
+        }).catch(function () {
+          api.setBusy(false);
+          api.setError('网络连接失败，请重试。');
+        });
+      }
+    });
+  }
   var KIND = {
     signup_bonus: '注册赠送', survey_reward: '问卷奖励', survey_reject: '答卷驳回',
     withdraw_lock: '提现冻结', withdraw_refund: '提现退回', withdraw_paid: '提现完成',
@@ -303,10 +348,7 @@
           btn.textContent = STATUS[s];
           if (u.status === s) btn.disabled = true;
           btn.addEventListener('click', function () {
-            postJSON('/api/admin/users/status', { uid: u.uid, status: s }).then(function (r) {
-              if (r.body && r.body.ok) { say('状态已改为 ' + STATUS[s]); load(qInput.value); }
-              else say('操作失败：' + (r.body && r.body.error || '网络错误'));
-            });
+            askStatus(u.uid, s, function () { load(qInput.value); });
           });
           g2.appendChild(btn);
         });
@@ -771,11 +813,7 @@
         btn.textContent = STATUS[s];
         if (t.userStatus === s) btn.disabled = true;
         btn.addEventListener('click', function () {
-          btn.disabled = true;
-          postJSON('/api/admin/users/status', { uid: t.uid, status: s }).then(function (r) {
-            if (r.body && r.body.ok) { say('状态已改为 ' + STATUS[s]); load(); }
-            else { say('操作失败：' + (r.body && r.body.error || '网络错误')); btn.disabled = false; }
-          });
+          askStatus(t.uid, s, function () { load(); });
         });
         g2.appendChild(btn);
       });
