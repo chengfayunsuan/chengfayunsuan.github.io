@@ -54,7 +54,7 @@ async function currentUid(env, request) {
   return row ? row.user_id : null;
 }
 
-/* SQLite 的 datetime('now') 是 UTC 且无时区标记，补成 ISO 再给前端 */
+/* SQLite 的 datetime('now','+8 hours') 是 UTC 且无时区标记，补成 ISO 再给前端 */
 function toIso(s) {
   if (!s) return null;
   const t = String(s).replace(' ', 'T');

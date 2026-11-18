@@ -97,6 +97,8 @@
 
 .er-wall__st.is-live .er-dot { background: #1E8E3E; }
 .er-wall__st.is-demo .er-dot { background: var(--red); }
+.er-wall__st.is-off { color: var(--gray); border-color: var(--gray); }
+.er-wall__st.is-off .er-dot { background: var(--gray); }
 
 .er-wall__r {
   padding: 22px 24px 20px;

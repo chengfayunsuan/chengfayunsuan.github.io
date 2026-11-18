@@ -163,7 +163,7 @@ async function register(request, env, url) {
   try {
     result = await env.DB.prepare(
       `INSERT INTO users (email, pw_hash, pw_salt, pw_algo, pw_iter, reg_ip, reg_net, updated_at)
-       VALUES (?, ?, ?, 'pbkdf2-sha256', ?, ?, ?, datetime('now'))`
+       VALUES (?, ?, ?, 'pbkdf2-sha256', ?, ?, ?, datetime('now','+8 hours'))`
     ).bind(email, hash, salt, PBKDF2_ITER, net.ip, net.asn).run();
   } catch (err) {
     // 并发注册时唯一索引兜底
@@ -205,7 +205,7 @@ async function login(request, env, url) {
 
   // 同一账号 20 分钟内失败达 10 次即拒绝，挡在线爆破
   const fails = await env.DB.prepare(
-    "SELECT COUNT(*) AS n FROM login_fails WHERE lower(email) = ? AND ts > datetime('now','-20 minutes')"
+    "SELECT COUNT(*) AS n FROM login_fails WHERE lower(email) = ? AND ts > datetime('now','+8 hours','-20 minutes')"
   ).bind(accountKey).first();
 
   if (fails && fails.n >= 10) {
@@ -239,12 +239,12 @@ async function login(request, env, url) {
   /* 密码对了就发会话：封禁与冻结的账号也能进来，
      但只能在工单、消息这类页面上活动，钱和问卷接口另行拦住 */
   await env.DB.prepare('DELETE FROM login_fails WHERE lower(email) = ?').bind(accountKey).run();
-  await env.DB.prepare("DELETE FROM login_fails WHERE ts < datetime('now','-2 days')").run();
+  await env.DB.prepare("DELETE FROM login_fails WHERE ts < datetime('now','+8 hours','-2 days')").run();
 
   await env.DB.prepare('DELETE FROM sessions WHERE expires_at < ?')
     .bind(new Date().toISOString()).run();
 
-  await env.DB.prepare("UPDATE users SET last_login_at = datetime('now') WHERE id = ?")
+  await env.DB.prepare("UPDATE users SET last_login_at = datetime('now','+8 hours') WHERE id = ?")
     .bind(user.id).run();
 
   const token = await createSession(env, user.id, request);
@@ -321,7 +321,7 @@ async function updateProfile(request, env) {
 
   if (!sets.length) return json({ ok: false, error: 'nothing_to_update' }, 400);
 
-  sets.push("updated_at = datetime('now')");
+  sets.push("updated_at = datetime('now','+8 hours')");
   binds.push(session.uid);
 
   await env.DB.prepare(`UPDATE users SET ${sets.join(', ')} WHERE id = ?`).bind(...binds).run();
@@ -378,7 +378,7 @@ async function updateEmail(request, env) {
   if (taken) return json({ ok: false, error: 'email_taken' }, 409);
 
   await env.DB.prepare(
-    "UPDATE users SET email = ?, email_verified = 0, updated_at = datetime('now') WHERE id = ?"
+    "UPDATE users SET email = ?, email_verified = 0, updated_at = datetime('now','+8 hours') WHERE id = ?"
   ).bind(email, user.id).run();
 
   return json({ ok: true, user: await profileOf(env, user.id) });
@@ -413,7 +413,7 @@ async function updatePassword(request, env) {
 
   await env.DB.batch([
     env.DB.prepare(
-      "UPDATE users SET pw_hash = ?, pw_salt = ?, pw_iter = ?, updated_at = datetime('now') WHERE id = ?"
+      "UPDATE users SET pw_hash = ?, pw_salt = ?, pw_iter = ?, updated_at = datetime('now','+8 hours') WHERE id = ?"
     ).bind(next, salt, PBKDF2_ITER, user.id),
     /* 保留当前这条会话，其余下线（sessions 的用户列名是 user_id） */
     env.DB.prepare('DELETE FROM sessions WHERE user_id = ? AND token_hash <> ?').bind(user.id, session.tokenHash)
@@ -571,7 +571,7 @@ async function mtxApply(env, args) {
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)`
         ).bind(uid, tid, meta.eventId || '', meta.offerId || '', meta.offerName || '',
           units, meta.payout || '', meta.currency || '', meta.ip || ''),
-        env.DB.prepare('UPDATE users SET fc_units = ?, updated_at = datetime(\'now\') WHERE id = ?')
+        env.DB.prepare('UPDATE users SET fc_units = ?, updated_at = datetime(\'now\',\'+8 hours\') WHERE id = ?')
           .bind(next, uid),
         env.DB.prepare(
           `INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, ?, ?, ?)`
@@ -606,9 +606,9 @@ async function mtxApply(env, args) {
 
   await env.DB.batch([
     env.DB.prepare(
-      "UPDATE mo_task SET status = 2, reversed_at = datetime('now') WHERE id = ? AND status = 1"
+      "UPDATE mo_task SET status = 2, reversed_at = datetime('now','+8 hours') WHERE id = ? AND status = 1"
     ).bind(row.id),
-    env.DB.prepare('UPDATE users SET fc_units = ?, updated_at = datetime(\'now\') WHERE id = ?')
+    env.DB.prepare('UPDATE users SET fc_units = ?, updated_at = datetime(\'now\',\'+8 hours\') WHERE id = ?')
       .bind(next, uid),
     env.DB.prepare(
       `INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, ?, ?, ?)`
@@ -913,8 +913,8 @@ async function fxRate(env) {
           rate = v;
           try {
             await env.DB.prepare(
-              `INSERT INTO fx_rate (id, usd_cny, updated_at) VALUES (1, ?, datetime('now'))
-               ON CONFLICT(id) DO UPDATE SET usd_cny = excluded.usd_cny, updated_at = datetime('now')`
+              `INSERT INTO fx_rate (id, usd_cny, updated_at) VALUES (1, ?, datetime('now','+8 hours'))
+               ON CONFLICT(id) DO UPDATE SET usd_cny = excluded.usd_cny, updated_at = datetime('now','+8 hours')`
             ).bind(v).run();
           } catch (e) {}
         }
@@ -958,7 +958,7 @@ async function ticketSubmit(request, env) {
   }
 
   await env.DB.prepare(
-    'INSERT INTO tickets (uid, username, type, detail, status, created_at) VALUES (?, ?, ?, ?, ?, datetime(\'now\'))'
+    'INSERT INTO tickets (uid, username, type, detail, status, created_at) VALUES (?, ?, ?, ?, ?, datetime(\'now\',\'+8 hours\'))'
   ).bind(uid, username, type, detail, 'open').run();
 
   return json({ ok: true });
@@ -1007,7 +1007,7 @@ async function adminTicketDecide(request, env, admin) {
     return json({ ok: false, error: 'bad_request' }, 400);
   }
   const reply = String(body.reply || '').trim().slice(0, 1000);
-  const reviewedAt = action === 'closed' ? "datetime('now')" : 'NULL';
+  const reviewedAt = action === 'closed' ? "datetime('now','+8 hours')" : 'NULL';
   await env.DB.prepare(
     `UPDATE tickets SET status = ?, reply = ?, reviewed_at = ${reviewedAt} WHERE id = ?`
   ).bind(action, reply, id).run();
@@ -1107,7 +1107,7 @@ async function adminSurveySave(request, env) {
   if (body.id) {
     await env.DB.prepare(
       `UPDATE surveys SET title = ?, provider = ?, price_units = ?, grade = ?, stars = ?,
-        requirement = ?, topic = ?, duration_min = ?, entry_url = ?, status = ?, updated_at = datetime('now')
+        requirement = ?, topic = ?, duration_min = ?, entry_url = ?, status = ?, updated_at = datetime('now','+8 hours')
         WHERE id = ?`
     ).bind(...args, Number(body.id)).run();
     return json({ ok: true, id: Number(body.id) });
@@ -1128,11 +1128,11 @@ async function adminSurveyFeature(request, env) {
 
   if (body.featured) {
     await env.DB.prepare(
-      "UPDATE surveys SET featured = 1, featured_at = datetime('now'), updated_at = datetime('now') WHERE id = ?"
+      "UPDATE surveys SET featured = 1, featured_at = datetime('now','+8 hours'), updated_at = datetime('now','+8 hours') WHERE id = ?"
     ).bind(id).run();
   } else {
     await env.DB.prepare(
-      "UPDATE surveys SET featured = 0, featured_at = NULL, updated_at = datetime('now') WHERE id = ?"
+      "UPDATE surveys SET featured = 0, featured_at = NULL, updated_at = datetime('now','+8 hours') WHERE id = ?"
     ).bind(id).run();
   }
 
@@ -1237,14 +1237,14 @@ async function storeRedeem(request, env) {
 
   const sn = orderSn('O');
   const next = user.fc_units - price;
-  const now = "datetime('now')";
+  const now = "datetime('now','+8 hours')";
 
   const stmts = [];
   const orderStatus = item.kind === 'sub' ? 'pending' : 'paid';
 
   stmts.push(
     env.DB.prepare(
-      `UPDATE users SET fc_units = ?, updated_at = datetime('now') WHERE id = ?`
+      `UPDATE users SET fc_units = ?, updated_at = datetime('now','+8 hours') WHERE id = ?`
     ).bind(next, user.id)
   );
 
@@ -1264,7 +1264,7 @@ async function storeRedeem(request, env) {
   if (cdk) {
     stmts.push(
       env.DB.prepare(
-        `UPDATE cdk_codes SET status = 'used', used_by = ?, used_at = datetime('now')
+        `UPDATE cdk_codes SET status = 'used', used_by = ?, used_at = datetime('now','+8 hours')
           WHERE id = ? AND status = 'free'`
       ).bind(user.id, cdk.id)
     );
@@ -1273,7 +1273,7 @@ async function storeRedeem(request, env) {
   if (item.stock > 0) {
     stmts.push(
       env.DB.prepare(
-        `UPDATE store_items SET stock = stock - 1, updated_at = datetime('now')
+        `UPDATE store_items SET stock = stock - 1, updated_at = datetime('now','+8 hours')
           WHERE id = ? AND stock > 0`
       ).bind(item.id)
     );
@@ -1397,7 +1397,7 @@ async function withdrawApply(request, env) {
 
   await env.DB.batch([
     env.DB.prepare(
-      `UPDATE users SET fc_units = ?, fc_frozen = fc_frozen + ?, updated_at = datetime('now') WHERE id = ?`
+      `UPDATE users SET fc_units = ?, fc_frozen = fc_frozen + ?, updated_at = datetime('now','+8 hours') WHERE id = ?`
     ).bind(next, units, user.id),
     env.DB.prepare(
       `INSERT INTO withdrawals (uid, amount, channel, account, status) VALUES (?, ?, ?, ?, 'pending')`
@@ -1443,10 +1443,10 @@ async function cdkRedeem(request, env) {
 
   await env.DB.batch([
     env.DB.prepare(
-      "UPDATE cdk_codes SET status = 'used', used_by = ?, used_at = datetime('now') WHERE id = ? AND status = 'free'"
+      "UPDATE cdk_codes SET status = 'used', used_by = ?, used_at = datetime('now','+8 hours') WHERE id = ? AND status = 'free'"
     ).bind(user.id, row.id),
     env.DB.prepare(
-      `UPDATE users SET fc_units = ?, updated_at = datetime('now') WHERE id = ?`
+      `UPDATE users SET fc_units = ?, updated_at = datetime('now','+8 hours') WHERE id = ?`
     ).bind(next, user.id),
     env.DB.prepare(
       `INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, 'cdk_redeem', ?, ?)`
@@ -1494,7 +1494,7 @@ async function messageRead(request, env) {
   const body = await readJson(request) || {};
   if (body.all) {
     await env.DB.prepare(
-      "UPDATE messages SET read_at = datetime('now') WHERE uid = ? AND read_at IS NULL"
+      "UPDATE messages SET read_at = datetime('now','+8 hours') WHERE uid = ? AND read_at IS NULL"
     ).bind(session.uid).run();
     return json({ ok: true });
   }
@@ -1503,7 +1503,7 @@ async function messageRead(request, env) {
   if (!id) return json({ ok: false, error: 'bad_request' }, 400);
 
   await env.DB.prepare(
-    "UPDATE messages SET read_at = datetime('now') WHERE id = ? AND uid = ? AND read_at IS NULL"
+    "UPDATE messages SET read_at = datetime('now','+8 hours') WHERE id = ? AND uid = ? AND read_at IS NULL"
   ).bind(id, session.uid).run();
 
   return json({ ok: true });
@@ -1599,7 +1599,7 @@ async function adminItemSave(request, env) {
   if (body.id) {
     await env.DB.prepare(
       `UPDATE store_items SET title = ?, subtitle = ?, kind = ?, price_units = ?, stock = ?,
-        note = ?, deliver = ?, status = ?, sort = ?, updated_at = datetime('now') WHERE id = ?`
+        note = ?, deliver = ?, status = ?, sort = ?, updated_at = datetime('now','+8 hours') WHERE id = ?`
     ).bind(...args, Number(body.id)).run();
     return json({ ok: true, id: Number(body.id) });
   }
@@ -1793,7 +1793,7 @@ async function adminOrderDecide(request, env) {
 
   const stmts = [
     env.DB.prepare(
-      `UPDATE users SET fc_units = ?, updated_at = datetime('now') WHERE id = ?`
+      `UPDATE users SET fc_units = ?, updated_at = datetime('now','+8 hours') WHERE id = ?`
     ).bind(next, user.id),
     env.DB.prepare(
       `INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, 'admin_adjust', ?, ?)`
@@ -1946,7 +1946,7 @@ async function adminNoticeSave(request, env) {
 
     await env.DB.prepare(
       `UPDATE announcements SET title = ?, body = ?, level = ?, status = ?, pinned = ?,
-        published_at = ?, updated_at = datetime('now') WHERE id = ?`
+        published_at = ?, updated_at = datetime('now','+8 hours') WHERE id = ?`
     ).bind(title, text, level, status, pinned, publishedAt, id).run();
 
     return json({ ok: true, id: id });
@@ -2167,7 +2167,7 @@ async function adminAdjust(request, env, admin) {
   const ref = 'A' + Date.now().toString(36).toUpperCase();
   await env.DB.batch([
     env.DB.prepare(
-      "UPDATE users SET fc_units = ?, updated_at = datetime('now') WHERE id = ?"
+      "UPDATE users SET fc_units = ?, updated_at = datetime('now','+8 hours') WHERE id = ?"
     ).bind(next, uid),
     env.DB.prepare(
       'INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, ?, ?, ?)'
@@ -2194,7 +2194,7 @@ async function adminStatus(request, env, admin) {
   /* 状态变更与留痕一起写，避免改了状态却没记录 */
   await env.DB.batch([
     env.DB.prepare(
-      "UPDATE users SET status = ?, updated_at = datetime('now') WHERE id = ?"
+      "UPDATE users SET status = ?, updated_at = datetime('now','+8 hours') WHERE id = ?"
     ).bind(status, uid),
     env.DB.prepare(
       `INSERT INTO user_bans (uid, from_status, to_status, reason, by_uid, by_role)
@@ -2243,7 +2243,7 @@ async function adminRole(request, env, admin) {
   if (target.role === role) return json({ ok: true });
 
   await env.DB.prepare(
-    "UPDATE users SET role = ?, updated_at = datetime('now') WHERE id = ?"
+    "UPDATE users SET role = ?, updated_at = datetime('now','+8 hours') WHERE id = ?"
   ).bind(role, uid).run();
 
   return json({ ok: true });
@@ -2306,13 +2306,13 @@ async function adminWithdrawDecide(request, env, admin) {
     /* 打款：冻结直接划走，可用余额不变，流水记负 */
     await env.DB.batch([
       env.DB.prepare(
-        "UPDATE users SET fc_frozen = ?, updated_at = datetime('now') WHERE id = ?"
+        "UPDATE users SET fc_frozen = ?, updated_at = datetime('now','+8 hours') WHERE id = ?"
       ).bind(frozen, user.id),
       env.DB.prepare(
         'INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, ?, ?, ?)'
       ).bind(user.id, -wd.amount, user.fc_units, 'withdraw_paid', id, note || '提现打款'),
       env.DB.prepare(
-        "UPDATE withdrawals SET status = 'paid', reviewed_by = ?, review_note = ?, reviewed_at = datetime('now') WHERE id = ?"
+        "UPDATE withdrawals SET status = 'paid', reviewed_by = ?, review_note = ?, reviewed_at = datetime('now','+8 hours') WHERE id = ?"
       ).bind(admin.uid, note, id)
     ]);
   } else {
@@ -2320,13 +2320,13 @@ async function adminWithdrawDecide(request, env, admin) {
     const back = user.fc_units + wd.amount;
     await env.DB.batch([
       env.DB.prepare(
-        "UPDATE users SET fc_frozen = ?, fc_units = ?, updated_at = datetime('now') WHERE id = ?"
+        "UPDATE users SET fc_frozen = ?, fc_units = ?, updated_at = datetime('now','+8 hours') WHERE id = ?"
       ).bind(frozen, back, user.id),
       env.DB.prepare(
         'INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, ?, ?, ?)'
       ).bind(user.id, wd.amount, back, 'withdraw_refund', id, note || '提现驳回退回'),
       env.DB.prepare(
-        "UPDATE withdrawals SET status = 'rejected', reviewed_by = ?, review_note = ?, reviewed_at = datetime('now') WHERE id = ?"
+        "UPDATE withdrawals SET status = 'rejected', reviewed_by = ?, review_note = ?, reviewed_at = datetime('now','+8 hours') WHERE id = ?"
       ).bind(admin.uid, note, id)
     ]);
   }
@@ -2374,7 +2374,7 @@ function formatFc(units) {
   return sign + Math.floor(abs / FC_SCALE) + (frac ? '.' + frac : '');
 }
 
-// D1 的 datetime('now') 为 UTC，补上 T 与 Z 供前端解析
+// D1 的 datetime('now','+8 hours') 为 UTC，补上 T 与 Z 供前端解析
 function toIso(value) {
   if (!value) return null;
   if (value.includes('T')) return value;

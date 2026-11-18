@@ -117,8 +117,38 @@
       if (r.body && r.body.ok) {
         wall = r.body;
         paintWall();
+        return;
       }
+      paintWallFail(r.body && r.body.error);
+    }).catch(function () {
+      paintWallFail('network');
     });
+  }
+
+  /* 拿不到链接也要给结论，不能把「正在检查接入状态…」一直挂在那儿 */
+  function paintWallFail(code) {
+    var title = $('erTitle');
+    var desc = $('erDesc');
+    var state = $('erState');
+    var openBtn = $('mtxOpen');
+    var dot = '<span class="er-dot"></span>';
+
+    if (code === 'account_locked') {
+      if (title) title.textContent = '账户受限，广告墙暂不可用';
+      if (desc) desc.textContent = '冻结或封禁状态下不能参与广告墙。设置页的封禁记录里能看到原因，' +
+        '觉得有误可以在联系客服提交工单。';
+      if (state) { state.className = 'er-wall__st is-off'; state.innerHTML = dot + 'LIMITED / 账户受限'; }
+    } else if (code === 'network') {
+      if (title) title.textContent = '没连上服务端';
+      if (desc) desc.textContent = '刷新页面重试。一直失败可以到联系客服反馈。';
+      if (state) { state.className = 'er-wall__st is-off'; state.innerHTML = dot + 'OFFLINE / 连接失败'; }
+    } else {
+      if (title) title.textContent = '接入状态获取失败';
+      if (desc) desc.textContent = '服务端没能返回广告墙链接。刷新重试；持续失败请提交工单。';
+      if (state) { state.className = 'er-wall__st is-off'; state.innerHTML = dot + 'ERROR / 获取失败'; }
+    }
+
+    if (openBtn) { openBtn.disabled = true; openBtn.textContent = '暂不可用'; }
   }
 
   /* ---------- 记录 ---------- */

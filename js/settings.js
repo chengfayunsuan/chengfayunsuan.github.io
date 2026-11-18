@@ -160,6 +160,67 @@
       .catch(function () {});
   }
 
+  /* 我的工单 */
+  var TK_LABEL = {
+    account: '账户与登录', balance: '余额与提现', survey: '问卷与奖励',
+    report: '举报与申诉', other: '其他'
+  };
+
+  function loadTickets() {
+    var list = $('ticketList');
+    if (!list) return;
+
+    fetch('/api/ticket', { headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.ok) return;
+        var items = d.items || [];
+        if (!items.length) return;
+
+        list.textContent = '';
+
+        items.forEach(function (t) {
+          var li = document.createElement('li');
+          li.className = 'tk__i';
+
+          var hd = document.createElement('div');
+          hd.className = 'tk__hd';
+
+          var tag = document.createElement('b');
+          tag.className = 'tk__tag ' + (t.status === 'closed' ? 'is-closed' : 'is-open');
+          tag.textContent = t.status === 'closed' ? '已处理' : '处理中';
+          hd.appendChild(tag);
+
+          var kind = document.createElement('span');
+          kind.className = 'tk__at';
+          kind.textContent = TK_LABEL[t.type] || '其他';
+          hd.appendChild(kind);
+
+          var at = document.createElement('span');
+          at.className = 'tk__at';
+          at.textContent = fmtFull(t.created_at);
+          hd.appendChild(at);
+
+          li.appendChild(hd);
+
+          var body = document.createElement('p');
+          body.className = 'tk__d';
+          body.textContent = t.detail;
+          li.appendChild(body);
+
+          if (t.reply) {
+            var re = document.createElement('p');
+            re.className = 'tk__re';
+            re.textContent = '站长回复：' + t.reply;
+            li.appendChild(re);
+          }
+
+          list.appendChild(li);
+        });
+      })
+      .catch(function () {});
+  }
+
   function loadRedeems() {
     var body = $('redeemBody');
     if (!body) return;
@@ -863,6 +924,7 @@
       show(data.user);
       loadRedeems();
       loadBans();
+      loadTickets();
     })
     .catch(function () {
       loading.hidden = true;

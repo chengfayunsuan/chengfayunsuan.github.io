@@ -695,6 +695,65 @@
   color: var(--gray);
 }
 
+.tk__i {
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--hair);
+}
+
+.tk__i:last-child {
+  border-bottom: 0;
+}
+
+.tk__hd {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tk__tag {
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  line-height: 1.6;
+  border: 2px solid var(--ink);
+}
+
+.tk__tag.is-open {
+  background: var(--red);
+  border-color: var(--red);
+  color: #F4F0E6;
+}
+
+.tk__tag.is-closed {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.tk__at {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--gray);
+}
+
+.tk__d {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--ink);
+}
+
+.tk__re {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  background: #EDE8DA;
+  border-left: 3px solid var(--red);
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--ink);
+}
+
 /* ---------- 08 偏好 ---------- */
 
 .pref {
