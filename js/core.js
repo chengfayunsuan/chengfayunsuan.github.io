@@ -85,7 +85,7 @@
     '/admin/surveys': { page: 'admin-surveys', js: '/js/admin-surveys.js?v=1' },
     '/admin/orders': { page: 'admin-orders', js: '/js/admin-shop.js?v=1' },
     '/admin/items': { page: 'admin-items', js: '/js/admin-shop.js?v=1' },
-    '/admin/messages': { page: 'admin-messages', js: '/js/admin-msg.js?v=1' }
+    '/admin/messages': { page: 'admin-messages', js: '/js/admin-msg.js?v=4' }
   };
 
   function normalize(path) {

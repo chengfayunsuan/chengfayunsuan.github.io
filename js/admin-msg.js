@@ -161,13 +161,21 @@
     return row;
   }
 
+  /* 表单处于「编辑某条」还是「新建」：标题与按钮文案跟着走 */
+  function syncNoticeMode() {
+    var id = $('ntId').value;
+    $('ntFormTitle').textContent = id ? '编辑公告 #' + id : '发布公告';
+    if ($('ntPublish')) $('ntPublish').textContent = id ? '保存并发布' : '发布';
+    if ($('ntDraft')) $('ntDraft').textContent = id ? '转为草稿' : '存草稿';
+  }
+
   function fillNoticeForm(n) {
     $('ntId').value = n ? n.id : '';
     $('ntTitle').value = n ? n.title : '';
     $('ntBody').value = n ? n.body : '';
     $('ntLevel').value = n ? n.level : 'info';
     $('ntPinned').checked = n ? n.pinned : false;
-    $('ntFormTitle').textContent = n ? '编辑公告 #' + n.id : '发布公告';
+    syncNoticeMode();
     setMsg($('ntMsg'), '');
   }
 
@@ -222,8 +230,12 @@
     postJSON('/api/admin/announcements/save', payload).then(function (r) {
       btns.forEach(function (b) { if (b) b.disabled = false; });
       if (r.body && r.body.ok) {
-        fillNoticeForm(null);
-        setMsg(msg, status === 'published' ? '已发布，前台立即可见' : '已存为草稿');
+        /* 存完不清空：把 id 留在表单里，接着点「保存并发布」就是更新这一条 */
+        if (r.body.id) $('ntId').value = r.body.id;
+        syncNoticeMode();
+        setMsg(msg, status === 'published'
+          ? '已发布，前台立即可见'
+          : '已存为草稿，内容还在表单里，点「保存并发布」就能上线');
         loadNotices();
       } else {
         var e = (r.body && r.body.error) || '网络错误';
