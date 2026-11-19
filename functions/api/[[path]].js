@@ -269,7 +269,28 @@ async function me(request, env) {
   const session = await currentSession(request, env);
   if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
   const user = await profileOf(env, session.uid);
-  return json({ ok: true, user: Object.assign({}, user, clientInfo(request)) });
+
+  /* 每日登录 +1 LV：按北京时间自然日算，同一天只加一次。
+     条件写在 WHERE 里，没跨天时这条 UPDATE 影响 0 行，不产生写入。
+     冻结/封禁不加；解封当天再进来会补上加一次。 */
+  const bump = await env.DB.prepare(
+    `UPDATE users
+        SET level = level + 1,
+            lv_bonus_on = date('now','+8 hours'),
+            updated_at = datetime('now','+8 hours')
+      WHERE id = ?
+        AND status = 'active'
+        AND (lv_bonus_on IS NULL OR lv_bonus_on <> date('now','+8 hours'))`
+  ).bind(session.uid).run();
+
+  const changed = bump && bump.meta && bump.meta.changes > 0;
+  if (changed && user) user.level = Number(user.level || 0) + 1;
+
+  return json({
+    ok: true,
+    lvUp: changed,
+    user: Object.assign({}, user, clientInfo(request))
+  });
 }
 
 // 当前请求的来源 IP 与网络，供「登录与网络」区块显示
