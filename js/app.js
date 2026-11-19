@@ -1138,7 +1138,7 @@
 
           var hlv = document.createElement('span');
           hlv.className = 'ld-hero__lv';
-          hlv.textContent = 'LV ' + (it.level || 1);
+          hlv.textContent = 'LV ' + (it.level == null ? 1 : it.level);
 
           var haf = document.createElement('span');
           haf.className = 'ld-hero__af';
@@ -1201,7 +1201,7 @@
 
         var lv = document.createElement('span');
         lv.className = 'ld-lv';
-        lv.textContent = 'LV ' + (it.level || 1);
+        lv.textContent = 'LV ' + (it.level == null ? 1 : it.level);
 
         var af = document.createElement('span');
         af.className = 'ld-af';

@@ -265,17 +265,38 @@ async function logout(request, env) {
   return json({ ok: true }, 200, { 'Set-Cookie': clearCookie() });
 }
 
+/* ---------------- 经验与等级 ----------------
+   等级由经验结算，第 n 级区间 (n-1)^2*100 ~ n^2*100，与前端
+   home.js / space.js 的 levelRange 完全一致。
+   经验本身可为负；负经验时等级结算为 0，回到 0 点即回到 LV1。 */
+function levelOf(exp) {
+  const n = Number(exp) || 0;
+  if (n < 0) return 0;
+  return Math.floor(Math.sqrt(n / 100)) + 1;
+}
+
+/* 生成「经验加 delta 并同步结算等级」的 SQL 片段。
+   delta 只传内部常量（1 / 3 / -8），不接用户输入。 */
+function lvSql(delta) {
+  const d = Number(delta) || 0;
+  return `exp = exp + (${d}), level = CASE
+            WHEN exp + (${d}) < 0 THEN 0
+            WHEN exp + (${d}) = 0 THEN 1
+            ELSE CAST(SQRT((exp + (${d})) / 100.0) AS INTEGER) + 1
+          END`;
+}
+
 async function me(request, env) {
   const session = await currentSession(request, env);
   if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
   const user = await profileOf(env, session.uid);
 
-  /* 每日登录 +1 LV：按北京时间自然日算，同一天只加一次。
+  /* 每日登录 +1 点经验（不是 +1 级）：按北京时间自然日算，同一天只加一次。
      条件写在 WHERE 里，没跨天时这条 UPDATE 影响 0 行，不产生写入。
      冻结/封禁不加；解封当天再进来会补上加一次。 */
   const bump = await env.DB.prepare(
     `UPDATE users
-        SET level = level + 1,
+        SET ${lvSql(1)},
             lv_bonus_on = date('now','+8 hours'),
             updated_at = datetime('now','+8 hours')
       WHERE id = ?
@@ -284,7 +305,10 @@ async function me(request, env) {
   ).bind(session.uid).run();
 
   const changed = bump && bump.meta && bump.meta.changes > 0;
-  if (changed && user) user.level = Number(user.level || 0) + 1;
+  if (changed && user) {
+    user.exp = Number(user.exp || 0) + 1;
+    user.level = levelOf(user.exp);
+  }
 
   return json({
     ok: true,
@@ -1284,7 +1308,7 @@ async function storeRedeem(request, env) {
 
   stmts.push(
     env.DB.prepare(
-      `UPDATE users SET fc_units = ?, updated_at = datetime('now','+8 hours') WHERE id = ?`
+      `UPDATE users SET fc_units = ?, ${lvSql(3)}, updated_at = datetime('now','+8 hours') WHERE id = ?`
     ).bind(next, user.id)
   );
 
@@ -1486,7 +1510,7 @@ async function cdkRedeem(request, env) {
       "UPDATE cdk_codes SET status = 'used', used_by = ?, used_at = datetime('now','+8 hours') WHERE id = ? AND status = 'free'"
     ).bind(user.id, row.id),
     env.DB.prepare(
-      `UPDATE users SET fc_units = ?, updated_at = datetime('now','+8 hours') WHERE id = ?`
+      `UPDATE users SET fc_units = ?, ${lvSql(3)}, updated_at = datetime('now','+8 hours') WHERE id = ?`
     ).bind(next, user.id),
     env.DB.prepare(
       `INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, 'cdk_redeem', ?, ?)`
@@ -2231,10 +2255,13 @@ async function adminStatus(request, env, admin) {
   if (target.role === 'owner' && status !== 'active') return json({ ok: false, error: 'owner_lock' }, 400);
   if (target.status === status) return json({ ok: true });
 
-  /* 状态变更与留痕一起写，避免改了状态却没记录 */
+  /* 状态变更与留痕一起写，避免改了状态却没记录。
+     每次进入封禁扣 8 点经验；解封与冻结不动经验。 */
+  const lvPart = status === 'banned' ? lvSql(-8) + ', ' : '';
+
   await env.DB.batch([
     env.DB.prepare(
-      "UPDATE users SET status = ?, updated_at = datetime('now','+8 hours') WHERE id = ?"
+      `UPDATE users SET status = ?, ${lvPart}updated_at = datetime('now','+8 hours') WHERE id = ?`
     ).bind(status, uid),
     env.DB.prepare(
       `INSERT INTO user_bans (uid, from_status, to_status, reason, by_uid, by_role)

@@ -387,7 +387,7 @@
 
     var lv = document.createElement('span');
     lv.className = 'rel__lv';
-    lv.textContent = 'LV ' + (it.level || 1);
+    lv.textContent = 'LV ' + (it.level == null ? 1 : it.level);
 
     var at = document.createElement('span');
     at.className = 'rel__at';
