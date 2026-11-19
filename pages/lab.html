@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>问卷实验台 · 乘法</title>
+<meta name="description" content="乘法内部实验台：模拟问卷的成功、失败、超速、配额满、被踢与打回。">
+<meta name="theme-color" content="#E0291E">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=12">
+<link rel="stylesheet" href="/css/home.css?v=10">
+<link rel="stylesheet" href="/css/page.css?v=5">
+<link rel="stylesheet" href="/css/lab.css?v=1">
+<script src="/js/config.js?v=7"></script>
+<script src="/js/core.js?v=18"></script>
+</head>
+<body data-page="lab">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/home">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">LAB</span>
+    </a>
+
+    <div class="hm-nav">
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><span class="hm-nav__cur" aria-hidden="true">CFB</span>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/home">我</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
+    </div>
+  </div>
+</header>
+
+<div class="pg-bar">
+  <div class="wrap pg-bar__in">
+    <a class="pg-bar__a" href="/home">← 返回账户首页</a>
+    <span class="pg-bar__k">LAB / 问卷实验台</span>
+  </div>
+</div>
+
+<main class="pg">
+  <div class="wrap">
+
+    <div class="pg-head">
+      <div>
+        <span class="pg-k">LAB</span>
+        <h1 class="pg-t">问卷实验台</h1>
+        <p class="pg-d">
+          选一种结局，走一遍完整流程：开始答卷 → 提交 → 服务商给结果。
+          每一笔都写真账，余额、经验、等级、参与记录会同步变化。
+          只对站长和管理员开放。
+        </p>
+      </div>
+      <div class="pg-side">
+        <b>6</b>
+        <span>种结局</span>
+      </div>
+    </div>
+
+    <section class="lab-state">
+      <div class="lab-state__i"><span>可用余额</span><b id="stFc">—</b></div>
+      <div class="lab-state__i"><span>冻结</span><b id="stFrozen">—</b></div>
+      <div class="lab-state__i"><span>经验</span><b id="stExp">—</b></div>
+      <div class="lab-state__i"><span>等级</span><b id="stLevel">—</b></div>
+      <div class="lab-state__i"><span>好感度</span><b id="stAff">—</b></div>
+    </section>
+
+    <h2 class="lab-h">选一种结局</h2>
+    <div class="lab-cases" id="cases"></div>
+
+    <section class="lab-live" id="live" hidden>
+      <div class="lab-live__in">
+        <div>
+          <span class="lab-live__k">进行中</span>
+          <b id="liveName">—</b>
+          <span class="lab-live__t" id="liveTime">0 秒</span>
+        </div>
+        <div class="lab-live__act">
+          <button class="btn btn--s" id="liveSubmit" type="button">提交答卷</button>
+          <button class="lab-drop" id="liveDrop" type="button">丢弃</button>
+        </div>
+      </div>
+    </section>
+
+    <h2 class="lab-h">结果</h2>
+    <div class="lab-log" id="logBox">
+      <pre id="log">等待操作…</pre>
+    </div>
+
+  </div>
+</main>
+
+<script src="/js/lab.js?v=1" defer></script>
+</body>
+</html>

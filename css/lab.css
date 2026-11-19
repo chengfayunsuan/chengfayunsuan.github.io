@@ -1,0 +1,192 @@
+/* 实验台 · 只有这一页用，刻意做得像一块操作面板：色块、等宽日志、不加动效 */
+
+.lab-state {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border: 3px solid var(--ink);
+  background: #fff;
+  margin: 26px 0 30px;
+}
+
+.lab-state__i {
+  padding: 14px 16px;
+  border-right: 1px solid var(--hair);
+}
+
+.lab-state__i:last-child { border-right: 0; }
+
+.lab-state__i span {
+  display: block;
+  font-size: 11px;
+  letter-spacing: .08em;
+  color: var(--gray);
+  text-transform: uppercase;
+}
+
+.lab-state__i b {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--num);
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: .01em;
+}
+
+.lab-h {
+  font-size: 13px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--hair);
+}
+
+/* ---------- 结局卡片 ---------- */
+
+.lab-cases {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(196px, 1fr));
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.lab-case {
+  text-align: left;
+  padding: 16px 16px 18px;
+  border: 3px solid var(--ink);
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 5px 5px 0 rgba(20, 19, 15, .12);
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+
+.lab-case:hover {
+  background: var(--paper-2);
+  transform: translate(-1px, -1px);
+  box-shadow: 7px 7px 0 rgba(20, 19, 15, .18);
+}
+
+.lab-case:active {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 rgba(20, 19, 15, .18);
+}
+
+.lab-case[disabled] {
+  opacity: .45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.lab-case__k {
+  display: block;
+  font-family: var(--num);
+  font-size: 11px;
+  letter-spacing: .14em;
+  color: var(--red);
+}
+
+.lab-case__t {
+  display: block;
+  margin: 4px 0 6px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+}
+
+.lab-case__d {
+  display: block;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--gray);
+}
+
+/* ---------- 进行中 ---------- */
+
+.lab-live {
+  border: 3px solid var(--red);
+  background: #fff;
+  margin-bottom: 30px;
+  box-shadow: 6px 6px 0 rgba(224, 41, 30, .18);
+}
+
+.lab-live__in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+}
+
+.lab-live__k {
+  display: block;
+  font-family: var(--num);
+  font-size: 11px;
+  letter-spacing: .14em;
+  color: var(--red);
+}
+
+.lab-live__in b {
+  display: block;
+  font-size: 18px;
+  margin-top: 2px;
+}
+
+.lab-live__t {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--mono, ui-monospace, Consolas, monospace);
+  font-size: 12px;
+  color: var(--gray);
+}
+
+.lab-live__act {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lab-drop {
+  border: 0;
+  background: none;
+  color: var(--gray);
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 4px 2px;
+}
+
+.lab-drop:hover { color: var(--red); }
+
+/* ---------- 日志 ---------- */
+
+.lab-log {
+  border: 3px solid var(--ink);
+  background: var(--ink);
+  padding: 4px;
+}
+
+.lab-log pre {
+  margin: 0;
+  padding: 14px 16px;
+  min-height: 190px;
+  max-height: 440px;
+  overflow: auto;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.85;
+  color: #E7E1D2;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.lab-log .ok { color: #7BD88F; }
+.lab-log .bad { color: #FF8A80; }
+.lab-log .dim { color: #8D8577; }
+
+@media (max-width: 860px) {
+  .lab-state { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lab-state__i { border-bottom: 1px solid var(--hair); }
+  .lab-live__in { flex-direction: column; align-items: flex-start; }
+}
