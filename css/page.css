@@ -11,18 +11,21 @@
   color: var(--paper);
 }
 
+/* 宽度与顶部导航一致：铺满整屏、两侧同一种留白 */
 .pg-bar__in {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 13px 0;
+  width: 100%;
+  max-width: none;
+  padding: 14px clamp(16px, 2.2vw, 40px);
 }
 
 .pg-bar__a {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
-  letter-spacing: .04em;
+  letter-spacing: .02em;
   transition: color .14s ease;
 }
 
@@ -30,9 +33,9 @@
 
 .pg-bar__k {
   font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: .2em;
-  color: #B8B0A0;
+  font-size: 12px;
+  letter-spacing: .16em;
+  color: #C6BEAE;
 }
 
 /* ---------- 页头 ---------- */
