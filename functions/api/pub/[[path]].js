@@ -215,7 +215,7 @@ export async function onRequestGet(context) {
       user: Object.assign(base, {
         fc: fc(row.fc_units),
         fcFrozen: fc(row.fc_frozen),
-        level: row.level || 1,
+        level: row.level == null ? 1 : row.level,
         exp: row.exp || 0,
         affinity: row.affinity || 0,
         bio: row.bio || '',

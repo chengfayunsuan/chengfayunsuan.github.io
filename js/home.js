@@ -178,10 +178,12 @@
     return n < 1 ? 1 : n;
   }
 
-  /* 等级区间：第 n 级起点为 (n-1)^2 * 100 点经验 */
+  /* 等级区间：每级 100 分，第 n 级 [(n-1)*100, n*100)
+     LV1 = 0～99、LV0 = -100～-1、LV-1 = -200～-100，负等级一样有进度条 */
   function levelRange(level) {
-    var lv = Math.max(1, level | 0);
-    return { from: Math.pow(lv - 1, 2) * 100, to: Math.pow(lv, 2) * 100 };
+    var lv = level | 0;
+    var from = (lv - 1) * 100;
+    return { from: from, to: from + 100 };
   }
 
   /* ---------- 渲染 ---------- */

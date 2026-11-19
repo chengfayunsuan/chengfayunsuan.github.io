@@ -500,13 +500,13 @@
     $('sub').textContent =
       '注册于 ' + (u.joinedMonth || '未记录') + ' · 已加入 ' + (u.joinedDays || 1) + ' 天';
 
-    /* 经验：第 n 级起点 (n-1)^2*100，第 n 级终点 n^2*100。
-       经验为负时等级是 0，进度条按 LV1 区间显示、停在 0%。 */
+    /* 经验：每级 100 分，第 n 级区间 [(n-1)*100, n*100)
+       LV0 是 -100～-1，LV-1 是 -200～-100，负等级同样有进度条 */
     var lv = u.level == null ? 1 : Number(u.level);
     var exp = u.exp || 0;
-    var start = lv > 0 ? Math.pow(lv - 1, 2) * 100 : 0;
-    var next = lv > 0 ? lv * lv * 100 : 100;
-    var pct = next > start ? ((exp - start) / (next - start)) * 100 : 0;
+    var start = (lv - 1) * 100;
+    var next = lv * 100;
+    var pct = ((exp - start) / 100) * 100;
     pct = Math.max(0, Math.min(100, pct));
 
     /* 余额是这块的主数字，位数多了要缩字号，免得撑破格子 */
@@ -523,9 +523,7 @@
     $('aff').textContent = u.affinity || 0;
 
     var hint = $('expHint');
-    if (lv <= 0) {
-      hint.textContent = '经验为负，回到 0 点即可回到 LV1。';
-    } else if (exp >= next) {
+    if (exp >= next) {
       hint.textContent = '已达到当前等级上限，等待等级结算。';
     } else {
       hint.textContent = '再获得 ' + (next - exp) + ' 点经验升至 LV' + (lv + 1) + '。';

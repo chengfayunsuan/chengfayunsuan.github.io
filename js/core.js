@@ -76,7 +76,7 @@
   /* ---------- 同导航组 SPA ---------- */
 
   var ROUTES = {
-    '/home': { page: 'home', js: '/js/home.js?v=11' },
+    '/home': { page: 'home', js: '/js/home.js?v=12' },
     '/settings': { page: 'settings', js: '/js/settings.js?v=19', css: ['/css/settings.css?v=17', '/css/relation.css?v=2'] },
     '/admin': { page: 'admin', js: '/js/admin.js?v=7' },
     '/admin/users': { page: 'admin-users', js: '/js/admin.js?v=7' },

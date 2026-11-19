@@ -266,24 +266,18 @@ async function logout(request, env) {
 }
 
 /* ---------------- 经验与等级 ----------------
-   等级由经验结算，第 n 级区间 (n-1)^2*100 ~ n^2*100，与前端
-   home.js / space.js 的 levelRange 完全一致。
-   经验本身可为负；负经验时等级结算为 0，回到 0 点即回到 LV1。 */
+   每级固定 100 分，线性结算：第 n 级区间 [(n-1)*100, n*100)。
+   所以 LV1 = 0～99，LV0 = -100～-1，LV-1 = -200～-100，允许负等级。
+   前端 home.js / space.js 的 levelRange 与这里必须一致。 */
 function levelOf(exp) {
-  const n = Number(exp) || 0;
-  if (n < 0) return 0;
-  return Math.floor(Math.sqrt(n / 100)) + 1;
+  return Math.floor((Number(exp) || 0) / 100) + 1;
 }
 
 /* 生成「经验加 delta 并同步结算等级」的 SQL 片段。
    delta 只传内部常量（1 / 3 / -8），不接用户输入。 */
 function lvSql(delta) {
   const d = Number(delta) || 0;
-  return `exp = exp + (${d}), level = CASE
-            WHEN exp + (${d}) < 0 THEN 0
-            WHEN exp + (${d}) = 0 THEN 1
-            ELSE CAST(SQRT((exp + (${d})) / 100.0) AS INTEGER) + 1
-          END`;
+  return `exp = exp + (${d}), level = CAST(FLOOR((exp + (${d})) / 100.0) AS INTEGER) + 1`;
 }
 
 async function me(request, env) {
@@ -864,7 +858,7 @@ async function ladder(request, env, url) {
     uid: row.id,
     username: row.username,
     role: row.role,
-    level: row.level || 1,
+    level: row.level == null ? 1 : row.level,
     exp: row.exp || 0,
     affinity: row.affinity || 0,
     fc: formatFc(row.fc_units)
@@ -2445,7 +2439,7 @@ function adminUserRow(r) {
     status: r.status,
     fc: formatFc(r.fc_units),
     fcFrozen: formatFc(r.fc_frozen),
-    level: r.level || 1,
+    level: r.level == null ? 1 : r.level,
     createdAt: toIso(r.created_at)
   };
 }
