@@ -77,7 +77,7 @@
 
   var ROUTES = {
     '/home': { page: 'home', js: '/js/home.js?v=11' },
-    '/settings': { page: 'settings', js: '/js/settings.js?v=18', css: ['/css/settings.css?v=15', '/css/relation.css?v=2'] },
+    '/settings': { page: 'settings', js: '/js/settings.js?v=19', css: ['/css/settings.css?v=17', '/css/relation.css?v=2'] },
     '/admin': { page: 'admin', js: '/js/admin.js?v=7' },
     '/admin/users': { page: 'admin-users', js: '/js/admin.js?v=7' },
     '/admin/withdrawals': { page: 'admin-withdrawals', js: '/js/admin.js?v=7' },

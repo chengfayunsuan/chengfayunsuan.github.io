@@ -464,6 +464,21 @@
   border-bottom: 1px solid var(--hair);
 }
 
+/* 03 账号安全：编辑面板不挤在三列里，单独占一整行 */
+.sec-edit {
+  margin-top: 18px;
+}
+
+.sec-edit .edit {
+  padding: 20px 22px 22px;
+  border: 3px solid var(--ink);
+  background: #fff;
+  box-shadow: 6px 6px 0 rgba(20, 19, 15, .07);
+}
+
+.sec-edit .edit__grid { max-width: none; }
+.sec-edit .edit__a { margin-top: 2px; }
+
 .edit__f {
   margin-bottom: 14px;
 }

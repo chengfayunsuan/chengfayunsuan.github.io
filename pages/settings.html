@@ -11,10 +11,10 @@
   <meta name="robots" content="noindex">
   <link rel="stylesheet" href="/css/style.css?v=12">
   <link rel="stylesheet" href="/css/home.css?v=12">
-  <link rel="stylesheet" href="/css/settings.css?v=15">
+  <link rel="stylesheet" href="/css/settings.css?v=17">
   <link rel="stylesheet" href="/css/relation.css?v=2">
   <script src="/js/config.js?v=7"></script>
-  <script src="/js/core.js?v=18"></script>
+  <script src="/js/core.js?v=20"></script>
 </head>
 
 <body data-page="settings">
@@ -192,18 +192,6 @@
               <button class="btn btn--ghost btn--s" type="button" data-edit="name">更改</button>
             </div>
 
-            <form class="edit" id="formName" hidden novalidate>
-              <div class="edit__f">
-                <label class="fld__l" for="newName">新用户名</label>
-                <input class="fld" id="newName" name="username" type="text" maxlength="20" autocomplete="nickname"
-                  placeholder="输入新的用户名">
-              </div>
-              <div class="edit__a">
-                <button class="btn btn--red btn--s" type="submit" id="saveName">保存</button>
-                <button class="btn btn--ghost btn--s" type="button" data-cancel="name">取消</button>
-              </div>
-              <p class="edit__e" id="nameErr" hidden></p>
-            </form>
 
           </div>
 
@@ -218,23 +206,6 @@
               <button class="btn btn--ghost btn--s" type="button" data-edit="email">更改</button>
             </div>
 
-            <form class="edit" id="formEmail" hidden novalidate>
-              <div class="edit__f">
-                <label class="fld__l" for="newEmail">新邮箱</label>
-                <input class="fld" id="newEmail" name="email" type="email" spellcheck="false" autocomplete="email"
-                  placeholder="name@example.com">
-              </div>
-              <div class="edit__f">
-                <label class="fld__l" for="emailPw">当前密码</label>
-                <input class="fld" id="emailPw" name="password" type="password" autocomplete="current-password"
-                  placeholder="确认是你本人操作">
-              </div>
-              <div class="edit__a">
-                <button class="btn btn--red btn--s" type="submit" id="saveEmail">保存</button>
-                <button class="btn btn--ghost btn--s" type="button" data-cancel="email">取消</button>
-              </div>
-              <p class="edit__e" id="emailErr" hidden></p>
-            </form>
 
           </div>
 
@@ -248,6 +219,46 @@
               </div>
               <button class="btn btn--ghost btn--s" type="button" data-edit="pw">更改</button>
             </div>
+
+          </div>
+        </div>
+
+        <div class="sec-edit" id="secEdit" hidden>
+
+            <form class="edit" id="formName" hidden novalidate>
+              <div class="edit__grid">
+                <div class="edit__f">
+                  <label class="fld__l" for="newName">新用户名</label>
+                  <input class="fld" id="newName" name="username" type="text" maxlength="20" autocomplete="nickname"
+                    placeholder="输入新的用户名">
+                </div>
+              </div>
+              <div class="edit__a">
+                <button class="btn btn--red btn--s" type="submit" id="saveName">保存</button>
+                <button class="btn btn--ghost btn--s" type="button" data-cancel="name">取消</button>
+              </div>
+              <p class="edit__e" id="nameErr" hidden></p>
+            </form>
+
+            <form class="edit" id="formEmail" hidden novalidate>
+              <div class="edit__grid">
+                <div class="edit__f">
+                  <label class="fld__l" for="newEmail">新邮箱</label>
+                  <input class="fld" id="newEmail" name="email" type="email" spellcheck="false" autocomplete="email"
+                    placeholder="name@example.com">
+                </div>
+                <div class="edit__f">
+                  <label class="fld__l" for="emailPw">当前密码</label>
+                  <input class="fld" id="emailPw" name="password" type="password" autocomplete="current-password"
+                    placeholder="确认是你本人操作">
+                </div>
+              </div>
+              <div class="edit__a">
+                <button class="btn btn--red btn--s" type="submit" id="saveEmail">保存</button>
+                <button class="btn btn--ghost btn--s" type="button" data-cancel="email">取消</button>
+              </div>
+              <p class="edit__e" id="emailErr" hidden></p>
+            </form>
 
             <form class="edit" id="formPw" hidden novalidate>
               <div class="edit__grid">
@@ -270,7 +281,7 @@
               </div>
               <p class="edit__e" id="pwErr" hidden></p>
             </form>
-          </div>
+
         </div>
       </div>
     </section>
@@ -508,7 +519,7 @@
     </div>
   </footer>
 
-  <script src="/js/settings.js?v=18" defer></script>
+  <script src="/js/settings.js?v=19" defer></script>
 </body>
 
 </html>

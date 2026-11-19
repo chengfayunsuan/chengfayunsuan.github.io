@@ -571,6 +571,9 @@
     ['name', 'email', 'pw'].forEach(function (k) {
       $('form' + k.charAt(0).toUpperCase() + k.slice(1)).hidden = k !== which;
     });
+    /* 表单搬到三列下方整行显示，容器跟着展开 */
+    var panel = $('secEdit');
+    if (panel) panel.hidden = false;
     if (which === 'name') { $('newName').value = current ? current.username : ''; $('newName').focus(); }
     if (which === 'email') { $('newEmail').value = ''; $('emailPw').value = ''; $('newEmail').focus(); }
     if (which === 'pw') { $('oldPw').value = ''; $('newPw').value = ''; $('newPw2').value = ''; $('oldPw').focus(); }
@@ -583,6 +586,8 @@
       var err = f.querySelector('.edit__e');
       if (err) { err.hidden = true; err.textContent = ''; }
     });
+    var panel = $('secEdit');
+    if (panel) panel.hidden = true;
   }
 
   document.querySelectorAll('[data-edit]').forEach(function (btn) {
