@@ -27,11 +27,15 @@
 
 ## Postback URL 填什么
 
+**必须带宏**，只填路径的话后端收不到任何参数：
+
 ```
-https://chengfa-761.pages.dev/api/moonetix/postback
+https://chengfa-761.pages.dev/api/moonetix/postback?user={user_id}&tx={transaction_id}&event={event_id}&status={status}&reward={reward}&payout={payout}&hash={hash}
 ```
 
-自定义域名上线后换成自己的域名。这个地址 GET / POST 都收，返回纯文本 `ok`（HTTP 200）。
+宏名照官方的来：用户是 `user`、交易号是 `tx`（后端两种写法都认，但官方只发这一套）。
+自定义域名上线后把前半段换掉。GET / POST 都收，返回纯文本 `ok`（HTTP 200），
+**6 秒内必须响应**（我们是毫秒级）。
 
 ## 奖励怎么算
 
@@ -44,20 +48,36 @@ Split 按你想给用户的比例，Rounding 选「最多 3 位小数」。
 ## 幂等与冲正
 
 - `transaction_id` 在 `mo_task` 表有唯一索引：同一条回调打十次也只入一次账。
-- `status=1` 入账，`status=2` 冲正（扣回原面额，余额不够就扣到 0，流水里注明实际扣除额）。
-- 两种都是先查原单，找不到 `status=2` 的直接回 `ok`，避免对方无限重试。
+- `status=1` 入账，`status=2` 冲正（扣回当初入账的原面额；余额不够就扣成负数，流水里写明）。
+- 未知单号的 `status=2` 记一条 `unknown-reversal` 占位，防止迟到的入账再发钱。
 
-## 接入后必须核对的一件事
+## 签名（已按官方开源实现核对过）
 
-**签名串的拼法**是按常见约定写的（除签名字段外所有参数按名字升序拼 `k=v&k=v`，用
-`MOONETIX_POSTBACK_KEY` 做 HMAC-SHA256，小写 hex）。正式接入时打开
-<https://docs.moonetix.com/postbacks> 对一眼，如果官方拼法不同，只改一个函数：
+官方在 <https://github.com/moonetix/offerwall-postback-handlers> 放了 PHP / Node / Python / Java
+四份 handler 和 20 个测试用例。签名串就是这一行，没有别的花样：
 
 ```
-mtxSignatureOk()   // functions/api/[[path]].js
+hash = hex( HMAC-SHA256( key = postback secret key,
+                         message = tx + ":" + user + ":" + reward + ":" + status ) )
 ```
 
-改完用后台 Integration 页的 **Send a test postback** 打一条，看线上返回是不是 `ok`。
+- 只有这四个值参与，用冒号连接；`payout` / `event` / `offer_id` / `offer_name` **不签**
+- `reward` 必须用收到的原串，`150` 和 `150.00` 算出来的哈希不同 —— 不要格式化、不要四舍五入
+- 小写 hex、64 位；缺 hash 回 400，签名不对回 403
+- 用的是 **postback secret key**，不是 link hash salt
+
+之前猜的「所有参数按名字升序拼 k=v」是错的，已改成上面的写法（`mtxSignatureOk`）。
+
+**冲正语义也照官方**：`status=2` 扣回的是**当初入账的那笔金额**（不是回调里带的 reward）；
+余额不够就扣成负数；收到从没入过账的 `status=2` 会记一条 `unknown-reversal` 占位，
+之后迟到的 `status=1` 查到这个占位就不再发钱。
+
+自测用官方工具，它按官方规则生成带签名的回调，连篡改和并发重复一起测：
+
+```
+npx github:moonetix/postback-tester --preset moonetix \
+  'https://chengfa-761.pages.dev/api/moonetix/postback?user={user_id}&tx={transaction_id}&event={event_id}&status={status}&reward={reward}&payout={payout}&hash={hash}' --user 1
+```
 
 ## 测试与排查
 

@@ -530,19 +530,25 @@ async function mtxParams(request, url) {
   return p;
 }
 
-/* 签名：除签名字段外所有参数按名字升序拼 k=v&k=v，用 postback key 做 HMAC-SHA256
-   注意·正式接入时按官网 postbacks 页核对一遍签名串的拼法，改这里即可 */
+/* 签名按官方开源 handler（github.com/moonetix/offerwall-postback-handlers）的约定：
+   HMAC-SHA256(key = postback secret key, message = tx + ":" + user + ":" + reward + ":" + status)
+   只签这四个值，payout / event / offer_id / offer_name 都不参与签名；
+   reward 必须用收到的原串，150 和 150.00 算出来的哈希不一样。
+   返回 ok / missing / invalid 三态：缺 hash 回 400，错 hash 回 403。 */
 async function mtxSignatureOk(c, p) {
-  if (!c.live) return true;   // 演示模式不校验，入账口只对站长开放
+  if (!c.live) return 'ok';   // 演示模式不校验，入账口只对站长开放
 
-  const given = String(p.signature || p.sig || p.hash || '').trim().toLowerCase();
-  if (!given) return false;
+  const given = String(p.hash || p.signature || p.sig || '').trim().toLowerCase();
+  if (!given) return 'missing';
+  if (!/^[0-9a-f]{64}$/.test(given)) return 'missing';
 
-  const skip = { signature: 1, sig: 1, hash: 1 };
-  const keys = Object.keys(p).filter(function (k) { return !skip[k]; }).sort();
-  const raw = keys.map(function (k) { return k + '=' + p[k]; }).join('&');
-  const want = await hmacHex(c.key, raw);
-  return want === given;
+  const tid = String(p.tx || p.transaction_id || '');
+  const user = String(p.user || p.user_id || '');
+  const reward = p.reward == null ? '' : String(p.reward);
+  const status = p.status == null ? '' : String(p.status);
+
+  const want = await hmacHex(c.key, tid + ':' + user + ':' + reward + ':' + status);
+  return want === given ? 'ok' : 'invalid';
 }
 
 /* 入账 / 冲正，两个模式共用 */
@@ -587,11 +593,18 @@ async function mtxApply(env, args) {
     return { ok: true, credited: mtxFc(units), balance: mtxFc(next) };
   }
 
-  /* status 2：冲正，把当初发的扣回来；找不到原单就当场认了，避免对方一直重试 */
+  /* status 2：冲正，把当初发的扣回来；找不到原单就记一条已冲正的占位，
+     这样之后迟到的 status 1 不会再发钱（官方 handler 的做法） */
   const row = await env.DB.prepare(
     'SELECT id, uid, reward_units, status FROM mo_task WHERE transaction_id = ?'
   ).bind(tid).first();
-  if (!row) return { ok: true, unknown: true };
+  if (!row) {
+    await env.DB.prepare(
+      `INSERT OR IGNORE INTO mo_task (uid, transaction_id, event_id, reward_units, status, reversed_at)
+       VALUES (?, ?, 'unknown-reversal', 0, 2, datetime('now','+8 hours'))`
+    ).bind(uid, tid).run();
+    return { ok: true, unknown: true };
+  }
   if (row.status === 2) return { ok: true, duplicated: true };
   if (Number(row.uid) !== uid) return { ok: false, error: 'uid_mismatch' };
 
@@ -600,9 +613,10 @@ async function mtxApply(env, args) {
   ).bind(uid).first();
   if (!user) return { ok: true, no_user: true };
 
+  /* 精确扣回当初发的数，余额不够就扣成负数：账不平比负余额更麻烦 */
   const want = Number(row.reward_units);
-  const deduct = Math.min(want, Math.max(0, Number(user.fc_units)));
-  const next = Number(user.fc_units) - deduct;
+  const before = Number(user.fc_units);
+  const next = before - want;
 
   await env.DB.batch([
     env.DB.prepare(
@@ -612,31 +626,36 @@ async function mtxApply(env, args) {
       .bind(next, uid),
     env.DB.prepare(
       `INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, ?, ?, ?)`
-    ).bind(uid, -deduct, next, 'moonetix_reverse', tid,
-      deduct < want ? '广告墙冲正（余额不足，实际扣 ' + mtxFc(deduct) + '）' : '广告墙冲正')
+    ).bind(uid, -want, next, 'moonetix_reverse', tid,
+      next < 0 ? '广告墙冲正（余额不足，已转负 ' + mtxFc(next) + '）' : '广告墙冲正')
   ]);
 
-  return { ok: true, reversed: mtxFc(deduct), balance: mtxFc(next) };
+  return { ok: true, reversed: mtxFc(want), balance: mtxFc(next) };
 }
 
 async function mtxPostback(request, env, url) {
   const c = mtxConf(env);
   const p = await mtxParams(request, url);   /* body 只能读一次，签名和入账共用这一份 */
 
-  if (c.live && !(await mtxSignatureOk(c, p))) {
-    /* 只打键名，不打值，方便对接时排查又不把用户数据写进日志 */
-    console.error('mtx postback signature mismatch, keys:', Object.keys(p).join(','));
-    return mtxText('bad signature', 401);
+  if (c.live) {
+    const sig = await mtxSignatureOk(c, p);
+    if (sig === 'missing') return mtxText('missing hash', 400);
+    if (sig === 'invalid') {
+      /* 只打键名，不打值，方便对接时排查又不把用户数据写进日志 */
+      console.error('mtx postback signature mismatch, keys:', Object.keys(p).join(','));
+      return mtxText('invalid hash', 403);
+    }
   }
 
-  const uid = Number(p.user_id || 0);
-  const tid = String(p.transaction_id || '').trim();
+  /* 官方宏名是 user / tx；旧写法 user_id / transaction_id 一起认，方便自测 */
+  const uid = Number(p.user || p.user_id || 0);
+  const tid = String(p.tx || p.transaction_id || '').trim();
   const status = Number(p.status || 1);
   const reward = Number(p.reward || 0);
 
-  if (!(uid > 0) || !tid) return mtxText('bad request', 400);
-  if (status !== 1 && status !== 2) return mtxText('bad status', 400);
-  if (!isFinite(reward) || reward < 0) return mtxText('bad reward', 400);
+  if (!(uid > 0) || !tid) return mtxText('bad parameters', 400);
+  if (status !== 1 && status !== 2) return mtxText('bad parameters', 400);
+  if (!isFinite(reward) || reward < 0) return mtxText('bad parameters', 400);
 
   const res = await mtxApply(env, {
     uid: uid,
@@ -644,9 +663,9 @@ async function mtxPostback(request, env, url) {
     status: status,
     units: Math.round(reward * FC_SCALE),
     meta: {
-      eventId: p.event_id || '',
+      eventId: p.event || p.event_id || '',
       offerId: p.offer_id || '',
-      offerName: p.offer_name || '',
+      offerName: p.offer_name || (p.offer_id ? '任务 #' + p.offer_id : ''),
       payout: p.payout || '',
       currency: p.currency || '',
       ip: request.headers.get('CF-Connecting-IP') || ''
