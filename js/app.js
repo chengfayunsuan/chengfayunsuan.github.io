@@ -1102,79 +1102,16 @@
       list.textContent = '';
 
       rows.forEach(function (it, i) {
-        /* 前三名：整行大块，三种底色 */
-        if (i < 3 && hero) {
-          var hrow = document.createElement('li');
-          hrow.className = 'ld-hero__row is-r' + (i + 1);
-
-          var hrank = document.createElement('span');
-          hrank.className = 'ld-hero__rank';
-          hrank.textContent = rowText(i + 1);
-
-          var hwho = document.createElement('span');
-          hwho.className = 'ld-hero__who';
-
-          var ha = document.createElement('a');
-          ha.className = 'ld-hero__name';
-          ha.href = '/space?uid=' + encodeURIComponent(it.uid);
-          ha.textContent = it.username || '未命名';
-
-          var huid = document.createElement('span');
-          huid.className = 'ld-hero__uid';
-          huid.textContent = 'UID ' + it.uid;
-
-          hwho.appendChild(ha);
-          hwho.appendChild(huid);
-
-          if (me && String(me.uid) === String(it.uid)) {
-            var hme = document.createElement('span');
-            hme.className = 'ld-me';
-            hme.textContent = 'ME';
-            hwho.appendChild(hme);
-          }
-
-          var hstats = document.createElement('span');
-          hstats.className = 'ld-hero__stats';
-
-          var hlv = document.createElement('span');
-          hlv.className = 'ld-hero__lv';
-          hlv.textContent = 'LV ' + (it.level == null ? 1 : it.level);
-
-          var haf = document.createElement('span');
-          haf.className = 'ld-hero__af';
-          haf.textContent = it.affinity || 0;
-          var hafu = document.createElement('i');
-          hafu.textContent = '好感';
-          haf.appendChild(hafu);
-
-          var hfc = document.createElement('span');
-          hfc.className = 'ld-hero__fc';
-          var hfcn = document.createElement('b');
-          setAmt(hfcn, it.fc);
-          hfc.appendChild(hfcn);
-          var hfcu = document.createElement('i');
-          hfcu.setAttribute('data-cur', 'code');
-          hfcu.textContent = 'CFB';
-          hfc.appendChild(hfcu);
-
-          hstats.appendChild(hlv);
-          hstats.appendChild(haf);
-          hstats.appendChild(hfc);
-
-          hrow.appendChild(hrank);
-          hrow.appendChild(hwho);
-          hrow.appendChild(hstats);
-          hero.appendChild(hrow);
-          return;
-        }
-
-        /* 第四名起：普通行，名次接着前三往下排 */
         var rank = i + 1;
-        var li = document.createElement('li');
-        li.className = 'ld-row';
+        var isHero = i < 3;
+        var isMe = me && String(me.uid) === String(it.uid);
+
+        /* 前三名与普通行用同一套六列：名次 / 用户名 / UID / LV / 好感 / 分数 */
+        var row = document.createElement('li');
+        row.className = isHero ? 'ld-hero__row is-r' + rank : 'ld-row';
 
         var rk = document.createElement('span');
-        rk.className = 'ld-rank';
+        rk.className = isHero ? 'ld-hero__rank' : 'ld-rank';
         rk.textContent = rowText(rank);
 
         var who = document.createElement('span');
@@ -1184,20 +1121,18 @@
         a.className = 'ld-name';
         a.href = '/space?uid=' + encodeURIComponent(it.uid);
         a.textContent = it.username || '未命名';
-
-        var uid = document.createElement('span');
-        uid.className = 'ld-uid';
-        uid.textContent = 'UID ' + it.uid;
-
         who.appendChild(a);
-        who.appendChild(uid);
 
-        if (me && String(me.uid) === String(it.uid)) {
+        if (isMe) {
           var tag = document.createElement('span');
           tag.className = 'ld-me';
           tag.textContent = 'ME';
           who.appendChild(tag);
         }
+
+        var uid = document.createElement('span');
+        uid.className = 'ld-uid';
+        uid.textContent = 'UID ' + it.uid;
 
         var lv = document.createElement('span');
         lv.className = 'ld-lv';
@@ -1220,12 +1155,14 @@
         fcu.textContent = 'CFB';
         fc.appendChild(fcu);
 
-        li.appendChild(rk);
-        li.appendChild(who);
-        li.appendChild(lv);
-        li.appendChild(af);
-        li.appendChild(fc);
-        list.appendChild(li);
+        row.appendChild(rk);
+        row.appendChild(who);
+        row.appendChild(uid);
+        row.appendChild(lv);
+        row.appendChild(af);
+        row.appendChild(fc);
+
+        (isHero ? hero : list).appendChild(row);
       });
 
       empty.hidden = rows.length > 0;

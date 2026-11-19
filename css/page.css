@@ -576,20 +576,23 @@
 /* ---------- 天梯榜 ---------- */
 
 .ld-list {
-  max-width: 900px;
-  margin: 26px 0 0;
+  max-width: 780px;
+  margin: 0;
   padding: 0;
   list-style: none;
   border-top: 4px solid var(--ink);
 }
 
+/* 名次 / 用户名 / UID / LV / 好感 / 分数，六列与前三名完全同一套 */
 .ld-row {
   display: grid;
-  grid-template-columns: 60px minmax(0, 1fr) 92px 112px 150px;
+  grid-template-columns: 54px minmax(0, 1fr) 76px 72px 84px 128px;
   align-items: center;
   gap: 14px;
-  /* 右侧留 10px，法币单位不贴边 */
-  padding: 14px 10px 14px 0;
+  min-height: 54px;
+  padding: 0 10px;
+  /* 上下留 3px 透明边，和前三名的 3px 实边对齐 */
+  border: 3px solid transparent;
   border-bottom: 1px solid var(--hair);
 }
 
@@ -1008,25 +1011,28 @@
   }
 }
 
-/* ---------- 天梯榜 · 前三整行 ---------- */
+/* ---------- 天梯榜 · 前三名与普通行同一套列 ---------- */
 
 .ld-hero {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin: 26px 0 0;
+  gap: 10px;
+  max-width: 780px;
+  margin: 26px 0 10px;
   padding: 0;
   list-style: none;
 }
 
-.ld-hero:empty { display: none; }
+.ld-hero:empty { display: none; margin: 0; }
 
+/* 列宽与 .ld-row 完全一致，所以上下严格对齐 */
 .ld-hero__row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: 54px minmax(0, 1fr) 76px 72px 84px 128px;
   align-items: center;
-  gap: 12px 24px;
-  padding: 18px 26px;
+  gap: 14px;
+  min-height: 66px;
+  padding: 0 10px;
   border: 3px solid var(--ink);
   background: var(--paper);
 }
@@ -1039,7 +1045,7 @@
 .ld-hero__rank {
   font-family: var(--black);
   font-weight: 400;
-  font-size: 54px;
+  font-size: 36px;
   line-height: .9;
   color: var(--red);
 }
@@ -1047,90 +1053,29 @@
 .ld-hero__row.is-r1 .ld-hero__rank,
 .ld-hero__row.is-r2 .ld-hero__rank { color: var(--paper); }
 
-.ld-hero__who {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  min-width: 0;
-}
+/* 前三名复用普通行的列内类，只调字号与配色 */
+.ld-hero__row .ld-name { font-size: 18px; color: inherit; }
+.ld-hero__row .ld-uid { color: inherit; opacity: .62; }
+.ld-hero__row .ld-lv,
+.ld-hero__row .ld-af { font-size: 18px; color: inherit; }
+.ld-hero__row .ld-fc { font-size: 26px; color: inherit; }
+.ld-hero__row .ld-lv i,
+.ld-hero__row .ld-af i,
+.ld-hero__row .ld-fc i { color: inherit; opacity: .62; }
+.ld-hero__row .ld-me { background: var(--paper); color: var(--ink); }
+.ld-hero__row.is-r3 .ld-me { background: var(--ink); color: var(--paper); }
 
-.ld-hero__name {
-  font-size: 20px;
-  font-weight: 700;
-  color: inherit;
-  text-decoration: none;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.ld-hero__name:hover { text-decoration: underline; }
-
-.ld-hero__uid {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: .08em;
-  opacity: .65;
-}
-
-.ld-hero__stats {
-  display: flex;
-  align-items: baseline;
-  gap: 22px;
-  white-space: nowrap;
-}
-
-.ld-hero__lv,
-.ld-hero__af {
-  display: flex;
-  align-items: baseline;
-  gap: 5px;
-  font-family: var(--black);
-  font-weight: 400;
-  font-size: 20px;
-}
-
-.ld-hero__lv i,
-.ld-hero__af i {
-  font-family: var(--mono);
-  font-style: normal;
-  font-size: 9.5px;
-  letter-spacing: .12em;
-  opacity: .6;
-}
-
-.ld-hero__fc {
-  display: flex;
-  align-items: baseline;
-  gap: 7px;
-  font-family: var(--black);
-  font-weight: 400;
-  font-size: 40px;
-  line-height: 1;
-}
-
-.ld-hero__fc i {
-  font-family: var(--mono);
-  font-style: normal;
-  font-size: 10px;
-  letter-spacing: .14em;
-  opacity: .65;
-}
-
-@media (max-width: 700px) {
-  .ld-hero__row {
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 8px 14px;
-    padding: 14px 16px;
-  }
-  .ld-hero__rank { font-size: 38px; }
-  .ld-hero__stats {
-    grid-column: 1 / -1;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .ld-hero__fc { font-size: 30px; }
+@media (max-width: 760px) {
+  .ld-hero__row,
+  .ld-row { grid-template-columns: 34px minmax(0, 1fr) 56px 50px 74px; gap: 8px; }
+  .ld-hero__row { min-height: 56px; }
+  .ld-hero__rank { font-size: 26px; }
+  .ld-rank { font-size: 22px; }
+  .ld-hero__row .ld-name { font-size: 15px; }
+  .ld-hero__row .ld-fc { font-size: 19px; }
+  .ld-uid { display: none; }
+  .ld-lv, .ld-af { font-size: 16px; }
+  .ld-fc { font-size: 17px; }
 }
 
 /* 金额容器内的数字节点：继承容器的字体与配色，只承载数值 */
