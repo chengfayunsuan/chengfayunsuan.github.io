@@ -283,6 +283,14 @@
   pointer-events: none;
 }
 
+/* 网络受限：照样能点（点了会说清原因并报给服务端），只是先降调 */
+.svc__go.is-net {
+  border-top-color: var(--paper-2);
+  color: var(--gray);
+}
+
+.svc__go.is-net:hover { color: var(--ink); }
+
 /* 推荐位 */
 .svc--feat {
   padding-top: 34px;

@@ -719,10 +719,14 @@
 
     panel.appendChild(head);
 
-    var body = document.createElement('div');
-    body.className = 'mo__body';
-    (opts.fields || []).forEach(function (f) { body.appendChild(buildField(f)); });
-    panel.appendChild(body);
+    /* 没有字段的纯提示框就不留这块，免得底部空一截 */
+    var fields = opts.fields || [];
+    if (fields.length) {
+      var body = document.createElement('div');
+      body.className = 'mo__body';
+      fields.forEach(function (f) { body.appendChild(buildField(f)); });
+      panel.appendChild(body);
+    }
 
     var msg = document.createElement('p');
     msg.className = 'mo__msg';
@@ -803,6 +807,53 @@
   }
 
   if (window.CF) CF.modal = modal;
+
+  /* ---------- 代理 / VPN 提醒 ----------
+     落地页和登录页不打扰；其余页面判定为机房/代理网络就提示一次。
+     真去点问卷由服务端封号（/api/surveys/join 里判），前端只负责把话说清楚。 */
+
+  var NET_AT = 'cf-net-at';
+  var NET_WARNED = 'cf-net-warned';
+
+  function netWarn(d) {
+    if (!CF.modal) return;
+    var where = d.org ? '（' + d.org + (d.country ? ' · ' + d.country : '') + '）' : (d.country ? '（' + d.country + '）' : '');
+    CF.modal({
+      kicker: 'NETWORK',
+      title: '这个网络看起来像代理 / VPN',
+      desc: '当前出口 IP 属于' + (d.kind === 'proxy' ? '代理或 VPN 网络' : '数据中心机房') + where
+        + '。站内的问卷任务要求真实本地网络，用这种网络点开问卷会被判定为异常，账号直接封禁，并且扣 8 点经验。',
+      hideCancel: true,
+      submitText: '我知道了',
+      fields: []
+    });
+  }
+
+  function checkNet() {
+    var p = location.pathname;
+    if (p === '/' || p === '/index.html' || p === '/login') return;
+    if (sessionStorage.getItem(NET_WARNED) === '1') return;
+
+    /* 半小时内不重复查，免得每换一页打一次接口 */
+    var last = Number(sessionStorage.getItem(NET_AT) || 0);
+    if (last && Date.now() - last < 30 * 60 * 1000) return;
+    try { sessionStorage.setItem(NET_AT, String(Date.now())); } catch (e) {}
+
+    fetch('/api/ip/check', { headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.ok || !d.suspect) return;
+        try { sessionStorage.setItem(NET_WARNED, '1'); } catch (e) {}
+        netWarn(d);
+      })
+      .catch(function () {});
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { setTimeout(checkNet, 500); });
+  } else {
+    setTimeout(checkNet, 500);
+  }
 
   window.addEventListener('popstate', function (ev) {
     var path = location.pathname;

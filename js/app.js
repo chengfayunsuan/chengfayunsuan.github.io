@@ -208,6 +208,10 @@
     return box;
   }
 
+  /* 出口网络预检结果：null 未知 / 对象 可疑。
+     hall 页加载时查一次，可疑的话点问卷当场拦住，不让人跳出去才发现号没了。 */
+  var netSuspect = null;
+
   function cardEl(s, feat) {
     var card = document.createElement('article');
     card.className = 'svc' + (feat ? ' svc--feat' : '');
@@ -339,12 +343,13 @@
     } catch (e) {}
 
     var usable = !!s.entry && !restricted;
+    var netBlocked = !!netSuspect && usable;
 
     var go = document.createElement(usable ? 'a' : 'span');
-    go.className = 'svc__go';
+    go.className = 'svc__go' + (netBlocked ? ' is-net' : '');
 
     var gt = document.createElement('span');
-    gt.textContent = restricted ? '账户受限' : (s.entry ? '进入问卷' : '暂未开放');
+    gt.textContent = restricted ? '账户受限' : (netBlocked ? '网络受限' : (s.entry ? '进入问卷' : '暂未开放'));
     go.appendChild(gt);
 
     if (usable) {
@@ -360,8 +365,45 @@
         go.rel = 'noopener';
       }
 
-      /* 点开就记一次参与，keepalive 保证跳转时请求不被取消 */
-      go.addEventListener('click', function () {
+      /* 点开就记一次参与，keepalive 保证跳转时请求不被取消。
+         网络被判定为代理/VPN 时不放行：仍然报给服务端（该封就封），但不跳走。 */
+      go.addEventListener('click', function (ev) {
+        if (netSuspect) {
+          ev.preventDefault();
+          say('这个网络被判定为代理 / VPN，不能接问卷');
+
+          try {
+            fetch('/api/surveys/join', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: s.id }),
+              keepalive: true
+            }).then(function (r) { return r.json().catch(function () { return null; }); })
+              .then(function (d) {
+                if (!d || d.error !== 'proxy_banned') return;
+
+                /* 封了就说明白：为什么封、封多久、还能干什么 */
+                if (window.CF && CF.modal) {
+                  CF.modal({
+                    kicker: 'BANNED',
+                    title: '账号已被封禁',
+                    desc: '这个出口 IP 被判定为代理 / VPN 网络'
+                      + (d.org ? '（' + d.org + (d.country ? ' · ' + d.country : '') + '）' : '')
+                      + '。按站规，问卷任务只接受真实本地网络，点开即封号并扣 8 点经验，现在只能提交工单和查看消息。',
+                    hideCancel: true,
+                    submitText: '去设置页看看',
+                    fields: [],
+                    onSubmit: function () { location.href = '/settings'; }
+                  });
+                }
+                if (window.CF && CF.cache) CF.cache.clear();
+              })
+              .catch(function () {});
+          } catch (e) {}
+
+          return;
+        }
+
         if (s.joined) return;
         try {
           fetch('/api/surveys/join', {
@@ -388,6 +430,17 @@
     var empty = document.querySelector('.pg-empty');
     var count = $('hallCount');
     if (!list) return;
+
+    /* 先问一次出口网络：判定为代理/机房就把问卷入口标成「网络受限」 */
+    fetch('/api/ip/check', { headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (d && d.ok && d.suspect) {
+          netSuspect = d;
+          if (typeof paint === 'function') paint();
+        }
+      })
+      .catch(function () {});
 
     var all = [];
     var sort = 'fc';

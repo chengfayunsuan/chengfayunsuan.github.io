@@ -35,6 +35,7 @@ export async function onRequest(context) {
     if (path === 'auth/login' && request.method === 'POST') return await login(request, env, url);
     if (path === 'auth/logout' && request.method === 'POST') return await logout(request, env, url);
     if (path === 'auth/me' && request.method === 'GET') return await me(request, env);
+    if (path === 'ip/check' && request.method === 'GET') return await ipCheck(request, env);
     if (path === 'user/profile' && request.method === 'PATCH') return await updateProfile(request, env);
     if (path === 'user/email' && request.method === 'POST') return await updateEmail(request, env);
     if (path === 'user/password' && request.method === 'POST') return await updatePassword(request, env);
@@ -325,6 +326,157 @@ function clientInfo(request) {
   if (cf.city) parts.push(cf.city);
   if (cf.asOrganization) parts.push(cf.asOrganization);
   return { ip, net: parts.join(' · ') };
+}
+
+/* ---------------- 代理 / VPN 检测 ----------------
+   三层信号，命中任意一层就判为可疑：
+   1. cf.asn 落在这份机房名单里。梯子九成跑在 VPS 上，这一条最有效，也不花外部请求。
+   2. ipapi.is 免费接口的 is_vpn / is_tor / is_proxy / is_datacenter，补细节。
+   3. 结果写进 ip_intel 缓存 24 小时，压住外部调用量。
+   外部接口失败不影响主流程：拿不到就只靠 ASN 名单，绝不因为查不到就拦人。 */
+
+const DC_ASN = {
+  16509: 'Amazon', 14618: 'Amazon',
+  15169: 'Google', 396982: 'Google Cloud',
+  8075: 'Microsoft', 8068: 'Microsoft',
+  20940: 'Akamai', 16625: 'Akamai',
+  14061: 'DigitalOcean', 63949: 'Linode', 20473: 'Vultr',
+  16276: 'OVH', 24940: 'Hetzner', 51167: 'Contabo', 12876: 'Scaleway',
+  9009: 'M247', 60781: 'LeaseWeb', 43350: 'NForce', 53667: 'FranTech',
+  3223: 'Voxility', 200651: 'FlokiNET', 31898: 'Oracle Cloud',
+  37963: '阿里云', 45102: '阿里云国际', 132203: '腾讯云', 45090: '腾讯云',
+  55990: '华为云', 136907: '华为云', 55960: 'AWS 中国',
+  38365: '百度云', 135377: 'UCloud', 55967: '京东云'
+};
+
+function ipOf(request) {
+  const raw = request.headers.get('CF-Connecting-IP')
+    || request.headers.get('X-Forwarded-For')
+    || request.headers.get('X-Real-IP')
+    || '';
+  return raw.split(',')[0].trim();
+}
+
+/* ip-api.com 免费层：支持任意 IP 查询，字段里直接带 proxy / hosting。
+   免费版只认 http（https 要付费），查的是 IP 归属，不涉及任何用户内容。
+   2.5 秒超时，拿不到就当查不到，绝不拿「查不到」当理由拦人。 */
+async function ipProbe(ip) {
+  const ctl = new AbortController();
+  const timer = setTimeout(function () { ctl.abort(); }, 2500);
+  const fields = 'status,message,countryCode,as,org,isp,proxy,hosting,mobile';
+  const q = encodeURIComponent(ip) + '?fields=' + fields;
+  try {
+    const res = await fetch('http://ip-api.com/json/' + q, { signal: ctl.signal });
+    if (!res.ok) return null;
+    const j = await res.json();
+    if (!j || j.status !== 'success') return null;
+    return j;
+  } catch (e) {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function asnNum(asField) {
+  const m = String(asField || '').match(/\d{2,10}/);
+  return m ? m[0] : '';
+}
+
+async function ipIntel(request, env) {
+  const ip = ipOf(request);
+  const cf = request.cf || {};
+  const cfAsn = cf.asn ? String(cf.asn) : '';
+  const cfOrg = cf.asOrganization || '';
+
+  if (!ip) {
+    return { ok: false, proxy: false, dc: false, country: cf.country || '', asn: cfAsn, org: cfOrg, src: 'none' };
+  }
+
+  const hit = await env.DB.prepare(
+    "SELECT * FROM ip_intel WHERE ip = ? AND checked_at > datetime('now','+8 hours','-1 day')"
+  ).bind(ip).first();
+
+  if (hit) {
+    return {
+      ok: true,
+      proxy: !!hit.proxy,
+      dc: !!hit.dc,
+      country: hit.country || cf.country || '',
+      asn: hit.asn || cfAsn,
+      org: hit.org || cfOrg,
+      src: hit.src || 'cache'
+    };
+  }
+
+  let asn = cfAsn;
+  let org = cfOrg;
+  let proxy = 0;
+  let dc = 0;
+  let src = 'asn';
+
+  if (asn && DC_ASN[asn]) { dc = 1; if (!org) org = DC_ASN[asn]; }
+
+  const ext = await ipProbe(ip);
+  if (ext) {
+    src = 'ipapi';
+    const ea = asnNum(ext.as);
+    if (ea) asn = ea;
+    if (ext.org) org = ext.org;
+    else if (ext.isp) org = ext.isp;
+    if (ext.proxy) proxy = 1;
+    if (ext.hosting) dc = 1;
+    if (asn && DC_ASN[asn]) dc = 1;
+  }
+
+  const country = (ext && ext.countryCode) || cf.country || '';
+
+  await env.DB.prepare(
+    `INSERT INTO ip_intel (ip, country, asn, org, proxy, dc, src, hits, checked_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, 1, datetime('now','+8 hours'))
+     ON CONFLICT(ip) DO UPDATE SET
+       country = excluded.country, asn = excluded.asn, org = excluded.org,
+       proxy = excluded.proxy, dc = excluded.dc, src = excluded.src,
+       hits = ip_intel.hits + 1, checked_at = excluded.checked_at`
+  ).bind(ip, country, asn, org, proxy, dc, src).run();
+
+  return { ok: true, proxy: !!proxy, dc: !!dc, country: country, asn: asn, org: org, src: src };
+}
+
+/* 给前端用：只回答「你是不是可疑」，不回传 IP 本身 */
+async function ipCheck(request, env) {
+  const intel = await ipIntel(request, env);
+  return json({
+    ok: true,
+    suspect: !!(intel.proxy || intel.dc),
+    kind: intel.proxy ? 'proxy' : (intel.dc ? 'dc' : ''),
+    country: intel.country || '',
+    org: intel.org || ''
+  });
+}
+
+/* 判定为代理/VPN 后还在点问卷：封号。
+   站长与管理员豁免，否则自己开梯子就把自己干掉了。 */
+async function banForProxy(env, uid, intel) {
+  const me = await env.DB.prepare('SELECT id, role, status FROM users WHERE id = ?').bind(uid).first();
+  if (!me) return false;
+  if (me.role === 'owner' || me.role === 'admin') return false;
+  if (me.status === 'banned') return true;
+
+  const why = '系统判定：使用代理 / VPN 网络访问问卷'
+    + '（' + (intel.country || '未知地区') + (intel.org ? ' · ' + intel.org : '') + '）';
+
+  await env.DB.batch([
+    env.DB.prepare(
+      `UPDATE users SET status = 'banned', ${lvSql(-8)}, updated_at = datetime('now','+8 hours') WHERE id = ?`
+    ).bind(uid),
+    env.DB.prepare(
+      `INSERT INTO user_bans (uid, from_status, to_status, reason, by_uid, by_role)
+       VALUES (?, ?, 'banned', ?, 0, 'system')`
+    ).bind(uid, me.status || 'active', why)
+  ]);
+
+  return true;
 }
 
 async function updateProfile(request, env) {
@@ -1574,6 +1726,22 @@ async function surveyJoin(request, env) {
   if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
   if (!isActive(session)) return locked();
 
+  /* 代理 / VPN 网络不给进问卷：当场封号，原因写进封禁记录。
+     站长与管理员豁免（banForProxy 内部判角色），免得自己开梯子把自己封了。 */
+  const intel = await ipIntel(request, env);
+  if (intel.ok && (intel.proxy || intel.dc)) {
+    const banned = await banForProxy(env, session.uid, intel);
+    if (banned) {
+      return json({
+        ok: false,
+        error: 'proxy_banned',
+        message: '检测到代理 / VPN 网络，账号已封禁',
+        country: intel.country || '',
+        org: intel.org || ''
+      }, 403);
+    }
+  }
+
   const body = await readJson(request);
   const id = Number(body && body.id);
   if (!id) return json({ ok: false, error: 'bad_request' }, 400);
@@ -2554,7 +2722,7 @@ async function userBans(request, env) {
       from: r.from_status || '',
       to: r.to_status || '',
       reason: r.reason || '',
-      by: r.by_role === 'owner' ? '站长' : '管理员',
+      by: r.by_role === 'system' ? '系统' : (r.by_role === 'owner' ? '站长' : '管理员'),
       at: r.created_at || ''
     };
   });
