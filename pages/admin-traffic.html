@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="/css/home.css?v=15">
 <link rel="stylesheet" href="/css/page.css?v=9">
 <link rel="stylesheet" href="/css/admin.css?v=13">
-<link rel="stylesheet" href="/css/admin-traffic.css?v=2">
+<link rel="stylesheet" href="/css/admin-traffic.css?v=4">
 <script src="/js/config.js?v=7"></script>
 <script src="/js/core.js?v=30"></script>
 </head>
@@ -88,9 +88,9 @@
             <span class="adm-badge">TRAFFIC</span>
           </div>
           <h1 class="face__name">流量</h1>
-          <p class="face__sub">访客 · 设备 · 明细</p>
+          <p class="face__sub">访客 · IP · 归属地</p>
           <div class="face__foot">
-            <p class="adm-lead">数据来自本站自己在中间件里记的访问日志，只记人打开的页面，不记静态资源和接口。明细里有 IP 与归属地，只给站长看，保留 90 天。</p>
+            <p class="adm-lead">数据来自本站自己在中间件里记的访问日志，只记人打开的页面，不记静态资源和接口。每个 IP 只列一行，标着来过几次、第一次和最近一次是什么时候。只给站长看，保留 90 天。</p>
           </div>
         </div>
 
@@ -140,32 +140,6 @@
         <div class="tv-chart" id="chart"></div>
       </div>
 
-      <div class="tv-cols">
-        <div class="adm-panel">
-          <div class="adm-h">
-            <span class="adm-h__t">浏览器</span>
-            <span class="adm-h__r">近 7 天 · 按次</span>
-          </div>
-          <ul class="tv-list" id="browsers"></ul>
-        </div>
-
-        <div class="adm-panel">
-          <div class="adm-h">
-            <span class="adm-h__t">系统</span>
-            <span class="adm-h__r">近 7 天 · 按次</span>
-          </div>
-          <ul class="tv-list" id="systems"></ul>
-        </div>
-
-        <div class="adm-panel">
-          <div class="adm-h">
-            <span class="adm-h__t">新老访客</span>
-            <span class="adm-h__r">今天 · 按访客</span>
-          </div>
-          <ul class="tv-list" id="mix"></ul>
-        </div>
-      </div>
-
       <div class="adm-panel">
         <div class="adm-h">
           <span class="adm-h__t">今天的时段分布</span>
@@ -176,10 +150,10 @@
 
       <div class="adm-panel">
         <div class="adm-h">
-          <span class="adm-h__t">访问明细</span>
-          <span class="adm-h__r" id="detailHint">—</span>
+          <span class="adm-h__t">访客 IP</span>
+          <span class="adm-h__r" id="ipHint">一个 IP 一行</span>
         </div>
-        <div class="tv-tb" id="detail"></div>
+        <div class="tv-tb" id="ips"></div>
         <div class="tv-pager">
           <span class="tv-pager__n" id="pgInfo">—</span>
           <div class="tv-pager__b" id="pgBtns"></div>
@@ -190,6 +164,6 @@
   </section>
 </main>
 
-<script src="/js/admin-traffic.js?v=2" defer></script>
+<script src="/js/admin-traffic.js?v=4" defer></script>
 </body>
 </html>

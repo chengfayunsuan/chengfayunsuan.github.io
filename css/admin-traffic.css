@@ -86,78 +86,6 @@
   white-space: nowrap;
 }
 
-/* ---------- 三列排行 ---------- */
-
-.tv-cols {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  align-items: stretch;
-}
-
-.tv-list {
-  margin: 0;
-  padding: 6px 0;
-  list-style: none;
-}
-
-.tv-list li {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 64px;
-  align-items: center;
-  gap: 12px;
-  padding: 9px 18px;
-  border-bottom: 1px solid var(--hair);
-}
-
-.tv-list li:last-child { border-bottom: 0; }
-
-.tv-li__x {
-  min-width: 0;
-}
-
-.tv-li__t {
-  display: block;
-  font-size: 13px;
-  font-family: var(--mono, ui-monospace, Consolas, monospace);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.tv-li__bar {
-  display: block;
-  height: 4px;
-  margin-top: 6px;
-  background: var(--paper-2);
-}
-
-.tv-li__bar i {
-  display: block;
-  height: 100%;
-  background: var(--red);
-}
-
-.tv-li__n {
-  text-align: right;
-  font-family: var(--num);
-  font-size: 15px;
-}
-
-.tv-li__n em {
-  display: block;
-  font-style: normal;
-  font-size: 10px;
-  color: var(--gray);
-  letter-spacing: .06em;
-}
-
-.tv-empty {
-  padding: 22px 18px;
-  font-size: 12.5px;
-  color: var(--gray);
-}
-
 /* ---------- 24 小时 ---------- */
 
 .tv-hours {
@@ -194,7 +122,7 @@
   letter-spacing: 0;
 }
 
-/* ---------- 访问明细 ---------- */
+/* ---------- 访客 IP ---------- */
 
 .tv-tb {
   margin: 0;
@@ -203,7 +131,7 @@
 
 .tv-tr {
   display: grid;
-  grid-template-columns: 128px minmax(0, 1.15fr) 130px minmax(0, 1fr) 104px 108px;
+  grid-template-columns: 172px minmax(0, 1.1fr) minmax(0, 1fr) 76px 122px 122px;
   align-items: center;
   gap: 14px;
   padding: 9px 18px;
@@ -229,8 +157,7 @@
   color: var(--gray);
 }
 
-.tv-tr .r-at,
-.tv-tr .r-ip {
+.tv-tr .r-at {
   font-family: var(--mono, ui-monospace, Consolas, monospace);
   font-size: 11.5px;
   color: var(--gray);
@@ -240,31 +167,32 @@
 }
 
 .tv-tr .r-ip {
+  font-family: var(--mono, ui-monospace, Consolas, monospace);
+  font-size: 12px;
   color: var(--ink);
   letter-spacing: -.01em;
-}
-
-.tv-tr .r-p {
-  font-family: var(--mono, ui-monospace, Consolas, monospace);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.tv-tr .r-n {
+  font-family: var(--num);
+  font-size: 13px;
+  color: var(--ink);
+  white-space: nowrap;
 }
 
 .tv-tr .r-c,
-.tv-tr .r-f {
+.tv-tr .r-net {
   color: var(--gray);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.tv-tr .r-u {
-  font-size: 11px;
-  color: var(--gray);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.tv-tr .r-net {
+  font-size: 11.5px;
 }
 
 /* ---------- 翻页 ---------- */
@@ -328,20 +256,16 @@
   color: var(--gray);
 }
 
-@media (max-width: 1080px) {
-  .tv-cols { grid-template-columns: 1fr; }
-}
-
 @media (max-width: 860px) {
   .tv-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tv-kpi { border-bottom: 1px solid var(--hair); }
   .tv-chart { height: 150px; gap: 3px; }
   .tv-col__v { display: none; }
+  /* 窄屏只留 IP / 归属地 / 次数 */
   .tv-tr,
-  .tv-tr--h { grid-template-columns: 96px minmax(0, 1fr) 52px; }
-  .tv-tr .r-ip,
-  .tv-tr .r-f,
-  .tv-tr .r-u { display: none; }
+  .tv-tr--h { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 58px; }
+  .tv-tr .r-at,
+  .tv-tr .r-net { display: none; }
   .tv-tr--h span:nth-child(3),
   .tv-tr--h span:nth-child(5),
   .tv-tr--h span:nth-child(6) { display: none; }

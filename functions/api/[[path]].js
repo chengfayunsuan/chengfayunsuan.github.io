@@ -2254,64 +2254,37 @@ async function adminTraffic(env, url) {
       GROUP BY d ORDER BY d`
   ).all();
 
-  /* 浏览器与系统在 SQL 里归类，省得把几千行 UA 拉回 Worker 再算 */
-  const browsers = await env.DB.prepare(
-    `SELECT CASE
-        WHEN ua LIKE '%Edg/%' OR ua LIKE '%EdgA/%' THEN 'Edge'
-        WHEN ua LIKE '%OPR/%' OR ua LIKE '%Opera%' THEN 'Opera'
-        WHEN ua LIKE '%Firefox/%' THEN 'Firefox'
-        WHEN ua LIKE '%MicroMessenger%' THEN '微信内置'
-        WHEN ua LIKE '%Chrome/%' OR ua LIKE '%CriOS/%' THEN 'Chrome'
-        WHEN ua LIKE '%Safari/%' THEN 'Safari'
-        WHEN ua = '' THEN '未知'
-        ELSE '其他' END AS k,
-       COUNT(*) AS pv, COUNT(DISTINCT vid) AS uv
-       FROM visits
-      WHERE at >= datetime('now','+8 hours','-7 days')
-      GROUP BY k ORDER BY pv DESC LIMIT 8`
-  ).all();
+  /* 一个 IP 一行：次数、首次、最近。归属地取该 IP 最近一次记录到的值 */
+  const total = await env.DB.prepare(
+    "SELECT COUNT(DISTINCT ip) AS n FROM visits WHERE ip <> ''"
+  ).first();
+  const totalN = Number(total && total.n) || 0;
+  const pages = Math.max(1, Math.ceil(totalN / per));
+  const cur = Math.min(page, pages);
 
-  const systems = await env.DB.prepare(
-    `SELECT CASE
-        WHEN ua LIKE '%Windows NT 10%' THEN 'Windows 10/11'
-        WHEN ua LIKE '%Windows%' THEN 'Windows 其它'
-        WHEN ua LIKE '%iPhone%' OR ua LIKE '%iPad%' THEN 'iOS / iPadOS'
-        WHEN ua LIKE '%Android%' THEN 'Android'
-        WHEN ua LIKE '%Mac OS X%' THEN 'macOS'
-        WHEN ua LIKE '%Linux%' THEN 'Linux'
-        WHEN ua = '' THEN '未知'
-        ELSE '其他' END AS k,
-       COUNT(*) AS pv, COUNT(DISTINCT vid) AS uv
+  const ips = await env.DB.prepare(
+    `SELECT ip,
+            COUNT(*)      AS pv,
+            MIN(at)       AS first_at,
+            MAX(at)       AS last_at,
+            MAX(country)  AS country,
+            MAX(region)   AS region,
+            MAX(city)     AS city,
+            MAX(asn)      AS asn,
+            MAX(org)      AS org,
+            MAX(colo)     AS colo
        FROM visits
-      WHERE at >= datetime('now','+8 hours','-7 days')
-      GROUP BY k ORDER BY pv DESC LIMIT 8`
-  ).all();
-
-  /* 今天的访客里，第一次出现就在今天的算新访客 */
-  const mix = await env.DB.prepare(
-    `SELECT CASE WHEN f.first_at >= date('now','+8 hours') THEN 'new' ELSE 'back' END AS k,
-            COUNT(*) AS pv, COUNT(DISTINCT v.vid) AS uv
-       FROM visits v
-       JOIN (SELECT vid, MIN(at) AS first_at FROM visits GROUP BY vid) f ON f.vid = v.vid
-      WHERE v.at >= date('now','+8 hours')
-      GROUP BY k`
-  ).all();
+      WHERE ip <> ''
+      GROUP BY ip
+      ORDER BY last_at DESC
+      LIMIT ? OFFSET ?`
+  ).bind(per, (cur - 1) * per).all();
 
   const hours = await env.DB.prepare(
     `SELECT substr(at, 12, 2) AS h, COUNT(*) AS pv
        FROM visits WHERE at >= date('now','+8 hours')
       GROUP BY h ORDER BY h`
   ).all();
-
-  const total = await env.DB.prepare('SELECT COUNT(*) AS n FROM visits').first();
-  const totalN = Number(total && total.n) || 0;
-  const pages = Math.max(1, Math.ceil(totalN / per));
-  const cur = Math.min(page, pages);
-
-  const detail = await env.DB.prepare(
-    `SELECT id, at, path, ip, country, region, city, asn, org, colo, ref, ua
-       FROM visits ORDER BY at DESC, id DESC LIMIT ? OFFSET ?`
-  ).bind(per, (cur - 1) * per).all();
 
   const rows = function (r) { return (r && r.results) || []; };
 
@@ -2323,33 +2296,22 @@ async function adminTraffic(env, url) {
     series: rows(series).map(function (r) {
       return { d: r.d, pv: Number(r.pv) || 0, uv: Number(r.uv) || 0 };
     }),
-    browsers: rows(browsers).map(function (r) {
-      return { k: r.k || '其他', pv: Number(r.pv) || 0, uv: Number(r.uv) || 0 };
-    }),
-    systems: rows(systems).map(function (r) {
-      return { k: r.k || '其他', pv: Number(r.pv) || 0, uv: Number(r.uv) || 0 };
-    }),
-    mix: rows(mix).map(function (r) {
-      return { k: r.k === 'new' ? '今日新访客' : '回访', pv: Number(r.pv) || 0, uv: Number(r.uv) || 0 };
-    }),
     hours: rows(hours).map(function (r) {
       return { h: r.h, pv: Number(r.pv) || 0 };
     }),
     pager: { page: cur, per: per, total: totalN, pages: pages },
-    detail: rows(detail).map(function (r) {
+    ips: rows(ips).map(function (r) {
       return {
-        id: r.id,
-        at: r.at,
-        path: r.path || '/',
         ip: r.ip || '',
+        pv: Number(r.pv) || 0,
+        first_at: r.first_at || '',
+        last_at: r.last_at || '',
         country: r.country || '',
         region: r.region || '',
         city: r.city || '',
         asn: r.asn || '',
         org: r.org || '',
-        colo: r.colo || '',
-        ref: r.ref || '',
-        ua: r.ua || ''
+        colo: r.colo || ''
       };
     })
   });

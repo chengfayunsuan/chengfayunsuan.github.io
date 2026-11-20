@@ -54,18 +54,18 @@
     Manila: '马尼拉', Dubai: '迪拜'
   };
 
-  /* 中文地方名不跟着转，原样返回 */
-  function zhCity(s) {
-    if (!s) return '';
-    return CITY[s] || s;
-  }
-
   var page = 1;
 
   function esc(s) {
     return String(s == null ? '' : s)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
+  }
+
+  /* 中文地方名不跟着转，原样返回 */
+  function zhCity(s) {
+    if (!s) return '';
+    return CITY[s] || s;
   }
 
   /* 北京时间日期，往前推 n 天 */
@@ -79,25 +79,8 @@
     return iso.slice(5);   // 2026-11-20 -> 11-20
   }
 
-  function uaBrief(ua) {
-    if (!ua) return '—';
-    var os = '其他';
-    if (/Windows NT 10/i.test(ua)) os = 'Win10';
-    else if (/Windows/i.test(ua)) os = 'Windows';
-    else if (/iPhone|iPad|iOS/i.test(ua)) os = 'iOS';
-    else if (/Android/i.test(ua)) os = 'Android';
-    else if (/Mac OS X/i.test(ua)) os = 'macOS';
-    else if (/Linux/i.test(ua)) os = 'Linux';
-
-    var br = '浏览器';
-    if (/Edg\//i.test(ua)) br = 'Edge';
-    else if (/OPR\/|Opera/i.test(ua)) br = 'Opera';
-    else if (/Firefox\//i.test(ua)) br = 'Firefox';
-    else if (/MicroMessenger/i.test(ua)) br = '微信';
-    else if (/Chrome\//i.test(ua)) br = 'Chrome';
-    else if (/Safari\//i.test(ua)) br = 'Safari';
-
-    return os + ' · ' + br;
+  function stamp(s) {
+    return String(s || '').slice(5, 16);   // 2026-11-20 15:26:07 -> 11-20 15:26
   }
 
   /* 国家 · 省 · 市；相邻两级同名时只留一个 */
@@ -112,30 +95,6 @@
     if (it.region) add(PROV[it.region] || zhCity(it.region));
     if (it.city) add(zhCity(it.city));
     return out.join(' · ') || '—';
-  }
-
-  function listInto(box, items, opt) {
-    if (!box) return;
-    if (!items.length) {
-      box.innerHTML = '<li class="tv-empty">' + esc(opt.empty || '这段时间还没有数据') + '</li>';
-      return;
-    }
-
-    var max = 1;
-    items.forEach(function (x) { if (x.pv > max) max = x.pv; });
-
-    box.innerHTML = items.map(function (it) {
-      var label = opt.label(it);
-      var pct = Math.round((it.pv / max) * 100);
-      var right = opt.uv ? '<em>' + it.uv + ' 人</em>' : (opt.suffix ? '<em>' + esc(opt.suffix) + '</em>' : '');
-      return '<li>' +
-        '<span class="tv-li__x">' +
-          '<span class="tv-li__t" title="' + esc(label) + '">' + esc(label) + '</span>' +
-          '<span class="tv-li__bar"><i style="width:' + pct + '%"></i></span>' +
-        '</span>' +
-        '<span class="tv-li__n">' + it.pv + right + '</span>' +
-      '</li>';
-    }).join('');
   }
 
   function paintChart(series, days) {
@@ -188,30 +147,29 @@
     box.innerHTML = html;
   }
 
-  function paintDetail(items) {
-    var box = $('detail');
+  function paintIps(items) {
+    var box = $('ips');
     if (!box) return;
 
     var head = '<div class="tv-tr tv-tr--h">' +
-      '<span>时间</span><span>页面</span><span>IP</span>' +
-      '<span>地区</span><span>来源</span><span>设备</span>' +
+      '<span>IP</span><span>归属地</span><span>网络</span><span>次数</span>' +
+      '<span>首次</span><span>最近</span>' +
       '</div>';
 
     if (!items.length) {
-      box.innerHTML = head + '<div class="tv-tr tv-tr--empty">还没有访问记录。有人打开页面后这里就会出现。</div>';
+      box.innerHTML = head + '<div class="tv-tr tv-tr--empty">还没有访客。有人打开页面后这里就会出现。</div>';
       return;
     }
 
     box.innerHTML = head + items.map(function (it) {
-      var ip = it.ip || '—';
       var net = [it.asn ? 'AS' + it.asn : '', it.org, it.colo].filter(Boolean).join(' · ');
       return '<div class="tv-tr">' +
-        '<span class="r-at" title="' + esc(it.at) + '">' + esc(String(it.at || '').slice(5, 19)) + '</span>' +
-        '<span class="r-p" title="' + esc(it.path) + '">' + esc(it.path) + '</span>' +
-        '<span class="r-ip" title="' + esc(net || ip) + '">' + esc(ip) + '</span>' +
+        '<span class="r-ip" title="' + esc(it.ip) + '">' + esc(it.ip) + '</span>' +
         '<span class="r-c" title="' + esc([it.region, it.city].filter(Boolean).join(' / ')) + '">' + esc(place(it)) + '</span>' +
-        '<span class="r-f" title="' + esc(it.ref || '直接访问') + '">' + esc(it.ref || '直接') + '</span>' +
-        '<span class="r-u" title="' + esc(it.ua) + '">' + esc(uaBrief(it.ua)) + '</span>' +
+        '<span class="r-net" title="' + esc(net || '未知') + '">' + esc(it.org || '—') + '</span>' +
+        '<span class="r-n">' + it.pv + ' 次</span>' +
+        '<span class="r-at" title="' + esc(it.first_at) + '">' + esc(stamp(it.first_at)) + '</span>' +
+        '<span class="r-at" title="' + esc(it.last_at) + '">' + esc(stamp(it.last_at)) + '</span>' +
       '</div>';
     }).join('');
   }
@@ -236,7 +194,7 @@
     var info = $('pgInfo');
     if (info) {
       info.textContent = p.total
-        ? '共 ' + p.total + ' 条 · 每页 ' + p.per + ' 条 · 第 ' + p.page + ' / ' + p.pages + ' 页'
+        ? '共 ' + p.total + ' 个 IP · 每页 ' + p.per + ' 个 · 第 ' + p.page + ' / ' + p.pages + ' 页'
         : '暂无记录';
     }
 
@@ -266,30 +224,11 @@
 
     paintChart(d.series, d.days);
     paintHours(d.hours);
-
-    listInto($('browsers'), d.browsers, {
-      label: function (it) { return it.k; },
-      uv: true,
-      empty: '还没有浏览器数据'
-    });
-
-    listInto($('systems'), d.systems, {
-      label: function (it) { return it.k; },
-      uv: true,
-      empty: '还没有系统数据'
-    });
-
-    listInto($('mix'), d.mix, {
-      label: function (it) { return it.k; },
-      uv: true,
-      empty: '今天还没有访客'
-    });
-
-    paintDetail(d.detail);
+    paintIps(d.ips);
     paintPager(d.pager);
 
-    var hint = $('detailHint');
-    if (hint) hint.textContent = '最新在前 · 保留 90 天';
+    var hint = $('ipHint');
+    if (hint) hint.textContent = '一个 IP 一行 · 保留 90 天';
   }
 
   function load() {
@@ -312,11 +251,11 @@
       });
   }
 
-  /* 翻页：滚回明细表顶部，别让人翻完还在页脚 */
+  /* 翻页：滚回表格顶部，别让人翻完还在页脚 */
   function goto(n) {
     if (n === page) return;
     page = n;
-    var box = $('detail');
+    var box = $('ips');
     if (box) {
       var y = box.getBoundingClientRect().top + window.scrollY - 90;
       window.scrollTo(0, Math.max(0, y));
