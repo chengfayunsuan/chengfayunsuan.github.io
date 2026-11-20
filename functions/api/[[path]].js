@@ -2226,6 +2226,91 @@ async function labPaperReset(env) {
   return json({ ok: true, paper: await labPaper(env) });
 }
 
+/* ---------------- 流量 ---------------- */
+
+/* 中间件每分钟都在写 visits，这里只管读。
+   每次打开顺手删掉 90 天前的，免得表无限长。 */
+async function adminTraffic(env, url) {
+  const days = Math.min(30, Math.max(7, Number(url.searchParams.get('days')) || 14));
+
+  await env.DB.prepare(
+    "DELETE FROM visits WHERE at < datetime('now','+8 hours','-90 days')"
+  ).run();
+
+  const today = await env.DB.prepare(
+    "SELECT COUNT(*) AS pv, COUNT(DISTINCT vid) AS uv FROM visits WHERE at >= date('now','+8 hours')"
+  ).first();
+
+  const week = await env.DB.prepare(
+    "SELECT COUNT(*) AS pv, COUNT(DISTINCT vid) AS uv FROM visits WHERE at >= datetime('now','+8 hours','-7 days')"
+  ).first();
+
+  const series = await env.DB.prepare(
+    `SELECT substr(at, 1, 10) AS d, COUNT(*) AS pv, COUNT(DISTINCT vid) AS uv
+       FROM visits
+      WHERE at >= datetime('now','+8 hours','-` + (days - 1) + ` days')
+      GROUP BY d ORDER BY d`
+  ).all();
+
+  const paths = await env.DB.prepare(
+    `SELECT path, COUNT(*) AS pv, COUNT(DISTINCT vid) AS uv
+       FROM visits
+      WHERE at >= datetime('now','+8 hours','-7 days')
+      GROUP BY path ORDER BY pv DESC LIMIT 12`
+  ).all();
+
+  const refs = await env.DB.prepare(
+    `SELECT ref, COUNT(*) AS pv
+       FROM visits
+      WHERE at >= datetime('now','+8 hours','-7 days')
+      GROUP BY ref ORDER BY pv DESC LIMIT 10`
+  ).all();
+
+  const countries = await env.DB.prepare(
+    `SELECT country, COUNT(*) AS pv
+       FROM visits
+      WHERE at >= datetime('now','+8 hours','-7 days')
+      GROUP BY country ORDER BY pv DESC LIMIT 8`
+  ).all();
+
+  const hours = await env.DB.prepare(
+    `SELECT substr(at, 12, 2) AS h, COUNT(*) AS pv
+       FROM visits WHERE at >= date('now','+8 hours')
+      GROUP BY h ORDER BY h`
+  ).all();
+
+  const recent = await env.DB.prepare(
+    'SELECT at, path, country, ref, ua FROM visits ORDER BY id DESC LIMIT 24'
+  ).all();
+
+  const rows = function (r) { return (r && r.results) || []; };
+
+  return json({
+    ok: true,
+    days: days,
+    today: { pv: Number(today && today.pv) || 0, uv: Number(today && today.uv) || 0 },
+    week: { pv: Number(week && week.pv) || 0, uv: Number(week && week.uv) || 0 },
+    series: rows(series).map(function (r) {
+      return { d: r.d, pv: Number(r.pv) || 0, uv: Number(r.uv) || 0 };
+    }),
+    paths: rows(paths).map(function (r) {
+      return { path: r.path || '/', pv: Number(r.pv) || 0, uv: Number(r.uv) || 0 };
+    }),
+    refs: rows(refs).map(function (r) {
+      return { ref: r.ref || '', pv: Number(r.pv) || 0 };
+    }),
+    countries: rows(countries).map(function (r) {
+      return { country: r.country || '', pv: Number(r.pv) || 0 };
+    }),
+    hours: rows(hours).map(function (r) {
+      return { h: r.h, pv: Number(r.pv) || 0 };
+    }),
+    recent: rows(recent).map(function (r) {
+      return { at: r.at, path: r.path || '/', country: r.country || '', ref: r.ref || '', ua: r.ua || '' };
+    })
+  });
+}
+
 /* 最近实验记录 */
 async function labLog(request, env, admin) {
   const rows = await env.DB.prepare(
@@ -2769,6 +2854,7 @@ async function adminApi(request, env, url, path) {
   if (path === 'admin/announcements/save' && request.method === 'POST') return await adminNoticeSave(request, env);
   if (path === 'admin/announcements/delete' && request.method === 'POST') return await adminNoticeDelete(request, env);
   if (path === 'admin/moonetix' && request.method === 'GET') return await adminMtxList(env, url);
+  if (path === 'admin/traffic' && request.method === 'GET') return await adminTraffic(env, url);
   return json({ ok: false, error: 'not_found' }, 404);
 }
 

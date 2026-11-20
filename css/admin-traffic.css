@@ -1,0 +1,273 @@
+/* 流量页 · 只在 /admin/traffic 用。数字用等宽，条与柱都按最大值等比缩放。 */
+
+.tv-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 3px solid var(--ink);
+  background: #fff;
+  margin-bottom: clamp(22px, 3vw, 34px);
+}
+
+.tv-kpi {
+  padding: 15px 18px 17px;
+  border-right: 1px solid var(--hair);
+}
+
+.tv-kpi:last-child { border-right: 0; }
+
+.tv-kpi span {
+  display: block;
+  font-size: 11px;
+  letter-spacing: .08em;
+  color: var(--gray);
+}
+
+.tv-kpi b {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--num);
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: -.01em;
+}
+
+.tv-kpi i {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--mono, ui-monospace, Consolas, monospace);
+  font-style: normal;
+  font-size: 10.5px;
+  letter-spacing: .1em;
+  color: var(--gray);
+}
+
+/* ---------- 14 天柱状 ---------- */
+
+.tv-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 190px;
+  padding: 16px 18px 12px;
+}
+
+.tv-col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  height: 100%;
+}
+
+.tv-col__b {
+  width: 100%;
+  max-width: 34px;
+  min-height: 3px;
+  background: var(--red);
+  transition: height .3s ease;
+}
+
+.tv-col.is-empty .tv-col__b { background: var(--paper-2); }
+
+.tv-col__v {
+  font-family: var(--num);
+  font-size: 11px;
+  color: var(--ink);
+}
+
+.tv-col__d {
+  font-family: var(--mono, ui-monospace, Consolas, monospace);
+  font-size: 10px;
+  letter-spacing: .02em;
+  color: var(--gray);
+  white-space: nowrap;
+}
+
+/* ---------- 三列排行 ---------- */
+
+.tv-cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+.tv-list {
+  margin: 0;
+  padding: 6px 0;
+  list-style: none;
+}
+
+.tv-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 64px;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 18px;
+  border-bottom: 1px solid var(--hair);
+}
+
+.tv-list li:last-child { border-bottom: 0; }
+
+.tv-li__x {
+  min-width: 0;
+}
+
+.tv-li__t {
+  display: block;
+  font-size: 13px;
+  font-family: var(--mono, ui-monospace, Consolas, monospace);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tv-li__bar {
+  display: block;
+  height: 4px;
+  margin-top: 6px;
+  background: var(--paper-2);
+}
+
+.tv-li__bar i {
+  display: block;
+  height: 100%;
+  background: var(--red);
+}
+
+.tv-li__n {
+  text-align: right;
+  font-family: var(--num);
+  font-size: 15px;
+}
+
+.tv-li__n em {
+  display: block;
+  font-style: normal;
+  font-size: 10px;
+  color: var(--gray);
+  letter-spacing: .06em;
+}
+
+.tv-empty {
+  padding: 22px 18px;
+  font-size: 12.5px;
+  color: var(--gray);
+}
+
+/* ---------- 24 小时 ---------- */
+
+.tv-hours {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 110px;
+  padding: 14px 18px 10px;
+}
+
+.tv-hour {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  font-family: var(--mono, ui-monospace, Consolas, monospace);
+  font-size: 9px;
+  color: var(--gray);
+}
+
+.tv-hour b {
+  width: 100%;
+  min-height: 2px;
+  background: var(--red);
+  opacity: .85;
+}
+
+.tv-hour i {
+  font-style: normal;
+  font-size: 8.5px;
+  letter-spacing: 0;
+}
+
+/* ---------- 最近访问 ---------- */
+
+.tv-recent {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tv-recent li {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr) 64px 118px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--hair);
+  font-size: 12.5px;
+}
+
+.tv-recent li:last-child { border-bottom: 0; }
+
+.tv-recent .r-at {
+  font-family: var(--mono, ui-monospace, Consolas, monospace);
+  font-size: 11.5px;
+  color: var(--gray);
+}
+
+.tv-recent .r-p {
+  font-family: var(--mono, ui-monospace, Consolas, monospace);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tv-recent .r-c,
+.tv-recent .r-f {
+  color: var(--gray);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tv-recent .r-u {
+  font-size: 11px;
+  color: var(--gray);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tv-head {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr) 64px 118px minmax(0, 1fr);
+  gap: 14px;
+  padding: 11px 18px;
+  border-bottom: 2px solid var(--ink);
+  font-size: 10.5px;
+  letter-spacing: .1em;
+  color: var(--gray);
+  background: rgba(var(--paper2-rgb), .5);
+}
+
+@media (max-width: 1080px) {
+  .tv-cols { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 860px) {
+  .tv-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tv-kpi { border-bottom: 1px solid var(--hair); }
+  .tv-chart { height: 150px; gap: 3px; }
+  .tv-col__v { display: none; }
+  .tv-recent li,
+  .tv-head { grid-template-columns: 96px minmax(0, 1fr) 52px; }
+  .tv-recent .r-f,
+  .tv-recent .r-u,
+  .tv-head span:nth-child(4),
+  .tv-head span:nth-child(5) { display: none; }
+}

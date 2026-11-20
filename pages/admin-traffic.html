@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>流量 · 乘法后台</title>
+<meta name="description" content="乘法运营后台：访客、页面、来源与地区。">
+<meta name="theme-color" content="#1D52E2">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/style.css?v=13">
+<link rel="stylesheet" href="/css/home.css?v=15">
+<link rel="stylesheet" href="/css/page.css?v=9">
+<link rel="stylesheet" href="/css/admin.css?v=13">
+<link rel="stylesheet" href="/css/admin-traffic.css?v=1">
+<script src="/js/config.js?v=7"></script>
+<script src="/js/core.js?v=30"></script>
+</head>
+<body data-page="admin-traffic" data-accent="blue">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/home">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><button class="hm-nav__cur" type="button" data-cur-toggle aria-label="切换显示币种" title="点击在乘法币与乘法刀之间切换"><span data-cur="code">CFB</span></button>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/home">我</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
+    </div>
+  </div>
+</header>
+
+<nav class="dock" aria-label="后台目录">
+  <div class="wrap dock__in">
+    <a class="dock__i" href="/admin">
+      <span class="dock__n">01</span><span class="dock__t">后台概览</span>
+    </a>
+    <a class="dock__i" href="/admin/users">
+      <span class="dock__n">02</span><span class="dock__t">用户管理</span>
+    </a>
+    <a class="dock__i" href="/admin/withdrawals">
+      <span class="dock__n">03</span><span class="dock__t">提现审核</span>
+    </a>
+    <a class="dock__i" href="/admin/orders">
+      <span class="dock__n">04</span><span class="dock__t">兑换订单</span>
+    </a>
+    <a class="dock__i" href="/admin/tickets">
+      <span class="dock__n">05</span><span class="dock__t">工单</span>
+    </a>
+    <a class="dock__i" href="/admin/surveys">
+      <span class="dock__n">06</span><span class="dock__t">问卷管理</span>
+    </a>
+    <a class="dock__i" href="/admin/items">
+      <span class="dock__n">07</span><span class="dock__t">商品兑换</span>
+    </a>
+    <a class="dock__i" href="/admin/messages">
+      <span class="dock__n">08</span><span class="dock__t">公告</span>
+    </a>
+    <a class="dock__i" href="/admin/moonetix">
+      <span class="dock__n">09</span><span class="dock__t">广告墙</span>
+    </a>
+    <a class="dock__i" href="/lab">
+      <span class="dock__n">10</span><span class="dock__t">实验台</span>
+    </a>
+    <a class="dock__i" href="/admin/customize">
+      <span class="dock__n">11</span><span class="dock__t">外观</span>
+    </a>
+    <a class="dock__i is-on" href="/admin/traffic" aria-current="page">
+      <span class="dock__n">12</span><span class="dock__t">流量</span>
+    </a>
+  </div>
+</nav>
+
+<main id="app">
+  <section class="face">
+    <div class="wrap">
+      <div class="face__in">
+        <div class="face__id">
+          <div class="face__meta">
+            <span class="face__uid">ADMIN / 流量</span>
+            <span class="adm-badge">TRAFFIC</span>
+          </div>
+          <h1 class="face__name">流量</h1>
+          <p class="face__sub">访客 · 页面 · 来源 · 地区</p>
+          <div class="face__foot">
+            <p class="adm-lead">数据来自本站自己在中间件里记的访问日志，只记人打开的页面，不记静态资源和接口。指纹是 IP 与 UA 的哈希，原始 IP 不留。保留 90 天。</p>
+          </div>
+        </div>
+
+        <div class="face__bal">
+          <div class="face__bal-k">TODAY / 今日</div>
+          <div class="face__bal-n" id="kToday">—</div>
+          <div class="face__bal-f">浏览数 / 访客数</div>
+          <div class="face__acts">
+            <button class="btn btn--ghost" id="reload" type="button">刷新</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="adm-sec adm-sec--last">
+    <div class="wrap">
+
+      <div class="tv-kpis">
+        <div class="tv-kpi">
+          <span>今日浏览</span>
+          <b id="kPv">—</b>
+          <i>PV</i>
+        </div>
+        <div class="tv-kpi">
+          <span>今日访客</span>
+          <b id="kUv">—</b>
+          <i>UV</i>
+        </div>
+        <div class="tv-kpi">
+          <span>近 7 天浏览</span>
+          <b id="kWpv">—</b>
+          <i>PV</i>
+        </div>
+        <div class="tv-kpi">
+          <span>近 7 天访客</span>
+          <b id="kWuv">—</b>
+          <i>UV</i>
+        </div>
+      </div>
+
+      <div class="adm-panel">
+        <div class="adm-h">
+          <span class="adm-h__t">近 14 天</span>
+          <span class="adm-h__r">柱高 = 当天浏览数</span>
+        </div>
+        <div class="tv-chart" id="chart"></div>
+      </div>
+
+      <div class="tv-cols">
+        <div class="adm-panel">
+          <div class="adm-h">
+            <span class="adm-h__t">热门页面</span>
+            <span class="adm-h__r">近 7 天</span>
+          </div>
+          <ul class="tv-list" id="paths"></ul>
+        </div>
+
+        <div class="adm-panel">
+          <div class="adm-h">
+            <span class="adm-h__t">来源</span>
+            <span class="adm-h__r">近 7 天</span>
+          </div>
+          <ul class="tv-list" id="refs"></ul>
+        </div>
+
+        <div class="adm-panel">
+          <div class="adm-h">
+            <span class="adm-h__t">地区</span>
+            <span class="adm-h__r">近 7 天</span>
+          </div>
+          <ul class="tv-list" id="countries"></ul>
+        </div>
+      </div>
+
+      <div class="adm-panel">
+        <div class="adm-h">
+          <span class="adm-h__t">今天的时段分布</span>
+          <span class="adm-h__r">北京时间 00 – 23</span>
+        </div>
+        <div class="tv-hours" id="hours"></div>
+      </div>
+
+      <div class="adm-panel">
+        <div class="adm-h">
+          <span class="adm-h__t">最近访问</span>
+          <span class="adm-h__r" id="recentHint">—</span>
+        </div>
+        <ul class="tv-recent" id="recent"></ul>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<script src="/js/admin-traffic.js?v=1" defer></script>
+</body>
+</html>

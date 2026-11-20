@@ -24,10 +24,62 @@ async function sha256Hex(text) {
     .join('');
 }
 
+/* 只记「人打开的页面」：静态资源、接口、预渲染都不算。
+   博客/爬虫也会进来，用 UA 粗筛一下，明显是脚本的不记。 */
+const SKIP_EXT = /\.(css|js|mjs|json|png|jpe?g|gif|svg|ico|webp|avif|woff2?|ttf|map|txt|xml)$/i;
+const BOT_UA = /(bot|crawler|spider|slurp|bingpreview|facebookexternalhit|curl|wget|python-requests|headless)/i;
+
+function isPageView(request, url) {
+  if (request.method !== 'GET') return false;
+  if (SKIP_EXT.test(url.pathname)) return false;
+  if (/^\/(api|cdn-cgi)\//.test(url.pathname)) return false;
+  const accept = request.headers.get('Accept') || '';
+  if (!accept.includes('text/html')) return false;
+  const ua = request.headers.get('User-Agent') || '';
+  if (BOT_UA.test(ua)) return false;
+  return true;
+}
+
+/* 记一行访问日志。失败不影响页面返回，所以整段吞掉错误。 */
+function logVisit(context, url) {
+  const { request, env } = context;
+  if (!env || !env.DB) return;
+
+  const ip = request.headers.get('CF-Connecting-IP') || '';
+  const ua = (request.headers.get('User-Agent') || '').slice(0, 160);
+  const cf = request.cf || {};
+  const country = cf.country || '';
+
+  let ref = '';
+  const rawRef = request.headers.get('Referer') || '';
+  if (rawRef) {
+    try {
+      const h = new URL(rawRef).hostname;
+      if (h && h !== url.hostname) ref = h.slice(0, 80);
+    } catch (e) { /* 来源不合法就不记 */ }
+  }
+
+  const path = url.pathname.slice(0, 120);
+
+  const task = (async () => {
+    const vid = (await sha256Hex(ip + '|' + ua)).slice(0, 20);
+    await env.DB.prepare(
+      'INSERT INTO visits (path, vid, country, ref, ua) VALUES (?, ?, ?, ?, ?)'
+    ).bind(path, vid, country, ref, ua).run();
+  })().catch(() => {});
+
+  if (context.waitUntil) context.waitUntil(task);
+}
+
 export async function onRequest(context) {
   const { request, next, env } = context;
   const url = new URL(request.url);
   const path = url.pathname;
+
+  /* 顺手记一笔访问，不挡请求 */
+  try {
+    if (isPageView(request, url)) logVisit(context, url);
+  } catch (e) { /* 记录失败不影响页面 */ }
 
   const guarded = /^\/admin(\/|$)/.test(path) || /^\/pages\/admin/.test(path);
   if (!guarded) return next();

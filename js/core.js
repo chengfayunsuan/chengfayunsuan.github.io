@@ -393,7 +393,8 @@
     '/admin/items': { page: 'admin-items' },
     '/admin/messages': { page: 'admin-messages' },
     '/admin/moonetix': { page: 'admin-moonetix' },
-    '/admin/customize': { page: 'admin-customize' }
+    '/admin/customize': { page: 'admin-customize' },
+    '/admin/traffic': { page: 'admin-traffic' }
   };
 
   function normalize(path) {
