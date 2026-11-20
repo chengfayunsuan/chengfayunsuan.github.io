@@ -55,11 +55,47 @@
   };
 
   var page = 1;
+  var openIp = '';
+  var trackCache = {};
+  var lastItems = [];
 
   function esc(s) {
     return String(s == null ? '' : s)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
+  }
+
+  /* UA 归成「系统 · 浏览器」两三个字，别把整串糊上去 */
+  function deviceOf(ua) {
+    ua = String(ua || '');
+    if (!ua) return '未知';
+
+    var sys = '其他';
+    if (/iPhone|iPad|iPod/.test(ua)) sys = 'iOS';
+    else if (/Android/.test(ua)) sys = 'Android';
+    else if (/Windows NT 10/.test(ua)) sys = 'Win10+';
+    else if (/Windows/.test(ua)) sys = 'Windows';
+    else if (/Mac OS X/.test(ua)) sys = 'macOS';
+    else if (/Linux/.test(ua)) sys = 'Linux';
+
+    /* 微信内置浏览器的 UA 里也带 Chrome，得先判 */
+    var br = '';
+    if (/MicroMessenger/.test(ua)) br = '微信';
+    else if (/QQ\//.test(ua)) br = 'QQ';
+    else if (/Edg\//.test(ua)) br = 'Edge';
+    else if (/Firefox\//.test(ua)) br = 'Firefox';
+    else if (/Chrome\//.test(ua)) br = 'Chrome';
+    else if (/Safari\//.test(ua)) br = 'Safari';
+
+    if (/Nexus 5|Android 6\.0/.test(ua)) sys = 'Android';
+
+    return br ? sys + ' · ' + br : sys;
+  }
+
+  /* 带日期，跨天来的才分得清；秒没意义 */
+  function clockOf(at) {
+    var s = String(at || '');
+    return s.slice(5, 10) + ' ' + s.slice(11, 16);
   }
 
   /* 中文地方名不跟着转，原样返回 */
@@ -150,6 +186,7 @@
   function paintIps(items) {
     var box = $('ips');
     if (!box) return;
+    lastItems = items;
 
     var head = '<div class="tv-tr tv-tr--h">' +
       '<span>IP</span><span>归属地</span><span>网络</span><span>次数</span>' +
@@ -163,15 +200,71 @@
 
     box.innerHTML = head + items.map(function (it) {
       var net = [it.asn ? 'AS' + it.asn : '', it.org, it.colo].filter(Boolean).join(' · ');
-      return '<div class="tv-tr">' +
-        '<span class="r-ip" title="' + esc(it.ip) + '">' + esc(it.ip) + '</span>' +
-        '<span class="r-c" title="' + esc([it.region, it.city].filter(Boolean).join(' / ')) + '">' + esc(place(it)) + '</span>' +
-        '<span class="r-net" title="' + esc(net || '未知') + '">' + esc(it.org || '—') + '</span>' +
-        '<span class="r-n">' + it.pv + ' 次</span>' +
-        '<span class="r-at" title="' + esc(it.first_at) + '">' + esc(stamp(it.first_at)) + '</span>' +
-        '<span class="r-at" title="' + esc(it.last_at) + '">' + esc(stamp(it.last_at)) + '</span>' +
+      var open = it.ip === openIp;
+      return '<div class="tv-row' + (open ? ' is-open' : '') + '" data-ip="' + esc(it.ip) + '">' +
+        '<div class="tv-tr">' +
+          '<span class="r-ip"><button type="button" class="r-ip__b" data-track="' + esc(it.ip) + '" title="看这个 IP 走过哪些页面">' +
+            esc(it.ip) + '<i class="r-ip__c">' + (open ? '收起' : it.pv + ' 步') + '</i></button></span>' +
+          '<span class="r-c" title="' + esc([it.region, it.city].filter(Boolean).join(' / ')) + '">' + esc(place(it)) + '</span>' +
+          '<span class="r-net" title="' + esc(net || '未知') + '">' + esc(it.org || '—') + '</span>' +
+          '<span class="r-n">' + it.pv + ' 次</span>' +
+          '<span class="r-at" title="' + esc(it.first_at) + '">' + esc(stamp(it.first_at)) + '</span>' +
+          '<span class="r-at" title="' + esc(it.last_at) + '">' + esc(stamp(it.last_at)) + '</span>' +
+        '</div>' +
+        '<div class="tv-track"' + (open ? '' : ' hidden') + '>' + (open ? trackHtml(it.ip, trackCache[it.ip]) : '') + '</div>' +
       '</div>';
     }).join('');
+  }
+
+  /* 展开区：一行一步，隔开半小时以上就插一条「离开 / 再回来」 */
+  function trackHtml(ip, d) {
+    if (!d) return '<p class="tv-tk__wait">正在读取轨迹…</p>';
+    if (!d.ok) return '<p class="tv-tk__wait">没读到，稍后重试。</p>';
+
+    var items = d.items || [];
+    if (!items.length) return '<p class="tv-tk__wait">这个 IP 还没有记录。</p>';
+
+    /* 路径去重，给一句「一共看了几个页面」 */
+    var seen = {};
+    items.forEach(function (it) { seen[it.path] = 1; });
+    var paths = Object.keys(seen).length;
+
+    var body = items.map(function (it, i) {
+      var gap = it.gap || 0;
+      var sep = '';
+      if (gap >= 30) {
+        sep = '<div class="tv-tk__gap">离开 <b>' + (gap >= 60 ? Math.round(gap / 60) + ' 小时' : gap + ' 分钟') + '</b> 后又来</div>';
+      }
+      return sep + '<div class="tv-tk">' +
+        (i === 0 ? '<em class="tv-tk__dot is-last"></em>' : '<em class="tv-tk__dot"></em>') +
+        '<span class="tv-tk__t">' + esc(clockOf(it.at)) + '</span>' +
+        '<span class="tv-tk__p">' + esc(it.path) + '</span>' +
+        '<span class="tv-tk__d">' + esc(deviceOf(it.ua)) + '</span>' +
+        '<span class="tv-tk__r">' + esc(it.ref ? '来自 ' + it.ref.replace(/^https?:\/\//, '') : '直接访问') + '</span>' +
+      '</div>';
+    }).join('');
+
+    return '<div class="tv-tk__h">共 ' + d.total + ' 步 · ' + paths + ' 个页面 · 时间倒序</div>' + body;
+  }
+
+  function loadTrack(ip) {
+    if (trackCache[ip]) {
+      paintIps(lastItems);
+      return;
+    }
+    trackCache[ip] = null;
+    paintIps(lastItems);
+
+    fetch('/api/admin/traffic/track?ip=' + encodeURIComponent(ip), { headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        trackCache[ip] = d || { ok: false };
+        if (openIp === ip) paintIps(lastItems);
+      })
+      .catch(function () {
+        trackCache[ip] = { ok: false };
+        if (openIp === ip) paintIps(lastItems);
+      });
   }
 
   function pageList(cur, total) {
@@ -255,6 +348,7 @@
   function goto(n) {
     if (n === page) return;
     page = n;
+    openIp = '';
     var box = $('ips');
     if (box) {
       var y = box.getBoundingClientRect().top + window.scrollY - 90;
@@ -271,6 +365,23 @@
       var n = Number(b.getAttribute('data-pg'));
       if (!n || n < 1) return;
       goto(n);
+    });
+  }
+
+  /* 点 IP 展开这个人的访问轨迹，再点收起；同一时间只开一行 */
+  var ipBox = $('ips');
+  if (ipBox) {
+    ipBox.addEventListener('click', function (ev) {
+      var b = ev.target.closest('button[data-track]');
+      if (!b) return;
+      var ip = b.getAttribute('data-track');
+      if (openIp === ip) {
+        openIp = '';
+        paintIps(lastItems);
+        return;
+      }
+      openIp = ip;
+      loadTrack(ip);
     });
   }
 

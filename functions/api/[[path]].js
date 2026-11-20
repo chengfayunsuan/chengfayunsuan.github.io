@@ -2246,6 +2246,50 @@ async function adminTraffic(env, url) {
   });
 }
 
+/* 单个 IP 的访问轨迹：点开某一行时按需拉，不塞进列表里 */
+async function adminIpTrack(env, url) {
+  const ip = String(url.searchParams.get('ip') || '').trim().slice(0, 60);
+  if (!ip) return json({ ok: false, error: 'no_ip' }, 400);
+
+  const rows = await env.DB.prepare(
+    `SELECT at, path, ref, ua FROM visits
+      WHERE ip = ? ORDER BY at DESC, id DESC LIMIT 200`
+  ).bind(ip).all();
+
+  const total = await env.DB.prepare(
+    'SELECT COUNT(*) AS n FROM visits WHERE ip = ?'
+  ).bind(ip).first();
+
+  const list = (rows && rows.results) || [];
+
+  /* 间隔超过 30 分钟算另一次来访，一眼能看出是连着点的还是隔了半天再来 */
+  let prev = '';
+  const out = list.map(function (r) {
+    const t = r.at || '';
+    let gap = 0;
+    if (prev) {
+      const a = Date.parse(prev.replace(' ', 'T') + 'Z');
+      const b = Date.parse(t.replace(' ', 'T') + 'Z');
+      if (a && b) gap = Math.round((a - b) / 60000);
+    }
+    prev = t;
+    return {
+      at: t,
+      path: r.path || '/',
+      ref: r.ref || '',
+      ua: (r.ua || '').slice(0, 180),
+      gap: gap
+    };
+  });
+
+  return json({
+    ok: true,
+    ip: ip,
+    total: Number(total && total.n) || 0,
+    items: out
+  });
+}
+
 /* ---------------- 后台：商品 / 兑换码 / 订单 / 消息 ---------------- */
 
 async function adminItemList(env) {
@@ -2759,6 +2803,7 @@ async function adminApi(request, env, url, path) {
   if (path === 'admin/announcements/delete' && request.method === 'POST') return await adminNoticeDelete(request, env);
   if (path === 'admin/moonetix' && request.method === 'GET') return await adminMtxList(env, url);
   if (path === 'admin/traffic' && request.method === 'GET') return await adminTraffic(env, url);
+  if (path === 'admin/traffic/track' && request.method === 'GET') return await adminIpTrack(env, url);
   return json({ ok: false, error: 'not_found' }, 404);
 }
 
