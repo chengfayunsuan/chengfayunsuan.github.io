@@ -4,14 +4,16 @@
    主题色把红色换成蓝色，其余变量与前台共用。
    ============================================================ */
 
-body[data-accent="blue"] {
+/* 后台默认蓝；用户自己在设置里改过主题后，以用户的配色为准 */
+html:not([data-theme]) body[data-accent="blue"] {
   --red: #1D52E2;
   --red-deep: #1439A6;
+  --red-rgb: 29, 82, 226;
 }
 
 /* 当前目录项：蓝底强调 */
 .dock__i.is-on { background: var(--red); }
-.dock__i.is-on .dock__n { color: rgba(244, 240, 230, .85); }
+.dock__i.is-on .dock__n { color: rgba(var(--paper-rgb), .85); }
 
 /* ---------- 门面补件 ---------- */
 
@@ -523,6 +525,10 @@ body[data-accent="blue"] {
 }
 
 .adm-h__t { font-size: 15px; font-weight: 700; }
+
+/* 自定义面板的状态标签贴右 */
+.adm-h .cz-tag,
+.adm-h .adm-h__r { margin-left: auto; }
 .adm-h__d { font-size: 12px; color: var(--gray); }
 
 .svf {

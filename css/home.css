@@ -100,7 +100,7 @@
   gap: 7px;
   padding: 13px 15px;
   border: 0;
-  border-right: 1px solid rgba(244, 240, 230, .14);
+  border-right: 1px solid rgba(var(--paper-rgb), .14);
   background: transparent;
   color: inherit;
   font-family: inherit;
@@ -123,7 +123,7 @@
   color: var(--red);
 }
 
-.dock__i:hover .dock__n { color: rgba(244, 240, 230, .8); }
+.dock__i:hover .dock__n { color: rgba(var(--paper-rgb), .8); }
 
 /* ---------- 门面 ---------- */
 
@@ -541,7 +541,7 @@
     ". d";
   gap: 4px 12px;
   padding: 20px clamp(18px, 2.4vw, 28px);
-  border-bottom: 1px solid rgba(20, 19, 15, .16);
+  border-bottom: 1px solid rgba(var(--ink-rgb), .16);
 }
 
 .hall__steps li:last-child { border-bottom: 0; }
@@ -637,7 +637,7 @@
 /* ---------- 页脚 ---------- */
 
 .foot {
-  border-top: 3px solid rgba(244, 240, 230, .16);
+  border-top: 3px solid rgba(var(--paper-rgb), .16);
   padding-top: 28px;
 }
 

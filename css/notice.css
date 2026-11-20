@@ -27,7 +27,7 @@
 .nt[data-lv="warn"]::before { background: var(--red); }
 .nt[data-lv="critical"]::before { background: var(--ink); }
 
-.nt.is-pinned { box-shadow: 5px 5px 0 rgba(224, 41, 30, .16); }
+.nt.is-pinned { box-shadow: 5px 5px 0 rgba(var(--red-rgb), .16); }
 
 .nt__head {
   display: flex;

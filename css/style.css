@@ -33,7 +33,13 @@
   --paper: #F4F0E6;
   --paper-2: #E7E1D2;
   --gray: #8D8577;
-  --hair: rgba(20, 19, 15, .16);
+  --hair: rgba(var(--ink-rgb), .16);
+
+  /* RGB 分量：给 rgba() 拼半透明用，主题切换时由核心脚本重算 */
+  --red-rgb: 224, 41, 30;
+  --ink-rgb: 20, 19, 15;
+  --paper-rgb: 244, 240, 230;
+  --paper2-rgb: 231, 225, 210;
 
   --sans: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Source Han Sans SC", sans-serif;
   --num: "Bebas Neue", Impact, "Arial Black", "Haettenschweiler", var(--sans);
@@ -104,7 +110,7 @@ body {
   /* 纸面颗粒：一层极淡的斜纹，避免大面积纯色发死 */
   background-image:
     repeating-linear-gradient(-45deg,
-      rgba(20, 19, 15, .022) 0 1px,
+      rgba(var(--ink-rgb), .022) 0 1px,
       transparent 1px 7px);
 }
 
@@ -381,7 +387,7 @@ button { font-family: inherit; cursor: pointer; }
   font-family: var(--black);
   font-size: min(46vw, 620px);
   line-height: .72;
-  color: rgba(224, 41, 30, .07);
+  color: rgba(var(--red-rgb), .07);
   pointer-events: none;
   user-select: none;
   transform: rotate(8deg);
@@ -518,7 +524,7 @@ button { font-family: inherit; cursor: pointer; }
 .belt__sep {
   width: 1px;
   height: 26px;
-  background: rgba(244, 240, 230, .22);
+  background: rgba(var(--paper-rgb), .22);
 }
 
 /* ---------- 通用区块 ---------- */
@@ -684,7 +690,7 @@ button { font-family: inherit; cursor: pointer; }
   border-top: 1px solid var(--hair);
 }
 
-.card--ink .card__rate { border-color: rgba(244, 240, 230, .18); }
+.card--ink .card__rate { border-color: rgba(var(--paper-rgb), .18); }
 
 .card__rate b {
   font-family: var(--black);
@@ -736,7 +742,7 @@ button { font-family: inherit; cursor: pointer; }
   gap: 16px;
   align-items: baseline;
   padding: 20px 0;
-  border-bottom: 1px solid rgba(244, 240, 230, .16);
+  border-bottom: 1px solid rgba(var(--paper-rgb), .16);
 }
 
 .source__list .n {
@@ -888,7 +894,7 @@ button { font-family: inherit; cursor: pointer; }
   position: absolute;
   inset: -20% -10%;
   background: repeating-linear-gradient(58deg,
-      rgba(20, 19, 15, .1) 0 3px,
+      rgba(var(--ink-rgb), .1) 0 3px,
       transparent 3px 34px);
   pointer-events: none;
 }
@@ -914,17 +920,17 @@ button { font-family: inherit; cursor: pointer; }
   max-width: 26em;
   font-size: 15px;
   line-height: 1.8;
-  color: rgba(244, 240, 230, .88);
+  color: rgba(var(--paper-rgb), .88);
 }
 
 .cta .btn {
   background: var(--ink);
   border-color: var(--ink);
   color: var(--paper);
-  box-shadow: 8px 8px 0 rgba(244, 240, 230, .9);
+  box-shadow: 8px 8px 0 rgba(var(--paper-rgb), .9);
 }
 
-.cta .btn:hover { box-shadow: 11px 11px 0 rgba(244, 240, 230, .9); }
+.cta .btn:hover { box-shadow: 11px 11px 0 rgba(var(--paper-rgb), .9); }
 
 .cta__side {
   display: flex;
@@ -943,7 +949,7 @@ button { font-family: inherit; cursor: pointer; }
   font-size: 11px;
   letter-spacing: .14em;
   padding: 9px 12px;
-  box-shadow: 4px 4px 0 rgba(20, 19, 15, .85);
+  box-shadow: 4px 4px 0 rgba(var(--ink-rgb), .85);
 }
 
 .cta__side .btn {
@@ -955,10 +961,10 @@ button { font-family: inherit; cursor: pointer; }
   background: transparent;
   color: var(--paper);
   border-color: var(--paper);
-  box-shadow: 6px 6px 0 rgba(20, 19, 15, .85);
+  box-shadow: 6px 6px 0 rgba(var(--ink-rgb), .85);
 }
 
-.btn--line:hover { box-shadow: 9px 9px 0 rgba(20, 19, 15, .85); }
+.btn--line:hover { box-shadow: 9px 9px 0 rgba(var(--ink-rgb), .85); }
 
 /* ---------- 页脚 ---------- */
 
@@ -973,7 +979,7 @@ button { font-family: inherit; cursor: pointer; }
   grid-template-columns: 1.4fr 1fr 1fr;
   gap: 40px;
   padding-bottom: 40px;
-  border-bottom: 1px solid rgba(244, 240, 230, .18);
+  border-bottom: 1px solid rgba(var(--paper-rgb), .18);
 }
 
 .foot__brand {
@@ -1158,7 +1164,7 @@ button { font-family: inherit; cursor: pointer; }
   align-items: center;
   justify-content: center;
   padding: 22px;
-  background: rgba(20, 19, 15, .58);
+  background: rgba(var(--ink-rgb), .58);
   opacity: 0;
   transition: opacity .18s ease;
   overflow-y: auto;

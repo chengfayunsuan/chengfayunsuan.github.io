@@ -287,10 +287,10 @@
 .svc--feat {
   padding-top: 34px;
   border-color: var(--red);
-  box-shadow: 6px 6px 0 rgba(224, 41, 30, .16);
+  box-shadow: 6px 6px 0 rgba(var(--red-rgb), .16);
 }
 
-.svc--feat:hover { box-shadow: 8px 8px 0 rgba(224, 41, 30, .3); }
+.svc--feat:hover { box-shadow: 8px 8px 0 rgba(var(--red-rgb), .3); }
 
 .svc__flag {
   position: absolute;

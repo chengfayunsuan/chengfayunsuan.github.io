@@ -752,69 +752,6 @@
       });
   });
 
-  /* ---------- 08 自定义设置 ---------- */
-
-  var PREF_KEY = 'cf.prefs';
-  var DEFAULTS = {
-    'notify.survey': true,
-    'notify.review': true,
-    'notify.balance': true,
-    'notify.withdraw': true,
-    'notify.notice': true,
-    'notify.weekly': false,
-    'privacy.page': true,
-    'privacy.ladder': true,
-    'privacy.joined': false,
-    'privacy.search': true,
-    'privacy.online': false,
-    'ui.compact': false,
-    'ui.motion': false,
-    'ui.tabular': true,
-    'ui.grid': false,
-    'safe.device': true,
-    'safe.region': false,
-    'safe.withdraw': true,
-    'data.stats': true,
-    'data.research': false
-  };
-
-  var prefs = {};
-
-  function loadPrefs() {
-    var saved = {};
-    try { saved = JSON.parse(localStorage.getItem(PREF_KEY) || '{}') || {}; } catch (e) { saved = {}; }
-    prefs = {};
-    Object.keys(DEFAULTS).forEach(function (k) {
-      prefs[k] = Object.prototype.hasOwnProperty.call(saved, k) ? !!saved[k] : DEFAULTS[k];
-    });
-  }
-
-  function savePrefs() {
-    try { localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); } catch (e) { /* 存不了就算了 */ }
-  }
-
-  function applyPrefs() {
-    var b = document.body;
-    b.classList.toggle('is-compact', prefs['ui.compact']);
-    b.classList.toggle('is-still', !prefs['ui.motion']);
-    b.classList.toggle('is-tabular', prefs['ui.tabular']);
-    b.classList.toggle('is-grid', prefs['ui.grid']);
-  }
-
-  loadPrefs();
-
-  document.querySelectorAll('[data-pref]').forEach(function (input) {
-    var key = input.getAttribute('data-pref');
-    input.checked = !!prefs[key];
-    input.addEventListener('change', function () {
-      prefs[key] = input.checked;
-      savePrefs();
-      applyPrefs();
-    });
-  });
-
-  applyPrefs();
-
   /* ---------- 账户概览右侧：查找用户 ---------- */
 
   var findForm = $('findForm');

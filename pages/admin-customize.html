@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>外观 · 乘法后台</title>
+<meta name="description" content="乘法运营后台：快捷导航与主题配色。">
+<meta name="theme-color" content="#1D52E2">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/style.css?v=13">
+<link rel="stylesheet" href="/css/home.css?v=15">
+<link rel="stylesheet" href="/css/page.css?v=9">
+<link rel="stylesheet" href="/css/admin.css?v=13">
+<link rel="stylesheet" href="/css/customize.css?v=3">
+<script src="/js/config.js?v=7"></script>
+<script src="/js/core.js?v=23"></script>
+</head>
+<body data-page="admin-customize" data-accent="blue">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/home">
+      <span class="brand__mark" aria-hidden="true"></span>
+      乘法
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><button class="hm-nav__cur" type="button" data-cur-toggle aria-label="切换显示币种" title="点击在乘法币与乘法刀之间切换"><span data-cur="code">CFB</span></button>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/home">我</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">退出</button>
+    </div>
+  </div>
+</header>
+
+<nav class="dock" aria-label="后台目录">
+  <div class="wrap dock__in">
+    <a class="dock__i" href="/admin">
+      <span class="dock__n">01</span><span class="dock__t">后台概览</span>
+    </a>
+    <a class="dock__i" href="/admin/users">
+      <span class="dock__n">02</span><span class="dock__t">用户管理</span>
+    </a>
+    <a class="dock__i" href="/admin/withdrawals">
+      <span class="dock__n">03</span><span class="dock__t">提现审核</span>
+    </a>
+    <a class="dock__i" href="/admin/orders">
+      <span class="dock__n">04</span><span class="dock__t">兑换订单</span>
+    </a>
+    <a class="dock__i" href="/admin/tickets">
+      <span class="dock__n">05</span><span class="dock__t">工单</span>
+    </a>
+    <a class="dock__i" href="/admin/surveys">
+      <span class="dock__n">06</span><span class="dock__t">问卷管理</span>
+    </a>
+    <a class="dock__i" href="/admin/items">
+      <span class="dock__n">07</span><span class="dock__t">商品兑换</span>
+    </a>
+    <a class="dock__i" href="/admin/messages">
+      <span class="dock__n">08</span><span class="dock__t">公告</span>
+    </a>
+    <a class="dock__i" href="/admin/moonetix">
+      <span class="dock__n">09</span><span class="dock__t">广告墙</span>
+    </a>
+    <a class="dock__i" href="/lab">
+      <span class="dock__n">10</span><span class="dock__t">实验台</span>
+    </a>
+    <a class="dock__i is-on" href="/admin/customize" aria-current="page">
+      <span class="dock__n">11</span><span class="dock__t">外观</span>
+    </a>
+  </div>
+</nav>
+
+<main id="app">
+  <section class="face">
+    <div class="wrap">
+      <div class="face__in">
+        <div class="face__id">
+          <div class="face__meta">
+            <span class="face__uid">ADMIN / 外观</span>
+            <span class="adm-badge">APPEARANCE</span>
+          </div>
+          <h1 class="face__name">外观</h1>
+          <p class="face__sub">快捷导航键位 · 整站配色</p>
+          <div class="face__foot">
+            <p class="adm-lead">这两项都只存在你自己这台电脑的浏览器里。改的是你的视图，不影响别人看到的站。</p>
+          </div>
+        </div>
+
+        <div class="face__bal">
+          <div class="face__bal-k">SCOPE / 生效范围</div>
+          <div class="face__bal-n">本机</div>
+          <div class="face__bal-f">键位与配色均存 cookie · 换设备需重设</div>
+          <div class="face__acts"><a class="btn btn--ghost" href="/settings">去用户端设置</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="adm-sec">
+    <div class="wrap">
+      <div class="adm-panel">
+        <div class="adm-h">
+          <span class="adm-h__t">快捷导航</span>
+          <span class="adm-h__r cz-tag is-on" id="hkState">已开启</span>
+        </div>
+
+        <div class="cz cz--flat">
+          <div class="cz__head">
+            <div class="cz__x">
+              <b>数字键直达</b>
+              <i>后台目录按 01–11 编号，1–9 对应前九项，0 对应第十项（实验台）。在输入框里打字时不会触发。</i>
+            </div>
+            <label class="cz-sw">
+              <input type="checkbox" id="hkOn" checked>
+              <span class="cz-sw__b"></span>
+              <span class="cz-sw__t">启用</span>
+            </label>
+          </div>
+
+          <div class="cz__tabs">
+            <button class="cz__tab" type="button" data-hk-scope="user">用户端 · 10 项</button>
+            <button class="cz__tab is-on" type="button" data-hk-scope="admin">后台 · 10 项</button>
+          </div>
+
+          <ul class="hk" id="hkList"></ul>
+
+          <div class="cz__foot">
+            <p class="cz__note">点「改键」后按任意数字或字母即可绑定；撞键会自动交换。用户端与后台各存一套。</p>
+            <div class="cz__acts"><button class="btn btn--ghost" type="button" id="hkReset">恢复默认键位</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="adm-panel">
+        <div class="adm-h">
+          <span class="adm-h__t">主题配色</span>
+          <span class="adm-h__r cz-tag" id="thState">默认配色</span>
+        </div>
+
+        <div class="cz cz--flat">
+          <div class="th-pre">
+            <div class="th-pre__x">
+              <b>预设配色</b>
+              <i>后台默认本来就是蓝的；点「正红」会连同后台一起变红。</i>
+            </div>
+            <div class="th-pre__b">
+              <button class="th-sw" type="button" data-theme-preset="red"><span class="th-sw__c" style="--c:#E0291E"></span>正红 · 默认</button>
+              <button class="th-sw" type="button" data-theme-preset="blue"><span class="th-sw__c" style="--c:#1D52E2"></span>后台蓝</button>
+            </div>
+          </div>
+
+          <div class="th-body">
+            <ul class="th-pal" id="thPal"></ul>
+
+            <div class="th-demo" id="thDemo">
+              <div class="th-demo__h"><span>PREVIEW</span><b>配色预览</b></div>
+              <div class="th-demo__b">
+                <div class="th-demo__bal"><span>乘法币余额</span><strong>32.50</strong><em>CFB</em></div>
+                <div class="th-demo__sw">
+                  <span class="th-demo__btn">主按钮</span>
+                  <span class="th-demo__btn th-demo__btn--ghost">次按钮</span>
+                </div>
+                <div class="th-demo__lv"><span class="th-demo__lvk">LV 3</span><span class="th-demo__lvt">再获得 40 点经验升至 LV4</span></div>
+                <div class="th-demo__bar"><i style="width:62%"></i></div>
+                <p class="th-demo__p">正文用墨色，说明与编号用次要灰，分隔线由墨色调淡。这里是示例，改动会即时反映在这扇小窗里。</p>
+                <div class="th-demo__band" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cz__foot">
+            <p class="cz__note">点「确定生效」后整站立即换色。配色对前台后台同时生效。</p>
+            <div class="cz__acts">
+              <button class="btn btn--ghost" type="button" id="thReset">恢复默认</button>
+              <button class="btn btn--red" type="button" id="thSave">确定生效</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 乘法 CHENGFA</span>
+      <span>运营后台 · 仅限站长与管理员</span>
+    </div>
+    <p class="foot__legal"><a href="/privacy">隐私政策</a> · <a href="/terms">用户协议</a> · <a href="/support">联系客服</a></p>
+  </div>
+</footer>
+
+<script src="/js/personalize.js?v=2" defer></script>
+</body>
+</html>

@@ -9,12 +9,13 @@
   <meta name="theme-color" content="#E0291E">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <meta name="robots" content="noindex">
-  <link rel="stylesheet" href="/css/style.css?v=12">
-  <link rel="stylesheet" href="/css/home.css?v=12">
-  <link rel="stylesheet" href="/css/settings.css?v=17">
+  <link rel="stylesheet" href="/css/style.css?v=13">
+  <link rel="stylesheet" href="/css/home.css?v=15">
+  <link rel="stylesheet" href="/css/settings.css?v=18">
   <link rel="stylesheet" href="/css/relation.css?v=2">
+  <link rel="stylesheet" href="/css/customize.css?v=3">
   <script src="/js/config.js?v=7"></script>
-  <script src="/js/core.js?v=21"></script>
+  <script src="/js/core.js?v=23"></script>
 </head>
 
 <body data-page="settings">
@@ -381,96 +382,89 @@
     </section>
 
     <!-- ============ 08 自定义设置 ============ -->
-    <section class="blk" id="sec-pref">
+    <section class="blk" id="sec-keys">
       <div class="wrap">
         <div class="blk__h">
           <span class="blk__n">08</span>
-          <h2 class="blk__t">自定义设置</h2>
+          <h2 class="blk__t">快捷导航</h2>
+          <span class="cz-tag is-on" id="hkState">已开启</span>
         </div>
 
-        <div class="pref">
-
-          <fieldset class="pref__g pref__g--wide">
-            <legend class="pref__gt">单位显示</legend>
-            <div class="cur-row">
-              <div class="cur-seg" id="styleSeg">
-                <button class="cur-seg__b" type="button" data-cur-style="code">
-                  <b>CFB / CFD</b><i>字母写法</i>
-                </button>
-                <button class="cur-seg__b" type="button" data-cur-style="name">
-                  <b>乘法币 / 乘法刀</b><i>汉字写法</i>
-                </button>
-              </div>
-              <p class="pref__hint">只改单位的写法，不改数值。按人民币还是按美元显示，点导航栏余额后面的币种即可切换。</p>
+        <div class="cz">
+          <div class="cz__head">
+            <div class="cz__x">
+              <b>数字键直达</b>
+              <i>站内任何页面按键盘上排的数字键，直接跳到对应功能。默认按功能目录的编号走，第 10 项用 0。在输入框里打字时不会触发。</i>
             </div>
-          </fieldset>
+            <label class="cz-sw">
+              <input type="checkbox" id="hkOn" checked>
+              <span class="cz-sw__b"></span>
+              <span class="cz-sw__t">启用</span>
+            </label>
+          </div>
 
-          <fieldset class="pref__g">
-            <legend class="pref__gt">通知</legend>
-            <label class="sw"><input type="checkbox" data-pref="notify.survey"><span class="sw__b"></span>
-              <span class="sw__x"><b>问卷上新</b><i>有符合你条件的问卷时发出提醒</i></span></label>
-            <label class="sw"><input type="checkbox" data-pref="notify.review"><span class="sw__b"></span>
-              <span class="sw__x"><b>答卷审核结果</b><i>答卷通过或驳回时通知</i></span></label>
-            <label class="sw"><input type="checkbox" data-pref="notify.balance"><span class="sw__b"></span>
-              <span class="sw__x"><b>余额变动</b><i>入账、扣除、冻结都会提示</i></span></label>
-            <label class="sw"><input type="checkbox" data-pref="notify.withdraw"><span class="sw__b"></span>
-              <span class="sw__x"><b>提现进度</b><i>审核、打款、退回三个节点各一条</i></span></label>
-            <label class="sw"><input type="checkbox" data-pref="notify.notice"><span class="sw__b"></span>
-              <span class="sw__x"><b>站内公告</b><i>规则调整、维护安排</i></span></label>
-            <label class="sw"><input type="checkbox" data-pref="notify.weekly"><span class="sw__b"></span>
-              <span class="sw__x"><b>每周汇总邮件</b><i>收益、等级、可参与问卷一并发出</i></span></label>
-          </fieldset>
+          <div class="cz__tabs">
+            <button class="cz__tab is-on" type="button" data-hk-scope="user">用户端 · 10 项</button>
+            <button class="cz__tab" type="button" data-hk-scope="admin">后台 · 10 项</button>
+          </div>
 
-          <fieldset class="pref__g">
-            <legend class="pref__gt">隐私</legend>
-            <label class="sw"><input type="checkbox" data-pref="privacy.page"><span class="sw__b"></span>
-              <span class="sw__x"><b>公开个人主页</b><i>关闭后他人无法访问你的主页</i></span></label>
-            <label class="sw"><input type="checkbox" data-pref="privacy.ladder"><span class="sw__b"></span>
-              <span class="sw__x"><b>在天梯榜展示</b><i>关闭后不参与排名，仍可看到榜单</i></span></label>
-            <label class="sw"><input type="checkbox" data-pref="privacy.joined"><span class="sw__b"></span>
-              <span class="sw__x"><b>展示注册时间</b><i>只影响他人看到的主页</i></span></label>
-            <label class="sw"><input type="checkbox" data-pref="privacy.search"><span class="sw__b"></span>
-              <span class="sw__x"><b>允许按 UID 搜到我</b><i>关闭后只能用用户名查找</i></span></label>
-            <label class="sw"><input type="checkbox" data-pref="privacy.online"><span class="sw__b"></span>
-              <span class="sw__x"><b>展示在线状态</b><i>关闭后一律显示离线</i></span></label>
-          </fieldset>
+          <ul class="hk" id="hkList"></ul>
 
-          <fieldset class="pref__g">
-            <legend class="pref__gt">界面</legend>
-            <label class="sw"><input type="checkbox" data-pref="ui.compact"><span class="sw__b"></span>
-              <span class="sw__x"><b>紧凑视图</b><i>列表行高收紧，一屏看到更多条目</i></span></label>
-            <label class="sw"><input type="checkbox" data-pref="ui.motion"><span class="sw__b"></span>
-              <span class="sw__x"><b>减少动效</b><i>关闭进度条与提示条的过渡动画</i></span></label>
-            <label class="sw"><input type="checkbox" data-pref="ui.tabular"><span class="sw__b"></span>
-              <span class="sw__x"><b>表格数字等宽</b><i>流水、榜单、明细改用等宽数字，逐行对齐</i></span></label>
-            <label class="sw"><input type="checkbox" data-pref="ui.grid"><span class="sw__b"></span>
-              <span class="sw__x"><b>显示网格底纹</b><i>背景叠加一层浅网格，版心更清楚</i></span></label>
-          </fieldset>
+          <div class="cz__foot">
+            <p class="cz__note">点「改键」后按任意数字或字母即可绑定；撞键会自动交换。键位只存在这台电脑的浏览器里。</p>
+            <div class="cz__acts"><button class="btn btn--ghost" type="button" id="hkReset">恢复默认键位</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-          <fieldset class="pref__g">
-            <legend class="pref__gt">安全</legend>
-            <label class="sw"><input type="checkbox" data-pref="safe.device"><span class="sw__b"></span>
-              <span class="sw__x"><b>新设备登录提醒</b><i>换设备登录时发一封邮件</i></span></label>
-            <label class="sw"><input type="checkbox" data-pref="safe.region"><span class="sw__b"></span>
-              <span class="sw__x"><b>异地登录二次确认</b><i>非常用地区登录需再验证一次</i></span></label>
-            <label class="sw"><input type="checkbox" data-pref="safe.withdraw"><span class="sw__b"></span>
-              <span class="sw__x"><b>提现前验证密码</b><i>提交提现申请时要求输入密码</i></span></label>
-          </fieldset>
-
-          <fieldset class="pref__g">
-            <legend class="pref__gt">数据</legend>
-            <label class="sw"><input type="checkbox" data-pref="data.stats"><span class="sw__b"></span>
-              <span class="sw__x"><b>匿名参与统计</b><i>只统计完成率与耗时，不含答案内容</i></span></label>
-            <label class="sw"><input type="checkbox" data-pref="data.research"><span class="sw__b"></span>
-              <span class="sw__x"><b>允许用于学术研究</b><i>脱敏后的数据可供高校课题使用</i></span></label>
-          </fieldset>
-
+    <section class="blk" id="sec-theme">
+      <div class="wrap">
+        <div class="blk__h">
+          <span class="blk__n">09</span>
+          <h2 class="blk__t">主题配色</h2>
+          <span class="cz-tag" id="thState">默认配色</span>
         </div>
 
-        <p class="blk__note">
-          开关会先保存在本机，账号同步接口接上后随账号走。隐私组的开关目前只在本机生效，
-          还不能阻止他人通过主页地址访问；账号级隐私要等偏好同步接口接上。
-        </p>
+        <div class="cz">
+          <div class="th-pre">
+            <div class="th-pre__x">
+              <b>预设配色</b>
+              <i>一键换掉整站主色，其余颜色保持协调。后台默认本来就是蓝的。</i>
+            </div>
+            <div class="th-pre__b">
+              <button class="th-sw" type="button" data-theme-preset="red"><span class="th-sw__c" style="--c:#E0291E"></span>正红 · 默认</button>
+              <button class="th-sw" type="button" data-theme-preset="blue"><span class="th-sw__c" style="--c:#1D52E2"></span>后台蓝</button>
+            </div>
+          </div>
+
+          <div class="th-body">
+            <ul class="th-pal" id="thPal"></ul>
+
+            <div class="th-demo" id="thDemo">
+              <div class="th-demo__h"><span>PREVIEW</span><b>配色预览</b></div>
+              <div class="th-demo__b">
+                <div class="th-demo__bal"><span>乘法币余额</span><strong>32.50</strong><em>CFB</em></div>
+                <div class="th-demo__sw">
+                  <span class="th-demo__btn">主按钮</span>
+                  <span class="th-demo__btn th-demo__btn--ghost">次按钮</span>
+                </div>
+                <div class="th-demo__lv"><span class="th-demo__lvk">LV 3</span><span class="th-demo__lvt">再获得 40 点经验升至 LV4</span></div>
+                <div class="th-demo__bar"><i style="width:62%"></i></div>
+                <p class="th-demo__p">正文用墨色，说明与编号用次要灰，分隔线由墨色调淡。这里是示例，改动会即时反映在这扇小窗里。</p>
+                <div class="th-demo__band" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cz__foot">
+            <p class="cz__note">颜色存在本机 cookie 里，换设备不带走。点「确定生效」后整站立即换色，恢复默认随时可以。</p>
+            <div class="cz__acts">
+              <button class="btn btn--ghost" type="button" id="thReset">恢复默认</button>
+              <button class="btn btn--red" type="button" id="thSave">确定生效</button>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -519,7 +513,8 @@
     </div>
   </footer>
 
-  <script src="/js/settings.js?v=19" defer></script>
+  <script src="/js/settings.js?v=20" defer></script>
+  <script src="/js/personalize.js?v=2" defer></script>
 </body>
 
 </html>

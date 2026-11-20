@@ -59,7 +59,7 @@
   transition: background .12s ease;
 }
 
-.msg:hover { background: rgba(231, 225, 210, .45); }
+.msg:hover { background: rgba(var(--paper2-rgb), .45); }
 
 .msg__dot {
   flex: none;
@@ -124,7 +124,7 @@
   color: var(--ink);
 }
 
-.msg.is-open { background: rgba(231, 225, 210, .35); }
+.msg.is-open { background: rgba(var(--paper2-rgb), .35); }
 
 .msg-empty {
   margin: 26px 0 0;

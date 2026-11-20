@@ -168,7 +168,7 @@
   border: var(--edge);
   background:
     repeating-linear-gradient(-45deg,
-      rgba(20, 19, 15, .035) 0 1px,
+      rgba(var(--ink-rgb), .035) 0 1px,
       transparent 1px 9px),
     var(--paper);
   text-align: center;
@@ -326,7 +326,7 @@
 .st-wallet__a .btn {
   padding: 10px 20px;
   font-size: 13px;
-  box-shadow: 5px 5px 0 rgba(244, 240, 230, .85);
+  box-shadow: 5px 5px 0 rgba(var(--paper-rgb), .85);
 }
 
 .st-wallet__a .btn--ghost {
@@ -389,7 +389,7 @@
   border-top: 1px solid var(--hair);
 }
 
-.st-card--ink .st-card__p { border-top-color: rgba(244, 240, 230, .2); }
+.st-card--ink .st-card__p { border-top-color: rgba(var(--paper-rgb), .2); }
 
 .st-card__p b {
   font-family: var(--black);

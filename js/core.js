@@ -11,6 +11,266 @@
 
   var CF = window.CF = window.CF || {};
 
+  /* ============================================================
+     外观：主题色
+     六个颜色变量是整站配色的全部来源，用户可在设置里改，存 cookie。
+     这里在 head 阶段同步执行一次，避免先闪一帧默认红再变色。
+     ============================================================ */
+
+  var THEME_KEY = 'cf-theme';
+
+  var THEME_DEF = {
+    red: '#E0291E',
+    'red-deep': '#B31F16',
+    ink: '#14130F',
+    paper: '#F4F0E6',
+    'paper-2': '#E7E1D2',
+    gray: '#8D8577'
+  };
+
+  var THEME_LIST = [
+    { key: 'red', label: '主色', hint: '按钮、进度条、强调块、可选中的标记' },
+    { key: 'red-deep', label: '主色·深', hint: '按钮按下、印章描边、深一档的强调' },
+    { key: 'ink', label: '墨色', hint: '正文、边框、深色底块' },
+    { key: 'paper', label: '纸色', hint: '页面底色、卡片底' },
+    { key: 'paper-2', label: '纸色·深', hint: '次级底色、条纹、悬停' },
+    { key: 'gray', label: '次要灰', hint: '说明文字、编号、占位' }
+  ];
+
+  function readCookie(name) {
+    var parts = ('; ' + document.cookie).split('; ' + name + '=');
+    if (parts.length < 2) return '';
+    return decodeURIComponent(parts[1].split(';')[0]);
+  }
+
+  function writeCookie(name, val, days) {
+    var d = new Date(Date.now() + (days || 365) * 864e5);
+    document.cookie = name + '=' + encodeURIComponent(val) +
+      ';path=/;expires=' + d.toUTCString() + ';SameSite=Lax';
+  }
+
+  function dropCookie(name) {
+    document.cookie = name + '=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT;SameSite=Lax';
+  }
+
+  function hexRgb(hex) {
+    var h = String(hex || '').replace('#', '').trim();
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    if (!/^[0-9a-fA-F]{6}$/.test(h)) return '';
+    return [
+      parseInt(h.slice(0, 2), 16),
+      parseInt(h.slice(2, 4), 16),
+      parseInt(h.slice(4, 6), 16)
+    ].join(', ');
+  }
+
+  function applyTheme(obj) {
+    var t = {};
+    var k;
+    for (k in THEME_DEF) t[k] = (obj && obj[k]) || THEME_DEF[k];
+
+    var s = document.documentElement.style;
+    s.setProperty('--red', t.red);
+    s.setProperty('--red-deep', t['red-deep']);
+    s.setProperty('--ink', t.ink);
+    s.setProperty('--paper', t.paper);
+    s.setProperty('--paper-2', t['paper-2']);
+    s.setProperty('--gray', t.gray);
+
+    var rgbOf = {
+      '--red-rgb': t.red,
+      '--ink-rgb': t.ink,
+      '--paper-rgb': t.paper,
+      '--paper2-rgb': t['paper-2']
+    };
+    for (var v in rgbOf) {
+      var rgb = hexRgb(rgbOf[v]);
+      if (rgb) s.setProperty(v, rgb);
+    }
+
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', t.red);
+
+    /* 标记「用户改过配色」：后台的默认蓝让位给用户自己的主题 */
+    var same = true;
+    for (k in THEME_DEF) if (t[k].toLowerCase() !== THEME_DEF[k].toLowerCase()) same = false;
+    if (same) document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', 'on');
+
+    CF.theme.current = t;
+    return t;
+  }
+
+  function loadTheme() {
+    var raw = readCookie(THEME_KEY);
+    if (!raw) return null;
+    try {
+      var o = JSON.parse(raw);
+      return o && typeof o === 'object' ? o : null;
+    } catch (e) { return null; }
+  }
+
+  CF.theme = {
+    KEY: THEME_KEY,
+    DEF: THEME_DEF,
+    LIST: THEME_LIST,
+    current: null,
+    hexRgb: hexRgb,
+    read: loadTheme,
+    /* 只应用不保存：设置页拿来做即时预览 */
+    apply: applyTheme,
+    save: function (obj) {
+      var t = {};
+      for (var k in THEME_DEF) t[k] = (obj && obj[k]) || THEME_DEF[k];
+      writeCookie(THEME_KEY, JSON.stringify(t));
+      return applyTheme(t);
+    },
+    reset: function () {
+      dropCookie(THEME_KEY);
+      return applyTheme(null);
+    },
+    /* 预设：正红 / 后台蓝 */
+    preset: function (name) {
+      if (name === 'blue') return { red: '#1D52E2', 'red-deep': '#1439A6' };
+      return { red: THEME_DEF.red, 'red-deep': THEME_DEF['red-deep'] };
+    }
+  };
+
+  applyTheme(loadTheme());
+
+  /* ============================================================
+     快捷键：数字键 1-9 / 0 直达导航项
+     默认按功能目录的编号走（第 10 项用 0），用户可改键，存 cookie。
+     ============================================================ */
+
+  var HOT_KEY = 'cf-hotkeys';
+
+  var NAV_USER = [
+    { k: '1', href: '/hall', t: '问卷大厅' },
+    { k: '2', href: '/earn', t: '赚积分' },
+    { k: '3', href: '/store', t: '兑换中心' },
+    { k: '4', href: '/ledger', t: '收支明细' },
+    { k: '5', href: '/ladder', t: '天梯榜' },
+    { k: '6', href: '/messages', t: '站内消息' },
+    { k: '7', href: '/support', t: '联系客服' },
+    { k: '8', href: '/settings', t: '账户设置' },
+    { k: '9', href: '/home', t: '账户首页' },
+    { k: '0', href: '/notices', t: '公告' }
+  ];
+
+  var NAV_ADMIN = [
+    { k: '1', href: '/admin', t: '后台概览' },
+    { k: '2', href: '/admin/users', t: '用户管理' },
+    { k: '3', href: '/admin/withdrawals', t: '提现审核' },
+    { k: '4', href: '/admin/orders', t: '兑换订单' },
+    { k: '5', href: '/admin/tickets', t: '工单' },
+    { k: '6', href: '/admin/surveys', t: '问卷管理' },
+    { k: '7', href: '/admin/items', t: '商品兑换' },
+    { k: '8', href: '/admin/messages', t: '公告' },
+    { k: '9', href: '/admin/moonetix', t: '广告墙' },
+    { k: '0', href: '/lab', t: '实验台' }
+  ];
+
+  function loadHot() {
+    var raw = readCookie(HOT_KEY);
+    var o = null;
+    try { o = raw ? JSON.parse(raw) : null; } catch (e) { o = null; }
+    return {
+      on: o && o.on === false ? false : true,
+      user: (o && o.user) || {},
+      admin: (o && o.admin) || {}
+    };
+  }
+
+  function saveHot(cfg) {
+    var out = {
+      on: cfg.on !== false,
+      user: cfg.user || {},
+      admin: cfg.admin || {}
+    };
+    writeCookie(HOT_KEY, JSON.stringify(out));
+    return out;
+  }
+
+  /* 合并默认与自定义：返回 [{href,t,key,def}] */
+  function hotList(scope, cfg) {
+    var def = scope === 'admin' ? NAV_ADMIN : NAV_USER;
+    var custom = (cfg || loadHot())[scope] || {};
+    var out = [];
+    for (var i = 0; i < def.length; i++) {
+      var item = def[i];
+      out.push({
+        href: item.href,
+        t: item.t,
+        key: custom[item.href] || item.k,
+        def: item.k
+      });
+    }
+    return out;
+  }
+
+  function go(href) {
+    if (!href) return false;
+    if (normalize(location.pathname) === normalize(href)) return false;
+    var a = document.querySelector('.dock a[href="' + href + '"]');
+    if (a) { a.click(); return true; }
+    location.href = href;
+    return true;
+  }
+
+  var hotBound = false;
+
+  function bindHotkeys() {
+    if (hotBound) return;
+    hotBound = true;
+
+    document.addEventListener('keydown', function (ev) {
+      if (ev.ctrlKey || ev.altKey || ev.metaKey || ev.shiftKey) return;
+      if (ev.repeat) return;
+
+      var t = ev.target;
+      if (t && t.nodeType === 1) {
+        var tag = t.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || t.isContentEditable) return;
+      }
+
+      /* 面板正在等键时不抢 */
+      if (document.body && document.body.getAttribute('data-hot-catch') === '1') return;
+
+      var key = ev.key;
+      if (!/^[0-9a-zA-Z]$/.test(key)) return;
+
+      var cfg = loadHot();
+      if (!cfg.on) return;
+
+      /* 实验台是后台工具，在那边按数字键也走后台那套 */
+      var isAdmin = location.pathname.indexOf('/admin') === 0 || location.pathname === '/lab';
+      var list = hotList(isAdmin ? 'admin' : 'user', cfg);
+      var want = '';
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].key.toLowerCase() === key.toLowerCase()) { want = list[i].href; break; }
+      }
+      if (!want) return;
+
+      ev.preventDefault();
+      go(want);
+    });
+  }
+
+  CF.keys = {
+    KEY: HOT_KEY,
+    DEF_USER: NAV_USER,
+    DEF_ADMIN: NAV_ADMIN,
+    read: loadHot,
+    save: saveHot,
+    list: hotList,
+    go: go,
+    bind: bindHotkeys
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindHotkeys);
+  else bindHotkeys();
+
   /* ---------- 会话缓存 ---------- */
 
   var KEY = 'cf-me';
@@ -77,7 +337,7 @@
 
   var ROUTES = {
     '/home': { page: 'home', js: '/js/home.js?v=12' },
-    '/settings': { page: 'settings', js: '/js/settings.js?v=19', css: ['/css/settings.css?v=17', '/css/relation.css?v=2'] },
+    '/settings': { page: 'settings', js: '/js/settings.js?v=20', css: ['/css/settings.css?v=18', '/css/relation.css?v=2'] },
     '/admin': { page: 'admin', js: '/js/admin.js?v=7' },
     '/admin/users': { page: 'admin-users', js: '/js/admin.js?v=7' },
     '/admin/withdrawals': { page: 'admin-withdrawals', js: '/js/admin.js?v=7' },
@@ -86,7 +346,8 @@
     '/admin/orders': { page: 'admin-orders', js: '/js/admin-shop.js?v=2' },
     '/admin/items': { page: 'admin-items', js: '/js/admin-shop.js?v=2' },
     '/admin/messages': { page: 'admin-messages', js: '/js/admin-msg.js?v=4' },
-    '/admin/moonetix': { page: 'admin-moonetix', js: '/js/admin-mtx.js?v=1' }
+    '/admin/moonetix': { page: 'admin-moonetix', js: '/js/admin-mtx.js?v=1' },
+    '/admin/customize': { page: 'admin-customize', js: '/js/personalize.js?v=2', css: ['/css/customize.css?v=3'] }
   };
 
   function normalize(path) {
