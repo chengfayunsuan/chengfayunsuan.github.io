@@ -335,8 +335,7 @@
 
 .face__strip {
   display: grid;
-  /* 等级那格占两份，让经验条有足够长度 */
-  grid-template-columns: 1fr 1fr 2fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   border: var(--edge);
   border-top: 0;
 }
@@ -397,7 +396,7 @@
 
 .stat__bar {
   display: block;
-  height: 8px;
+  height: 15px;
   margin-top: 9px;
   border: 2px solid var(--ink);
   background: var(--paper);
