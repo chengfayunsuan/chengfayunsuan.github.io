@@ -214,9 +214,9 @@
 
         if (!d.ok) {
           if (d.error === 'already_done') {
-            $('svTitle').textContent = '这份问卷你已经交过了';
-            $('svMeta').textContent = '同一份问卷只能参与一次。';
-            note('去大厅看看别的问卷。', false);
+            $('svTitle').textContent = '这个网络已经交过这份问卷';
+            $('svMeta').textContent = '同一份问卷同一个 IP 只能参与一次。';
+            note('换了网络之后可以再来一次。', false);
           } else if (d.error === 'not_inline') {
             $('svTitle').textContent = '这份问卷要跳转到问卷商页面';
             $('svMeta').textContent = '回大厅点入口就能进去。';
@@ -287,7 +287,7 @@
             if (btn) { btn.disabled = false; btn.textContent = '提交答卷'; }
             $('svTip').textContent = '';
             if (d && d.error === 'already_done') {
-              note('这份卷子已经交过了，同一份只能参与一次。', true);
+              note('这个 IP 已经交过这份问卷了，换个网络可以再来一次。', true);
               $('svForm').hidden = true;
               return;
             }

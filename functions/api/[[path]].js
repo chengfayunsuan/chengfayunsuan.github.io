@@ -1246,7 +1246,6 @@ function surveyRow(r) {
     entry: r.entry_url,
     kind: r.kind || 'link',
     inline: r.kind === 'inline',
-    repeat: Number(r.repeat_mode) || 0,
     questionCount: r.kind === 'inline' ? paperParse(r.paper).questions.length : 0,
     featured: r.featured === 1,
     status: r.status,
@@ -1258,28 +1257,19 @@ async function surveyList(request, env) {
   const session = await currentSession(request, env);
   if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
 
-  const who = await env.DB.prepare('SELECT role FROM users WHERE id = ?').bind(session.uid).first();
-  const isAdmin = !!who && (who.role === 'owner' || who.role === 'admin');
+  /* 「已参与」也按 IP 看：换了 IP 就该重新变成可参与 */
+  const ip = ipOf(request) || 'unknown';
 
   const rows = await env.DB.prepare(
     `SELECT s.*, EXISTS(
-        SELECT 1 FROM survey_joins j WHERE j.survey_id = s.id AND j.uid = ?
+        SELECT 1 FROM survey_joins j WHERE j.survey_id = s.id AND j.ip = ?
       ) AS joined
        FROM surveys s WHERE s.status = 'open'
       ORDER BY s.featured DESC, (s.featured_at IS NULL), s.featured_at DESC, s.created_at DESC
       LIMIT 100`
-  ).bind(session.uid).all();
+  ).bind(ip).all();
 
-  return json({
-    ok: true,
-    items: (rows.results || []).map(function (r) {
-      const it = surveyRow(r);
-      /* 能重来的问卷，大厅里别显示成「已参与」，否则按钮点不动 */
-      const mode = Number(r.repeat_mode) || 0;
-      if (mode === 2 || (mode === 1 && isAdmin)) it.joined = false;
-      return it;
-    })
-  });
+  return json({ ok: true, items: (rows.results || []).map(surveyRow) });
 }
 
 async function adminSurveyList(env) {
@@ -1327,10 +1317,6 @@ async function adminSurveySave(request, env) {
   const kind = kindWanted === 'inline' && paper.questions.length ? 'inline' : 'link';
   const paperJson = kind === 'inline' ? JSON.stringify(paper) : '';
 
-  /* 重复参与：0 每个账号一次 / 1 只有站长与管理员能重来 / 2 谁都能重来 */
-  const repeatRaw = Number(body.repeat);
-  const repeatMode = [0, 1, 2].indexOf(repeatRaw) >= 0 ? repeatRaw : 0;
-
   const args = [
     title,
     String(body.provider || '').trim(),
@@ -1343,23 +1329,22 @@ async function adminSurveySave(request, env) {
     kind === 'inline' ? '' : String(body.entry || '').trim(),
     status,
     kind,
-    paperJson,
-    repeatMode
+    paperJson
   ];
 
   if (body.id) {
     await env.DB.prepare(
       `UPDATE surveys SET title = ?, provider = ?, price_units = ?, grade = ?, stars = ?,
         requirement = ?, topic = ?, duration_min = ?, entry_url = ?, status = ?,
-        kind = ?, paper = ?, repeat_mode = ?, updated_at = datetime('now','+8 hours')
+        kind = ?, paper = ?, updated_at = datetime('now','+8 hours')
         WHERE id = ?`
     ).bind(...args, Number(body.id)).run();
     return json({ ok: true, id: Number(body.id), kind: kind, questions: paper.questions.length });
   }
 
   const res = await env.DB.prepare(
-    `INSERT INTO surveys (title, provider, price_units, grade, stars, requirement, topic, duration_min, entry_url, status, kind, paper, repeat_mode)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO surveys (title, provider, price_units, grade, stars, requirement, topic, duration_min, entry_url, status, kind, paper)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(...args).run();
 
   return json({ ok: true, id: res.meta && res.meta.last_row_id, kind: kind, questions: paper.questions.length });
@@ -1786,8 +1771,8 @@ async function surveyJoin(request, env) {
   if (!sv) return json({ ok: false, error: 'not_found' }, 404);
 
   await env.DB.prepare(
-    'INSERT OR IGNORE INTO survey_joins (uid, survey_id) VALUES (?, ?)'
-  ).bind(session.uid, id).run();
+    'INSERT OR IGNORE INTO survey_joins (uid, survey_id, ip) VALUES (?, ?, ?)'
+  ).bind(session.uid, id, ipOf(request) || 'unknown').run();
 
   const inline = sv.kind === 'inline' && !!paperParse(sv.paper).questions.length;
   return json({
@@ -1889,41 +1874,37 @@ async function surveyPaper(request, env, url) {
     return json({ ok: false, error: 'not_inline' }, 400);
   }
 
+  /* 按 IP 判重：同一个出口 IP 对同一份问卷只能参与一次，换 IP 才能再来。
+     按账号判反而更容易刷 —— 多注册几个号就绕过去了。 */
+  const ip = ipOf(request) || 'unknown';
+
   const join = await env.DB.prepare(
-    'SELECT * FROM survey_joins WHERE uid = ? AND survey_id = ?'
-  ).bind(session.uid, id).first();
+    'SELECT * FROM survey_joins WHERE ip = ? AND survey_id = ?'
+  ).bind(ip, id).first();
 
-  /* 能不能再进一次：repeat_mode 2 谁都能重来，1 只有站长与管理员能重来 */
-  const mode = Number(sv.repeat_mode) || 0;
-  let repeat = mode === 2;
-  if (mode === 1) {
-    const who = await env.DB.prepare('SELECT role FROM users WHERE id = ?').bind(session.uid).first();
-    repeat = !!who && (who.role === 'owner' || who.role === 'admin');
-  }
-
-  if (!repeat && join && (join.stage === 'done' || join.stage === 'pending')) {
-    return json({ ok: false, error: 'already_done', status: join.status }, 409);
+  if (join && (join.stage === 'done' || join.stage === 'pending')) {
+    return json({ ok: false, error: 'already_done', status: join.status, sameIp: true }, 409);
   }
 
   if (!join) {
     await env.DB.prepare(
-      `INSERT OR IGNORE INTO survey_joins (uid, survey_id, status, stage, created_at)
-       VALUES (?, ?, 'pending', 'open', datetime('now','+8 hours'))`
-    ).bind(session.uid, id).run();
+      `INSERT OR IGNORE INTO survey_joins (uid, survey_id, ip, status, stage, created_at)
+       VALUES (?, ?, ?, 'pending', 'open', datetime('now','+8 hours'))`
+    ).bind(session.uid, id, ip).run();
   } else if (join.stage !== 'open') {
-    /* 重来时把上一轮的答卷、用时、待冲正时间一起清掉，否则轮询会把上一轮给冲正了。
+    /* 换 IP 重来时把上一轮的答卷、用时、待冲正时间一起清掉，否则轮询会把上一轮给冲正了。
        还在答（stage=open）的不要动，否则刷新一次就把计时清零了 */
     await env.DB.prepare(
       `UPDATE survey_joins
-          SET stage = 'open', status = 'pending', created_at = datetime('now','+8 hours'),
+          SET uid = ?, stage = 'open', status = 'pending', created_at = datetime('now','+8 hours'),
               answers = '', elapsed = 0, due_at = '', reviewed_at = NULL
-        WHERE uid = ? AND survey_id = ?`
-    ).bind(session.uid, id).run();
+        WHERE ip = ? AND survey_id = ?`
+    ).bind(session.uid, ip, id).run();
   }
 
   const row = await env.DB.prepare(
-    'SELECT created_at FROM survey_joins WHERE uid = ? AND survey_id = ?'
-  ).bind(session.uid, id).first();
+    'SELECT created_at FROM survey_joins WHERE ip = ? AND survey_id = ?'
+  ).bind(ip, id).first();
 
   return json({
     ok: true,
@@ -1965,9 +1946,10 @@ async function surveySubmit(request, env) {
   if (!sv) return json({ ok: false, error: 'not_found' }, 404);
 
   const paper = paperParse(sv.paper);
+  const ip = ipOf(request) || 'unknown';
   const join = await env.DB.prepare(
-    'SELECT * FROM survey_joins WHERE uid = ? AND survey_id = ?'
-  ).bind(uid, id).first();
+    'SELECT * FROM survey_joins WHERE ip = ? AND survey_id = ?'
+  ).bind(ip, id).first();
   if (!join) return json({ ok: false, error: 'not_started' }, 400);
   if (join.stage === 'done') return json({ ok: false, error: 'already_done' }, 409);
 
@@ -1995,9 +1977,9 @@ async function surveySubmit(request, env) {
 
   const markJoin = function (status, stage, note) {
     return env.DB.prepare(
-      `UPDATE survey_joins SET status = ?, stage = ?, elapsed = ?, answers = ?,
-              reviewed_at = datetime('now','+8 hours') WHERE uid = ? AND survey_id = ?`
-    ).bind(status, stage, elapsed, JSON.stringify(picked), uid, id);
+      `UPDATE survey_joins SET uid = ?, status = ?, stage = ?, elapsed = ?, answers = ?,
+              reviewed_at = datetime('now','+8 hours') WHERE ip = ? AND survey_id = ?`
+    ).bind(uid, status, stage, elapsed, JSON.stringify(picked), ip, id);
   };
   const addMoney = function (delta, exp) {
     return env.DB.prepare(
@@ -2100,8 +2082,8 @@ async function surveySubmit(request, env) {
     markJoin('approved', 'pending'),
     addMoney(reward, 1),
     ledger(reward, 'survey_reward', '问卷通过（待质检）：' + sv.title.slice(0, 34)),
-    env.DB.prepare('UPDATE survey_joins SET due_at = ? WHERE uid = ? AND survey_id = ?')
-      .bind(due.t, uid, id)
+    env.DB.prepare('UPDATE survey_joins SET due_at = ? WHERE ip = ? AND survey_id = ?')
+      .bind(due.t, ip, id)
   ]);
 
   return reply({
@@ -2128,9 +2110,10 @@ async function surveyPoll(request, env, url) {
   const uid = session.uid;
   if (!id) return json({ ok: false, error: 'bad_request' }, 400);
 
+  const ip = ipOf(request) || 'unknown';
   const join = await env.DB.prepare(
-    'SELECT * FROM survey_joins WHERE uid = ? AND survey_id = ?'
-  ).bind(uid, id).first();
+    'SELECT * FROM survey_joins WHERE ip = ? AND survey_id = ?'
+  ).bind(ip, id).first();
   if (!join) return json({ ok: false, error: 'not_found' }, 404);
 
   if (join.stage !== 'pending') {
@@ -2161,19 +2144,22 @@ async function surveyPoll(request, env, url) {
   const sv = await env.DB.prepare('SELECT title, price_units FROM surveys WHERE id = ?').bind(id).first();
   const reward = Number(sv && sv.price_units) || 0;
 
+  /* 钱当初是发给参与那一条记录的人，冲正也扣他，不是扣现在这个会话 */
+  const ownerUid = Number(join.uid) || uid;
+
   await env.DB.batch([
     env.DB.prepare(
       `UPDATE survey_joins SET status = 'rejected', stage = 'done',
-              reviewed_at = datetime('now','+8 hours') WHERE uid = ? AND survey_id = ?`
-    ).bind(uid, id),
+              reviewed_at = datetime('now','+8 hours') WHERE ip = ? AND survey_id = ?`
+    ).bind(ip, id),
     env.DB.prepare(
       `UPDATE users SET fc_units = fc_units - (${reward}), ${lvSql(-8)},
               updated_at = datetime('now','+8 hours') WHERE id = ?`
-    ).bind(uid),
+    ).bind(ownerUid),
     env.DB.prepare(
       `INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo)
        VALUES (?, ?, (SELECT fc_units FROM users WHERE id = ?), 'survey_reject', ?, ?)`
-    ).bind(uid, -reward, uid, 'SV-' + id, '问卷打回冲正：' + String((sv && sv.title) || '').slice(0, 34))
+    ).bind(ownerUid, -reward, ownerUid, 'SV-' + id, '问卷打回冲正：' + String((sv && sv.title) || '').slice(0, 34))
   ]);
 
   return json({
@@ -2182,7 +2168,7 @@ async function surveyPoll(request, env, url) {
     rejected: true,
     result: 'rejected',
     secondsLeft: 0,
-    user: await userStateOf(env, uid)
+    user: await userStateOf(env, ownerUid)
   });
 }
 

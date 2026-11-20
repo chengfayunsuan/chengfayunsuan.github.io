@@ -815,12 +815,58 @@
 
   if (window.CF) CF.modal = modal;
 
-  /* ---------- 代理 / VPN 提醒 ----------
-     落地页和登录页不打扰；其余页面判定为机房/代理网络就提示一次。
-     真去点问卷由服务端封号（/api/surveys/join 里判），前端只负责把话说清楚。 */
+  /* ---------- 地区判断 + 代理 / VPN 提醒 ----------
+     国家只看地理位置，判梯子只看 proxy / hosting，两者不混：
+     海外家宽是正常访客，不会因为 IP 在境外就被当成 VPN。
+     海外访客自动给英文界面，用户手动切过语言之后就不再插手。 */
 
   var NET_AT = 'cf-net-at';
   var NET_WARNED = 'cf-net-warned';
+  var NET_CACHE = 'cf-net-cache';
+
+  /* 说中文的地区，其余一律当作海外访客 */
+  var CN_REGION = { CN: 1, HK: 1, MO: 1, TW: 1 };
+
+  /* 有英文版的页面；这里没列到的页面不跳，免得把人带进 404 */
+  var EN_MAP = {
+    '/': '/en/',
+    '/login': '/en/login',
+    '/hall': '/en/hall',
+    '/home': '/en/home',
+    '/earn': '/en/earn',
+    '/store': '/en/store'
+  };
+
+  function langPref() {
+    var m = document.cookie.match(/(?:^|;\s*)cf_lang=([a-z]{2})/);
+    return m ? m[1] : '';
+  }
+
+  function setLang(v) {
+    document.cookie = 'cf_lang=' + v + ';path=/;max-age=' + (365 * 86400) + ';samesite=lax';
+  }
+
+  function autoLang(d) {
+    if (location.pathname.indexOf('/en') === 0) return;      /* 已经在英文页 */
+    if (location.pathname.indexOf('/admin') === 0) return;
+
+    var to = EN_MAP[location.pathname];
+    if (!to) return;                                         /* 这一页没有英文版 */
+
+    var pref = langPref();
+    if (pref === 'zh') return;                               /* 手动选了中文，听他的 */
+    if (pref === 'en') {                                     /* 手动选了英文，中文页也换过去 */
+      location.replace(to + location.search + location.hash);
+      return;
+    }
+
+    /* 没有偏好时按地区：只有能确定是海外才跳 */
+    var c = String((d && d.country) || '').toUpperCase();
+    if (!c) return;
+    if (CN_REGION[c]) return;
+
+    location.replace(to + location.search + location.hash);
+  }
 
   function netWarn(d) {
     if (!CF.modal) return;
@@ -836,25 +882,48 @@
     });
   }
 
+  function handleNet(d, quiet) {
+    if (!d || !d.ok) return;
+    autoLang(d);
+    if (quiet || !d.suspect) return;
+    if (sessionStorage.getItem(NET_WARNED) === '1') return;
+    try { sessionStorage.setItem(NET_WARNED, '1'); } catch (e) {}
+    netWarn(d);
+  }
+
   function checkNet() {
     var p = location.pathname;
-    if (p === '/' || p === '/index.html' || p === '/login') return;
-    if (sessionStorage.getItem(NET_WARNED) === '1') return;
 
-    /* 半小时内不重复查，免得每换一页打一次接口 */
-    var last = Number(sessionStorage.getItem(NET_AT) || 0);
-    if (last && Date.now() - last < 30 * 60 * 1000) return;
-    try { sessionStorage.setItem(NET_AT, String(Date.now())); } catch (e) {}
+    /* 落地页与登录页不弹窗，但仍然要查一次 —— 海外访客要在这一步被送去英文页 */
+    var quiet = (p === '/' || p === '/index.html' || p === '/login' || p.indexOf('/en') === 0);
+
+    /* 后台与接口不参与语言跳转 */
+    if (p.indexOf('/admin') === 0) return;
+
+    var hit = null;
+    try { hit = JSON.parse(sessionStorage.getItem(NET_CACHE) || 'null'); } catch (e) {}
+    if (hit && hit.t && Date.now() - hit.t < 30 * 60 * 1000) {
+      handleNet(hit.d, quiet);
+      return;
+    }
 
     fetch('/api/ip/check', { headers: { Accept: 'application/json' } })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
-        if (!d || !d.ok || !d.suspect) return;
-        try { sessionStorage.setItem(NET_WARNED, '1'); } catch (e) {}
-        netWarn(d);
+        if (!d || !d.ok) return;
+        try { sessionStorage.setItem(NET_CACHE, JSON.stringify({ t: Date.now(), d: d })); } catch (e) {}
+        handleNet(d, quiet);
       })
       .catch(function () {});
   }
+
+  /* 语言按钮：点过就记住，之后不再自动跳 */
+  document.addEventListener('click', function (ev) {
+    var a = ev.target && ev.target.closest && ev.target.closest('a.hm-nav__lang, a.nav__lang');
+    if (!a) return;
+    var href = a.getAttribute('href') || '';
+    setLang(href === '/en' || href.indexOf('/en/') === 0 ? 'en' : 'zh');
+  });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () { setTimeout(checkNet, 500); });

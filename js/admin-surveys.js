@@ -222,7 +222,6 @@
     $('svEntry').value = s ? s.entry : '';
     $('svReq').value = s ? s.requirement : '';
     $('svStatus').value = s ? s.status : 'open';
-    $('svRepeat').value = String(s && s.repeat ? s.repeat : 0);
     $('svFormTitle').textContent = s ? '编辑问卷 #' + s.id : '新增问卷';
 
     if (kindEl) kindEl.value = s && s.kind === 'inline' ? 'inline' : 'link';
@@ -260,8 +259,6 @@
 
     var sub = [];
     if (s.kind === 'inline') sub.push('站内作答 · ' + (s.questionCount || 0) + ' 题');
-    if (s.repeat === 1) sub.push('站长可重来');
-    if (s.repeat === 2) sub.push('谁都能重来');
     if (s.provider) sub.push(s.provider);
     if (s.durationMin) sub.push(s.durationMin + ' 分钟');
     if (s.topic) sub.push(s.topic);
@@ -352,8 +349,7 @@
         entry: $('svEntry').value.trim(),
         requirement: $('svReq').value.trim(),
         status: $('svStatus').value,
-        kind: isInline() ? 'inline' : 'link',
-        repeat: Number($('svRepeat').value) || 0
+        kind: isInline() ? 'inline' : 'link'
       };
 
       if (isInline()) {
