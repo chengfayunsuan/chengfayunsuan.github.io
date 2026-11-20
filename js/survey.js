@@ -13,6 +13,8 @@
   var paper = null;
   var startedAt = '';
   var attempt = 0;          /* 本轮答卷的编号：站长每测一遍就是新的一条 */
+  var myUid = 0;            /* 回传里的 pid */
+  var rewardText = '';      /* 回传里的 revenue */
   var ticker = 0;
   var poller = 0;
 
@@ -125,7 +127,36 @@
     rejected: '质检没过：奖励已经扣回，经验 −8。'
   };
 
-  /* 结局要落到地址栏上（?status=success 这种），刷新也还是这张结果页。
+  /* 回传码照行业惯例来（InnovateMR / Cint 那一套）：
+     1 完成 · 2 中途终止 · 3 配额满 · 4 质检终止（0 是我们自己的接口异常）。
+     终止类带一个 reason，对应到这边具体是哪一种。 */
+  var CODE = {
+    success: 1,
+    reject: 1,      /* 先入账，此刻对问卷商来说就是完成 */
+    kick: 2,
+    quota: 3,
+    speed: 4,
+    rejected: 4,
+    fail: 0
+  };
+
+  var REASON = {
+    rejected: 'quality',
+    speed: 'speeder',
+    kick: 'screenout',
+    quota: 'quota',
+    fail: 'error'
+  };
+
+  var CODE_DESC = {
+    0: '接口异常',
+    1: '完成',
+    2: '中途终止',
+    3: '配额已满',
+    4: '质检终止'
+  };
+
+  /* 结局要落到地址栏上（?status=1&pid=&tid= 这种），刷新也还是这张结果页。
      真问卷商就是这么回调的，我们自己也照这个来。
      答卷的明细放 sessionStorage，免得刷新后再向服务端要一份已经结算过的。 */
   function resKey() {
@@ -136,10 +167,12 @@
     try {
       sessionStorage.setItem(resKey(), JSON.stringify({
         result: d.result || 'success',
+        code: CODE[d.result || 'success'],
         elapsed: d.elapsed || 0,
         steps: d.steps || [],
         pending: !!d.pending,
         delay: d.delay || 0,
+        reward: d.reward || '',
         at: Date.now()
       }));
     } catch (e) {}
@@ -152,15 +185,37 @@
     } catch (e) { return null; }
   }
 
-  function callbackUrl(status) {
-    var qs = '?id=' + id + '&status=' + encodeURIComponent(status);
-    return attempt ? (qs + '&attempt=' + attempt) : qs;
+  /* tid 拿答卷行号，pid 拿用户 id —— 跟上游回传的字段名对齐 */
+  function callbackUrl(kind) {
+    var code = CODE[kind] == null ? 1 : CODE[kind];
+    var qs = '?id=' + id + '&status=' + code
+      + '&pid=' + (myUid || 0)
+      + '&tid=' + (attempt ? (id + '-' + attempt) : String(id));
+    if (rewardText) qs += '&revenue=' + encodeURIComponent(rewardText);
+    if (REASON[kind]) qs += '&reason=' + REASON[kind];
+    return qs;
   }
 
-  function showCallbackStatus(status) {
+  function showCallbackStatus(kind) {
     try {
-      history.replaceState(null, '', location.pathname + callbackUrl(status));
+      history.replaceState(null, '', location.pathname + callbackUrl(kind));
     } catch (e) {}
+  }
+
+  /* 数字码 + reason 反推回这边的结局；老链接里写的是 success 这种词也认 */
+  function kindFromQuery(status, reason) {
+    if (!status || isNaN(Number(status))) return status || 'success';
+    if (reason === 'quality') return 'rejected';
+    if (reason === 'speeder') return 'speed';
+    if (reason === 'screenout') return 'kick';
+    if (reason === 'quota') return 'quota';
+    if (reason === 'error') return 'fail';
+    var n = Number(status);
+    if (n === 1) return 'success';
+    if (n === 2) return 'kick';
+    if (n === 3) return 'quota';
+    if (n === 4) return 'speed';
+    return 'fail';
   }
 
   function showResult(d) {
@@ -169,7 +224,9 @@
     clearInterval(ticker);
 
     var kind = d.result || 'success';
-    $('svResKind').textContent = (KIND[kind] || kind).toUpperCase() + ' / ' + (d.elapsed || 0) + ' 秒';
+    var code = d.code == null ? CODE[kind] : d.code;
+    $('svResKind').textContent = 'STATUS ' + code + ' · '
+      + (CODE_DESC[code] || (KIND[kind] || kind)) + ' / ' + (d.elapsed || 0) + ' 秒';
     $('svResTitle').textContent = KIND[kind] || kind;
     $('svResDesc').textContent = DESC[kind] || '';
 
@@ -206,7 +263,15 @@
           if (d.done) {
             clearInterval(poller);
             if (d.rejected) {
-              $('svResKind').textContent = '打回 / 已冲正';
+              /* 回调跟着改：地址栏从 status=1 变成 status=4&reason=quality */
+              var keep = loadResult() || { elapsed: 0, steps: [] };
+              keep.result = 'rejected';
+              keep.code = 4;
+              keep.pending = false;
+              keep.at = Date.now();
+              try { sessionStorage.setItem(resKey(), JSON.stringify(keep)); } catch (e) {}
+
+              $('svResKind').textContent = 'STATUS 4 · 质检终止 / ' + (keep.elapsed || 0) + ' 秒';
               $('svResTitle').textContent = '被打回了';
               if (tip) tip.textContent = '质检没通过：奖励已经扣回，经验 −8。';
               var ul = $('svSteps');
@@ -214,12 +279,6 @@
                 ul.insertAdjacentHTML('beforeend',
                   '<li>质检结论：答卷无效</li><li>奖励冲正，经验 −8，参与记录标记为打回</li>');
               }
-              /* 回调跟着改：地址栏从 status=reject 变成 status=rejected */
-              var keep = loadResult() || { elapsed: 0, steps: [] };
-              keep.result = 'rejected';
-              keep.pending = false;
-              keep.at = Date.now();
-              try { sessionStorage.setItem(resKey(), JSON.stringify(keep)); } catch (e) {}
               showCallbackStatus('rejected');
             }
             return;
@@ -242,6 +301,7 @@
       .then(function (d) {
         var u = d && d.user;
         if (!u) return;
+        myUid = u.uid || 0;
         if (window.CF && CF.cache) CF.cache.set(u);
         var bal = $('navBal');
         if (bal) bal.textContent = u.fc;
@@ -251,12 +311,13 @@
       .catch(function () {});
   }
 
-  /* 回调进来（?status=）：只画结果，绝不再开一份新卷子 */
+  /* 回调进来（?status=1&pid=…&tid=…）：只画结果，绝不再开一份新卷子 */
   function renderCallback() {
     var saved = loadResult();
+    var kind = kindFromQuery(pageStatus, query.get('reason') || '');
     var d;
 
-    if (saved && saved.result === pageStatus) {
+    if (saved && saved.result === kind) {
       d = saved;
       if (d.pending) {
         /* 刷新前已经在等质检：按当时的时间点接着倒数，不重新给 30 秒 */
@@ -265,14 +326,16 @@
       }
     } else {
       d = {
-        result: pageStatus,
+        result: kind,
+        code: Number(pageStatus) || CODE[kind],
         elapsed: Number(query.get('elapsed')) || 0,
         steps: []
       };
     }
 
     $('svTitle').textContent = '答卷已提交';
-    $('svMeta').textContent = '结局由问卷商回调带回';
+    $('svMeta').textContent = '结局由问卷商回调带回'
+      + (query.get('tid') ? ' · tid ' + query.get('tid') : '');
     var tm = $('svTimer');
     if (tm) tm.hidden = true;   /* 已经交卷了，别再挂个「用时 0 秒」 */
     showResult(d);
@@ -328,6 +391,7 @@
           paper.provider || ''
         ].filter(Boolean).join(' · ');
         $('svReward').textContent = '+' + paper.price;
+        rewardText = String(paper.price || '').replace(/[^\d.]/g, '');
         if (paper.requirement) {
           var req = $('svReq');
           req.hidden = false;
@@ -387,6 +451,8 @@
             say('提交失败：' + ((d && d.error) || '未知错误'));
             return;
           }
+          /* 打回时这笔钱确实到账了，revenue 照报价报；其余失败结局报 0 */
+          if (!d.pending && d.reward) rewardText = String(d.reward).replace(/[^\d.]/g, '');
           saveResult(d);
           showCallbackStatus(d.result || 'success');
           showResult(d);
