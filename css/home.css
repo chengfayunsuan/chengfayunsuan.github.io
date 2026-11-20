@@ -80,6 +80,24 @@
   color: var(--paper);
 }
 
+/* 语言切换：贴在退出左边，跟退出按钮一个形状，但更轻 */
+.hm-nav__lang {
+  border: 2px solid var(--hair);
+  color: var(--gray);
+  padding: 4px 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  line-height: 1.4;
+  text-decoration: none;
+  transition: border-color .14s, color .14s;
+}
+
+.hm-nav__lang:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
 /* ---------- 操作栏：常驻目录 ---------- */
 
 .dock {

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Survey Hall · Chengfa</title>
+<meta name="description" content="Chengfa Survey Hall: browse surveys you qualify for and see what they pay.">
+<meta name="theme-color" content="#E0291E">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=14">
+<link rel="stylesheet" href="/css/home.css?v=16">
+<link rel="stylesheet" href="/css/page.css?v=9">
+<link rel="stylesheet" href="/css/hall.css?v=9">
+<script src="/js/config.js?v=7"></script>
+<script src="/js/core.js?v=31"></script>
+</head>
+<body data-page="hall">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/en/home">
+      <span class="brand__mark" aria-hidden="true"></span>
+      Chengfa
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <a class="hm-nav__lang" href="/hall" title="切回中文">中文</a>
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><button class="hm-nav__cur" type="button" data-cur-toggle aria-label="Switch display currency" title="Switch between CFB and CF$"><span data-cur="code">CFB</span></button>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/en/home">Me</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<div class="pg-bar">
+  <div class="wrap pg-bar__in">
+    <a class="pg-bar__a" href="/en/home">← Back to account</a>
+    <span class="pg-bar__k">SURVEY HALL</span>
+  </div>
+</div>
+
+<main class="pg pg--tight">
+  <div class="wrap">
+
+    <div class="pg-head">
+      <div>
+        <span class="pg-k">SURVEY HALL</span>
+        <h1 class="pg-t">Survey Hall</h1>
+      </div>
+
+      <div class="pg-side pg-side--num">
+        <b id="hallCount">0</b>
+        <span>available</span>
+      </div>
+    </div>
+
+    <div class="pg-tools">
+      <div class="pg-tabs">
+        <button class="pg-tab is-on" type="button" data-sort="fc">Price · high to low</button>
+        <button class="pg-tab" type="button" data-sort="time">Time · newest</button>
+        <button class="pg-tab" type="button" data-sort="star">Rating · high to low</button>
+      </div>
+    </div>
+
+    <!-- 站长推荐 -->
+    <section class="hl-sect hl-sect--feat" id="featWrap" hidden>
+      <div class="hl-sect__head">
+        <span class="hl-sect__k">EDITOR'S PICK</span>
+        <h2 class="hl-sect__t">Editor's picks</h2>
+        <span class="hl-sect__d">A few picks from the surveys currently open</span>
+      </div>
+      <div class="sv-grid" id="featList"></div>
+    </section>
+
+    <!-- 全部问卷 -->
+    <section class="hl-sect">
+      <div class="hl-sect__head">
+        <span class="hl-sect__k">ALL SURVEYS</span>
+        <h2 class="hl-sect__t">All surveys</h2>
+      </div>
+      <div class="sv-grid" id="svList"></div>
+    </section>
+
+    <div class="pg-empty" hidden>
+      <p class="pg-empty__k">NO SURVEY OPEN</p>
+      <h2 class="pg-empty__t">No surveys available right now</h2>
+      <p class="pg-empty__d">
+        Nothing matches your profile right now, or this round is full. New surveys trigger an in-site message. Filling in your age range, city and occupation will widen what you match.
+      </p>
+      <div class="pg-empty__a">
+        <a class="btn btn--red" href="/settings">Complete your profile</a>
+        <a class="btn btn--ghost" href="/en/home">Back to account</a>
+      </div>
+    </div>
+
+    <ol class="hl-steps">
+      <li>
+        <span class="hl-steps__n">01</span>
+        <span class="hl-steps__t">Complete your profile</span>
+        <span class="hl-steps__d">Age range, city and occupation decide which surveys you match. Missing fields mean missed matches.</span>
+      </li>
+      <li>
+        <span class="hl-steps__n">02</span>
+        <span class="hl-steps__t">Pick a survey you qualify for</span>
+        <span class="hl-steps__d">Each survey lists its question count, expected time and reward. You can pause after starting.</span>
+      </li>
+      <li>
+        <span class="hl-steps__n">03</span>
+        <span class="hl-steps__t">Credited once approved</span>
+        <span class="hl-steps__d">Responses are checked for validity and completeness, then credited to your balance and listed in the ledger.</span>
+      </li>
+    </ol>
+
+    <p class="hl-tail">
+      Survey rewards come from research fees paid by clients. There are no referral kickbacks, no multi-level cuts, and nothing to pay before you start.
+      <a href="/en">See how it works →</a>
+    </p>
+
+  </div>
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 Chengfa</span>
+      <span>Take surveys · Earn rewards · Redeem payouts</span>
+    </div>
+    <p class="foot__legal"><a href="/privacy">Privacy Policy</a> · <a href="/terms">Terms of Service</a> · <a href="/support">Contact Support</a></p>
+  </div>
+</footer>
+
+<script src="/js/app.js?v=18" defer></script>
+<script src="/en/dict.js?v=1"></script>
+<script src="/js/i18n-en.js?v=1" defer></script>
+</body>
+</html>

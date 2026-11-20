@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Account · Chengfa</title>
+<meta name="description" content="Your Chengfa account: balance, level and survey entry points.">
+<meta name="theme-color" content="#E0291E">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=14">
+<link rel="stylesheet" href="/css/home.css?v=16">
+<link rel="stylesheet" href="/css/notice.css?v=2">
+<script src="/js/config.js?v=7"></script>
+<script src="/js/core.js?v=31"></script>
+</head>
+<body data-page="home">
+
+<!-- ============ 导航 ============ -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/en/home">
+      <span class="brand__mark" aria-hidden="true"></span>
+      Chengfa
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <a class="hm-nav__lang" href="/home" title="切回中文">中文</a>
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><button class="hm-nav__cur" type="button" data-cur-toggle aria-label="Switch display currency" title="Switch between CFB and CF$"><span data-cur="code">CFB</span></button>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <span class="hm-nav__name" id="navName">Loading</span>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ 操作栏：常驻目录 ============ -->
+<nav class="dock" aria-label="Menu">
+  <div class="wrap dock__in">
+    <a class="dock__i" href="/en/hall">
+      <span class="dock__n">01</span><span class="dock__t">Survey Hall</span>
+    </a>
+    <a class="dock__i" href="/en/earn">
+      <span class="dock__n">02</span><span class="dock__t">Earn</span>
+    </a>
+    <a class="dock__i" href="/en/store">
+      <span class="dock__n">03</span><span class="dock__t">Redeem</span>
+    </a>
+    <a class="dock__i" href="/ledger">
+      <span class="dock__n">04</span><span class="dock__t">Ledger</span>
+    </a>
+    <a class="dock__i" href="/ladder">
+      <span class="dock__n">05</span><span class="dock__t">Leaderboard</span>
+    </a>
+    <a class="dock__i" href="/messages" data-msg-dock>
+      <span class="dock__n">06</span><span class="dock__t">Messages</span>
+    </a>
+    <a class="dock__i" href="/support">
+      <span class="dock__n">07</span><span class="dock__t">Contact Support</span>
+    </a>
+    <a class="dock__i" href="/settings">
+      <span class="dock__n">08</span><span class="dock__t">Settings</span>
+    </a>
+  </div>
+</nav>
+
+<main id="app" hidden>
+
+  <!-- ============ 门面 ============ -->
+  <section class="face">
+    <div class="wrap">
+
+      <div class="face__in">
+        <!-- 身份 -->
+        <div class="face__id">
+          <div class="face__meta">
+            <span class="face__uid">UID <b id="uidText">1</b></span>
+            <span class="face__role" id="roleText">User</span>
+          </div>
+
+          <h1 class="face__name" id="userName">—</h1>
+
+          <p class="face__sub">
+            Joined <span id="joinedAt">—</span>
+            <span class="face__dot" aria-hidden="true">/</span>
+            Status <span id="statusText">Active</span>
+          </p>
+
+          <div class="face__foot">
+            <p class="face__motto" id="bioText" role="textbox" tabindex="0"
+               aria-label="Your bio — click to edit, Enter to save"></p>
+            <span class="face__hint" id="bioHint">Click the bio to edit</span>
+          </div>
+        </div>
+
+        <!-- 余额 -->
+        <div class="face__bal">
+          <div class="face__bal-k"><span data-cur="name">Cash</span>Balance</div>
+
+          <div class="face__bal-n" id="fcText">0</div>
+
+          <div class="face__bal-f">
+            Held <span id="fcFrozen">0</span>
+            <span class="face__bal-tag" data-cur="code">CFB</span>
+          </div>
+
+          <div class="face__acts">
+            <a class="btn btn--red" href="/en/store">Redeem</a>
+            <a class="btn btn--ghost" href="/en/store">Payout</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 数据条 -->
+      <div class="face__strip">
+        <div class="stat">
+          <span class="stat__n" id="statDone">0</span>
+          <span class="stat__t">Surveys completed</span>
+        </div>
+        <div class="stat">
+          <span class="stat__n" id="statDays">1</span>
+          <span class="stat__t">Days since joining</span>
+        </div>
+        <div class="stat stat--level">
+          <span class="stat__n"><span class="stat__lv">LV</span><span id="statLevel">1</span></span>
+          <div class="stat__row">
+            <span class="stat__t">Current level</span>
+            <span class="stat__x"><span id="expText">0</span>/<span id="expNext">100</span></span>
+          </div>
+          <div class="stat__bar"><i id="expBar"></i></div>
+        </div>
+        <div class="stat">
+          <span class="stat__n" id="statAff">0</span>
+          <span class="stat__t">Affinity</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 公告 ============ -->
+  <section class="prog">
+    <div class="wrap">
+      <div class="prog__note">
+        <span class="stamp stamp--red">NOTICE</span>
+        <div class="hm-notice" id="homeNotice">
+          <p class="hm-notice__i">Loading notices…</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 问卷大厅 ============ -->
+  <section class="hall" id="surveys">
+    <div class="wrap">
+
+      <div class="hall__head">
+        <div>
+          <span class="hall__k">SURVEY HALL</span>
+          <h2 class="hall__t">Survey Hall</h2>
+        </div>
+        <div class="hall__count">
+          <b>0</b>
+          <span>available</span>
+        </div>
+      </div>
+
+      <div class="hall__body">
+
+        <div class="hall__empty">
+          <p class="hall__empty-t">No surveys available right now</p>
+          <p class="hall__empty-d">
+            Surveys are published by research clients and appear here once approved. You get an in-site message when new ones go live. Only surveys that match your profile are listed — ones you do not qualify for, or that are full, stay hidden.
+          </p>
+          <a class="btn btn--red" href="/en/hall">
+            Enter the Survey Hall <span aria-hidden="true">→</span>
+          </a>
+        </div>
+
+        <ol class="hall__steps">
+          <li>
+            <span class="hall__steps-n">01</span>
+            <span class="hall__steps-t">Complete your profile</span>
+            <span class="hall__steps-d">Age range, city and occupation set the surveys you qualify for.</span>
+          </li>
+          <li>
+            <span class="hall__steps-n">02</span>
+            <span class="hall__steps-t">Pick a survey you qualify for</span>
+            <span class="hall__steps-d">The list shows question type, expected time and reward.</span>
+          </li>
+          <li>
+            <span class="hall__steps-n">03</span>
+            <span class="hall__steps-t">Credited once approved</span>
+            <span class="hall__steps-d">Responses are verified for validity and completeness, then credited to your balance.</span>
+          </li>
+        </ol>
+
+      </div>
+
+      <p class="hall__tail">
+        Survey rewards come from fees paid by research clients. No referral kickbacks, no multi-level splits.
+        <a href="/en">See how it works <span aria-hidden="true">→</span></a>
+      </p>
+
+    </div>
+  </section>
+
+</main>
+
+<!-- 载入遮罩 -->
+<div class="hm-load" id="loading">
+  <span class="hm-load__mark" aria-hidden="true"></span>
+  <span>Loading your account</span>
+</div>
+
+<!-- 提示条 -->
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 Chengfa</span>
+      <span>Take surveys · Earn rewards · Redeem payouts</span>
+    </div>
+    <p class="foot__legal"><a href="/privacy">Privacy Policy</a> · <a href="/terms">Terms of Service</a> · <a href="/support">Contact Support</a></p>
+  </div>
+</footer>
+
+<script src="/js/home.js?v=12" defer></script>
+<script src="/en/dict.js?v=1"></script>
+<script src="/js/i18n-en.js?v=1" defer></script>
+</body>
+</html>

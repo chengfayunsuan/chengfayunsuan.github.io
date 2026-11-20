@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" class="auth-checking">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Account · Chengfa</title>
+<meta name="description" content="Sign in or create a Chengfa account. Once you are in, you can browse public surveys, take part and accumulate points.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/style.css?v=14">
+<link rel="stylesheet" href="/css/auth.css?v=9">
+</head>
+<body class="auth-page">
+
+<!-- ============ 导航 ============ -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/en">
+      <span class="brand__mark" aria-hidden="true"></span>
+      Chengfa
+      <span class="brand__en">CHENGFA</span>
+    </a>
+    <a class="auth-back" href="/en">← Back to home</a>
+  </div>
+</header>
+
+<main class="auth">
+  <div class="wrap auth__in">
+
+    <!-- ---------- 表单 ---------- -->
+    <section class="auth__panel">
+
+      <span class="stamp stamp--red">ACCOUNT</span>
+
+      <h1 class="auth__t" id="authTitle">Sign in</h1>
+      <p class="auth__d" id="authDesc">Sign in with the email and password you registered with.</p>
+
+      <div class="auth__tabs" role="tablist" aria-label="Sign in or sign up">
+        <button class="auth__tab is-on" type="button" role="tab" data-mode="login" aria-selected="true">Sign in</button>
+        <button class="auth__tab" type="button" role="tab" data-mode="signup" aria-selected="false">Sign up</button>
+      </div>
+
+      <form class="auth__form" id="authForm" novalidate>
+
+        <div class="field" id="userRow">
+          <label class="field__l" for="username" id="userLabel">Username</label>
+          <input class="field__i" id="username" name="username" type="text"
+                 autocomplete="username" placeholder="Your username"
+                 spellcheck="false" maxlength="20" required>
+          <p class="field__e" id="userErr" hidden></p>
+          <p class="field__h" id="userHint">Forgot your username? Your registered email works too.</p>
+        </div>
+
+        <div class="field" id="emailRow" hidden>
+          <label class="field__l" for="email">Email</label>
+          <input class="field__i" id="email" name="email" type="email"
+                 autocomplete="email" placeholder="name@example.com"
+                 spellcheck="false">
+          <p class="field__e" id="emailErr" hidden></p>
+          <p class="field__h">Used for account recovery and notifications. Never shown publicly.</p>
+        </div>
+
+        <div class="field">
+          <label class="field__l" for="password">Password</label>
+          <input class="field__i" id="password" name="password" type="password"
+                 autocomplete="current-password" placeholder="Your password" required>
+          <p class="field__e" id="pwErr" hidden></p>
+          <p class="field__h" id="pwHint">Forgot your password? Open a ticket under Contact Support with your registered email, and the site owner will verify and reset it.</p>
+        </div>
+
+        <div class="field" id="agreeRow">
+          <label class="check">
+            <input type="checkbox" id="agree" name="agree">
+            <span class="check__box" aria-hidden="true"></span>
+            <span class="check__t">I have read and agree to the <a class="check__a" href="/terms" target="_blank" rel="noopener">Terms of Service</a> and <a class="check__a" href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>, where the earning and payout rules are explained.</span>
+          </label>
+          <p class="field__e" id="agreeErr" hidden></p>
+        </div>
+
+        <button class="auth__verify" id="verifyBox" type="button" data-state="idle">
+          <span class="auth__verify__mark" aria-hidden="true"></span>
+          <span class="auth__verify__text" id="verifyText" role="status" aria-live="polite">Tap to complete the human check</span>
+          <span class="auth__verify__tag" id="verifyTag">VERIFY</span>
+          <span class="cf-turnstile" id="tsSlot" aria-hidden="true"></span>
+        </button>
+
+        <button class="btn auth__submit" type="submit" id="authSubmit">
+          Sign in <span aria-hidden="true">→</span>
+        </button>
+
+        <p class="auth__note" id="authNote">
+          Sessions last 30 days. Sign out after using a shared device.
+        </p>
+
+      </form>
+    </section>
+
+    <!-- ---------- 右侧图形 ---------- -->
+    <aside class="auth__art" aria-hidden="true">
+      <div class="ac-tri">
+        <div class="ac-tri__inner">
+          <span class="ac-tri__num">180<span class="u">pts</span></span>
+          <span class="ac-tri__label">Average per survey</span>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+</main>
+
+<footer class="auth-foot">
+  <div class="wrap auth-foot__in">
+    <span>© 2026 Chengfa</span>
+    <span>Take surveys · Earn points · Redeem payouts</span>
+    <p class="foot__legal"><a href="/privacy">Privacy Policy</a> · <a href="/terms">Terms of Service</a> · <a href="/support">Contact Support</a></p>
+  </div>
+</footer>
+
+<script src="/js/config.js?v=7"></script>
+<script src="/js/core.js?v=31"></script>
+<script src="/js/auth.js?v=9" defer></script>
+
+<!-- Turnstile：显式渲染 + 隐形模式，官方控件不占版面；本地换测试钥匙 -->
+<script>
+(function () {
+  var dev = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  window.CF_SITEKEY = dev ? '1x00000000000000000000AA' : '0x4AAAAAAGElp7Rel6PYL9UW';
+})();
+</script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+<script src="/en/dict.js?v=1"></script>
+<script src="/js/i18n-en.js?v=1" defer></script>
+</body>
+</html>

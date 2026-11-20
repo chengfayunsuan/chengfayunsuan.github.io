@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Earn · Chengfa</title>
+<meta name="description" content="Chengfa · Earn: complete third-party offers on the wall, rewards credited by server callback.">
+<meta name="theme-color" content="#E0291E">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=14">
+<link rel="stylesheet" href="/css/home.css?v=16">
+<link rel="stylesheet" href="/css/page.css?v=9">
+<link rel="stylesheet" href="/css/store.css?v=1">
+<link rel="stylesheet" href="/css/earn.css?v=4">
+<script src="/js/config.js?v=7"></script>
+<script src="/js/core.js?v=31"></script>
+</head>
+<body data-page="earn">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/en/home">
+      <span class="brand__mark" aria-hidden="true"></span>
+      Chengfa
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <a class="hm-nav__lang" href="/earn" title="切回中文">中文</a>
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><button class="hm-nav__cur" type="button" data-cur-toggle aria-label="Switch display currency" title="Switch between CFB and CF$"><span data-cur="code">CFB</span></button>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/en/home">Me</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<div class="pg-bar">
+  <div class="wrap pg-bar__in">
+    <a class="pg-bar__a" href="/en/home">← Back to account</a>
+    <span class="pg-bar__k">EARN</span>
+  </div>
+</div>
+
+<main class="pg">
+  <div class="wrap">
+
+    <div class="pg-head">
+      <div>
+        <span class="pg-k">EARN</span>
+        <h1 class="pg-t">Earn</h1>
+        <p class="pg-d">
+          Advertisers list their offers on the Moonetix offerwall: try an app, watch a demo, sign up for a trial. Finish one and the advertiser pays, and we convert that into CFB at our standard rate. The reward is credited by the provider's server callback, not by the page itself — so it lands a few seconds late and can be reversed.
+        </p>
+      </div>
+
+      <div class="pg-side">
+        <b>3</b>
+        <span> steps to get paid</span>
+      </div>
+    </div>
+
+    <div class="st-wallet">
+      <div>
+        <span class="st-wallet__k">Available balance</span>
+        <div class="st-wallet__n">
+          <b id="erFc">0</b><i data-cur="code">CFB</i>
+        </div>
+      </div>
+
+      <div>
+        <span class="st-wallet__k">Frozen</span>
+        <div class="st-wallet__n st-wallet__n--sm">
+          <b id="erFrozen">0</b><i data-cur="code">CFB</i>
+        </div>
+        <p class="st-wallet__f">Held while the payout is under review</p>
+      </div>
+
+      <div class="st-wallet__a">
+        <button class="btn btn--red" type="button" id="mtxOpen">Open the offerwall</button>
+        <a class="btn btn--ghost" href="/en/store">Redeem</a>
+      </div>
+    </div>
+
+    <!-- ============ 01 广告墙 ============ -->
+    <section class="blk" id="sec-wall">
+      <div class="blk__h">
+        <span class="blk__n">01</span>
+        <h2 class="blk__t">Moonetix offerwall</h2>
+      </div>
+
+      <div class="er-wall">
+        <div class="er-wall__l">
+          <span class="er-wall__k">MOONETIX / OFFERWALL</span>
+          <h3 class="er-wall__t" id="erTitle">Checking connection…</h3>
+          <p class="er-wall__d" id="erDesc">
+            The wall is hosted by a third party and opens under your account ID, so every visit is recognised as the same person and rewards never go to the wrong account.
+          </p>
+          <p class="er-wall__st" id="erState"><span class="er-dot"></span>Checking</p>
+        </div>
+
+        <div class="er-wall__r">
+          <p class="er-wall__h">How rewards arrive</p>
+          <ol class="er-steps">
+            <li><b>Open the wall</b><span>The server builds a one-time link from your UID and the signing salt</span></li>
+            <li><b>Complete a task</b><span>Provider calls back once the advertiser confirms</span></li>
+            <li><b>Credited</b><span>Signature and transaction ID checked; duplicates credited once</span></li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 02 任务记录 ============ -->
+    <section class="blk" id="sec-tasks">
+      <div class="blk__h">
+        <span class="blk__n">02</span>
+        <h2 class="blk__t">Task history</h2>
+        <span class="blk__s" id="erSum">—</span>
+      </div>
+
+      <div class="er-list" id="erList"></div>
+      <p class="st-empty" id="erEmpty" hidden>No offerwall activity yet. Your first completed task will show up here with its transaction ID, amount and status.</p>
+    </section>
+
+    <!-- ============ 03 规则 ============ -->
+    <section class="blk" id="sec-rule">
+      <div class="blk__h">
+        <span class="blk__n">03</span>
+        <h2 class="blk__t">A few rules</h2>
+      </div>
+
+      <div class="er-notes">
+        <div class="er-note">
+          <span class="er-note__k">Credits are not instant</span>
+          <p>The advertiser verifies the task first, which usually takes from tens of seconds to a few minutes. If the balance has not moved right away, give it a moment.</p>
+        </div>
+        <div class="er-note">
+          <span class="er-note__k">can be reversed</span>
+          <p>If a task is judged invalid — uninstalled too fast, fake details — the provider sends a reversal callback and the reward is taken back.</p>
+        </div>
+        <div class="er-note">
+          <span class="er-note__k">Network requirements</span>
+          <p>Users on VPNs, proxies or data-centre networks are blocked by the offerwall itself. That is the provider's rule, not a limit we imposed.</p>
+        </div>
+        <div class="er-note">
+          <span class="er-note__k">Relationship with partners</span>
+          <p>Tasks are published by third-party advertisers; we only display them and settle the payout. If a reward is missing, open a ticket with the transaction ID.</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar">
+      <span>© 2026 Chengfa</span>
+      <span>Take surveys · Earn points · Redeem payouts</span>
+    </div>
+    <p class="foot__legal">This site is an independent personal project. Offerwall tasks are supplied by third-party advertisers.</p>
+  </div>
+</footer>
+
+<script src="/js/earn.js?v=3" defer></script>
+<script src="/en/dict.js?v=1"></script>
+<script src="/js/i18n-en.js?v=1" defer></script>
+</body>
+</html>

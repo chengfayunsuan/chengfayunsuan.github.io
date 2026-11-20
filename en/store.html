@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Redeem · Chengfa</title>
+<meta name="description" content="Chengfa Redeem: cash out CFB or spend it on digital codes.">
+<meta name="theme-color" content="#E0291E">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=14">
+<link rel="stylesheet" href="/css/home.css?v=16">
+<link rel="stylesheet" href="/css/page.css?v=9">
+<link rel="stylesheet" href="/css/store.css?v=1">
+<script src="/js/config.js?v=7"></script>
+<script src="/js/core.js?v=31"></script>
+</head>
+<body data-page="store">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/en/home">
+      <span class="brand__mark" aria-hidden="true"></span>
+      Chengfa
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <a class="hm-nav__lang" href="/store" title="切回中文">中文</a>
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><button class="hm-nav__cur" type="button" data-cur-toggle aria-label="Switch display currency" title="Switch between CFB and CF$"><span data-cur="code">CFB</span></button>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/en/home">Me</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<div class="pg-bar">
+  <div class="wrap pg-bar__in">
+    <a class="pg-bar__a" href="/en/home">← Back to account</a>
+    <span class="pg-bar__k">REDEEM</span>
+  </div>
+</div>
+
+<main class="pg">
+  <div class="wrap">
+
+    <div class="pg-head">
+      <div>
+        <span class="pg-k">REDEEM</span>
+        <h1 class="pg-t">Redeem</h1>
+        <p class="pg-d">
+          CFB can be withdrawn to Alipay or WeChat, or spent instantly on digital codes. Both routes use the same rate with no fee spread — which one you pick only depends on what you need.
+        </p>
+      </div>
+
+      <div class="pg-side">
+        <b>1:1</b>
+        <span><span data-cur="code">CFB</span> =<span data-cur="cash">CNY</span></span>
+      </div>
+    </div>
+
+    <div class="st-wallet">
+      <div>
+        <span class="st-wallet__k">Redeemable balance</span>
+        <div class="st-wallet__n">
+          <b id="stFc">0</b><i data-cur="code">CFB</i>
+        </div>
+      </div>
+
+      <div>
+        <span class="st-wallet__k">Frozen</span>
+        <div class="st-wallet__n st-wallet__n--sm">
+          <b id="stFrozen">0</b><i data-cur="code">CFB</i>
+        </div>
+        <p class="st-wallet__f">Held while the payout is under review</p>
+      </div>
+
+      <div class="st-wallet__a">
+        <button class="btn btn--red" type="button" id="stWithdrawBtn">Request payout</button>
+        <button class="btn btn--ghost" type="button" id="stCodeBtn">Redeem a code</button>
+      </div>
+    </div>
+
+    <section class="st-sec">
+      <div class="st-sec__h">
+        <span class="pg-k">ITEMS</span>
+        <h2 class="st-sec__t">Items available</h2>
+        <p class="st-sec__d">Prices and stock are read live; redemptions appear in your history immediately.</p>
+      </div>
+      <div class="st-grid" id="stList"></div>
+      <p class="st-empty" id="stEmpty" hidden>Nothing to redeem right now — check back later.</p>
+    </section>
+
+    <section class="st-sec">
+      <div class="st-sec__h">
+        <span class="pg-k">RECORDS</span>
+        <h2 class="st-sec__t">My history</h2>
+      </div>
+
+      <div class="st-tabs" role="tablist">
+        <button class="st-tab is-on" type="button" data-tab="orders">Redemption history</button>
+        <button class="st-tab" type="button" data-tab="withdraw">Payout history</button>
+      </div>
+
+      <div class="st-recs" id="stOrders"></div>
+      <div class="st-recs" id="stWithdraws" hidden></div>
+      <p class="st-empty" id="stRecEmpty" hidden>Nothing here yet.</p>
+    </section>
+
+    <div class="pg-note">
+      <span class="stamp stamp--red">NOTICE</span>
+      <p>
+        Once a payout is requested, the amount is held until it is approved, then paid out within seven business days. Gift codes are issued instantly; subscriptions are activated manually within two business days, and you are notified by in-site message.
+      </p>
+    </div>
+
+    <ul class="st-rule">
+      <li>
+        <b>Exchange rate</b>
+        <span>1 CFB = 1 CNY and 1 CF$ = 1 USD, same number either way. Use the currency switch next to your balance in the top bar. Withdrawals and gift codes use the same rate and carry no extra fee.</span>
+      </li>
+      <li>
+        <b>Settlement time</b>
+        <span>Gift codes are issued instantly. Payouts are reviewed manually and arrive within seven business days, later across public holidays.</span>
+      </li>
+      <li>
+        <b>Hold rules</b>
+        <span>When a payout is requested, the amount moves from available to held. If it is rejected, it goes straight back.</span>
+      </li>
+      <li>
+        <b>Check records</b>
+        <span>Every credit and debit is written to your ledger, so you can check line by line and trace any difference by its reference ID.</span>
+      </li>
+    </ul>
+
+  </div>
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 Chengfa</span>
+      <span>Take surveys · Earn rewards · Redeem payouts</span>
+    </div>
+    <p class="foot__legal"><a href="/privacy">Privacy Policy</a> · <a href="/terms">Terms of Service</a> · <a href="/support">Contact Support</a></p>
+  </div>
+</footer>
+
+<script src="/js/app.js?v=18" defer></script>
+<script src="/en/dict.js?v=1"></script>
+<script src="/js/i18n-en.js?v=1" defer></script>
+</body>
+</html>
