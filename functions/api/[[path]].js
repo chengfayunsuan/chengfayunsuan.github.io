@@ -1246,6 +1246,7 @@ function surveyRow(r) {
     entry: r.entry_url,
     kind: r.kind || 'link',
     inline: r.kind === 'inline',
+    repeat: Number(r.repeat_mode) || 0,
     questionCount: r.kind === 'inline' ? paperParse(r.paper).questions.length : 0,
     featured: r.featured === 1,
     status: r.status,
@@ -1257,6 +1258,9 @@ async function surveyList(request, env) {
   const session = await currentSession(request, env);
   if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
 
+  const who = await env.DB.prepare('SELECT role FROM users WHERE id = ?').bind(session.uid).first();
+  const isAdmin = !!who && (who.role === 'owner' || who.role === 'admin');
+
   const rows = await env.DB.prepare(
     `SELECT s.*, EXISTS(
         SELECT 1 FROM survey_joins j WHERE j.survey_id = s.id AND j.uid = ?
@@ -1266,7 +1270,16 @@ async function surveyList(request, env) {
       LIMIT 100`
   ).bind(session.uid).all();
 
-  return json({ ok: true, items: (rows.results || []).map(surveyRow) });
+  return json({
+    ok: true,
+    items: (rows.results || []).map(function (r) {
+      const it = surveyRow(r);
+      /* 能重来的问卷，大厅里别显示成「已参与」，否则按钮点不动 */
+      const mode = Number(r.repeat_mode) || 0;
+      if (mode === 2 || (mode === 1 && isAdmin)) it.joined = false;
+      return it;
+    })
+  });
 }
 
 async function adminSurveyList(env) {
@@ -1314,6 +1327,10 @@ async function adminSurveySave(request, env) {
   const kind = kindWanted === 'inline' && paper.questions.length ? 'inline' : 'link';
   const paperJson = kind === 'inline' ? JSON.stringify(paper) : '';
 
+  /* 重复参与：0 每个账号一次 / 1 只有站长与管理员能重来 / 2 谁都能重来 */
+  const repeatRaw = Number(body.repeat);
+  const repeatMode = [0, 1, 2].indexOf(repeatRaw) >= 0 ? repeatRaw : 0;
+
   const args = [
     title,
     String(body.provider || '').trim(),
@@ -1326,22 +1343,23 @@ async function adminSurveySave(request, env) {
     kind === 'inline' ? '' : String(body.entry || '').trim(),
     status,
     kind,
-    paperJson
+    paperJson,
+    repeatMode
   ];
 
   if (body.id) {
     await env.DB.prepare(
       `UPDATE surveys SET title = ?, provider = ?, price_units = ?, grade = ?, stars = ?,
         requirement = ?, topic = ?, duration_min = ?, entry_url = ?, status = ?,
-        kind = ?, paper = ?, updated_at = datetime('now','+8 hours')
+        kind = ?, paper = ?, repeat_mode = ?, updated_at = datetime('now','+8 hours')
         WHERE id = ?`
     ).bind(...args, Number(body.id)).run();
     return json({ ok: true, id: Number(body.id), kind: kind, questions: paper.questions.length });
   }
 
   const res = await env.DB.prepare(
-    `INSERT INTO surveys (title, provider, price_units, grade, stars, requirement, topic, duration_min, entry_url, status, kind, paper)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO surveys (title, provider, price_units, grade, stars, requirement, topic, duration_min, entry_url, status, kind, paper, repeat_mode)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(...args).run();
 
   return json({ ok: true, id: res.meta && res.meta.last_row_id, kind: kind, questions: paper.questions.length });
@@ -1875,7 +1893,15 @@ async function surveyPaper(request, env, url) {
     'SELECT * FROM survey_joins WHERE uid = ? AND survey_id = ?'
   ).bind(session.uid, id).first();
 
-  if (join && (join.stage === 'done' || join.stage === 'pending')) {
+  /* 能不能再进一次：repeat_mode 2 谁都能重来，1 只有站长与管理员能重来 */
+  const mode = Number(sv.repeat_mode) || 0;
+  let repeat = mode === 2;
+  if (mode === 1) {
+    const who = await env.DB.prepare('SELECT role FROM users WHERE id = ?').bind(session.uid).first();
+    repeat = !!who && (who.role === 'owner' || who.role === 'admin');
+  }
+
+  if (!repeat && join && (join.stage === 'done' || join.stage === 'pending')) {
     return json({ ok: false, error: 'already_done', status: join.status }, 409);
   }
 
@@ -1885,8 +1911,13 @@ async function surveyPaper(request, env, url) {
        VALUES (?, ?, 'pending', 'open', datetime('now','+8 hours'))`
     ).bind(session.uid, id).run();
   } else if (join.stage !== 'open') {
+    /* 重来时把上一轮的答卷、用时、待冲正时间一起清掉，否则轮询会把上一轮给冲正了。
+       还在答（stage=open）的不要动，否则刷新一次就把计时清零了 */
     await env.DB.prepare(
-      "UPDATE survey_joins SET stage = 'open', created_at = datetime('now','+8 hours') WHERE uid = ? AND survey_id = ?"
+      `UPDATE survey_joins
+          SET stage = 'open', status = 'pending', created_at = datetime('now','+8 hours'),
+              answers = '', elapsed = 0, due_at = '', reviewed_at = NULL
+        WHERE uid = ? AND survey_id = ?`
     ).bind(session.uid, id).run();
   }
 
