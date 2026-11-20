@@ -426,3 +426,55 @@
   .tv-tk__d,
   .tv-tk__r { display: none; }
 }
+
+/* ---------- 风控记录 ---------- */
+.tv-risk { display: flex; flex-direction: column; }
+
+.tv-risk__row {
+  display: grid;
+  grid-template-columns: 92px 84px 40px minmax(0, 1fr) 96px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--hair);
+  font-size: 13px;
+}
+
+.tv-risk__row:last-child { border-bottom: 0; }
+
+.tv-risk__t {
+  color: var(--gray);
+  font-family: var(--num);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+}
+
+.tv-risk__k { color: var(--red, #c8352a); font-weight: 600; }
+
+.tv-risk__s {
+  text-align: right;
+  color: var(--gray);
+  font-family: var(--num);
+  font-size: 12px;
+}
+
+.tv-risk__d {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tv-risk__u {
+  text-align: right;
+  color: var(--gray);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tv-risk__empty { padding: 16px 4px; color: var(--gray); font-size: 13px; }
+
+@media (max-width: 720px) {
+  .tv-risk__row { grid-template-columns: 78px 78px minmax(0, 1fr); }
+  .tv-risk__s, .tv-risk__u { display: none; }
+}

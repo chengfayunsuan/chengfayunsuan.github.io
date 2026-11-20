@@ -347,9 +347,59 @@
     if (hint) hint.textContent = '一个 IP 一行 · 保留 90 天';
   }
 
+  /* ---------- 风控记录 ---------- */
+
+  var RISK_KIND = {
+    bot: '机器作答',
+    straight: '直线作答',
+    device_reuse: '同设备换号',
+    join_rate: '开卷过频',
+    submit_rate: '交卷过频',
+    account_spread: '多号共用'
+  };
+
+  function paintRisk(d) {
+    var box = $('risk');
+    if (!box) return;
+
+    var hint = $('riskHint');
+    var kinds = (d && d.kinds) || [];
+    if (hint) {
+      hint.textContent = kinds.length
+        ? '近 7 天 · ' + kinds.map(function (k) { return (RISK_KIND[k.kind] || k.kind) + ' ' + k.n; }).join(' / ')
+        : '近 7 天没有命中';
+    }
+
+    var items = (d && d.items) || [];
+    if (!items.length) {
+      box.innerHTML = '<div class="tv-risk__empty">最近没有命中记录</div>';
+      return;
+    }
+
+    box.innerHTML = items.map(function (e) {
+      var t = String(e.at || '');
+      return '<div class="tv-risk__row">'
+        + '<span class="tv-risk__t">' + esc(t.slice(5, 16)) + '</span>'
+        + '<span class="tv-risk__k">' + esc(RISK_KIND[e.kind] || e.kind) + '</span>'
+        + '<span class="tv-risk__s">' + (e.score || 0) + '</span>'
+        + '<span class="tv-risk__d">' + esc(e.detail || '') + '</span>'
+        + '<span class="tv-risk__u">' + esc(e.username || ('uid ' + e.uid)) + '</span>'
+        + '</div>';
+    }).join('');
+  }
+
+  function loadRisk() {
+    fetch('/api/admin/risk?limit=30', { headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) { if (d && d.ok) paintRisk(d); })
+      .catch(function () {});
+  }
+
   function load() {
     var btn = $('reload');
     if (btn) btn.disabled = true;
+
+    loadRisk();
 
     fetch('/api/admin/traffic?days=14&page=' + page + '&per=30', { headers: { Accept: 'application/json' } })
       .then(function (r) {
@@ -367,8 +417,7 @@
       });
   }
 
-  /* 翻页：滚回表格顶部，别让人翻完还在页脚 */
-  function goto(n) {
+  /* 翻页：滚回表格顶部，别让人翻完还在页脚 */  function goto(n) {
     if (n === page) return;
     page = n;
     openIp = '';

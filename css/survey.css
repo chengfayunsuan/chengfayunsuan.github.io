@@ -253,3 +253,13 @@
   .paper-submit { flex-direction: column; align-items: stretch; }
   .paper-tip { text-align: left; }
 }
+
+/* 蜜罐：挪出视野但仍在 DOM 里，屏幕阅读器和真人都不该碰到它 */
+.paper-hp {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}

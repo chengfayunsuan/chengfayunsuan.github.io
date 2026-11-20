@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="/css/style.css?v=14">
 <link rel="stylesheet" href="/css/home.css?v=16">
 <link rel="stylesheet" href="/css/page.css?v=9">
-<link rel="stylesheet" href="/css/survey.css?v=2">
+<link rel="stylesheet" href="/css/survey.css?v=3">
 <script src="/js/config.js?v=7"></script>
 <script src="/js/core.js?v=33"></script>
 </head>
@@ -62,6 +62,13 @@
       <form class="paper-form" id="svForm" hidden>
         <div id="svQs"></div>
 
+        <!-- 蜜罐：真人看不见也不会填，脚本会把所有 input 都填上 -->
+        <div class="paper-hp" aria-hidden="true">
+          <label>公司网址（不用填）
+            <input type="text" name="company_url" id="svHp" tabindex="-1" autocomplete="off">
+          </label>
+        </div>
+
         <div class="paper-submit">
           <span class="paper-progress" id="svProgress">0 / 0 题</span>
           <button class="btn btn--red" type="submit" id="svSend">提交答卷</button>
@@ -97,6 +104,7 @@
 
 <div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="/js/survey.js?v=7" defer></script>
+<script src="/js/fp.js?v=1" defer></script>
+<script src="/js/survey.js?v=8" defer></script>
 </body>
 </html>

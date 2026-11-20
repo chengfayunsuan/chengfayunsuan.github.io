@@ -511,6 +511,89 @@ async function resolveJoin(env, request, id, uid, attempt) {
   return { join: join, ip: ip, priv: false };
 }
 
+/* ---------------- 风控 ----------------
+   光靠 IP 判重挡不住换设备、换号的羊毛党。这一层补三样：
+   设备指纹、行为特征、奖励限额。每次命中写一条 risk_events，事后能查。 */
+
+const RISK = {
+  joinPerIpHour: 30,      /* 同一出口 IP 一小时内最多开 30 份卷 */
+  submitPerUidHour: 12,   /* 同一账号一小时内最多交 12 份 */
+  rewardPerUidDay: 60,    /* 同一账号一天最多从问卷挣 60 CFB */
+  fpUidWarn: 3,           /* 一台设备挂 3 个以上账号，记一笔 */
+  ipUidWarn: 5            /* 一个 IP 挂 5 个以上账号，记一笔 */
+};
+
+async function riskHit(env, e) {
+  try {
+    await env.DB.prepare(
+      `INSERT INTO risk_events (uid, ip, fp, survey_id, kind, score, detail)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
+    ).bind(
+      e.uid || 0, e.ip || '', e.fp || '', e.surveyId || 0,
+      e.kind || '', e.score || 0, String(e.detail || '').slice(0, 300)
+    ).run();
+  } catch (err) {
+    console.error('risk hit failed:', err && err.message);
+  }
+}
+
+/* 一小时内这个 IP 开了多少份卷 */
+async function joinsLastHour(env, ip) {
+  const r = await env.DB.prepare(
+    `SELECT COUNT(*) AS n FROM survey_joins
+      WHERE ip = ? AND datetime(created_at) > datetime('now','+8 hours','-1 hour')`
+  ).bind(ip).first();
+  return Number(r && r.n) || 0;
+}
+
+/* 一小时内这个账号交了多少份卷 */
+async function submitsLastHour(env, uid) {
+  const r = await env.DB.prepare(
+    `SELECT COUNT(*) AS n FROM survey_joins
+      WHERE uid = ? AND reviewed_at IS NOT NULL
+        AND datetime(reviewed_at) > datetime('now','+8 hours','-1 hour')`
+  ).bind(uid).first();
+  return Number(r && r.n) || 0;
+}
+
+/* 今天这个账号从问卷挣了多少（单位 1/10000 CFB） */
+async function surveyRewardToday(env, uid) {
+  const r = await env.DB.prepare(
+    `SELECT COALESCE(SUM(delta), 0) AS s FROM fc_ledger
+      WHERE uid = ? AND kind = 'survey_reward'
+        AND date(created_at, '+8 hours') = date('now','+8 hours')`
+  ).bind(uid).first();
+  return Number(r && r.s) || 0;
+}
+
+/* 这台设备、这个 IP 各自挂了几个账号 —— 只是记账，不直接拦 */
+async function accountSpread(env, ip, fp) {
+  const out = { ipUids: 0, fpUids: 0 };
+  if (ip) {
+    const a = await env.DB.prepare(
+      'SELECT COUNT(DISTINCT uid) AS n FROM survey_joins WHERE ip = ?'
+    ).bind(ip).first();
+    out.ipUids = Number(a && a.n) || 0;
+  }
+  if (fp) {
+    const b = await env.DB.prepare(
+      'SELECT COUNT(DISTINCT uid) AS n FROM survey_joins WHERE fp = ?'
+    ).bind(fp).first();
+    out.fpUids = Number(b && b.n) || 0;
+  }
+  return out;
+}
+
+/* 直线作答：四题以上全挑同一个位置，基本不是人在看题 */
+function isStraight(picked) {
+  if (picked.length < 4) return false;
+  var first = picked[0].i;
+  for (var k = 1; k < picked.length; k++) {
+    if (picked[k].i !== first) return false;
+  }
+  return true;
+}
+
 async function updateProfile(request, env) {
   const session = await currentSession(request, env);
   if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
@@ -1915,13 +1998,51 @@ async function surveyPaper(request, env, url) {
   const priv = await isPrivileged(env, session.uid);
   let ip = ipOf(request) || 'unknown';
   let attempt = 0;
+  const fp = String(url.searchParams.get('fp') || '').slice(0, 40);
+
+  if (!priv) {
+    /* 今天的问卷收益到顶就直接关门，省得白答一场 */
+    const earned = await surveyRewardToday(env, session.uid);
+    if (earned >= RISK.rewardPerUidDay * FC_SCALE) {
+      return json({
+        ok: false, error: 'daily_cap',
+        message: '今天的问卷收益已经到 ' + RISK.rewardPerUidDay + ' CFB 上限，明天再来'
+      }, 429);
+    }
+
+    /* 频率：同一个 IP 一小时开太多卷，基本是脚本在刷 */
+    const recent = await joinsLastHour(env, ip);
+    if (recent >= RISK.joinPerIpHour) {
+      await riskHit(env, {
+        uid: session.uid, ip, fp, surveyId: id, kind: 'join_rate', score: 40,
+        detail: '一小时内开卷 ' + recent + ' 次'
+      });
+      return json({ ok: false, error: 'risk_limited', message: '开卷太频繁，歇一会儿再来' }, 429);
+    }
+
+    /* 设备指纹：换 IP 无所谓，同一台机器对同一份卷只能算一次 */
+    if (fp) {
+      const dev = await env.DB.prepare(
+        `SELECT uid FROM survey_joins
+          WHERE survey_id = ? AND fp = ? AND fp <> '' AND uid <> ?
+          LIMIT 1`
+      ).bind(id, fp, session.uid).first();
+      if (dev) {
+        await riskHit(env, {
+          uid: session.uid, ip, fp, surveyId: id, kind: 'device_reuse', score: 50,
+          detail: '这台设备上账号 ' + dev.uid + ' 已经做过这份卷'
+        });
+        return json({ ok: false, error: 'already_done', reason: 'device', sameIp: false }, 409);
+      }
+    }
+  }
 
   if (priv) {
     ip = privIp(session.uid);
     const ins = await env.DB.prepare(
-      `INSERT INTO survey_joins (uid, survey_id, ip, status, stage, created_at)
-       VALUES (?, ?, ?, 'pending', 'open', datetime('now','+8 hours'))`
-    ).bind(session.uid, id, ip).run();
+      `INSERT INTO survey_joins (uid, survey_id, ip, fp, status, stage, created_at)
+       VALUES (?, ?, ?, ?, 'pending', 'open', datetime('now','+8 hours'))`
+    ).bind(session.uid, id, ip, fp).run();
     attempt = Number(ins.meta && ins.meta.last_row_id) || 0;
   } else {
     const join = await env.DB.prepare(
@@ -1934,18 +2055,27 @@ async function surveyPaper(request, env, url) {
 
     if (!join) {
       await env.DB.prepare(
-        `INSERT OR IGNORE INTO survey_joins (uid, survey_id, ip, status, stage, created_at)
-         VALUES (?, ?, ?, 'pending', 'open', datetime('now','+8 hours'))`
-      ).bind(session.uid, id, ip).run();
+        `INSERT OR IGNORE INTO survey_joins (uid, survey_id, ip, fp, status, stage, created_at)
+         VALUES (?, ?, ?, ?, 'pending', 'open', datetime('now','+8 hours'))`
+      ).bind(session.uid, id, ip, fp).run();
     } else if (join.stage !== 'open') {
       /* 换 IP 重来时把上一轮的答卷、用时、待冲正时间一起清掉，否则轮询会把上一轮给冲正了。
          还在答（stage=open）的不要动，否则刷新一次就把计时清零了 */
       await env.DB.prepare(
         `UPDATE survey_joins
-            SET uid = ?, stage = 'open', status = 'pending', created_at = datetime('now','+8 hours'),
+            SET uid = ?, fp = ?, stage = 'open', status = 'pending', created_at = datetime('now','+8 hours'),
                 answers = '', elapsed = 0, due_at = '', reviewed_at = NULL
           WHERE ip = ? AND survey_id = ?`
-      ).bind(session.uid, ip, id).run();
+      ).bind(session.uid, fp, ip, id).run();
+    }
+
+    /* 一台设备 / 一个 IP 挂太多账号，先记一笔，人多了再人工看 */
+    const spread = await accountSpread(env, ip, fp);
+    if (spread.fpUids >= RISK.fpUidWarn || spread.ipUids >= RISK.ipUidWarn) {
+      await riskHit(env, {
+        uid: session.uid, ip, fp, surveyId: id, kind: 'account_spread', score: 30,
+        detail: '同设备 ' + spread.fpUids + ' 个账号 / 同 IP ' + spread.ipUids + ' 个账号'
+      });
     }
   }
 
@@ -1992,6 +2122,22 @@ async function surveySubmit(request, env) {
   const uid = session.uid;
   if (!id) return json({ ok: false, error: 'bad_request' }, 400);
 
+  const priv = await isPrivileged(env, uid);
+  const fp = String((body && body.fp) || '').slice(0, 40);
+  const ipNow = ipOf(request) || 'unknown';
+
+  /* 频率：一小时内交太多份卷，人不会这么干 */
+  if (!priv) {
+    const sent = await submitsLastHour(env, uid);
+    if (sent >= RISK.submitPerUidHour) {
+      await riskHit(env, {
+        uid, ip: ipNow, fp, surveyId: id, kind: 'submit_rate', score: 40,
+        detail: '一小时内交卷 ' + sent + ' 次'
+      });
+      return json({ ok: false, error: 'risk_limited', message: '交卷太频繁，歇一会儿再来' }, 429);
+    }
+  }
+
   const sv = await env.DB.prepare('SELECT * FROM surveys WHERE id = ?').bind(id).first();
   if (!sv) return json({ ok: false, error: 'not_found' }, 404);
 
@@ -2013,7 +2159,7 @@ async function surveySubmit(request, env) {
     if (!question) continue;
     const opt = question.options[Number(a.o)];
     if (opt == null) continue;
-    picked.push({ q: question.q, a: typeof opt === 'object' ? opt.label : opt });
+    picked.push({ q: question.q, i: Number(a.o), a: typeof opt === 'object' ? opt.label : opt });
     if (opt && typeof opt === 'object' && opt.outcome) outcome = opt.outcome;
   }
 
@@ -2024,6 +2170,12 @@ async function surveySubmit(request, env) {
   const elapsed = Math.max(1, Number(took && took.s) || 0);
 
   if (!outcome) outcome = elapsed < SURVEY_MIN_SECONDS ? 'speed' : 'success';
+
+  /* 行为层：蜜罐被填说明有脚本在自动填表；四题以上全挑同一个位置说明没在读题。
+     两者都直接作废，不给钱 —— 这一类拦下来比事后扣钱省事。 */
+  const trap = String((body && body.hp) || '').trim();
+  if (trap) outcome = 'bot';
+  else if (isStraight(picked)) outcome = 'straight';
 
   const markJoin = function (status, stage, note) {
     return env.DB.prepare(
@@ -2054,6 +2206,45 @@ async function surveySubmit(request, env) {
   const reply = async function (extra) {
     return json(Object.assign(base, extra, { user: await userStateOf(env, uid) }));
   };
+
+  if (outcome === 'bot' || outcome === 'straight') {
+    const why = outcome === 'bot'
+      ? '蜜罐字段被填，像是脚本在自动填表'
+      : '每道题都选同一个位置，没在读题';
+    await env.DB.batch([markJoin('invalid', 'done')]);
+    await riskHit(env, {
+      uid, ip, fp, surveyId: id,
+      kind: outcome,
+      score: outcome === 'bot' ? 80 : 50,
+      detail: why
+    });
+    return reply({
+      result: outcome,
+      reward: '0',
+      steps: [
+        '提交答卷（用时 ' + elapsed + ' 秒）',
+        why,
+        '答卷作废，不发奖励，不扣经验'
+      ]
+    });
+  }
+
+  /* 奖励限额：一天从问卷挣太多就停，脚本刷也刷不出量 */
+  if (!priv && (outcome === 'success' || outcome === 'reject')) {
+    const todayUnits = await surveyRewardToday(env, uid);
+    if (todayUnits + reward > RISK.rewardPerUidDay * FC_SCALE) {
+      await env.DB.batch([markJoin('invalid', 'done')]);
+      return reply({
+        result: 'cap',
+        reward: '0',
+        steps: [
+          '提交答卷（用时 ' + elapsed + ' 秒）',
+          '今日问卷收益已达上限 ' + RISK.rewardPerUidDay + ' CFB',
+          '这份不发奖励，明天再来'
+        ]
+      });
+    }
+  }
 
   if (outcome === 'success') {
     await env.DB.batch([
@@ -2870,6 +3061,7 @@ async function adminApi(request, env, url, path) {
   if (path === 'admin/users/role' && request.method === 'POST') return await adminRole(request, env, admin);
   if (path === 'admin/withdrawals' && request.method === 'GET') return await adminWithdrawals(request, env, url);
   if (path === 'admin/withdrawals/decide' && request.method === 'POST') return await adminWithdrawDecide(request, env, admin);
+  if (path === 'admin/risk' && request.method === 'GET') return await adminRisk(env, url);
   if (path === 'admin/tickets' && request.method === 'GET') return await adminTickets(env, url);
   if (path === 'admin/tickets/decide' && request.method === 'POST') return await adminTicketDecide(request, env, admin);
   if (path === 'admin/surveys' && request.method === 'GET') return await adminSurveyList(env);
@@ -3107,7 +3299,11 @@ async function adminWithdrawals(request, env, url) {
 
   const rows = await env.DB.prepare(
     `SELECT w.id, w.uid, w.amount, w.channel, w.account, w.status,
-            w.created_at, w.reviewed_at, u.username
+            w.created_at, w.reviewed_at, u.username,
+            (SELECT COUNT(*) FROM risk_events r
+              WHERE r.uid = w.uid AND r.at >= datetime('now','+8 hours','-30 days')) AS risk_n,
+            (SELECT MAX(r.score) FROM risk_events r
+              WHERE r.uid = w.uid AND r.at >= datetime('now','+8 hours','-30 days')) AS risk_max
        FROM withdrawals w LEFT JOIN users u ON u.id = w.uid
       ${filtered ? 'WHERE w.status = ?' : ''}
       ORDER BY w.id DESC LIMIT 100`
@@ -3129,8 +3325,48 @@ async function adminWithdrawals(request, env, url) {
       account: r.account,
       status: r.status,
       createdAt: toIso(r.created_at),
-      reviewedAt: toIso(r.reviewed_at)
+      reviewedAt: toIso(r.reviewed_at),
+      /* 复核时先看这一步：近 30 天被风控记过几次、最重几分 */
+      riskCount: r.risk_n || 0,
+      riskScore: r.risk_max || 0
     }))
+  });
+}
+
+/* 风控记录：最近命中 + 近 7 天按类型聚合 */
+async function adminRisk(env, url) {
+  const limit = Math.min(200, Math.max(10, Number(url.searchParams.get('limit')) || 50));
+
+  const rows = await env.DB.prepare(
+    `SELECT r.id, r.at, r.uid, r.ip, r.fp, r.survey_id, r.kind, r.score, r.detail,
+            u.username, s.title
+       FROM risk_events r
+       LEFT JOIN users u ON u.id = r.uid
+       LEFT JOIN surveys s ON s.id = r.survey_id
+      ORDER BY r.id DESC LIMIT ?`
+  ).bind(limit).all();
+
+  const kinds = await env.DB.prepare(
+    `SELECT kind, COUNT(*) AS n, MAX(at) AS last_at
+       FROM risk_events WHERE at >= datetime('now','+8 hours','-7 days')
+      GROUP BY kind ORDER BY n DESC`
+  ).all();
+
+  return json({
+    ok: true,
+    items: (rows.results || []).map((r) => ({
+      id: r.id,
+      at: r.at,
+      uid: r.uid,
+      username: r.username || '',
+      ip: r.ip,
+      fp: r.fp,
+      surveyTitle: r.title || '',
+      kind: r.kind,
+      score: r.score,
+      detail: r.detail
+    })),
+    kinds: (kinds.results || []).map((r) => ({ kind: r.kind, n: r.n, lastAt: r.last_at }))
   });
 }
 
