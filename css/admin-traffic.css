@@ -131,7 +131,7 @@
 
 .tv-tr {
   display: grid;
-  grid-template-columns: 172px minmax(0, 1.1fr) minmax(0, 1fr) 76px 122px 122px;
+  grid-template-columns: 214px minmax(0, 1.1fr) minmax(0, 1fr) 76px 122px 122px;
   align-items: center;
   gap: 14px;
   padding: 9px 18px;
@@ -220,6 +220,21 @@
   color: var(--red);
 }
 
+/* 「疑似机器」标记：只在可疑时出现，红色但要小，别抢主信息 */
+.r-ip__s {
+  flex: none;
+  margin-left: 6px;
+  padding: 1px 5px;
+  border: 1px solid var(--red);
+  background: rgba(var(--red-rgb), .07);
+  font-size: 10px;
+  font-style: normal;
+  letter-spacing: .02em;
+  color: var(--red);
+  white-space: nowrap;
+  cursor: help;
+}
+
 /* ---------- 展开的访问轨迹 ---------- */
 
 .tv-track {
@@ -240,6 +255,16 @@
   font-size: 10.5px;
   letter-spacing: .1em;
   color: var(--gray);
+}
+
+.tv-tk__flag {
+  margin: 0 0 9px;
+  padding: 8px 11px;
+  border-left: 3px solid var(--red);
+  background: rgba(var(--red-rgb), .05);
+  font-size: 11.5px;
+  line-height: 1.66;
+  color: var(--ink);
 }
 
 .tv-tk {

@@ -2159,6 +2159,17 @@ async function surveyPoll(request, env, url) {
 
 /* 中间件每分钟都在写 visits，这里只管读。
    每次打开顺手删掉 90 天前的，免得表无限长。 */
+/* 这条记录像不像真人浏览器。只做提示，不过滤、不计入黑名单 */
+function visitSigns(ua, lang, mode) {
+  const out = [];
+  const u = String(ua || '');
+  if (!mode && /Chrome|Safari|Firefox|Edg|MicroMessenger/.test(u)) out.push('没有 Sec-Fetch');
+  const m = u.match(/MicroMessenger\/(\d+)/);
+  if (m && Number(m[1]) < 8) out.push('微信 ' + m[1] + '.x 是 2019 年的版本');
+  if (!lang && u) out.push('没有 Accept-Language');
+  return out;
+}
+
 async function adminTraffic(env, url) {
   const days = Math.min(30, Math.max(7, Number(url.searchParams.get('days')) || 14));
   const page = Math.max(1, Number(url.searchParams.get('page')) || 1);
@@ -2201,7 +2212,10 @@ async function adminTraffic(env, url) {
             MAX(city)     AS city,
             MAX(asn)      AS asn,
             MAX(org)      AS org,
-            MAX(colo)     AS colo
+            MAX(colo)     AS colo,
+            MAX(lang)     AS lang,
+            MAX(fetch)    AS fetch,
+            MAX(ua)       AS ua
        FROM visits
       WHERE ip <> ''
       GROUP BY ip
@@ -2240,7 +2254,10 @@ async function adminTraffic(env, url) {
         city: r.city || '',
         asn: r.asn || '',
         org: r.org || '',
-        colo: r.colo || ''
+        colo: r.colo || '',
+        lang: r.lang || '',
+        fetch: r.fetch || '',
+        signs: visitSigns(r.ua, r.lang, r.fetch)
       };
     })
   });
@@ -2252,7 +2269,7 @@ async function adminIpTrack(env, url) {
   if (!ip) return json({ ok: false, error: 'no_ip' }, 400);
 
   const rows = await env.DB.prepare(
-    `SELECT at, path, ref, ua FROM visits
+    `SELECT at, path, ref, ua, lang, fetch FROM visits
       WHERE ip = ? ORDER BY at DESC, id DESC LIMIT 200`
   ).bind(ip).all();
 
@@ -2278,6 +2295,9 @@ async function adminIpTrack(env, url) {
       path: r.path || '/',
       ref: r.ref || '',
       ua: (r.ua || '').slice(0, 180),
+      lang: r.lang || '',
+      fetch: r.fetch || '',
+      signs: visitSigns(r.ua, r.lang, r.fetch),
       gap: gap
     };
   });

@@ -98,6 +98,19 @@
     return s.slice(5, 10) + ' ' + s.slice(11, 16);
   }
 
+  /* 可疑信号由服务端算好，前端只管显示 */
+  function signsOf(it) {
+    if (!it) return [];
+    if (it.signs && it.signs.length) return it.signs;
+
+    /* 老记录没有 signs 字段，用手里这点信息补一次 */
+    var ua = String(it.ua || '');
+    var out = [];
+    var m = ua.match(/MicroMessenger\/(\d+)/);
+    if (m && Number(m[1]) < 8) out.push('微信 ' + m[1] + '.x 是 2019 年的版本');
+    return out;
+  }
+
   /* 中文地方名不跟着转，原样返回 */
   function zhCity(s) {
     if (!s) return '';
@@ -201,10 +214,14 @@
     box.innerHTML = head + items.map(function (it) {
       var net = [it.asn ? 'AS' + it.asn : '', it.org, it.colo].filter(Boolean).join(' · ');
       var open = it.ip === openIp;
+      var signs = signsOf(it);
+      var flag = signs.length
+        ? '<i class="r-ip__s" title="' + esc(signs.join('；')) + '">疑似机器</i>'
+        : '';
       return '<div class="tv-row' + (open ? ' is-open' : '') + '" data-ip="' + esc(it.ip) + '">' +
         '<div class="tv-tr">' +
           '<span class="r-ip"><button type="button" class="r-ip__b" data-track="' + esc(it.ip) + '" title="看这个 IP 走过哪些页面">' +
-            esc(it.ip) + '<i class="r-ip__c">' + (open ? '收起' : it.pv + ' 步') + '</i></button></span>' +
+            esc(it.ip) + '<i class="r-ip__c">' + (open ? '收起' : it.pv + ' 步') + '</i></button>' + flag + '</span>' +
           '<span class="r-c" title="' + esc([it.region, it.city].filter(Boolean).join(' / ')) + '">' + esc(place(it)) + '</span>' +
           '<span class="r-net" title="' + esc(net || '未知') + '">' + esc(it.org || '—') + '</span>' +
           '<span class="r-n">' + it.pv + ' 次</span>' +
@@ -244,7 +261,13 @@
       '</div>';
     }).join('');
 
-    return '<div class="tv-tk__h">共 ' + d.total + ' 步 · ' + paths + ' 个页面 · 时间倒序</div>' + body;
+    var signs = signsOf(items[0] || {});
+    var flag = signs.length
+      ? '<div class="tv-tk__flag">这一条不像真人浏览器：' + esc(signs.join('；')) +
+        '。自动探测和脚本经常直接伪造成微信的 UA，这类记录不必当成访客。</div>'
+      : '';
+
+    return '<div class="tv-tk__h">共 ' + d.total + ' 步 · ' + paths + ' 个页面 · 时间倒序</div>' + flag + body;
   }
 
   function loadTrack(ip) {

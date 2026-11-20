@@ -69,12 +69,16 @@ function logVisit(context, url) {
 
   const path = url.pathname.slice(0, 120);
 
+  /* 这两个只用来判断「是不是真浏览器」，不上报给任何人 */
+  const lang = (request.headers.get('Accept-Language') || '').slice(0, 60);
+  const fetchMode = (request.headers.get('Sec-Fetch-Mode') || '').slice(0, 16);
+
   const task = (async () => {
     const vid = (await sha256Hex(ip + '|' + ua)).slice(0, 20);
     await env.DB.prepare(
-      `INSERT INTO visits (path, vid, ip, country, region, city, asn, org, colo, ref, ua)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).bind(path, vid, ip, country, region, city, asn, org, colo, ref, ua).run();
+      `INSERT INTO visits (path, vid, ip, country, region, city, asn, org, colo, ref, ua, lang, fetch)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(path, vid, ip, country, region, city, asn, org, colo, ref, ua, lang, fetchMode).run();
   })().catch(() => {});
 
   if (context.waitUntil) context.waitUntil(task);
