@@ -8,6 +8,8 @@
   var $ = function (id) { return document.getElementById(id); };
 
   var id = Number(new URLSearchParams(location.search).get('id')) || 0;
+  var query = new URLSearchParams(location.search);
+  var pageStatus = query.get('status') || '';   /* 回调带回来的结局，有它就只画结果，不再开卷 */
   var paper = null;
   var startedAt = '';
   var attempt = 0;          /* 本轮答卷的编号：站长每测一遍就是新的一条 */
@@ -109,7 +111,8 @@
     speed: '超速',
     quota: '满额',
     kick: '被踢',
-    reject: '打回'
+    reject: '打回',
+    rejected: '被打回'
   };
 
   var DESC = {
@@ -118,8 +121,47 @@
     speed: '答得太快，被判超速作废。',
     quota: '这份问卷的名额刚好在提交前收满了。',
     kick: '答题过程中命中了排除条件，会话被终止。',
-    reject: '问卷商说这份要过质检，先入账，过一会儿再看结果。'
+    reject: '问卷商说这份要过质检，先入账，过一会儿再看结果。',
+    rejected: '质检没过：奖励已经扣回，经验 −8。'
   };
+
+  /* 结局要落到地址栏上（?status=success 这种），刷新也还是这张结果页。
+     真问卷商就是这么回调的，我们自己也照这个来。
+     答卷的明细放 sessionStorage，免得刷新后再向服务端要一份已经结算过的。 */
+  function resKey() {
+    return 'sv:res:' + id;
+  }
+
+  function saveResult(d) {
+    try {
+      sessionStorage.setItem(resKey(), JSON.stringify({
+        result: d.result || 'success',
+        elapsed: d.elapsed || 0,
+        steps: d.steps || [],
+        pending: !!d.pending,
+        delay: d.delay || 0,
+        at: Date.now()
+      }));
+    } catch (e) {}
+  }
+
+  function loadResult() {
+    try {
+      var raw = sessionStorage.getItem(resKey());
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+  }
+
+  function callbackUrl(status) {
+    var qs = '?id=' + id + '&status=' + encodeURIComponent(status);
+    return attempt ? (qs + '&attempt=' + attempt) : qs;
+  }
+
+  function showCallbackStatus(status) {
+    try {
+      history.replaceState(null, '', location.pathname + callbackUrl(status));
+    } catch (e) {}
+  }
 
   function showResult(d) {
     $('svForm').hidden = true;
@@ -172,6 +214,13 @@
                 ul.insertAdjacentHTML('beforeend',
                   '<li>质检结论：答卷无效</li><li>奖励冲正，经验 −8，参与记录标记为打回</li>');
               }
+              /* 回调跟着改：地址栏从 status=reject 变成 status=rejected */
+              var keep = loadResult() || { elapsed: 0, steps: [] };
+              keep.result = 'rejected';
+              keep.pending = false;
+              keep.at = Date.now();
+              try { sessionStorage.setItem(resKey(), JSON.stringify(keep)); } catch (e) {}
+              showCallbackStatus('rejected');
             }
             return;
           }
@@ -184,12 +233,7 @@
 
   /* ---------- 启动 ---------- */
 
-  function boot() {
-    if (!id) {
-      note('地址里少了问卷编号。回大厅重新点一次。', true);
-      return;
-    }
-
+  function loadMe() {
     fetch('/api/auth/me', { headers: { Accept: 'application/json' } })
       .then(function (r) {
         if (r.status === 401) { location.replace('/login?next=' + encodeURIComponent(location.pathname + location.search)); return null; }
@@ -205,6 +249,47 @@
         if (nm) nm.textContent = u.username || '我';
       })
       .catch(function () {});
+  }
+
+  /* 回调进来（?status=）：只画结果，绝不再开一份新卷子 */
+  function renderCallback() {
+    var saved = loadResult();
+    var d;
+
+    if (saved && saved.result === pageStatus) {
+      d = saved;
+      if (d.pending) {
+        /* 刷新前已经在等质检：按当时的时间点接着倒数，不重新给 30 秒 */
+        var left = Math.round((d.at + (d.delay || 30) * 1000 - Date.now()) / 1000);
+        d.delay = Math.max(1, left);
+      }
+    } else {
+      d = {
+        result: pageStatus,
+        elapsed: Number(query.get('elapsed')) || 0,
+        steps: []
+      };
+    }
+
+    $('svTitle').textContent = '答卷已提交';
+    $('svMeta').textContent = '结局由问卷商回调带回';
+    var tm = $('svTimer');
+    if (tm) tm.hidden = true;   /* 已经交卷了，别再挂个「用时 0 秒」 */
+    showResult(d);
+  }
+
+  function boot() {
+    if (!id) {
+      note('地址里少了问卷编号。回大厅重新点一次。', true);
+      return;
+    }
+
+    loadMe();
+
+    if (pageStatus) {
+      renderCallback();
+      return;
+    }
 
     fetch('/api/surveys/paper?id=' + id, { headers: { Accept: 'application/json' } })
       .then(function (r) {
@@ -302,6 +387,8 @@
             say('提交失败：' + ((d && d.error) || '未知错误'));
             return;
           }
+          saveResult(d);
+          showCallbackStatus(d.result || 'success');
           showResult(d);
           if (window.CF && CF.cache) CF.cache.clear();
         })
