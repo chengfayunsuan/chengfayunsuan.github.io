@@ -54,6 +54,148 @@
     if (bal && me.fc) setAmt(bal, me.fc);
   }
 
+  /* ---------- 题目编辑（站内作答） ---------- */
+
+  var SCEN = [
+    ['', '不绑定结局'],
+    ['success', '通过 · 奖励入账'],
+    ['fail', '失败 · 接口 500'],
+    ['speed', '超速 · 判作废'],
+    ['quota', '配额满 · 被退回'],
+    ['kick', '被踢 · 中途终止'],
+    ['reject', '打回 · 延迟冲正']
+  ];
+
+  var kindEl = $('svKind');
+  var paperWrap = $('svPaperWrap');
+  var paperList = $('svPaperList');
+  var paperEmpty = $('svPaperEmpty');
+  var entryWrap = $('svEntryWrap');
+  var entryEl = $('svEntry');
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function isInline() {
+    return kindEl && kindEl.value === 'inline';
+  }
+
+  function syncKind() {
+    var inline = isInline();
+    if (paperWrap) paperWrap.hidden = !inline;
+    if (entryWrap) entryWrap.hidden = inline;
+    if (entryEl) entryEl.disabled = inline;
+    renumber();
+  }
+
+  function renumber() {
+    if (!paperList) return;
+    var qs = paperList.querySelectorAll('.svp__q');
+    [].forEach.call(qs, function (q, i) {
+      var n = q.querySelector('.svp__n');
+      if (n) n.textContent = ('0' + (i + 1)).slice(-2);
+    });
+    if (paperEmpty) paperEmpty.hidden = qs.length > 0;
+  }
+
+  function optRow(label, outcome) {
+    var opts = SCEN.map(function (o) {
+      return '<option value="' + o[0] + '"' + (o[0] === (outcome || '') ? ' selected' : '') + '>' +
+        esc(o[1]) + '</option>';
+    }).join('');
+    return '<div class="svp__o">' +
+      '<input class="svp__i" data-o type="text" maxlength="200" value="' + esc(label || '') + '" placeholder="选项文字">' +
+      '<select class="svp__s" data-out>' + opts + '</select>' +
+      '<button class="svp__x" type="button" data-delopt title="删掉这个选项">×</button>' +
+      '</div>';
+  }
+
+  function addQuestion(q) {
+    if (!paperList) return;
+    var item = q && typeof q === 'object' ? q : {};
+    var list = Array.isArray(item.options) && item.options.length ? item.options : ['', ''];
+
+    var html = '<div class="svp__q">' +
+      '<div class="svp__qh">' +
+        '<span class="svp__n">01</span>' +
+        '<input class="svp__i svp__i--q" data-q type="text" maxlength="300" value="' + esc(item.q || '') + '" placeholder="题干，例如：你平时主要用什么设备上网">' +
+        '<button class="svp__x" type="button" data-delq title="删掉这道题">删除</button>' +
+      '</div>' +
+      '<div class="svp__opts">' + list.map(function (o) {
+        if (o && typeof o === 'object') return optRow(o.label, o.outcome);
+        return optRow(o, '');
+      }).join('') + '</div>' +
+      '<button class="svp__add" type="button" data-addopt>+ 加一个选项</button>' +
+      '</div>';
+
+    paperList.insertAdjacentHTML('beforeend', html);
+    renumber();
+  }
+
+  function collectPaper() {
+    if (!paperList) return { questions: [] };
+    var qs = [].map.call(paperList.querySelectorAll('.svp__q'), function (qEl) {
+      var qt = qEl.querySelector('[data-q]');
+      var text = qt ? qt.value.trim() : '';
+      var opts = [].map.call(qEl.querySelectorAll('.svp__o'), function (oEl) {
+        var li = oEl.querySelector('[data-o]');
+        var se = oEl.querySelector('[data-out]');
+        var label = li ? li.value.trim() : '';
+        if (!label) return null;
+        var out = se ? se.value : '';
+        return out ? { label: label, outcome: out } : label;
+      }).filter(Boolean);
+      return text && opts.length ? { q: text, options: opts } : null;
+    }).filter(Boolean);
+    return { questions: qs };
+  }
+
+  function paintPaper(raw) {
+    if (!paperList) return;
+    paperList.innerHTML = '';
+    var paper = {};
+    try { paper = typeof raw === 'string' ? JSON.parse(raw || '{}') : (raw || {}); } catch (e) { paper = {}; }
+    (paper.questions || []).forEach(addQuestion);
+    renumber();
+  }
+
+  if (kindEl) kindEl.addEventListener('change', syncKind);
+
+  var addBtn = $('svPaperAdd');
+  if (addBtn) addBtn.addEventListener('click', function () { addQuestion(null); });
+
+  if (paperList) {
+    paperList.addEventListener('click', function (ev) {
+      var t = ev.target;
+      if (!t.closest) return;
+
+      if (t.closest('[data-addopt]')) {
+        var q = t.closest('.svp__q');
+        var opts = q.querySelector('.svp__opts');
+        if (opts.querySelectorAll('.svp__o').length >= 12) { say('一题最多 12 个选项'); return; }
+        opts.insertAdjacentHTML('beforeend', optRow('', ''));
+        return;
+      }
+
+      if (t.closest('[data-delopt]')) {
+        var row = t.closest('.svp__o');
+        var box = row.parentNode;
+        if (box.querySelectorAll('.svp__o').length <= 1) { say('每题至少留一个选项'); return; }
+        row.remove();
+        return;
+      }
+
+      if (t.closest('[data-delq]')) {
+        var item = t.closest('.svp__q');
+        item.remove();
+        renumber();
+      }
+    });
+  }
+
   /* ---------- 表单 ---------- */
 
   var form = $('svForm');
@@ -81,6 +223,10 @@
     $('svReq').value = s ? s.requirement : '';
     $('svStatus').value = s ? s.status : 'open';
     $('svFormTitle').textContent = s ? '编辑问卷 #' + s.id : '新增问卷';
+
+    if (kindEl) kindEl.value = s && s.kind === 'inline' ? 'inline' : 'link';
+    paintPaper(s ? s.paper : '');
+    syncKind();
   }
 
   /* ---------- 列表 ---------- */
@@ -112,6 +258,7 @@
     title.appendChild(b);
 
     var sub = [];
+    if (s.kind === 'inline') sub.push('站内作答 · ' + (s.questionCount || 0) + ' 题');
     if (s.provider) sub.push(s.provider);
     if (s.durationMin) sub.push(s.durationMin + ' 分钟');
     if (s.topic) sub.push(s.topic);
@@ -201,8 +348,18 @@
         topic: $('svTopic').value.trim(),
         entry: $('svEntry').value.trim(),
         requirement: $('svReq').value.trim(),
-        status: $('svStatus').value
+        status: $('svStatus').value,
+        kind: isInline() ? 'inline' : 'link'
       };
+
+      if (isInline()) {
+        var paper = collectPaper();
+        if (!paper.questions.length) {
+          setMsg('选了站内作答，但一道题都没有。至少加一道有选项的题。', true);
+          return;
+        }
+        payload.paper = paper;
+      }
 
       var id = $('svId').value;
       if (id) payload.id = Number(id);

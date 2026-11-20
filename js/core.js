@@ -185,7 +185,7 @@
     { k: '7', href: '/admin/items', t: '商品兑换' },
     { k: '8', href: '/admin/messages', t: '公告' },
     { k: '9', href: '/admin/moonetix', t: '广告墙' },
-    { k: '0', href: '/lab', t: '实验台' }
+    { k: '0', href: '/admin/traffic', t: '流量' }
   ];
 
   /* 反引号键：数字键 1-9/0 已经排满了，它单独占一个「回首页」的位置。
@@ -273,7 +273,7 @@
       if (document.body && document.body.getAttribute('data-hot-catch') === '1') return;
 
       var key = ev.key;
-      var isAdmin = location.pathname.indexOf('/admin') === 0 || location.pathname === '/lab';
+      var isAdmin = location.pathname.indexOf('/admin') === 0;
 
       var cfg = loadHot();
       if (!cfg.on) return;
@@ -288,7 +288,7 @@
       if (ev.shiftKey) return;
       if (!/^[0-9a-zA-Z]$/.test(key)) return;
 
-      /* 实验台是后台工具，在那边按数字键也走后台那套 */
+      /* 后台页面用后台那套键位 */
       var list = hotList(isAdmin ? 'admin' : 'user', cfg);
       var want = '';
       for (var i = 0; i < list.length; i++) {
@@ -393,7 +393,6 @@
     '/admin/items': { page: 'admin-items' },
     '/admin/messages': { page: 'admin-messages' },
     '/admin/moonetix': { page: 'admin-moonetix' },
-    '/admin/customize': { page: 'admin-customize' },
     '/admin/traffic': { page: 'admin-traffic' }
   };
 

@@ -342,14 +342,17 @@
       restricted = !!(meNow && meNow.status && meNow.status !== 'active');
     } catch (e) {}
 
-    var usable = !!s.entry && !restricted;
+    /* 站内作答的问卷没有外链，入口指向本站答题页 */
+    var inline = !!s.inline;
+    var usable = (!!s.entry || inline) && !restricted;
     var netBlocked = !!netSuspect && usable;
 
     var go = document.createElement(usable ? 'a' : 'span');
     go.className = 'svc__go' + (netBlocked ? ' is-net' : '');
 
     var gt = document.createElement('span');
-    gt.textContent = restricted ? '账户受限' : (netBlocked ? '网络受限' : (s.entry ? '进入问卷' : '暂未开放'));
+    gt.textContent = restricted ? '账户受限' : (netBlocked ? '网络受限'
+      : (inline ? '开始答题' : (s.entry ? '进入问卷' : '暂未开放')));
     go.appendChild(gt);
 
     if (usable) {
@@ -359,8 +362,8 @@
       arrow.textContent = '→';
       go.appendChild(arrow);
 
-      go.href = s.entry;
-      if (/^https?:/i.test(s.entry)) {
+      go.href = inline ? ('/survey?id=' + s.id) : s.entry;
+      if (!inline && /^https?:/i.test(s.entry)) {
         go.target = '_blank';
         go.rel = 'noopener';
       }

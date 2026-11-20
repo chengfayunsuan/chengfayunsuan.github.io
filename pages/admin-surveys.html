@@ -11,9 +11,9 @@
 <link rel="stylesheet" href="/css/style.css?v=13">
 <link rel="stylesheet" href="/css/home.css?v=15">
 <link rel="stylesheet" href="/css/page.css?v=9">
-<link rel="stylesheet" href="/css/admin.css?v=13">
+<link rel="stylesheet" href="/css/admin.css?v=14">
 <script src="/js/config.js?v=7"></script>
-<script src="/js/core.js?v=30"></script>
+<script src="/js/core.js?v=31"></script>
 </head>
 <body data-page="admin-surveys" data-accent="blue">
 
@@ -65,14 +65,8 @@
     <a class="dock__i" href="/admin/moonetix">
       <span class="dock__n">09</span><span class="dock__t">广告墙</span>
     </a>
-    <a class="dock__i" href="/lab">
-      <span class="dock__n">10</span><span class="dock__t">实验台</span>
-    </a>
-    <a class="dock__i" href="/admin/customize">
-      <span class="dock__n">11</span><span class="dock__t">外观</span>
-    </a>
     <a class="dock__i" href="/admin/traffic">
-      <span class="dock__n">12</span><span class="dock__t">流量</span>
+      <span class="dock__n">10</span><span class="dock__t">流量</span>
     </a>
   </div>
 </nav>
@@ -168,7 +162,15 @@
             </select>
           </label>
 
-          <label class="svf__f svf__f--wide3">
+          <label class="svf__f">
+            <span class="svf__l">形式</span>
+            <select class="svf__i" id="svKind">
+              <option value="link">外链（跳去问卷商页面）</option>
+              <option value="inline">站内作答（在本站答题）</option>
+            </select>
+          </label>
+
+          <label class="svf__f svf__f--wide3" id="svEntryWrap">
             <span class="svf__l">入口链接</span>
             <input class="svf__i" id="svEntry" type="text" maxlength="300" placeholder="https://… 或 /问卷页；留空则大厅显示「暂未开放」">
           </label>
@@ -177,6 +179,18 @@
             <span class="svf__l">参与要求</span>
             <textarea class="svf__i svf__i--area" id="svReq" rows="2" maxlength="200" placeholder="例如：18–35 岁 · 一二线城市 · 需实名认证"></textarea>
           </label>
+
+          <div class="svf__paper" id="svPaperWrap" hidden>
+            <div class="svf__paper-h">
+              <div>
+                <span class="svf__l">题目</span>
+                <p class="svf__paper-d">选「站内作答」时才用得上。选项一行一个；想让某个选项触发结局（通过 / 失败 / 超速 / 满额 / 被踢 / 打回），在右边选一下，不选就是普通题。</p>
+              </div>
+              <button class="btn btn--ghost" type="button" id="svPaperAdd">添加题目</button>
+            </div>
+            <div class="svf__paper-list" id="svPaperList"></div>
+            <p class="svf__paper-e" id="svPaperEmpty">还没有题目。点「添加题目」开始，保存后大厅里点进这份问卷就是这张卷子。</p>
+          </div>
 
           <div class="svf__acts">
             <button class="btn btn--red" type="submit" id="svSave">保存问卷</button>
@@ -222,6 +236,6 @@
   </div>
 </footer>
 
-<script src="/js/admin-surveys.js?v=1" defer></script>
+<script src="/js/admin-surveys.js?v=2" defer></script>
 </body>
 </html>

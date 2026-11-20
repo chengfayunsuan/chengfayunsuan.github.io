@@ -568,6 +568,136 @@ html:not([data-theme]) body[data-accent="blue"] {
 
 .svf__i--area { resize: vertical; min-height: 62px; line-height: 1.6; }
 
+/* ---------- 题目编辑（站内作答） ---------- */
+
+.svf__paper {
+  grid-column: 1 / -1;
+  border: 2px solid var(--ink);
+  background: #fff;
+  padding: 14px 16px 16px;
+}
+
+.svf__paper-h {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.svf__paper-d {
+  margin: 5px 0 0;
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--gray);
+  max-width: 62ch;
+}
+
+.svf__paper-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.svf__paper-e {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--gray);
+}
+
+.svp__q {
+  border: 1px solid var(--hair);
+  background: rgba(var(--paper2-rgb), .28);
+  padding: 11px 12px 12px;
+}
+
+.svp__qh {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 9px;
+}
+
+.svp__n {
+  font-family: var(--num);
+  font-size: 11px;
+  letter-spacing: .06em;
+  color: var(--gray);
+}
+
+.svp__i {
+  width: 100%;
+  border: 2px solid var(--ink);
+  background: #fff;
+  padding: 7px 9px;
+  font-family: inherit;
+  font-size: 12.5px;
+  color: var(--ink);
+  outline: none;
+}
+
+.svp__i:focus {
+  border-color: var(--red);
+  box-shadow: 3px 3px 0 var(--red);
+}
+
+.svp__i--q { font-weight: 700; }
+
+.svp__x {
+  border: 1px solid var(--ink);
+  background: #fff;
+  color: var(--gray);
+  font-size: 11.5px;
+  padding: 5px 9px;
+  min-width: 30px;
+  cursor: pointer;
+}
+
+.svp__x:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.svp__opts {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-left: 35px;
+}
+
+.svp__o {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 176px 30px;
+  align-items: center;
+  gap: 8px;
+}
+
+.svp__s {
+  border: 2px solid var(--ink);
+  background: #fff;
+  padding: 7px 8px;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--ink);
+  outline: none;
+}
+
+.svp__add {
+  margin: 9px 0 0 35px;
+  border: 1px dashed var(--ink);
+  background: transparent;
+  color: var(--gray);
+  font-size: 11.5px;
+  padding: 5px 11px;
+  cursor: pointer;
+}
+
+.svp__add:hover {
+  color: var(--ink);
+  border-style: solid;
+}
+
 .svf__acts {
   grid-column: 1 / -1;
   display: flex;
