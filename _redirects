@@ -28,3 +28,6 @@
 /notices /pages/notices 200
 /admin/traffic   /pages/admin-traffic 200
 /survey  /pages/survey 200
+# 这两个页面已经删了，但旧地址被边缘缓存过，用 302 把人挡回后台首页
+/lab              /admin  302
+/admin/customize  /admin  302
