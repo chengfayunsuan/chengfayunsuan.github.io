@@ -115,9 +115,7 @@
     kick: '被踢',
     reject: '打回',
     rejected: '被打回',
-    bot: '机器作答',
-    straight: '无效作答',
-    cap: '超出限额'
+    bot: '机器作答'
   };
 
   var DESC = {
@@ -128,9 +126,7 @@
     kick: '答题过程中命中了排除条件，会话被终止。',
     reject: '问卷商说这份要过质检，先入账，过一会儿再看结果。',
     rejected: '质检没过：奖励已经扣回，经验 −8。',
-    bot: '表单里有不该被填的字段，被判成脚本作答。',
-    straight: '每道题都选了同一个位置，被判无效。',
-    cap: '今天的问卷收益到上限了，明天再来。'
+    bot: '表单里有不该被填的字段，被判成脚本作答。'
   };
 
   /* 回传码照行业惯例来（InnovateMR / Cint 那一套）：
@@ -144,9 +140,7 @@
     speed: 4,
     rejected: 4,
     bot: 4,         /* 作弊/机器作答在行业里统一按质检终止处理 */
-    straight: 4,
-    fail: 0,
-    cap: 5          /* 5 = 预筛终止那一档，我们借来表示「今天不能再接」 */
+    fail: 0
   };
 
   var REASON = {
@@ -155,9 +149,7 @@
     kick: 'screenout',
     quota: 'quota',
     bot: 'fraud',
-    straight: 'straightline',
-    fail: 'error',
-    cap: 'cap'
+    fail: 'error'
   };
 
   var CODE_DESC = {
@@ -165,8 +157,7 @@
     1: '完成',
     2: '中途终止',
     3: '配额已满',
-    4: '质检终止',
-    5: '预筛终止'
+    4: '质检终止'
   };
 
   /* 结局要落到地址栏上（?status=1&pid=&tid= 这种），刷新也还是这张结果页。
@@ -224,14 +215,11 @@
     if (reason === 'quota') return 'quota';
     if (reason === 'error') return 'fail';
     if (reason === 'fraud') return 'bot';
-    if (reason === 'straightline') return 'straight';
-    if (reason === 'cap') return 'cap';
     var n = Number(status);
     if (n === 1) return 'success';
     if (n === 2) return 'kick';
     if (n === 3) return 'quota';
     if (n === 4) return 'speed';
-    if (n === 5) return 'cap';
     return 'fail';
   }
 
@@ -388,8 +376,8 @@
             $('svTitle').textContent = '这个网络已经交过这份问卷';
             $('svMeta').textContent = '同一份问卷同一个 IP 只能参与一次。';
             note('换了网络之后可以再来一次。', false);
-          } else if (d.error === 'daily_cap' || d.error === 'risk_limited') {
-            $('svTitle').textContent = d.error === 'daily_cap' ? '今天的额度用完了' : '开卷太频繁';
+          } else if (d.error === 'risk_limited') {
+            $('svTitle').textContent = '开卷太频繁';
             $('svMeta').textContent = d.message || '';
           } else if (d.error === 'not_inline') {
             $('svTitle').textContent = '这份问卷要跳转到问卷商页面';
@@ -476,7 +464,7 @@
               $('svForm').hidden = true;
               return;
             }
-            if (d && (d.error === 'risk_limited' || d.error === 'daily_cap')) {
+            if (d && d.error === 'risk_limited') {
               note(d.message || '先歇一会儿再交。', true);
               return;
             }

@@ -351,10 +351,8 @@
 
   var RISK_KIND = {
     bot: '机器作答',
-    straight: '直线作答',
     device_reuse: '同设备换号',
     join_rate: '开卷过频',
-    submit_rate: '交卷过频',
     account_spread: '多号共用'
   };
 

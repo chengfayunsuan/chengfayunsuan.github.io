@@ -512,13 +512,12 @@ async function resolveJoin(env, request, id, uid, attempt) {
 }
 
 /* ---------------- 风控 ----------------
-   光靠 IP 判重挡不住换设备、换号的羊毛党。这一层补三样：
-   设备指纹、行为特征、奖励限额。每次命中写一条 risk_events，事后能查。 */
+   光靠 IP 判重挡不住换设备、换号的羊毛党。这一层只管「谁在交」，
+   不管「填了什么」—— 答卷内容由问卷商判定，这里不插手。
+   每次命中写一条 risk_events，事后能查。 */
 
 const RISK = {
   joinPerIpHour: 30,      /* 同一出口 IP 一小时内最多开 30 份卷 */
-  submitPerUidHour: 12,   /* 同一账号一小时内最多交 12 份 */
-  rewardPerUidDay: 60,    /* 同一账号一天最多从问卷挣 60 CFB */
   fpUidWarn: 3,           /* 一台设备挂 3 个以上账号，记一笔 */
   ipUidWarn: 5            /* 一个 IP 挂 5 个以上账号，记一笔 */
 };
@@ -546,26 +545,6 @@ async function joinsLastHour(env, ip) {
   return Number(r && r.n) || 0;
 }
 
-/* 一小时内这个账号交了多少份卷 */
-async function submitsLastHour(env, uid) {
-  const r = await env.DB.prepare(
-    `SELECT COUNT(*) AS n FROM survey_joins
-      WHERE uid = ? AND reviewed_at IS NOT NULL
-        AND datetime(reviewed_at) > datetime('now','+8 hours','-1 hour')`
-  ).bind(uid).first();
-  return Number(r && r.n) || 0;
-}
-
-/* 今天这个账号从问卷挣了多少（单位 1/10000 CFB） */
-async function surveyRewardToday(env, uid) {
-  const r = await env.DB.prepare(
-    `SELECT COALESCE(SUM(delta), 0) AS s FROM fc_ledger
-      WHERE uid = ? AND kind = 'survey_reward'
-        AND date(created_at, '+8 hours') = date('now','+8 hours')`
-  ).bind(uid).first();
-  return Number(r && r.s) || 0;
-}
-
 /* 这台设备、这个 IP 各自挂了几个账号 —— 只是记账，不直接拦 */
 async function accountSpread(env, ip, fp) {
   const out = { ipUids: 0, fpUids: 0 };
@@ -582,16 +561,6 @@ async function accountSpread(env, ip, fp) {
     out.fpUids = Number(b && b.n) || 0;
   }
   return out;
-}
-
-/* 直线作答：四题以上全挑同一个位置，基本不是人在看题 */
-function isStraight(picked) {
-  if (picked.length < 4) return false;
-  var first = picked[0].i;
-  for (var k = 1; k < picked.length; k++) {
-    if (picked[k].i !== first) return false;
-  }
-  return true;
 }
 
 async function updateProfile(request, env) {
@@ -2001,15 +1970,6 @@ async function surveyPaper(request, env, url) {
   const fp = String(url.searchParams.get('fp') || '').slice(0, 40);
 
   if (!priv) {
-    /* 今天的问卷收益到顶就直接关门，省得白答一场 */
-    const earned = await surveyRewardToday(env, session.uid);
-    if (earned >= RISK.rewardPerUidDay * FC_SCALE) {
-      return json({
-        ok: false, error: 'daily_cap',
-        message: '今天的问卷收益已经到 ' + RISK.rewardPerUidDay + ' CFB 上限，明天再来'
-      }, 429);
-    }
-
     /* 频率：同一个 IP 一小时开太多卷，基本是脚本在刷 */
     const recent = await joinsLastHour(env, ip);
     if (recent >= RISK.joinPerIpHour) {
@@ -2122,21 +2082,7 @@ async function surveySubmit(request, env) {
   const uid = session.uid;
   if (!id) return json({ ok: false, error: 'bad_request' }, 400);
 
-  const priv = await isPrivileged(env, uid);
   const fp = String((body && body.fp) || '').slice(0, 40);
-  const ipNow = ipOf(request) || 'unknown';
-
-  /* 频率：一小时内交太多份卷，人不会这么干 */
-  if (!priv) {
-    const sent = await submitsLastHour(env, uid);
-    if (sent >= RISK.submitPerUidHour) {
-      await riskHit(env, {
-        uid, ip: ipNow, fp, surveyId: id, kind: 'submit_rate', score: 40,
-        detail: '一小时内交卷 ' + sent + ' 次'
-      });
-      return json({ ok: false, error: 'risk_limited', message: '交卷太频繁，歇一会儿再来' }, 429);
-    }
-  }
 
   const sv = await env.DB.prepare('SELECT * FROM surveys WHERE id = ?').bind(id).first();
   if (!sv) return json({ ok: false, error: 'not_found' }, 404);
@@ -2171,11 +2117,10 @@ async function surveySubmit(request, env) {
 
   if (!outcome) outcome = elapsed < SURVEY_MIN_SECONDS ? 'speed' : 'success';
 
-  /* 行为层：蜜罐被填说明有脚本在自动填表；四题以上全挑同一个位置说明没在读题。
-     两者都直接作废，不给钱 —— 这一类拦下来比事后扣钱省事。 */
+  /* 只认技术特征，不看答得对不对：蜜罐字段被填说明有脚本在自动填表。
+     题目怎么答、答案合不合理，是问卷商的事，这里不评判。 */
   const trap = String((body && body.hp) || '').trim();
   if (trap) outcome = 'bot';
-  else if (isStraight(picked)) outcome = 'straight';
 
   const markJoin = function (status, stage, note) {
     return env.DB.prepare(
@@ -2207,43 +2152,23 @@ async function surveySubmit(request, env) {
     return json(Object.assign(base, extra, { user: await userStateOf(env, uid) }));
   };
 
-  if (outcome === 'bot' || outcome === 'straight') {
-    const why = outcome === 'bot'
-      ? '蜜罐字段被填，像是脚本在自动填表'
-      : '每道题都选同一个位置，没在读题';
+  if (outcome === 'bot') {
     await env.DB.batch([markJoin('invalid', 'done')]);
     await riskHit(env, {
       uid, ip, fp, surveyId: id,
-      kind: outcome,
-      score: outcome === 'bot' ? 80 : 50,
-      detail: why
+      kind: 'bot',
+      score: 80,
+      detail: '蜜罐字段被填，像是脚本在自动填表'
     });
     return reply({
-      result: outcome,
+      result: 'bot',
       reward: '0',
       steps: [
         '提交答卷（用时 ' + elapsed + ' 秒）',
-        why,
+        '蜜罐字段被填，像是脚本在自动填表',
         '答卷作废，不发奖励，不扣经验'
       ]
     });
-  }
-
-  /* 奖励限额：一天从问卷挣太多就停，脚本刷也刷不出量 */
-  if (!priv && (outcome === 'success' || outcome === 'reject')) {
-    const todayUnits = await surveyRewardToday(env, uid);
-    if (todayUnits + reward > RISK.rewardPerUidDay * FC_SCALE) {
-      await env.DB.batch([markJoin('invalid', 'done')]);
-      return reply({
-        result: 'cap',
-        reward: '0',
-        steps: [
-          '提交答卷（用时 ' + elapsed + ' 秒）',
-          '今日问卷收益已达上限 ' + RISK.rewardPerUidDay + ' CFB',
-          '这份不发奖励，明天再来'
-        ]
-      });
-    }
   }
 
   if (outcome === 'success') {
