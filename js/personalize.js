@@ -81,12 +81,16 @@
     for (var i = 0; i < list.length; i++) {
       var it = list[i];
       var isCatch = catching === it.href;
-      html += '<li class="hk__i' + (isCatch ? ' is-catching' : '') + '">' +
+      var right = it.fixed
+        ? '<span class="hk__fix">固定</span>'
+        : '<button class="hk__b" type="button" data-hk-edit="' + esc(it.href) + '">' +
+          (isCatch ? '取消' : '改键') + '</button>';
+
+      html += '<li class="hk__i' + (it.fixed ? ' is-fixed' : '') + (isCatch ? ' is-catching' : '') + '">' +
         '<span class="hk__k">' + esc(isCatch ? '?' : it.key) + '</span>' +
         '<span class="hk__x"><b>' + esc(it.t) + '</b><i>' + esc(it.href) + '</i></span>' +
-        '<span class="hk__d">默认 ' + esc(it.def) + '</span>' +
-        '<button class="hk__b" type="button" data-hk-edit="' + esc(it.href) + '">' +
-        (isCatch ? '取消' : '改键') + '</button>' +
+        '<span class="hk__d">' + (it.fixed ? '常驻' : '默认 ' + esc(it.def)) + '</span>' +
+        right +
         '</li>';
     }
     box.innerHTML = html;

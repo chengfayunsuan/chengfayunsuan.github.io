@@ -232,6 +232,23 @@ body:not([data-page^="admin"]):not(.has-adm-tab) .hk { border-top: 1px solid var
   color: var(--paper);
 }
 
+/* 反引号那一行：键位固定，只给个标记，不给改键按钮 */
+.hk__i.is-fixed { background: rgba(var(--paper2-rgb), .5); }
+
+/* 反引号在 15px 下就是个点，放大才看得清是「键」 */
+.hk__i.is-fixed .hk__k { font-size: 20px; line-height: 1; padding-bottom: 3px; }
+
+.hk__fix {
+  display: block;
+  padding: 6px 0;
+  border: 2px dashed var(--hair);
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--gray);
+}
+
 /* ---------- 底部动作条 ---------- */
 
 .cz__foot {

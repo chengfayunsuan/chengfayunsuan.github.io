@@ -188,6 +188,13 @@
     { k: '0', href: '/lab', t: '实验台' }
   ];
 
+  /* 反引号键：数字键 1-9/0 已经排满了，它单独占一个「回首页」的位置。
+     跟数字键同一套开关、同一份列表，只是键位固定（它不是字母数字，输入框里也绑不了）。 */
+  var NAV_FIXED = {
+    user: { href: '/home', t: '回账户首页', k: '~' },
+    admin: { href: '/admin', t: '回后台概览', k: '~' }
+  };
+
   function loadHot() {
     var raw = readCookie(HOT_KEY);
     var o = null;
@@ -209,11 +216,12 @@
     return out;
   }
 
-  /* 合并默认与自定义：返回 [{href,t,key,def}] */
+  /* 合并默认与自定义：返回 [{href,t,key,def,fixed}]，反引号键排在最前 */
   function hotList(scope, cfg) {
     var def = scope === 'admin' ? NAV_ADMIN : NAV_USER;
     var custom = (cfg || loadHot())[scope] || {};
-    var out = [];
+    var fix = NAV_FIXED[scope] || NAV_FIXED.user;
+    var out = [{ href: fix.href, t: fix.t, key: fix.k, def: fix.k, fixed: true }];
     for (var i = 0; i < def.length; i++) {
       var item = def[i];
       out.push({
@@ -267,19 +275,18 @@
       var key = ev.key;
       var isAdmin = location.pathname.indexOf('/admin') === 0 || location.pathname === '/lab';
 
-      /* 反引号 / ~ 键：固定回首页，不走数字键那套，也不受「启用」开关影响。
-         前台回账户首页，后台与实验台回后台概览。 */
+      var cfg = loadHot();
+      if (!cfg.on) return;
+
+      /* 反引号 / ~ 键：回首页。它跟数字键同一套开关，但键位固定不参与改键。 */
       if (key === '`' || key === '~' || ev.code === 'Backquote') {
         ev.preventDefault();
-        go(isAdmin ? '/admin' : '/home');
+        go((NAV_FIXED[isAdmin ? 'admin' : 'user'] || NAV_FIXED.user).href);
         return;
       }
 
       if (ev.shiftKey) return;
       if (!/^[0-9a-zA-Z]$/.test(key)) return;
-
-      var cfg = loadHot();
-      if (!cfg.on) return;
 
       /* 实验台是后台工具，在那边按数字键也走后台那套 */
       var list = hotList(isAdmin ? 'admin' : 'user', cfg);
