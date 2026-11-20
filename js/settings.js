@@ -305,6 +305,16 @@
     $('curName').textContent = u.username || '—';
     $('curEmail').textContent = u.email || '—';
 
+    /* 邮箱验证状态：已验证就不再显示“验证邮箱”按钮 */
+    var tag = $('emailTag');
+    if (tag) {
+      tag.hidden = !u.email;
+      tag.textContent = u.emailVerified ? '已验证' : '未验证';
+      tag.classList.toggle('is-ok', !!u.emailVerified);
+    }
+    var vbtn = $('emailVerifyBtn');
+    if (vbtn) vbtn.hidden = !u.email || !!u.emailVerified;
+
     setAmt($('setFc'), u.fc);
     setAmt($('setFrozen'), u.fcFrozen);
 
@@ -568,7 +578,7 @@
   /* ---------- 03 安全：展开与提交 ---------- */
 
   function openEdit(which) {
-    ['name', 'email', 'pw'].forEach(function (k) {
+    ['name', 'email', 'pw', 'verify'].forEach(function (k) {
       $('form' + k.charAt(0).toUpperCase() + k.slice(1)).hidden = k !== which;
     });
     /* 表单搬到三列下方整行显示，容器跟着展开 */
@@ -576,11 +586,17 @@
     if (panel) panel.hidden = false;
     if (which === 'name') { $('newName').value = current ? current.username : ''; $('newName').focus(); }
     if (which === 'email') { $('newEmail').value = ''; $('emailPw').value = ''; $('newEmail').focus(); }
+    if (which === 'verify') {
+      $('vfCode').value = '';
+      $('vfErr').hidden = true;
+      $('vfOk').hidden = true;
+      $('vfCode').focus();
+    }
     if (which === 'pw') { $('oldPw').value = ''; $('newPw').value = ''; $('newPw2').value = ''; $('oldPw').focus(); }
   }
 
   function closeAll() {
-    ['name', 'email', 'pw'].forEach(function (k) {
+    ['name', 'email', 'pw', 'verify'].forEach(function (k) {
       var f = $('form' + k.charAt(0).toUpperCase() + k.slice(1));
       f.hidden = true;
       var err = f.querySelector('.edit__e');
@@ -696,6 +712,95 @@
       .then(function () {
         btn.disabled = false;
         btn.textContent = '保存';
+      });
+  });
+
+  /* ---------- 邮箱验证：发码 + 校验 ---------- */
+
+  var vbtn = $('emailVerifyBtn');
+  if (vbtn) {
+    vbtn.addEventListener('click', function () { openEdit('verify'); });
+  }
+
+  var vfSend = $('vfSend');
+  if (vfSend) {
+    vfSend.addEventListener('click', function () {
+      $('vfErr').hidden = true;
+      $('vfOk').hidden = true;
+      vfSend.disabled = true;
+      vfSend.textContent = '发送中';
+
+      fetch('/api/user/email/code', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, body: d }; }); })
+        .then(function (r) {
+          var d = r.body || {};
+          if (r.ok && d.ok) {
+            $('vfOk').textContent = '验证码已发到 ' + (d.email || '你的邮箱') + '，10 分钟内有效。';
+            $('vfOk').hidden = false;
+            $('vfCode').focus();
+            return;
+          }
+          if (d.error === 'too_soon') { $('vfErr').textContent = '刚发过，' + (d.wait || 60) + ' 秒后再发。'; $('vfErr').hidden = false; return; }
+          if (d.error === 'too_many') { $('vfErr').textContent = d.message || '今天发太多了。'; $('vfErr').hidden = false; return; }
+          if (d.error === 'already_verified') { $('vfErr').textContent = '这个邮箱已经验证过了。'; $('vfErr').hidden = false; return; }
+          if (d.error === 'mail_unconfigured') {
+            /* 站长还没配发信服务：本地调试时后端会把码带回来，直接填进去 */
+            if (d.devCode) {
+              $('vfCode').value = d.devCode;
+              $('vfErr').textContent = '发信服务没配（本地调试模式），已把验证码填好。';
+            } else {
+              $('vfErr').textContent = '站长还没配发信服务，暂时发不出邮件。';
+            }
+            $('vfErr').hidden = false;
+            return;
+          }
+          $('vfErr').textContent = d.message || '发送失败，稍后再试。';
+          $('vfErr').hidden = false;
+        })
+        .catch(function () { $('vfErr').textContent = '网络连接失败。'; $('vfErr').hidden = false; })
+        .then(function () {
+          vfSend.disabled = false;
+          vfSend.textContent = '发送验证码';
+        });
+    });
+  }
+
+  $('formVerify').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    $('vfErr').hidden = true;
+
+    var code = $('vfCode').value.replace(/\D/g, '').slice(0, 6);
+    if (code.length !== 6) { $('vfErr').textContent = '验证码是 6 位数字。'; $('vfErr').hidden = false; return; }
+
+    var btn = $('vfDone');
+    btn.disabled = true;
+    btn.textContent = '校验中';
+
+    fetch('/api/user/email/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: code })
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, body: d }; }); })
+      .then(function (r) {
+        var d = r.body || {};
+        if (r.ok && d.ok) {
+          if (d.user) { current = d.user; render(current); }
+          closeAll();
+          say('邮箱已验证');
+          return;
+        }
+        if (d.error === 'wrong_code') { $('vfErr').textContent = '验证码不对，还能试 ' + (d.left || 0) + ' 次。'; }
+        else if (d.error === 'expired') { $('vfErr').textContent = d.message || '验证码过期了，重新发一条。'; }
+        else if (d.error === 'too_many_tries') { $('vfErr').textContent = d.message || '试太多次了，重新发一条。'; }
+        else if (d.error === 'no_code') { $('vfErr').textContent = d.message || '先发一条验证码。'; }
+        else { $('vfErr').textContent = '验证失败，稍后再试。'; }
+        $('vfErr').hidden = false;
+      })
+      .catch(function () { $('vfErr').textContent = '网络连接失败。'; $('vfErr').hidden = false; })
+      .then(function () {
+        btn.disabled = false;
+        btn.textContent = '提交验证';
       });
   });
 

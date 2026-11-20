@@ -1136,3 +1136,31 @@ body.is-grid {
 }
 
 .tb__code:hover { color: var(--red); }
+
+/* 邮箱验证：状态标签 + 并排按钮 */
+.row__acts {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.row__tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  font-size: 10px;
+  letter-spacing: .06em;
+  color: var(--gray);
+  vertical-align: middle;
+}
+
+.row__tag.is-ok { color: var(--ink); border-color: var(--ink); }
+
+.edit__ok {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #1a7f37;
+}

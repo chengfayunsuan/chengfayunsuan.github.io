@@ -11,7 +11,7 @@
   <meta name="robots" content="noindex">
   <link rel="stylesheet" href="/css/style.css?v=14">
   <link rel="stylesheet" href="/css/home.css?v=16">
-  <link rel="stylesheet" href="/css/settings.css?v=18">
+  <link rel="stylesheet" href="/css/settings.css?v=19">
   <link rel="stylesheet" href="/css/relation.css?v=2">
   <link rel="stylesheet" href="/css/customize.css?v=6">
   <script src="/js/config.js?v=7"></script>
@@ -200,11 +200,14 @@
           <div class="row3__i">
             <div class="row" id="rowEmail">
               <div class="row__l">
-                <span class="row__k">注册邮箱</span>
+                <span class="row__k">注册邮箱 <span class="row__tag" id="emailTag" hidden>未验证</span></span>
                 <span class="row__v" id="curEmail">—</span>
                 <span class="row__h">用于登录与找回密码。更换后需要在新邮箱完成一次验证。</span>
               </div>
-              <button class="btn btn--ghost btn--s" type="button" data-edit="email">更改</button>
+              <div class="row__acts">
+                <button class="btn btn--ghost btn--s" type="button" id="emailVerifyBtn">验证邮箱</button>
+                <button class="btn btn--ghost btn--s" type="button" data-edit="email">更改</button>
+              </div>
             </div>
 
 
@@ -259,6 +262,26 @@
                 <button class="btn btn--ghost btn--s" type="button" data-cancel="email">取消</button>
               </div>
               <p class="edit__e" id="emailErr" hidden></p>
+            </form>
+
+            <form class="edit" id="formVerify" hidden novalidate>
+              <div class="edit__grid">
+                <div class="edit__f">
+                  <label class="fld__l" for="vfCode">邮箱验证码</label>
+                  <input class="fld" id="vfCode" name="code" type="text" inputmode="numeric" maxlength="6"
+                    autocomplete="one-time-code" placeholder="6 位数字">
+                </div>
+                <div class="edit__f">
+                  <label class="fld__l">没收到？</label>
+                  <button class="btn btn--ghost btn--s" type="button" id="vfSend">发送验证码</button>
+                </div>
+              </div>
+              <div class="edit__a">
+                <button class="btn btn--red btn--s" type="submit" id="vfDone">提交验证</button>
+                <button class="btn btn--ghost btn--s" type="button" data-cancel="verify">取消</button>
+              </div>
+              <p class="edit__e" id="vfErr" hidden></p>
+              <p class="edit__ok" id="vfOk" hidden></p>
             </form>
 
             <form class="edit" id="formPw" hidden novalidate>
@@ -510,7 +533,7 @@
     </div>
   </footer>
 
-  <script src="/js/settings.js?v=20" defer></script>
+  <script src="/js/settings.js?v=21" defer></script>
   <script src="/js/personalize.js?v=6" defer></script>
 </body>
 

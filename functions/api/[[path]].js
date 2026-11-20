@@ -39,6 +39,8 @@ export async function onRequest(context) {
     if (path === 'user/profile' && request.method === 'PATCH') return await updateProfile(request, env);
     if (path === 'user/email' && request.method === 'POST') return await updateEmail(request, env);
     if (path === 'user/password' && request.method === 'POST') return await updatePassword(request, env);
+    if (path === 'user/email/code' && request.method === 'POST') return await emailSendCode(request, env);
+    if (path === 'user/email/verify' && request.method === 'POST') return await emailVerify(request, env);
     if (path === 'user/bans' && request.method === 'GET') return await userBans(request, env);
     if (path === 'ledger' && request.method === 'GET') return await ledger(request, env, url);
     if (path === 'ladder' && request.method === 'GET') return await ladder(request, env, url);
@@ -659,9 +661,150 @@ async function updateEmail(request, env) {
   return json({ ok: true, user: await profileOf(env, user.id) });
 }
 
-// 改密码：要旧密码，改完把其它设备上的会话全部踢掉
-async function updatePassword(request, env) {
+/* ---------------- 邮箱验证 ----------------
+   6 位数字码，10 分钟过期，60 秒才能重发，一天最多 10 条，错 5 次锁死。
+   发信走 Resend（env.RESEND_API_KEY + MAIL_FROM）。
+   没配发信服务时：码照样入库，只在本地调试（MAIL_DEBUG=1）时回传，方便把流程跑通。 */
+
+const EMAIL_CODE_TTL = 600;     /* 有效期，秒 */
+const EMAIL_CODE_GAP = 60;      /* 两条之间至少隔这么久 */
+const EMAIL_CODE_DAY = 10;      /* 一天最多发几条 */
+const EMAIL_CODE_TRIES = 5;     /* 一条码最多试几次 */
+
+function code6() {
+  const n = crypto.getRandomValues(new Uint32Array(1))[0] % 1000000;
+  return String(n).padStart(6, '0');
+}
+
+function maskMail(m) {
+  const s = String(m || '');
+  const at = s.indexOf('@');
+  if (at < 1) return s;
+  return s.slice(0, Math.min(2, at)) + '***' + s.slice(at);
+}
+
+async function mailSend(env, to, code) {
+  const key = env.RESEND_API_KEY;
+  if (!key) return 'mail_unconfigured';
+
+  const from = env.MAIL_FROM || '乘法 <onboarding@resend.dev>';
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: from,
+        to: [to],
+        subject: '乘法 · 邮箱验证码 ' + code,
+        text: '你的验证码是 ' + code + '，10 分钟内有效。不是本人操作就忽略这封邮件。'
+      })
+    });
+    if (!res.ok) {
+      console.error('resend failed:', res.status, (await res.text().catch(() => '')).slice(0, 200));
+      return 'mail_failed';
+    }
+    return '';
+  } catch (e) {
+    console.error('resend error:', e && e.message);
+    return 'mail_failed';
+  }
+}
+
+/* 这条码是多久以前发的（秒） */
+async function codeAgeSeconds(env, at) {
+  const r = await env.DB.prepare(
+    "SELECT CAST((julianday(datetime('now','+8 hours')) - julianday(?)) * 86400 AS INTEGER) AS s"
+  ).bind(at).first();
+  return Math.max(0, Number(r && r.s) || 0);
+}
+
+async function emailSendCode(request, env) {
   const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+  if (!isActive(session)) return locked();
+
+  const me = await env.DB.prepare(
+    'SELECT id, email, email_verified FROM users WHERE id = ? AND deleted_at IS NULL'
+  ).bind(session.uid).first();
+  if (!me || !me.email) return json({ ok: false, error: 'no_email' }, 400);
+  if (me.email_verified) return json({ ok: false, error: 'already_verified' }, 400);
+
+  const row = await env.DB.prepare('SELECT * FROM email_codes WHERE uid = ?').bind(me.id).first();
+  let hits = 1;
+
+  if (row) {
+    const age = await codeAgeSeconds(env, row.sent_at);
+    if (age < EMAIL_CODE_GAP) {
+      return json({ ok: false, error: 'too_soon', wait: EMAIL_CODE_GAP - age }, 429);
+    }
+    hits = age < 86400 ? (Number(row.hits) || 0) + 1 : 1;
+    if (hits > EMAIL_CODE_DAY) {
+      return json({ ok: false, error: 'too_many', message: '今天验证码发太多了，明天再来' }, 429);
+    }
+  }
+
+  const code = code6();
+  await env.DB.prepare(
+    `INSERT INTO email_codes (uid, email, code, tries, hits, sent_at)
+     VALUES (?, ?, ?, 0, ?, datetime('now','+8 hours'))
+     ON CONFLICT(uid) DO UPDATE SET
+       email = excluded.email, code = excluded.code, tries = 0,
+       hits = excluded.hits, sent_at = excluded.sent_at`
+  ).bind(me.id, me.email, code, hits).run();
+
+  const err = await mailSend(env, me.email, code);
+  if (err) {
+    const out = {
+      ok: false,
+      error: err,
+      message: err === 'mail_unconfigured' ? '站长还没配发信服务，暂时发不出邮件' : '邮件没发出去，稍后再试'
+    };
+    if (env.MAIL_DEBUG === '1') out.devCode = code;
+    return json(out, err === 'mail_unconfigured' ? 503 : 502);
+  }
+
+  return json({ ok: true, email: maskMail(me.email) });
+}
+
+async function emailVerify(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+  if (!isActive(session)) return locked();
+
+  const body = await readJson(request);
+  const code = String((body && body.code) || '').replace(/\D/g, '').slice(0, 6);
+  if (code.length !== 6) return json({ ok: false, error: 'bad_code' }, 400);
+
+  const row = await env.DB.prepare('SELECT * FROM email_codes WHERE uid = ?').bind(session.uid).first();
+  if (!row) return json({ ok: false, error: 'no_code', message: '先发一条验证码' }, 400);
+  if ((Number(row.tries) || 0) >= EMAIL_CODE_TRIES) {
+    return json({ ok: false, error: 'too_many_tries', message: '试太多次了，重新发一条' }, 429);
+  }
+
+  if (await codeAgeSeconds(env, row.sent_at) > EMAIL_CODE_TTL) {
+    return json({ ok: false, error: 'expired', message: '验证码过期了，重新发一条' }, 400);
+  }
+
+  if (String(row.code) !== code) {
+    await env.DB.prepare('UPDATE email_codes SET tries = tries + 1 WHERE uid = ?').bind(session.uid).run();
+    return json({
+      ok: false, error: 'wrong_code',
+      left: Math.max(0, EMAIL_CODE_TRIES - ((Number(row.tries) || 0) + 1))
+    }, 400);
+  }
+
+  await env.DB.batch([
+    env.DB.prepare(
+      "UPDATE users SET email_verified = 1, updated_at = datetime('now','+8 hours') WHERE id = ? AND email = ?"
+    ).bind(session.uid, row.email),
+    env.DB.prepare('DELETE FROM email_codes WHERE uid = ?').bind(session.uid)
+  ]);
+
+  return json({ ok: true, verified: true, user: await profileOf(env, session.uid) });
+}
+
+// 改密码：要旧密码，改完把其它设备上的会话全部踢掉
+async function updatePassword(request, env) {  const session = await currentSession(request, env);
   if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
   if (!isActive(session)) return locked();
 
@@ -1702,6 +1845,24 @@ async function withdrawApply(request, env) {
     "SELECT COUNT(*) AS n FROM withdrawals WHERE uid = ? AND status = 'pending'"
   ).bind(user.id).first();
   if (pending && pending.n > 0) return json({ ok: false, error: 'has_pending' }, 400);
+
+  /* 奖励的使用节奏也要卡：24 小时内一条、7 天最多 3 条。
+     频繁小额提现是套现/洗号最典型的动作，节奏卡住比事后翻账省事。 */
+  const gap = await env.DB.prepare(
+    `SELECT CAST((julianday('now') - julianday(MAX(created_at))) * 86400 AS INTEGER) AS s
+       FROM withdrawals WHERE uid = ?`
+  ).bind(user.id).first();
+  if (gap && gap.s !== null && Number(gap.s) < 24 * 3600) {
+    const left = Math.ceil((24 * 3600 - Number(gap.s)) / 3600);
+    return json({ ok: false, error: 'withdraw_cooling', hoursLeft: left }, 429);
+  }
+
+  const week = await env.DB.prepare(
+    "SELECT COUNT(*) AS n FROM withdrawals WHERE uid = ? AND created_at >= datetime('now','-7 days')"
+  ).bind(user.id).first();
+  if ((Number(week && week.n) || 0) >= 3) {
+    return json({ ok: false, error: 'withdraw_weekly' }, 429);
+  }
 
   if (user.fc_units < units) return json({ ok: false, error: 'insufficient_balance' }, 400);
 
