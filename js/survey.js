@@ -10,6 +10,7 @@
   var id = Number(new URLSearchParams(location.search).get('id')) || 0;
   var paper = null;
   var startedAt = '';
+  var attempt = 0;          /* 本轮答卷的编号：站长每测一遍就是新的一条 */
   var ticker = 0;
   var poller = 0;
 
@@ -155,7 +156,8 @@
     poller = setInterval(tick, 1000);
 
     var ask = function () {
-      fetch('/api/surveys/poll?id=' + id, { headers: { Accept: 'application/json' } })
+      var qs = '?id=' + id + (attempt ? '&attempt=' + attempt : '');
+      fetch('/api/surveys/poll' + qs, { headers: { Accept: 'application/json' } })
         .then(function (r) { return r.json(); })
         .then(function (d) {
           if (!d || !d.ok) return;
@@ -232,6 +234,7 @@
         paper = d.survey;
         paper.questions = d.questions;   /* 题面在 d.questions 里，surevy 只有基本信息 */
         startedAt = d.startedAt;
+        attempt = Number(d.attempt) || 0;
 
         $('svTitle').textContent = paper.title;
         $('svMeta').textContent = [
@@ -279,7 +282,7 @@
       fetch('/api/surveys/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ id: id, answers: answers })
+        body: JSON.stringify({ id: id, answers: answers, attempt: attempt })
       })
         .then(function (r) { return r.json(); })
         .then(function (d) {

@@ -482,6 +482,35 @@ async function banForProxy(env, uid, intel) {
   return true;
 }
 
+/* 站长 / 管理员权力大于一切：问卷的 IP 判重管不到他们。
+   自己测一份卷子要来回走七八遍，被自己的出口 IP 卡住就没法干活了。 */
+async function isPrivileged(env, uid) {
+  const me = await env.DB.prepare('SELECT role FROM users WHERE id = ?').bind(uid).first();
+  return !!me && (me.role === 'owner' || me.role === 'admin');
+}
+
+/* 站长每一轮用一条独立伪 IP 落库：既不跟真实 IP 撞唯一索引，也不占别人的名额。
+   前缀带 @，一眼能看出这条不是真访客。 */
+function privIp(uid) {
+  return '@' + uid + ':' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+/* 找本轮答卷：优先按 attempt（站长每轮独立一行），否则退回按出口 IP 找。
+   拿别人的 attempt 也没用 —— IP 或者站长身份对不上就不用它。 */
+async function resolveJoin(env, request, id, uid, attempt) {
+  const ip = ipOf(request) || 'unknown';
+  if (attempt) {
+    const row = await env.DB.prepare(
+      'SELECT * FROM survey_joins WHERE id = ? AND survey_id = ?'
+    ).bind(attempt, id).first();
+    if (row && (row.ip === ip || await isPrivileged(env, uid))) return { join: row, ip: row.ip, priv: true };
+  }
+  const join = await env.DB.prepare(
+    'SELECT * FROM survey_joins WHERE ip = ? AND survey_id = ?'
+  ).bind(ip, id).first();
+  return { join: join, ip: ip, priv: false };
+}
+
 async function updateProfile(request, env) {
   const session = await currentSession(request, env);
   if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
@@ -1257,8 +1286,10 @@ async function surveyList(request, env) {
   const session = await currentSession(request, env);
   if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
 
-  /* 「已参与」也按 IP 看：换了 IP 就该重新变成可参与 */
-  const ip = ipOf(request) || 'unknown';
+  /* 「已参与」也按 IP 看：换了 IP 就该重新变成可参与。
+     站长自己永远当「没参加过」—— 想测几遍入口都能点进去。 */
+  const priv = await isPrivileged(env, session.uid);
+  const ip = priv ? ('@never:' + session.uid) : (ipOf(request) || 'unknown');
 
   const rows = await env.DB.prepare(
     `SELECT s.*, EXISTS(
@@ -1275,7 +1306,8 @@ async function surveyList(request, env) {
 async function adminSurveyList(env) {
   const rows = await env.DB.prepare(
     `SELECT s.*, (
-        SELECT COUNT(*) FROM survey_joins j WHERE j.survey_id = s.id
+        SELECT COUNT(*) FROM survey_joins j
+         WHERE j.survey_id = s.id AND j.ip NOT LIKE '@%'
       ) AS joined_count
        FROM surveys s
       ORDER BY s.featured DESC, s.featured_at DESC, s.created_at DESC
@@ -1770,9 +1802,12 @@ async function surveyJoin(request, env) {
   ).bind(id).first();
   if (!sv) return json({ ok: false, error: 'not_found' }, 404);
 
-  await env.DB.prepare(
-    'INSERT OR IGNORE INTO survey_joins (uid, survey_id, ip) VALUES (?, ?, ?)'
-  ).bind(session.uid, id, ipOf(request) || 'unknown').run();
+  /* 站长点入口不落库：真正开卷时 paper 会单独建一条，免得一次点击记两行 */
+  if (!(await isPrivileged(env, session.uid))) {
+    await env.DB.prepare(
+      'INSERT OR IGNORE INTO survey_joins (uid, survey_id, ip) VALUES (?, ?, ?)'
+    ).bind(session.uid, id, ipOf(request) || 'unknown').run();
+  }
 
   const inline = sv.kind === 'inline' && !!paperParse(sv.paper).questions.length;
   return json({
@@ -1875,36 +1910,50 @@ async function surveyPaper(request, env, url) {
   }
 
   /* 按 IP 判重：同一个出口 IP 对同一份问卷只能参与一次，换 IP 才能再来。
-     按账号判反而更容易刷 —— 多注册几个号就绕过去了。 */
-  const ip = ipOf(request) || 'unknown';
+     按账号判反而更容易刷 —— 多注册几个号就绕过去了。
+     站长 / 管理员例外：每开一次就是新的一条，随便测几遍，不占真实 IP 名额。 */
+  const priv = await isPrivileged(env, session.uid);
+  let ip = ipOf(request) || 'unknown';
+  let attempt = 0;
 
-  const join = await env.DB.prepare(
-    'SELECT * FROM survey_joins WHERE ip = ? AND survey_id = ?'
-  ).bind(ip, id).first();
-
-  if (join && (join.stage === 'done' || join.stage === 'pending')) {
-    return json({ ok: false, error: 'already_done', status: join.status, sameIp: true }, 409);
-  }
-
-  if (!join) {
-    await env.DB.prepare(
-      `INSERT OR IGNORE INTO survey_joins (uid, survey_id, ip, status, stage, created_at)
+  if (priv) {
+    ip = privIp(session.uid);
+    const ins = await env.DB.prepare(
+      `INSERT INTO survey_joins (uid, survey_id, ip, status, stage, created_at)
        VALUES (?, ?, ?, 'pending', 'open', datetime('now','+8 hours'))`
     ).bind(session.uid, id, ip).run();
-  } else if (join.stage !== 'open') {
-    /* 换 IP 重来时把上一轮的答卷、用时、待冲正时间一起清掉，否则轮询会把上一轮给冲正了。
-       还在答（stage=open）的不要动，否则刷新一次就把计时清零了 */
-    await env.DB.prepare(
-      `UPDATE survey_joins
-          SET uid = ?, stage = 'open', status = 'pending', created_at = datetime('now','+8 hours'),
-              answers = '', elapsed = 0, due_at = '', reviewed_at = NULL
-        WHERE ip = ? AND survey_id = ?`
-    ).bind(session.uid, ip, id).run();
+    attempt = Number(ins.meta && ins.meta.last_row_id) || 0;
+  } else {
+    const join = await env.DB.prepare(
+      'SELECT * FROM survey_joins WHERE ip = ? AND survey_id = ?'
+    ).bind(ip, id).first();
+
+    if (join && (join.stage === 'done' || join.stage === 'pending')) {
+      return json({ ok: false, error: 'already_done', status: join.status, sameIp: true }, 409);
+    }
+
+    if (!join) {
+      await env.DB.prepare(
+        `INSERT OR IGNORE INTO survey_joins (uid, survey_id, ip, status, stage, created_at)
+         VALUES (?, ?, ?, 'pending', 'open', datetime('now','+8 hours'))`
+      ).bind(session.uid, id, ip).run();
+    } else if (join.stage !== 'open') {
+      /* 换 IP 重来时把上一轮的答卷、用时、待冲正时间一起清掉，否则轮询会把上一轮给冲正了。
+         还在答（stage=open）的不要动，否则刷新一次就把计时清零了 */
+      await env.DB.prepare(
+        `UPDATE survey_joins
+            SET uid = ?, stage = 'open', status = 'pending', created_at = datetime('now','+8 hours'),
+                answers = '', elapsed = 0, due_at = '', reviewed_at = NULL
+          WHERE ip = ? AND survey_id = ?`
+      ).bind(session.uid, ip, id).run();
+    }
   }
 
-  const row = await env.DB.prepare(
-    'SELECT created_at FROM survey_joins WHERE ip = ? AND survey_id = ?'
-  ).bind(ip, id).first();
+  const row = attempt
+    ? await env.DB.prepare('SELECT id, created_at FROM survey_joins WHERE id = ?').bind(attempt).first()
+    : await env.DB.prepare(
+        'SELECT id, created_at FROM survey_joins WHERE ip = ? AND survey_id = ?'
+      ).bind(ip, id).first();
 
   return json({
     ok: true,
@@ -1917,6 +1966,7 @@ async function surveyPaper(request, env, url) {
       requirement: sv.requirement || ''
     },
     startedAt: row ? row.created_at : '',
+    attempt: row ? Number(row.id) || attempt || 0 : attempt || 0,
     minSeconds: SURVEY_MIN_SECONDS,
     questions: paperPublic(paper)
   });
@@ -1946,10 +1996,10 @@ async function surveySubmit(request, env) {
   if (!sv) return json({ ok: false, error: 'not_found' }, 404);
 
   const paper = paperParse(sv.paper);
-  const ip = ipOf(request) || 'unknown';
-  const join = await env.DB.prepare(
-    'SELECT * FROM survey_joins WHERE ip = ? AND survey_id = ?'
-  ).bind(ip, id).first();
+  /* 找本轮那一行：站长每一轮独立成行，靠 attempt 认领；普通用户按出口 IP */
+  const found = await resolveJoin(env, request, id, uid, Number(body && body.attempt) || 0);
+  const join = found.join;
+  const ip = found.ip;
   if (!join) return json({ ok: false, error: 'not_started' }, 400);
   if (join.stage === 'done') return json({ ok: false, error: 'already_done' }, 409);
 
@@ -2110,10 +2160,11 @@ async function surveyPoll(request, env, url) {
   const uid = session.uid;
   if (!id) return json({ ok: false, error: 'bad_request' }, 400);
 
-  const ip = ipOf(request) || 'unknown';
-  const join = await env.DB.prepare(
-    'SELECT * FROM survey_joins WHERE ip = ? AND survey_id = ?'
-  ).bind(ip, id).first();
+  const found = await resolveJoin(
+    env, request, id, uid, Number(url.searchParams.get('attempt')) || 0
+  );
+  const join = found.join;
+  const ip = found.ip;
   if (!join) return json({ ok: false, error: 'not_found' }, 404);
 
   if (join.stage !== 'pending') {
