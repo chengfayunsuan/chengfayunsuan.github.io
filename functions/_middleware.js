@@ -33,6 +33,8 @@ function isPageView(request, url) {
   if (request.method !== 'GET') return false;
   if (SKIP_EXT.test(url.pathname)) return false;
   if (/^\/(api|cdn-cgi)\//.test(url.pathname)) return false;
+  /* 后台与实验台是站长自己的操作，算进流量只会把前台的数据搅浑 */
+  if (/^\/(admin|lab)(\/|$)/.test(url.pathname)) return false;
   const accept = request.headers.get('Accept') || '';
   if (!accept.includes('text/html')) return false;
   const ua = request.headers.get('User-Agent') || '';
