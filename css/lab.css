@@ -42,64 +42,223 @@
   border-bottom: 1px solid var(--hair);
 }
 
-/* ---------- 结局卡片 ---------- */
+/* ---------- 问卷卡 ---------- */
 
-.lab-cases {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(196px, 1fr));
-  gap: 12px;
-  margin-bottom: 30px;
-}
-
-.lab-case {
-  text-align: left;
-  padding: 16px 16px 18px;
+.lab-paper {
   border: 3px solid var(--ink);
   background: #fff;
-  cursor: pointer;
+  margin-bottom: 30px;
   box-shadow: 5px 5px 0 rgba(var(--ink-rgb), .12);
-  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
 }
 
-.lab-case:hover {
-  background: var(--paper-2);
-  transform: translate(-1px, -1px);
-  box-shadow: 7px 7px 0 rgba(var(--ink-rgb), .18);
+.lab-paper__in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px 18px;
 }
 
-.lab-case:active {
-  transform: translate(3px, 3px);
-  box-shadow: 1px 1px 0 rgba(var(--ink-rgb), .18);
-}
-
-.lab-case[disabled] {
-  opacity: .45;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.lab-case__k {
+.lab-paper__x b {
   display: block;
-  font-family: var(--num);
-  font-size: 11px;
-  letter-spacing: .14em;
-  color: var(--red);
-}
-
-.lab-case__t {
-  display: block;
-  margin: 4px 0 6px;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 19px;
   letter-spacing: -.01em;
 }
 
-.lab-case__d {
+.lab-paper__x span {
   display: block;
-  font-size: 12px;
-  line-height: 1.6;
+  margin-top: 5px;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 11.5px;
+  letter-spacing: .02em;
   color: var(--gray);
+}
+
+.lab-paper__act {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* 上传区 */
+
+.lab-paste {
+  border-top: 2px solid var(--ink);
+  padding: 14px 18px 16px;
+  background: var(--paper-2);
+}
+
+.lab-paste textarea {
+  width: 100%;
+  min-height: 168px;
+  padding: 12px 13px;
+  border: 2px solid var(--ink);
+  background: #fff;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--ink);
+  resize: vertical;
+}
+
+.lab-paste textarea:focus {
+  outline: 2px solid var(--red);
+  outline-offset: -2px;
+}
+
+.lab-paste__f {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 12px;
+}
+
+.lab-paste__h {
+  margin: 0;
+  max-width: 68ch;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--gray);
+}
+
+.lab-paste__h code {
+  padding: 1px 5px;
+  background: #fff;
+  border: 1px solid var(--hair);
+  font-size: 11.5px;
+}
+
+.lab-paste__act {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+/* ---------- 答题卡 ---------- */
+
+.lab-form {
+  border: 3px solid var(--red);
+  background: #fff;
+  margin-bottom: 30px;
+  box-shadow: 6px 6px 0 rgba(var(--red-rgb), .18);
+}
+
+.lab-form__h {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.lab-form__h b {
+  display: block;
+  margin-top: 2px;
+  font-size: 18px;
+}
+
+.lab-form__hr { text-align: right; }
+
+.lab-qs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lab-q {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 4px 12px;
+  padding: 18px;
+  border-bottom: 1px solid var(--hair);
+}
+
+.lab-q:last-child { border-bottom: 0; }
+
+.lab-q__n {
+  font-family: var(--num);
+  font-size: 13px;
+  letter-spacing: .1em;
+  color: var(--red);
+  padding-top: 3px;
+}
+
+.lab-q__t {
+  margin: 0;
+  font-size: 15.5px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.lab-q__o {
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 9px;
+}
+
+.lab-opt {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 13px;
+  border: 2px solid var(--hair);
+  font-size: 13.5px;
+  line-height: 1.5;
+  cursor: pointer;
+  transition: border-color .12s, background .12s;
+}
+
+.lab-opt:hover { border-color: var(--ink); background: var(--paper-2); }
+
+.lab-opt input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--red);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.lab-opt:has(input:checked) {
+  border-color: var(--ink);
+  background: var(--paper-2);
+}
+
+.lab-opt:has(input:checked) span { font-weight: 700; }
+
+.lab-form__f {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 18px;
+  border-top: 2px solid var(--ink);
+  background: rgba(var(--paper2-rgb), .55);
+}
+
+.lab-form__tip {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--gray);
+}
+
+.lab-form__tip.is-bad {
+  color: var(--red);
+  font-weight: 700;
+}
+
+.lab-form__act {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
 }
 
 /* ---------- 进行中 ---------- */
@@ -189,4 +348,15 @@
   .lab-state { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .lab-state__i { border-bottom: 1px solid var(--hair); }
   .lab-live__in { flex-direction: column; align-items: flex-start; }
+
+  .lab-paper__in,
+  .lab-form__f,
+  .lab-paste__f { flex-direction: column; align-items: stretch; }
+
+  .lab-paper__act,
+  .lab-form__act,
+  .lab-paste__act { justify-content: flex-start; flex-wrap: wrap; }
+
+  .lab-q { grid-template-columns: 30px minmax(0, 1fr); padding: 15px 14px; }
+  .lab-form__hr { text-align: left; }
 }

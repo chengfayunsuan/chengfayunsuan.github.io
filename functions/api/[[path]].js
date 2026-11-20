@@ -1764,8 +1764,85 @@ async function surveyJoin(request, env) {
             kick 中途被踢 / reject 事后打回。 */
 
 const LAB_TITLE = '[实验] 模拟问卷';
-const LAB_MIN_SECONDS = 30;   // 低于这个秒数判超速
+const LAB_MIN_SECONDS = 30;   // 没选结局时，低于这个秒数判超速
 const LAB_SCENARIOS = ['success', 'fail', 'speed', 'quota', 'kick', 'reject'];
+const LAB_REJECT_DELAY = 30;  // 打回不立刻生效，这么多秒后才冲正
+
+/* 内置问卷：前两题是普通题，最后一题的选项各自绑一个结局，
+   选哪条就走哪条 —— 这就是实验台的用法。 */
+const LAB_DEFAULT_PAPER = {
+  title: '实验问卷 · 六种结局',
+  builtin: true,
+  questions: [
+    { q: '你的年龄段', options: ['18 岁以下', '18 – 24', '25 – 34', '35 – 44', '45 岁以上'] },
+    { q: '你平均每天用手机上网多久', options: ['1 小时以内', '1 – 3 小时', '3 – 6 小时', '6 小时以上'] },
+    {
+      q: '这一单要跑到哪个结局',
+      options: [
+        { label: '正常通过，奖励入账', outcome: 'success' },
+        { label: '问卷商接口 500，答卷没保存', outcome: 'fail' },
+        { label: '答得太快，判超速作废', outcome: 'speed' },
+        { label: '名额已满，被挡在门外', outcome: 'quota' },
+        { label: '筛选题不符，中途被踢', outcome: 'kick' },
+        { label: '先给钱，过一会儿被打回', outcome: 'reject' }
+      ]
+    }
+  ]
+};
+
+/* 上传的问卷要收得住：题目数、选项数、字数都卡上限，别让一份巨型 JSON 把页面撑死 */
+const LAB_MAX_Q = 20;
+const LAB_MAX_OPT = 12;
+
+function labPaperClean(raw) {
+  const src = raw && typeof raw === 'object' ? raw : {};
+  const qs = Array.isArray(src.questions) ? src.questions : [];
+  const out = [];
+  for (let i = 0; i < qs.length && out.length < LAB_MAX_Q; i++) {
+    const q = qs[i] || {};
+    const text = String(q.q || q.title || '').trim().slice(0, 300);
+    if (!text) continue;
+
+    const opts = [];
+    const list = Array.isArray(q.options) ? q.options : [];
+    for (let j = 0; j < list.length && opts.length < LAB_MAX_OPT; j++) {
+      const o = list[j];
+      if (o && typeof o === 'object') {
+        const label = String(o.label || '').trim().slice(0, 200);
+        if (!label) continue;
+        const outcome = LAB_SCENARIOS.indexOf(String(o.outcome || '')) >= 0 ? String(o.outcome) : '';
+        opts.push(outcome ? { label: label, outcome: outcome } : label);
+      } else {
+        const label = String(o || '').trim().slice(0, 200);
+        if (label) opts.push(label);
+      }
+    }
+    if (opts.length < 2) continue;
+    out.push({ q: text, options: opts });
+  }
+
+  return {
+    title: String(src.title || '').trim().slice(0, 80) || '未命名问卷',
+    questions: out,
+    builtin: false
+  };
+}
+
+/* 当前生效的问卷：有上传的用上传的，没有就用内置 */
+async function labPaper(env) {
+  const row = await env.DB.prepare('SELECT * FROM lab_paper ORDER BY id DESC LIMIT 1').first();
+  if (!row) return LAB_DEFAULT_PAPER;
+
+  let parsed = null;
+  try { parsed = JSON.parse(row.body || '{}'); } catch (e) { parsed = null; }
+  const clean = labPaperClean(parsed);
+  if (!clean.questions.length) return LAB_DEFAULT_PAPER;
+
+  clean.title = row.title || clean.title;
+  clean.id = row.id;
+  clean.at = row.created_at;
+  return clean;
+}
 
 /* 实验问卷自己养一条，没有就建，奖励固定 2.5。
    状态锁在 paused，这样它不会出现在问卷大厅里被真实用户点到。 */
@@ -1805,61 +1882,33 @@ async function labStateOf(env, uid) {
   };
 }
 
-/* 开始一次答卷：配额满在这一步就被挡回去，其余进 open 等提交 */
+/* 开始一次答卷：只建会话、把问卷发下去，结局等答完才知道 */
 async function labStart(request, env, admin) {
-  const body = await readJson(request);
-  const scenario = String((body && body.scenario) || '');
-  if (LAB_SCENARIOS.indexOf(scenario) < 0) return json({ ok: false, error: 'bad_scenario' }, 400);
-
   const sv = await labSurvey(env);
   const uid = admin.uid;
-
-  if (scenario === 'quota') {
-    await env.DB.batch([
-      env.DB.prepare(
-        `INSERT OR REPLACE INTO survey_joins (uid, survey_id, status, reviewed_at, created_at)
-         VALUES (?, ?, 'quota_full', NULL, datetime('now','+8 hours'))`
-      ).bind(uid, sv.id),
-      env.DB.prepare(
-        `INSERT INTO lab_run (uid, survey_id, scenario, stage, result, note, done_at)
-         VALUES (?, ?, ?, 'done', 'quota', '该问卷名额已收满，未进入答题', datetime('now','+8 hours'))`
-      ).bind(uid, sv.id, scenario)
-    ]);
-
-    return json({
-      ok: true,
-      blocked: true,
-      result: 'quota',
-      reward: formatFc(sv.price_units),
-      steps: [
-        '打开问卷入口',
-        '服务商返回 quota_full：这个配额已收满',
-        '没有产生答卷，不记奖励也不扣经验'
-      ],
-      user: await labStateOf(env, uid)
-    });
-  }
+  const paper = await labPaper(env);
 
   const ins = await env.DB.prepare(
     `INSERT INTO lab_run (uid, survey_id, scenario, stage, reward_units)
-     VALUES (?, ?, ?, 'open', ?)`
-  ).bind(uid, sv.id, scenario, sv.price_units).run();
+     VALUES (?, ?, '', 'open', ?)`
+  ).bind(uid, sv.id, sv.price_units).run();
 
   return json({
     ok: true,
     runId: ins.meta && ins.meta.last_row_id,
-    scenario: scenario,
     survey: { id: sv.id, title: sv.title, reward: formatFc(sv.price_units) },
+    paper: paper,
     minSeconds: LAB_MIN_SECONDS,
     steps: ['打开问卷入口', '会话建立，开始计时'],
     user: await labStateOf(env, uid)
   });
 }
 
-/* 提交答卷：按 scenario 给出结局，该发钱的发、该扣的扣 */
+/* 提交答卷：按答题时选到的那个选项决定结局，该发钱的发、该扣的扣 */
 async function labFinish(request, env, admin) {
   const body = await readJson(request);
   const runId = Number(body && body.runId);
+  const answers = Array.isArray(body && body.answers) ? body.answers : [];
   const uid = admin.uid;
 
   const run = await env.DB.prepare(
@@ -1869,7 +1918,31 @@ async function labFinish(request, env, admin) {
 
   const sv = await labSurvey(env);
   const reward = Number(sv.price_units) || 0;
-  const scenario = run.scenario;
+  const paper = await labPaper(env);
+
+  /* 用服务端这份问卷反查结局：前端只说「选了第几题第几项」，结论在这儿下 */
+  let outcome = '';
+  const picked = [];
+  for (let i = 0; i < answers.length; i++) {
+    const a = answers[i] || {};
+    const qi = Number(a.q);
+    const oi = Number(a.o);
+    const question = paper.questions[qi];
+    if (!question) continue;
+    const opt = question.options[oi];
+    if (opt == null) continue;
+    picked.push({ q: question.q, a: typeof opt === 'object' ? opt.label : opt });
+    if (opt && typeof opt === 'object' && opt.outcome) outcome = opt.outcome;
+  }
+
+  /* 用时按会话建立时间算，不信前端 */
+  const took = await env.DB.prepare(
+    "SELECT CAST((julianday(datetime('now','+8 hours')) - julianday(?)) * 86400 AS INTEGER) AS s"
+  ).bind(run.created_at).first();
+  const elapsed = Math.max(1, Number(took && took.s) || 0);
+
+  /* 问卷里没绑结局（普通问卷）就按时间判：太快算超速，其余按通过 */
+  if (!outcome) outcome = elapsed < LAB_MIN_SECONDS ? 'speed' : 'success';
 
   /* JOIN 与收尾语句，各分支复用 */
   const joinWith = function (status) {
@@ -1878,11 +1951,11 @@ async function labFinish(request, env, admin) {
        VALUES (?, ?, ?, datetime('now','+8 hours'), datetime('now','+8 hours'))`
     ).bind(uid, sv.id, status);
   };
-  const markDone = function (result, elapsed, note) {
+  const markDone = function (result, secs, note) {
     return env.DB.prepare(
-      `UPDATE lab_run SET stage = 'done', result = ?, elapsed = ?, note = ?,
+      `UPDATE lab_run SET stage = 'done', result = ?, elapsed = ?, note = ?, answers = ?,
               done_at = datetime('now','+8 hours') WHERE id = ?`
-    ).bind(result, elapsed, note, run.id);
+    ).bind(result, secs, note, JSON.stringify(picked), run.id);
   };
   /* 加经验/扣经验都走 lvSql，等级同步结算 */
   const addMoney = function (delta) {
@@ -1899,20 +1972,21 @@ async function labFinish(request, env, admin) {
     ).bind(uid, delta, uid, kind, 'LAB-' + run.id, memo);
   };
 
-  if (scenario === 'success') {
+  if (outcome === 'success') {
     await env.DB.batch([
       joinWith('approved'),
       addMoney(reward),
       ledger(reward, 'survey_reward', '实验台：模拟问卷通过'),
-      markDone('success', 182, '答卷通过质检，奖励入账')
+      markDone('success', elapsed, '答卷通过质检，奖励入账')
     ]);
     return json({
       ok: true,
       result: 'success',
-      elapsed: 182,
+      elapsed: elapsed,
       reward: formatFc(reward),
+      picked: picked,
       steps: [
-        '提交答卷（用时 182 秒）',
+        '提交答卷（用时 ' + elapsed + ' 秒）',
         '服务商确认有效：通过质检',
         '奖励入账 +' + formatFc(reward) + ' CFB，经验 +1'
       ],
@@ -1920,56 +1994,87 @@ async function labFinish(request, env, admin) {
     });
   }
 
-  if (scenario === 'speed') {
+  if (outcome === 'speed') {
+    const why = elapsed < LAB_MIN_SECONDS
+      ? '用时 ' + elapsed + ' 秒，低于 ' + LAB_MIN_SECONDS + ' 秒门槛'
+      : '用时 ' + elapsed + ' 秒，但作答轨迹异常（直答无停顿），仍判超速';
     await env.DB.batch([
       joinWith('invalid'),
-      markDone('speed', 4, '用时 4 秒，低于 ' + LAB_MIN_SECONDS + ' 秒门槛，答卷作废')
+      markDone('speed', elapsed, why + '，答卷作废')
     ]);
     return json({
       ok: true,
       result: 'speed',
-      elapsed: 4,
+      elapsed: elapsed,
       reward: '0',
+      picked: picked,
       steps: [
-        '提交答卷（用时 4 秒）',
-        '低于最短作答时长 ' + LAB_MIN_SECONDS + ' 秒，服务商判超速',
+        '提交答卷（用时 ' + elapsed + ' 秒）',
+        why + '，服务商判超速',
         '答卷作废，不发奖励，不扣经验'
       ],
       user: await labStateOf(env, uid)
     });
   }
 
-  if (scenario === 'kick') {
+  if (outcome === 'kick') {
+    const last = picked.length ? picked[picked.length - 1] : null;
+    const at = last ? '「' + last.q + '」选了「' + last.a + '」，命中排除条件' : '筛选题命中排除条件';
     await env.DB.batch([
       joinWith('terminated'),
-      markDone('kick', 42, '第 3 题筛选题不符，服务商中途终止')
+      markDone('kick', elapsed, '第 ' + picked.length + ' 题' + at + '，服务商中途终止')
     ]);
     return json({
       ok: true,
       result: 'kick',
-      elapsed: 42,
+      elapsed: elapsed,
       reward: '0',
+      picked: picked,
       steps: [
-        '第 1～2 题正常作答',
-        '第 3 题筛选题选了「不在职」，命中排除条件',
+        '前 ' + Math.max(0, picked.length - 1) + ' 题正常作答',
+        at,
         '服务商 terminate：会话被踢出，答卷未提交'
       ],
       user: await labStateOf(env, uid)
     });
   }
 
-  if (scenario === 'fail') {
+  if (outcome === 'quota') {
+    await env.DB.batch([
+      env.DB.prepare(
+        `INSERT OR REPLACE INTO survey_joins (uid, survey_id, status, reviewed_at, created_at)
+         VALUES (?, ?, 'quota_full', NULL, datetime('now','+8 hours'))`
+      ).bind(uid, sv.id),
+      markDone('quota', elapsed, '提交时该配额已收满，答卷被拒收')
+    ]);
+    return json({
+      ok: true,
+      result: 'quota',
+      elapsed: elapsed,
+      reward: '0',
+      picked: picked,
+      steps: [
+        '提交答卷（用时 ' + elapsed + ' 秒）',
+        '服务商返回 quota_full：这个配额刚好在提交前收满',
+        '答卷被退回，没有奖励也不扣经验'
+      ],
+      user: await labStateOf(env, uid)
+    });
+  }
+
+  if (outcome === 'fail') {
     await env.DB.batch([
       joinWith('failed'),
-      markDone('fail', 61, '问卷商接口返回 500，答卷未保存')
+      markDone('fail', elapsed, '问卷商接口返回 500，答卷未保存')
     ]);
     return json({
       ok: true,
       result: 'fail',
-      elapsed: 61,
+      elapsed: elapsed,
       reward: '0',
+      picked: picked,
       steps: [
-        '提交答卷（用时 61 秒）',
+        '提交答卷（用时 ' + elapsed + ' 秒）',
         '问卷商接口返回 500，答卷没有落库',
         '没有奖励；服务商也没给结算回调'
       ],
@@ -1977,30 +2082,148 @@ async function labFinish(request, env, admin) {
     });
   }
 
-  /* reject：先按成功入账，再被服务商打回。经验净 -7（+1 再 -8） */
+  /* reject：一次打回不是即时的。先按通过入账，等 LAB_REJECT_DELAY 秒后由 /admin/lab/poll 冲正。
+     stage 停在 pending，账面上这段时间是「已入账待质检」。 */
+  const due = await env.DB.prepare(
+    "SELECT datetime('now','+8 hours','+" + LAB_REJECT_DELAY + " seconds') AS t"
+  ).first();
+
   await env.DB.batch([
-    joinWith('rejected'),
+    joinWith('approved'),
     addMoney(reward),
-    ledger(reward, 'survey_reward', '实验台：模拟问卷通过（随后被打回）'),
-    addMoney(-reward),
-    ledger(-reward, 'survey_reject', '实验台：打回冲正'),
-    markDone('reject', 205, '问卷商事后打回：答卷被判无效，奖励冲正')
+    ledger(reward, 'survey_reward', '实验台：模拟问卷通过（待质检）'),
+    env.DB.prepare(
+      `UPDATE lab_run SET stage = 'pending', result = 'reject', elapsed = ?, answers = ?,
+              note = ?, due_at = ? WHERE id = ?`
+    ).bind(
+      elapsed,
+      JSON.stringify(picked),
+      '已入账，' + LAB_REJECT_DELAY + ' 秒后质检打回',
+      due.t,
+      run.id
+    )
   ]);
 
   return json({
     ok: true,
     result: 'reject',
-    elapsed: 205,
+    pending: true,
+    runId: run.id,
+    delay: LAB_REJECT_DELAY,
+    elapsed: elapsed,
     reward: '0',
+    picked: picked,
     steps: [
-      '提交答卷（用时 205 秒）',
+      '提交答卷（用时 ' + elapsed + ' 秒）',
       '首次结算：+' + formatFc(reward) + ' CFB，经验 +1',
-      '问卷商发起打回：答卷被判定无效',
+      '服务商说答卷要过质检，先入账，' + LAB_REJECT_DELAY + ' 秒后再看结果',
+      '这 ' + LAB_REJECT_DELAY + ' 秒里余额是真的，可以先花'
+    ],
+    user: await labStateOf(env, uid)
+  });
+}
+
+/* 打回轮询：到点才冲正，没到点就把剩余秒数报回去。
+   前端拿着这个接口做倒计时，页面关掉也没关系，下次打开照样能结算。 */
+async function labPoll(request, env, admin, url) {
+  const runId = Number(url.searchParams.get('runId'));
+  const uid = admin.uid;
+
+  const run = await env.DB.prepare('SELECT * FROM lab_run WHERE id = ? AND uid = ?')
+    .bind(runId, uid).first();
+  if (!run) return json({ ok: false, error: 'not_found' }, 404);
+
+  if (run.stage === 'done') {
+    return json({ ok: true, done: true, result: run.result, note: run.note, user: await labStateOf(env, uid) });
+  }
+
+  if (run.stage !== 'pending') {
+    return json({ ok: true, done: false, stage: run.stage });
+  }
+
+  const t = await env.DB.prepare(
+    `SELECT (datetime('now','+8 hours') >= ?) AS due,
+            CAST((julianday(?) - julianday(datetime('now','+8 hours'))) * 86400 AS INTEGER) AS left`
+  ).bind(run.due_at, run.due_at).first();
+
+  if (!t || !t.due) {
+    return json({
+      ok: true,
+      done: false,
+      pending: true,
+      secondsLeft: Math.max(0, Number(t && t.left) || 0),
+      user: await labStateOf(env, uid)
+    });
+  }
+
+  /* 到期：冲正原入账额，经验再扣 8（合计 +1 −8 = −7） */
+  const sv = await labSurvey(env);
+  const reward = Number(run.reward_units) || 0;
+
+  await env.DB.batch([
+    env.DB.prepare(
+      `UPDATE users SET fc_units = fc_units - (?), ${lvSql(-8)},
+              updated_at = datetime('now','+8 hours') WHERE id = ?`
+    ).bind(reward, uid),
+    env.DB.prepare(
+      `INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo)
+       VALUES (?, ?, (SELECT fc_units FROM users WHERE id = ?), 'survey_reject', ?, ?)`
+    ).bind(uid, -reward, uid, 'LAB-' + run.id, '实验台：质检查出问题，打回冲正'),
+    env.DB.prepare(
+      `INSERT OR REPLACE INTO survey_joins (uid, survey_id, status, reviewed_at, created_at)
+       VALUES (?, ?, 'rejected', datetime('now','+8 hours'), datetime('now','+8 hours'))`
+    ).bind(uid, sv.id),
+    env.DB.prepare(
+      "UPDATE lab_run SET stage = 'done', note = ?, done_at = datetime('now','+8 hours') WHERE id = ?"
+    ).bind('问卷商事后打回：答卷被判无效，奖励冲正', run.id)
+  ]);
+
+  return json({
+    ok: true,
+    done: true,
+    result: 'reject',
+    reward: '0',
+    note: '打回已生效',
+    steps: [
+      '质检未通过：答卷被判定无效',
       '冲正：−' + formatFc(reward) + ' CFB，经验 −8',
       '净变化：0 CFB，经验 −7'
     ],
     user: await labStateOf(env, uid)
   });
+}
+
+/* 当前实验问卷 */
+async function labPaperGet(env) {
+  return json({ ok: true, paper: await labPaper(env) });
+}
+
+/* 上传一份问卷：接 {title, questions:[...]}，或者直接接 {paper:{...}} */
+async function labPaperSave(request, env) {
+  const body = await readJson(request);
+  const raw = body && body.paper ? body.paper : body;
+  const clean = labPaperClean(raw);
+
+  if (!clean.questions.length) {
+    return json({
+      ok: false,
+      error: 'empty_paper',
+      message: '至少要有一道题，且每题两个以上选项'
+    }, 400);
+  }
+
+  const title = clean.title;
+
+  await env.DB.prepare('INSERT INTO lab_paper (title, body) VALUES (?, ?)')
+    .bind(title, JSON.stringify({ title: title, questions: clean.questions })).run();
+
+  return json({ ok: true, paper: await labPaper(env) });
+}
+
+/* 清空上传，回到内置那份 */
+async function labPaperReset(env) {
+  await env.DB.prepare('DELETE FROM lab_paper').run();
+  return json({ ok: true, paper: await labPaper(env) });
 }
 
 /* 最近实验记录 */
@@ -2536,6 +2759,10 @@ async function adminApi(request, env, url, path) {
   if (path === 'admin/messages/send' && request.method === 'POST') return await adminMessageSend(request, env);
   if (path === 'admin/lab/start' && request.method === 'POST') return await labStart(request, env, admin);
   if (path === 'admin/lab/finish' && request.method === 'POST') return await labFinish(request, env, admin);
+  if (path === 'admin/lab/poll' && request.method === 'GET') return await labPoll(request, env, admin, url);
+  if (path === 'admin/lab/paper' && request.method === 'GET') return await labPaperGet(env);
+  if (path === 'admin/lab/paper' && request.method === 'POST') return await labPaperSave(request, env);
+  if (path === 'admin/lab/paper/reset' && request.method === 'POST') return await labPaperReset(env);
   if (path === 'admin/lab/log' && request.method === 'GET') return await labLog(request, env, admin);
   if (path === 'admin/messages' && request.method === 'GET') return await adminMessageList(env, url);
   if (path === 'admin/announcements' && request.method === 'GET') return await adminNoticeList(env);
