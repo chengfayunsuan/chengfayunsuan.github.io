@@ -37,6 +37,17 @@
     { key: 'gray', label: '次要灰', hint: '说明文字、编号、占位' }
   ];
 
+  /* 预设配色：每套只换主色与深色，墨色和纸色保持不动 */
+  var THEME_PRESETS = [
+    { key: 'red', label: '正红', red: '#E0291E', deep: '#B31F16' },
+    { key: 'blue', label: '后台蓝', red: '#1D52E2', deep: '#1439A6' },
+    { key: 'green', label: '松绿', red: '#1F7A45', deep: '#145C33' },
+    { key: 'orange', label: '陶橙', red: '#C25A0F', deep: '#8F400A' },
+    { key: 'purple', label: '黛紫', red: '#6D33B0', deep: '#4C2380' },
+    { key: 'teal', label: '深海青', red: '#0F7C8C', deep: '#0A5A66' },
+    { key: 'ink', label: '皂黑', red: '#2A2822', deep: '#14130F' }
+  ];
+
   function readCookie(name) {
     var parts = ('; ' + document.cookie).split('; ' + name + '=');
     if (parts.length < 2) return '';
@@ -130,8 +141,14 @@
       return applyTheme(null);
     },
     /* 预设：正红 / 后台蓝 */
+    /* 预设：主色 + 深一档，名字给按钮用 */
+    presets: function () { return THEME_PRESETS; },
     preset: function (name) {
-      if (name === 'blue') return { red: '#1D52E2', 'red-deep': '#1439A6' };
+      for (var i = 0; i < THEME_PRESETS.length; i++) {
+        if (THEME_PRESETS[i].key === name) {
+          return { red: THEME_PRESETS[i].red, 'red-deep': THEME_PRESETS[i].deep };
+        }
+      }
       return { red: THEME_DEF.red, 'red-deep': THEME_DEF['red-deep'] };
     }
   };
@@ -347,7 +364,7 @@
     '/admin/items': { page: 'admin-items', js: '/js/admin-shop.js?v=2' },
     '/admin/messages': { page: 'admin-messages', js: '/js/admin-msg.js?v=4' },
     '/admin/moonetix': { page: 'admin-moonetix', js: '/js/admin-mtx.js?v=1' },
-    '/admin/customize': { page: 'admin-customize', js: '/js/personalize.js?v=2', css: ['/css/customize.css?v=3'] }
+    '/admin/customize': { page: 'admin-customize', js: '/js/personalize.js?v=3', css: ['/css/customize.css?v=4'] }
   };
 
   function normalize(path) {

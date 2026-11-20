@@ -198,6 +198,19 @@
     d.style.setProperty('--paper2-rgb', CF.theme.hexRgb(draft['paper-2']));
   }
 
+  function renderPresets() {
+    var box = document.getElementById('thPresets');
+    if (!box) return;
+    var list = CF.theme.presets ? CF.theme.presets() : [];
+    var html = '';
+    for (var i = 0; i < list.length; i++) {
+      var ps = list[i];
+      html += '<button class="th-sw" type="button" data-theme-preset="' + esc(ps.key) + '">' +
+        '<span class="th-sw__c" style="--c:' + esc(ps.red) + '"></span>' + esc(ps.label) + '</button>';
+    }
+    box.innerHTML = html;
+  }
+
   function paintPreset() {
     var btns = document.querySelectorAll('[data-theme-preset]');
     for (var i = 0; i < btns.length; i++) {
@@ -317,6 +330,7 @@
     bindHotUI();
     paintHot();
 
+    renderPresets();
     bindThemeUI();
     paintPal();
     paintDemo();

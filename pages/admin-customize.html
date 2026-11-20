@@ -12,9 +12,9 @@
 <link rel="stylesheet" href="/css/home.css?v=15">
 <link rel="stylesheet" href="/css/page.css?v=9">
 <link rel="stylesheet" href="/css/admin.css?v=13">
-<link rel="stylesheet" href="/css/customize.css?v=3">
+<link rel="stylesheet" href="/css/customize.css?v=4">
 <script src="/js/config.js?v=7"></script>
-<script src="/js/core.js?v=23"></script>
+<script src="/js/core.js?v=25"></script>
 </head>
 <body data-page="admin-customize" data-accent="blue">
 
@@ -148,10 +148,7 @@
               <b>预设配色</b>
               <i>后台默认本来就是蓝的；点「正红」会连同后台一起变红。</i>
             </div>
-            <div class="th-pre__b">
-              <button class="th-sw" type="button" data-theme-preset="red"><span class="th-sw__c" style="--c:#E0291E"></span>正红 · 默认</button>
-              <button class="th-sw" type="button" data-theme-preset="blue"><span class="th-sw__c" style="--c:#1D52E2"></span>后台蓝</button>
-            </div>
+            <div class="th-pre__b" id="thPresets"></div>
           </div>
 
           <div class="th-body">
@@ -198,6 +195,6 @@
   </div>
 </footer>
 
-<script src="/js/personalize.js?v=2" defer></script>
+<script src="/js/personalize.js?v=3" defer></script>
 </body>
 </html>
