@@ -242,7 +242,7 @@
     hotBound = true;
 
     document.addEventListener('keydown', function (ev) {
-      if (ev.ctrlKey || ev.altKey || ev.metaKey || ev.shiftKey) return;
+      if (ev.ctrlKey || ev.altKey || ev.metaKey) return;
       if (ev.repeat) return;
 
       var t = ev.target;
@@ -255,13 +255,23 @@
       if (document.body && document.body.getAttribute('data-hot-catch') === '1') return;
 
       var key = ev.key;
+      var isAdmin = location.pathname.indexOf('/admin') === 0 || location.pathname === '/lab';
+
+      /* 反引号 / ~ 键：固定回首页，不走数字键那套，也不受「启用」开关影响。
+         前台回账户首页，后台与实验台回后台概览。 */
+      if (key === '`' || key === '~' || ev.code === 'Backquote') {
+        ev.preventDefault();
+        go(isAdmin ? '/admin' : '/home');
+        return;
+      }
+
+      if (ev.shiftKey) return;
       if (!/^[0-9a-zA-Z]$/.test(key)) return;
 
       var cfg = loadHot();
       if (!cfg.on) return;
 
       /* 实验台是后台工具，在那边按数字键也走后台那套 */
-      var isAdmin = location.pathname.indexOf('/admin') === 0 || location.pathname === '/lab';
       var list = hotList(isAdmin ? 'admin' : 'user', cfg);
       var want = '';
       for (var i = 0; i < list.length; i++) {
@@ -364,7 +374,7 @@
     '/admin/items': { page: 'admin-items', js: '/js/admin-shop.js?v=2' },
     '/admin/messages': { page: 'admin-messages', js: '/js/admin-msg.js?v=4' },
     '/admin/moonetix': { page: 'admin-moonetix', js: '/js/admin-mtx.js?v=1' },
-    '/admin/customize': { page: 'admin-customize', js: '/js/personalize.js?v=3', css: ['/css/customize.css?v=4'] }
+    '/admin/customize': { page: 'admin-customize', js: '/js/personalize.js?v=4', css: ['/css/customize.css?v=5'] }
   };
 
   function normalize(path) {

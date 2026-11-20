@@ -13,9 +13,9 @@
   <link rel="stylesheet" href="/css/home.css?v=15">
   <link rel="stylesheet" href="/css/settings.css?v=18">
   <link rel="stylesheet" href="/css/relation.css?v=2">
-  <link rel="stylesheet" href="/css/customize.css?v=4">
+  <link rel="stylesheet" href="/css/customize.css?v=5">
   <script src="/js/config.js?v=7"></script>
-  <script src="/js/core.js?v=25"></script>
+  <script src="/js/core.js?v=26"></script>
 </head>
 
 <body data-page="settings">
@@ -394,7 +394,7 @@
           <div class="cz__head">
             <div class="cz__x">
               <b>数字键直达</b>
-              <i>站内任何页面按键盘上排的数字键，直接跳到对应功能。默认按功能目录的编号走，第 10 项用 0。在输入框里打字时不会触发。</i>
+              <i>站内任何页面按键盘上排的数字键，直接跳到对应功能。默认按功能目录的编号走，第 10 项用 0。在输入框里打字时不会触发。反引号 ` 键（1 左边那个）随时回账户首页，不受右边这个开关影响。</i>
             </div>
             <label class="cz-sw">
               <input type="checkbox" id="hkOn" checked>
@@ -411,7 +411,7 @@
           <ul class="hk" id="hkList"></ul>
 
           <div class="cz__foot">
-            <p class="cz__note">点「改键」后按任意数字或字母即可绑定；撞键会自动交换。键位只存在这台电脑的浏览器里。</p>
+            <p class="cz__note">点「改键」后按任意数字或字母即可绑定；撞键会自动交换。` 键固定回首页，不参与改键。键位只存在这台电脑的浏览器里。</p>
             <div class="cz__acts"><button class="btn btn--ghost" type="button" id="hkReset">恢复默认键位</button></div>
           </div>
         </div>
@@ -511,7 +511,7 @@
   </footer>
 
   <script src="/js/settings.js?v=20" defer></script>
-  <script src="/js/personalize.js?v=3" defer></script>
+  <script src="/js/personalize.js?v=4" defer></script>
 </body>
 
 </html>

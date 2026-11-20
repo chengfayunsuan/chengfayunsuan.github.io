@@ -35,6 +35,27 @@
   var scope = 'user';
   var catching = null;
 
+  /* 后台键位只对站长和管理员有意义。
+     普通用户与大会员在设置页看不到「后台」这一栏，免得看到一个自己永远用不上的目录。 */
+  function gateAdminTab() {
+    var page = (document.body.getAttribute('data-page') || '');
+    if (page.indexOf('admin') === 0) return;
+
+    function allow(u) {
+      if (u && (u.role === 'owner' || u.role === 'admin')) {
+        document.body.classList.add('has-adm-tab');
+      }
+    }
+
+    var me = CF.cache && CF.cache.get ? CF.cache.get() : null;
+    if (me) { allow(me); return; }
+
+    fetch('/api/auth/me', { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) { allow(d && (d.user || d)); })
+      .catch(function () {});
+  }
+
   function paintHot() {
     var cfg = CF.keys.read();
 
@@ -329,6 +350,7 @@
 
     bindHotUI();
     paintHot();
+    gateAdminTab();
 
     renderPresets();
     bindThemeUI();

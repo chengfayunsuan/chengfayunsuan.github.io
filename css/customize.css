@@ -114,6 +114,14 @@
   border-bottom: 1px solid var(--hair);
 }
 
+/* 后台页签：后台页面本来就能看；前台设置页要等 JS 确认是站长/管理员才放出来 */
+body:not([data-page^="admin"]) [data-hk-scope="admin"] { display: none; }
+body.has-adm-tab [data-hk-scope="admin"] { display: inline-block; }
+/* 只剩一个页签时整条页签栏没有意义，直接收起 */
+body:not([data-page^="admin"]):not(.has-adm-tab) .cz__tabs { display: none; }
+/* 页签栏收起后，列表顶上补一条分隔线 */
+body:not([data-page^="admin"]):not(.has-adm-tab) .hk { border-top: 1px solid var(--hair); }
+
 .cz__tab {
   flex: 0 0 auto;
   padding: 12px 20px;
