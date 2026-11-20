@@ -32,17 +32,35 @@
 
   var SKIP = { SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, CODE: 1, PRE: 1 };
 
+  /* 用户自己的东西一律不翻：用户名、问卷标题与供应商、商品名、消息正文。
+     标记优先看 data-tr-skip，下面这串选择器是给不由本脚本控制的节点兜底的。 */
+  var RAW = [
+    '[data-tr-skip]',
+    '#navName', '.hm-nav__name',
+    '.svc__t', '.svc__prov-name', '.svc__topic', '.svc__req',
+    '.st-item__t', '.st-item__s',
+    '.ord__t', '.msg__b', '.lg-n'
+  ].join(',');
+
+  function raw(el) {
+    if (!el || el.nodeType !== 1) return false;
+    if (el.hasAttribute('data-tr-skip')) return true;
+    return !!(el.closest && el.closest(RAW));
+  }
+
   function walk(node) {
     if (!node) return;
     if (node.nodeType === 3) {
       var p = node.parentNode;
       if (p && SKIP[p.nodeName]) return;
+      if (raw(p)) return;
       var next = tr(node.nodeValue);
       if (next !== node.nodeValue) node.nodeValue = next;
       return;
     }
     if (node.nodeType !== 1) return;
     if (SKIP[node.nodeName]) return;
+    if (raw(node)) return;
 
     var attrs = ['placeholder', 'title', 'aria-label', 'alt'];
     for (var i = 0; i < attrs.length; i++) {
@@ -64,6 +82,8 @@
       for (var i = 0; i < list.length; i++) {
         var m = list[i];
         if (m.type === 'characterData') {
+          /* 用户名这类节点内容会随登录态变化，别被改动 */
+          if (raw(m.target.parentNode)) continue;
           var nv = tr(m.target.nodeValue);
           if (nv !== m.target.nodeValue) m.target.nodeValue = nv;
         } else {
