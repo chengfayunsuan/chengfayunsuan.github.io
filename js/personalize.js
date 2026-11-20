@@ -164,9 +164,11 @@
       });
     }
 
-    /* 捕获阶段先拿到按键，避免被页面其它快捷键吃掉 */
+    /* 捕获阶段先拿到按键，避免被页面其它快捷键吃掉。
+       SPA 换页会把这支脚本重跑一遍，所以同一次按键只让一份处理，别互相打架。 */
     document.addEventListener('keydown', function (ev) {
-      if (!catching) return;
+      if (!catching || ev.__pzCatch) return;
+      ev.__pzCatch = true;
       ev.preventDefault();
       ev.stopPropagation();
 
@@ -343,8 +345,11 @@
   /* ---------- 启动 ---------- */
 
   function boot() {
-    /* 后台外观页默认停在「后台」页签 */
-    if ((document.body.getAttribute('data-page') || '').indexOf('admin') === 0) scope = 'admin';
+    /* 每次进来都从零开始：SPA 换页后 DOM 是新的，旧状态（等键、页签、草稿）都得清掉 */
+    scope = (document.body.getAttribute('data-page') || '').indexOf('admin') === 0 ? 'admin' : 'user';
+    catching = null;
+    dirty = false;
+    document.body.setAttribute('data-hot-catch', '0');
 
     draft = baseOf(CF.theme.read());
 

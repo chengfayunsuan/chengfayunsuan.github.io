@@ -228,7 +228,17 @@
 
   function go(href) {
     if (!href) return false;
-    if (normalize(location.pathname) === normalize(href)) return false;
+    var path = normalize(href);
+    if (normalize(location.pathname) === path) return false;
+
+    /* 同一个导航组里就直接换页，别整页刷新 */
+    var route = routeOf(path);
+    var nowPage = (document.body || document.documentElement).getAttribute('data-page') || '';
+    if (route && groupOf(nowPage) && groupOf(nowPage) === groupOf(route.page)) {
+      swap(route, path, true);
+      return true;
+    }
+
     var a = document.querySelector('.dock a[href="' + href + '"]');
     if (a) { a.click(); return true; }
     location.href = href;
@@ -360,21 +370,23 @@
     }
   }, true);
 
-  /* ---------- 同导航组 SPA ---------- */
+  /* ---------- 同导航组 SPA ----------
+     目标页要用的 css / js 不再写在这里，换页时直接读目标 HTML 自己引了什么。
+     以前每加一个样式就得记得来这儿补一条，漏一次就是「有时候样式没了」。 */
 
   var ROUTES = {
-    '/home': { page: 'home', js: '/js/home.js?v=12' },
-    '/settings': { page: 'settings', js: '/js/settings.js?v=20', css: ['/css/settings.css?v=18', '/css/relation.css?v=2'] },
-    '/admin': { page: 'admin', js: '/js/admin.js?v=7' },
-    '/admin/users': { page: 'admin-users', js: '/js/admin.js?v=7' },
-    '/admin/withdrawals': { page: 'admin-withdrawals', js: '/js/admin.js?v=7' },
-    '/admin/tickets': { page: 'admin-tickets', js: '/js/admin.js?v=7' },
-    '/admin/surveys': { page: 'admin-surveys', js: '/js/admin-surveys.js?v=1' },
-    '/admin/orders': { page: 'admin-orders', js: '/js/admin-shop.js?v=2' },
-    '/admin/items': { page: 'admin-items', js: '/js/admin-shop.js?v=2' },
-    '/admin/messages': { page: 'admin-messages', js: '/js/admin-msg.js?v=4' },
-    '/admin/moonetix': { page: 'admin-moonetix', js: '/js/admin-mtx.js?v=1' },
-    '/admin/customize': { page: 'admin-customize', js: '/js/personalize.js?v=4', css: ['/css/customize.css?v=5'] }
+    '/home': { page: 'home' },
+    '/settings': { page: 'settings' },
+    '/admin': { page: 'admin' },
+    '/admin/users': { page: 'admin-users' },
+    '/admin/withdrawals': { page: 'admin-withdrawals' },
+    '/admin/tickets': { page: 'admin-tickets' },
+    '/admin/surveys': { page: 'admin-surveys' },
+    '/admin/orders': { page: 'admin-orders' },
+    '/admin/items': { page: 'admin-items' },
+    '/admin/messages': { page: 'admin-messages' },
+    '/admin/moonetix': { page: 'admin-moonetix' },
+    '/admin/customize': { page: 'admin-customize' }
   };
 
   function normalize(path) {
@@ -417,12 +429,28 @@
     });
   }
 
+  var GLOBAL_JS = /^\/js\/(core|config)\.js/i;
+
   function runScript(src) {
     if (!src) return;
+    /* core / config 是全局的，SPA 换页时不能重跑，否则事件会绑两遍 */
+    if (GLOBAL_JS.test(src.split('?')[0])) return;
     var s = document.createElement('script');
     s.src = src + (src.indexOf('?') >= 0 ? '&' : '?') + '_=' + Date.now();
     s.defer = true;
     document.body.appendChild(s);
+  }
+
+  /* 目标页自己要用的资源，一律以目标 HTML 里写的为准。
+     以前靠 ROUTES 手写白名单，加一个 css 忘一次就漏一次（设置页的 customize.css 就是这么丢的）。 */
+  function collect(doc, sel, attr) {
+    var out = [];
+    var list = doc.querySelectorAll(sel);
+    for (var i = 0; i < list.length; i++) {
+      var v = list[i].getAttribute(attr);
+      if (v) out.push(v);
+    }
+    return out;
   }
 
   function swap(route, path, push) {
@@ -437,8 +465,20 @@
         var nowMain = document.querySelector('main');
         if (!nextMain || !nowMain) throw new Error('no main');
 
+        var cssList = (route.css || []).concat(collect(doc, 'link[rel="stylesheet"]', 'href'));
+
+        /* 同一个 js 只跑一次：route.js 和 HTML 里的引用经常是同一份 */
+        var jsAll = (route.js ? [route.js] : []).concat(collect(doc, 'script[src]', 'src'));
+        var jsList = [], seenJs = {};
+        for (var k = 0; k < jsAll.length; k++) {
+          var base = jsAll[k].split('?')[0];
+          if (seenJs[base]) continue;
+          seenJs[base] = 1;
+          jsList.push(jsAll[k]);
+        }
+
         /* 先把目标页独有样式挂上，再换 DOM，避免出现无样式闪烁 */
-        ensureCss(route.css);
+        ensureCss(cssList);
 
         nowMain.replaceWith(document.importNode(nextMain, true));
         document.title = doc.title;
@@ -454,7 +494,7 @@
         if (push) history.pushState({ page: route.page, path: path }, '', path);
         window.scrollTo(0, 0);
 
-        runScript(route.js);
+        for (var i = 0; i < jsList.length; i++) runScript(jsList[i]);
       })
       .catch(function () { location.href = path; });
   }
