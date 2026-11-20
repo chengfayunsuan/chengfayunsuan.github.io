@@ -47,10 +47,16 @@ function logVisit(context, url) {
   const { request, env } = context;
   if (!env || !env.DB) return;
 
-  const ip = request.headers.get('CF-Connecting-IP') || '';
+  const ip = (request.headers.get('CF-Connecting-IP') || '').slice(0, 45);
   const ua = (request.headers.get('User-Agent') || '').slice(0, 160);
   const cf = request.cf || {};
   const country = cf.country || '';
+  /* 边缘节点能给到什么就记什么，本地 wrangler 下这些基本都是空 */
+  const region = (cf.region || '').slice(0, 60);
+  const city = (cf.city || '').slice(0, 60);
+  const asn = cf.asn ? String(cf.asn).slice(0, 12) : '';
+  const org = (cf.asOrganization || '').slice(0, 80);
+  const colo = (cf.colo || '').slice(0, 8);
 
   let ref = '';
   const rawRef = request.headers.get('Referer') || '';
@@ -66,8 +72,9 @@ function logVisit(context, url) {
   const task = (async () => {
     const vid = (await sha256Hex(ip + '|' + ua)).slice(0, 20);
     await env.DB.prepare(
-      'INSERT INTO visits (path, vid, country, ref, ua) VALUES (?, ?, ?, ?, ?)'
-    ).bind(path, vid, country, ref, ua).run();
+      `INSERT INTO visits (path, vid, ip, country, region, city, asn, org, colo, ref, ua)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(path, vid, ip, country, region, city, asn, org, colo, ref, ua).run();
   })().catch(() => {});
 
   if (context.waitUntil) context.waitUntil(task);

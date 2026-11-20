@@ -2232,6 +2232,8 @@ async function labPaperReset(env) {
    每次打开顺手删掉 90 天前的，免得表无限长。 */
 async function adminTraffic(env, url) {
   const days = Math.min(30, Math.max(7, Number(url.searchParams.get('days')) || 14));
+  const page = Math.max(1, Number(url.searchParams.get('page')) || 1);
+  const per = Math.min(100, Math.max(10, Number(url.searchParams.get('per')) || 30));
 
   await env.DB.prepare(
     "DELETE FROM visits WHERE at < datetime('now','+8 hours','-90 days')"
@@ -2252,25 +2254,47 @@ async function adminTraffic(env, url) {
       GROUP BY d ORDER BY d`
   ).all();
 
-  const paths = await env.DB.prepare(
-    `SELECT path, COUNT(*) AS pv, COUNT(DISTINCT vid) AS uv
+  /* 浏览器与系统在 SQL 里归类，省得把几千行 UA 拉回 Worker 再算 */
+  const browsers = await env.DB.prepare(
+    `SELECT CASE
+        WHEN ua LIKE '%Edg/%' OR ua LIKE '%EdgA/%' THEN 'Edge'
+        WHEN ua LIKE '%OPR/%' OR ua LIKE '%Opera%' THEN 'Opera'
+        WHEN ua LIKE '%Firefox/%' THEN 'Firefox'
+        WHEN ua LIKE '%MicroMessenger%' THEN '微信内置'
+        WHEN ua LIKE '%Chrome/%' OR ua LIKE '%CriOS/%' THEN 'Chrome'
+        WHEN ua LIKE '%Safari/%' THEN 'Safari'
+        WHEN ua = '' THEN '未知'
+        ELSE '其他' END AS k,
+       COUNT(*) AS pv, COUNT(DISTINCT vid) AS uv
        FROM visits
       WHERE at >= datetime('now','+8 hours','-7 days')
-      GROUP BY path ORDER BY pv DESC LIMIT 12`
+      GROUP BY k ORDER BY pv DESC LIMIT 8`
   ).all();
 
-  const refs = await env.DB.prepare(
-    `SELECT ref, COUNT(*) AS pv
+  const systems = await env.DB.prepare(
+    `SELECT CASE
+        WHEN ua LIKE '%Windows NT 10%' THEN 'Windows 10/11'
+        WHEN ua LIKE '%Windows%' THEN 'Windows 其它'
+        WHEN ua LIKE '%iPhone%' OR ua LIKE '%iPad%' THEN 'iOS / iPadOS'
+        WHEN ua LIKE '%Android%' THEN 'Android'
+        WHEN ua LIKE '%Mac OS X%' THEN 'macOS'
+        WHEN ua LIKE '%Linux%' THEN 'Linux'
+        WHEN ua = '' THEN '未知'
+        ELSE '其他' END AS k,
+       COUNT(*) AS pv, COUNT(DISTINCT vid) AS uv
        FROM visits
       WHERE at >= datetime('now','+8 hours','-7 days')
-      GROUP BY ref ORDER BY pv DESC LIMIT 10`
+      GROUP BY k ORDER BY pv DESC LIMIT 8`
   ).all();
 
-  const countries = await env.DB.prepare(
-    `SELECT country, COUNT(*) AS pv
-       FROM visits
-      WHERE at >= datetime('now','+8 hours','-7 days')
-      GROUP BY country ORDER BY pv DESC LIMIT 8`
+  /* 今天的访客里，第一次出现就在今天的算新访客 */
+  const mix = await env.DB.prepare(
+    `SELECT CASE WHEN f.first_at >= date('now','+8 hours') THEN 'new' ELSE 'back' END AS k,
+            COUNT(*) AS pv, COUNT(DISTINCT v.vid) AS uv
+       FROM visits v
+       JOIN (SELECT vid, MIN(at) AS first_at FROM visits GROUP BY vid) f ON f.vid = v.vid
+      WHERE v.at >= date('now','+8 hours')
+      GROUP BY k`
   ).all();
 
   const hours = await env.DB.prepare(
@@ -2279,9 +2303,15 @@ async function adminTraffic(env, url) {
       GROUP BY h ORDER BY h`
   ).all();
 
-  const recent = await env.DB.prepare(
-    'SELECT at, path, country, ref, ua FROM visits ORDER BY id DESC LIMIT 24'
-  ).all();
+  const total = await env.DB.prepare('SELECT COUNT(*) AS n FROM visits').first();
+  const totalN = Number(total && total.n) || 0;
+  const pages = Math.max(1, Math.ceil(totalN / per));
+  const cur = Math.min(page, pages);
+
+  const detail = await env.DB.prepare(
+    `SELECT id, at, path, ip, country, region, city, asn, org, colo, ref, ua
+       FROM visits ORDER BY at DESC, id DESC LIMIT ? OFFSET ?`
+  ).bind(per, (cur - 1) * per).all();
 
   const rows = function (r) { return (r && r.results) || []; };
 
@@ -2293,20 +2323,34 @@ async function adminTraffic(env, url) {
     series: rows(series).map(function (r) {
       return { d: r.d, pv: Number(r.pv) || 0, uv: Number(r.uv) || 0 };
     }),
-    paths: rows(paths).map(function (r) {
-      return { path: r.path || '/', pv: Number(r.pv) || 0, uv: Number(r.uv) || 0 };
+    browsers: rows(browsers).map(function (r) {
+      return { k: r.k || '其他', pv: Number(r.pv) || 0, uv: Number(r.uv) || 0 };
     }),
-    refs: rows(refs).map(function (r) {
-      return { ref: r.ref || '', pv: Number(r.pv) || 0 };
+    systems: rows(systems).map(function (r) {
+      return { k: r.k || '其他', pv: Number(r.pv) || 0, uv: Number(r.uv) || 0 };
     }),
-    countries: rows(countries).map(function (r) {
-      return { country: r.country || '', pv: Number(r.pv) || 0 };
+    mix: rows(mix).map(function (r) {
+      return { k: r.k === 'new' ? '今日新访客' : '回访', pv: Number(r.pv) || 0, uv: Number(r.uv) || 0 };
     }),
     hours: rows(hours).map(function (r) {
       return { h: r.h, pv: Number(r.pv) || 0 };
     }),
-    recent: rows(recent).map(function (r) {
-      return { at: r.at, path: r.path || '/', country: r.country || '', ref: r.ref || '', ua: r.ua || '' };
+    pager: { page: cur, per: per, total: totalN, pages: pages },
+    detail: rows(detail).map(function (r) {
+      return {
+        id: r.id,
+        at: r.at,
+        path: r.path || '/',
+        ip: r.ip || '',
+        country: r.country || '',
+        region: r.region || '',
+        city: r.city || '',
+        asn: r.asn || '',
+        org: r.org || '',
+        colo: r.colo || '',
+        ref: r.ref || '',
+        ua: r.ua || ''
+      };
     })
   });
 }
