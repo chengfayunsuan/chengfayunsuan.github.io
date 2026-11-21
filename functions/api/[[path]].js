@@ -1472,8 +1472,15 @@ function trConf(env) {
   const share = Number(env.THEOREMREACH_SHARE || 0.69);
   const maxXb = Number(env.THEOREMREACH_MAX_XB || 500);
   const per = Number(env.THEOREMREACH_XB_PER || 1);
+  /* 官方要求 entry 链接必须带这些：partner_id 对应面板里的 Placement，
+     exchange_rate 是「1 美元 = 多少个我们的币」，官方下限 10 */
+  const partnerId = String(env.THEOREMREACH_PARTNER_ID || '').trim();
+  const rate = Number(env.THEOREMREACH_EXCHANGE_RATE || 10);
+  const curName = String(env.THEOREMREACH_CURRENCY || 'XB').trim() || 'XB';
   return {
-    apiKey, token, secretKey, pathKey,
+    apiKey, token, secretKey, pathKey, partnerId,
+    exchangeRate: isFinite(rate) && rate >= 10 ? Math.round(rate) : 10,
+    curName,
     share: isFinite(share) && share > 0 && share <= 1 ? share : 0.69,
     maxXb: isFinite(maxXb) && maxXb > 0 ? maxXb : 500,
     xbPer: isFinite(per) && per > 0 ? per : 1,
@@ -1530,6 +1537,39 @@ async function trLink(request, env) {
   });
 }
 
+/* 生成官方的签名入口链接。
+   裸的 ?api_key&user_id 只是「能进」，官方要求的还有 currency_name_plural /
+   exchange_rate / transaction_id / external_id / partner_id，并且整条 URL 要签 hash；
+   不签或不传这些，它会走进默认流程（默认国家、默认汇率），奖励归属也对不上。
+   exchange_rate 下限 10，意思是 1 美元 = 10 个币。 */
+async function trEntryUrl(c, uid, debug) {
+  /* 没有 partner_id 就先别上签名链接：官方标了必填，少了可能被直接拒，
+     比现在的裸链接更糟。等面板里拿到 Placements ID 再启用这一段。 */
+  if (!c.partnerId) {
+    return TR_WALL + '?api_key=' + encodeURIComponent(c.apiKey) + '&user_id=' + Number(uid);
+  }
+
+  const qs = [
+    'api_key=' + encodeURIComponent(c.apiKey),
+    'user_id=' + Number(uid),
+    /* external_id：除 IP 之外的第二个身份锚点，官方要求必填 */
+    'external_id=' + Number(uid),
+    /* 每次进入一个唯一号，回调会原样带回，用来对账「这次进入」 */
+    'transaction_id=' + encodeURIComponent('cf' + uid + '-' + Date.now().toString(36) + '-' +
+      Math.random().toString(36).slice(2, 7)),
+    'exchange_rate=' + c.exchangeRate,
+    'currency_name_plural=' + encodeURIComponent(c.curName),
+    'currency_name_singular=' + encodeURIComponent(c.curName)
+  ];
+  if (c.partnerId) qs.push('partner_id=' + encodeURIComponent(c.partnerId));
+  if (debug) qs.push('debug=true');
+
+  const url = TR_WALL + '?' + qs.join('&');
+  /* 没有 secret 就签不了名，退回裸链接，至少还能进 */
+  if (!c.secretKey) return url;
+  return url + '&hash=' + (await trHashOf(c.secretKey, url));
+}
+
 /* 墙入口的跳转版：登录了就 302 过去，没登录送去登录页。
    做成跳转而不是 JSON，好处是卡片可以是个普通 <a>，中键新窗口也能用。 */
 async function trGo(request, env) {
@@ -1538,12 +1578,13 @@ async function trGo(request, env) {
   if (!session) return Response.redirect(origin + '/login', 302);
   if (!isActive(session)) return Response.redirect(origin + '/support', 302);
 
-  /* 墙地址靠 api_key 拼，光有 secret 不够 */
   const c = trConf(env);
   if (!c.apiKey) return Response.redirect(origin + '/earn', 302);
 
-  const target = TR_WALL + '?api_key=' + encodeURIComponent(c.apiKey) +
-    '&user_id=' + Number(session.uid);
+  /* ?debug=1 走官方测试模式：只出 1 道题的问卷，专门用来验证回调，
+     绝不能让它进生产流量 */
+  const debug = /^(1|true|yes)$/i.test(new URL(request.url).searchParams.get('debug') || '');
+  const target = await trEntryUrl(c, session.uid, debug);
   return new Response(null, {
     status: 302,
     headers: {
@@ -1658,7 +1699,9 @@ async function trDecide(env, request, p, seg, url) {
   const how = byHash ? 'hash' : (byPath ? 'path' : 'token');
 
   const uid = Number(p.user_id || p.uid || p.user || 0);
-  const tid = String(p.tx_id || p.txn_id || p.tx || p.transaction_id || p.tid || '').trim();
+  /* 只认它自己的交易号。transaction_id 是我们传进去的「本次进入」编号，
+     一次进入可能答好几份卷，拿它去重会把后面几份奖励全吞掉 */
+  const tid = String(p.tx_id || p.txn_id || p.tx || p.tid || '').trim();
   const reward = Number(p.reward != null ? p.reward : (p.reward_amount != null ? p.reward_amount : 0));
   const usd = Number(p.currency);   /* 官方：currency 是这笔实际付给发布方的美元金额 */
   const flag = String(p.reversal || p.is_reversal || p.reversed || '').trim();
@@ -1705,6 +1748,8 @@ async function trDecide(env, request, p, seg, url) {
     meta: {
       offerId: p.offer_id || p.survey_id || '',
       offerName: p.offer_name || p.survey_name || '',
+      /* 它回传的「本次进入」编号（= 我们 entry 链接里的 transaction_id），用来对账 */
+      eventId: p.transaction_id || '',
       payout: p.currency || '',
       currency: 'XB',
       ip: p.ip || request.headers.get('CF-Connecting-IP') || ''
