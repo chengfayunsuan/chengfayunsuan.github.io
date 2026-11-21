@@ -147,3 +147,20 @@ CREATE TABLE IF NOT EXISTS follows (
 
 CREATE INDEX IF NOT EXISTS idx_follows_followee ON follows(followee_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_follows_follower ON follows(follower_id, created_at DESC);
+
+-- ============================================================
+-- 好感度每日结算账
+--
+-- 每天北京时间 0 点结算前一天：当日赚分最多的人 +1 点好感度。
+-- day 主键保证并发只结算一次；uid=0 / earned=0 表示那天无人入账。
+-- 赚分口径：fc_ledger 正向 delta，剔除 cdk_redeem / withdraw_refund / admin_adjust。
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS affinity_daily (
+  day        TEXT    PRIMARY KEY,              -- 北京时间 YYYY-MM-DD（被结算的那个自然日）
+  uid        INTEGER NOT NULL DEFAULT 0,       -- 当日赚分王；0 = 无人入账
+  earned     INTEGER NOT NULL DEFAULT 0,       -- 当日入账总量，单位 1/10000 fc
+  applied_at TEXT    NOT NULL DEFAULT (datetime('now','+8 hours'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_affinity_daily_uid ON affinity_daily(uid, day);

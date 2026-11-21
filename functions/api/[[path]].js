@@ -286,9 +286,85 @@ function lvSql(delta) {
   return `exp = exp + (${d}), level = CAST(FLOOR((exp + (${d})) / 100.0) AS INTEGER) + 1`;
 }
 
+/* ---------------- 好感度每日结算 ----------------
+   每天北京时间 0 点结算前一天：当日赚分最多的人 +1 点好感度。
+   「赚分」= fc_ledger 里正向的收益入账（问卷、广告墙等）；
+   充值（cdk_redeem）、提现退回、管理员调整不算赚分——那是钱在挪窝。
+   Cloudflare Pages 没有定时器，结算挂在 /api/auth/me 上懒触发：
+   跨天后第一个访问的人把之前所有没结算的天一口气补齐（含回填历史）。
+   并发安全靠 affinity_daily.day 主键：INSERT OR IGNORE 抢到的那次才加好感度。 */
+
+const AFFINITY_SKIP_KINDS = "('withdraw_refund','cdk_redeem','admin_adjust')";
+
+async function settleAffinity(env) {
+  // 快路径：昨天已结算就直接返回，整个函数只剩一次轻量读
+  const probe = await env.DB.prepare(
+    `SELECT (SELECT MAX(day) FROM affinity_daily) done,
+            date('now','+8 hours','-1 day') yesterday`
+  ).first();
+  if (!probe || probe.done === probe.yesterday) return 0;
+
+  // 起点：最早一笔入账所在的北京日；回填历史全靠它
+  const first = await env.DB.prepare(
+    `SELECT MIN(date(created_at,'+8 hours')) d FROM fc_ledger
+      WHERE delta > 0 AND kind NOT IN ${AFFINITY_SKIP_KINDS}`
+  ).first();
+  const start = first && first.d ? first.d : probe.yesterday;
+
+  const days = [];
+  const cur = new Date(start + 'T00:00:00Z');
+  const end = new Date(probe.yesterday + 'T00:00:00Z');
+  while (cur <= end && days.length < 120) {   // 单次请求最多补 120 天，再多下次接着补
+    days.push(cur.toISOString().slice(0, 10));
+    cur.setUTCDate(cur.getUTCDate() + 1);
+  }
+
+  let awarded = 0;
+  for (const day of days) {
+    const win = await env.DB.prepare(
+      `SELECT l.uid, SUM(l.delta) s
+         FROM fc_ledger l JOIN users u ON u.id = l.uid
+        WHERE l.delta > 0
+          AND l.kind NOT IN ${AFFINITY_SKIP_KINDS}
+          AND date(l.created_at,'+8 hours') = ?
+          AND u.status = 'active' AND u.deleted_at IS NULL
+        GROUP BY l.uid
+        ORDER BY s DESC, l.uid ASC
+        LIMIT 1`
+    ).bind(day).first();
+
+    // uid=0 的占位行把「无人入账」的日子也钉在表里，避免反复空扫
+    const ins = await env.DB.prepare(
+      `INSERT OR IGNORE INTO affinity_daily (day, uid, earned, applied_at)
+       VALUES (?, ?, ?, datetime('now','+8 hours'))`
+    ).bind(day, win ? win.uid : 0, win ? win.s : 0).run();
+    if (!(ins.meta && ins.meta.changes > 0)) continue;   // 别人刚结算过这一天
+
+    if (win) {
+      await env.DB.prepare(
+        `UPDATE users
+            SET affinity = affinity + 1,
+                updated_at = datetime('now','+8 hours')
+          WHERE id = ?`
+      ).bind(win.uid).run();
+      awarded++;
+    }
+  }
+  return awarded;
+}
+
 async function me(request, env) {
   const session = await currentSession(request, env);
   if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+
+  // 好感度日结：挂在登录态页都必经的 /me 上，放在取资料之前，
+  // 这样刚补上的好感度当场就能看到；结算失败不影响本次响应。
+  try {
+    await settleAffinity(env);
+  } catch (e) {
+    console.error('affinity settle error:', e && e.message ? e.message : e);
+  }
+
   const user = await profileOf(env, session.uid);
 
   /* 每日登录 +1 点经验（不是 +1 级）：按北京时间自然日算，同一天只加一次。
