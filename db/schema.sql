@@ -164,3 +164,33 @@ CREATE TABLE IF NOT EXISTS affinity_daily (
 );
 
 CREATE INDEX IF NOT EXISTS idx_affinity_daily_uid ON affinity_daily(uid, day);
+
+-- ============================================================
+-- 邮箱验证码（三处共用）
+--
+-- purpose: verify 验证邮箱 / reset 忘记密码 / password 改密码
+-- 一个账号一天最多发 3 封，流水记在 mail_log，配额与重发间隔都从那里算。
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS mail_codes (
+  uid      INTEGER NOT NULL,
+  purpose  TEXT    NOT NULL,
+  email    TEXT    NOT NULL DEFAULT '',
+  code     TEXT    NOT NULL DEFAULT '',
+  tries    INTEGER NOT NULL DEFAULT 0,
+  sent_at  TEXT    NOT NULL DEFAULT (datetime('now','+8 hours')),
+  PRIMARY KEY (uid, purpose)
+);
+
+CREATE INDEX IF NOT EXISTS idx_mail_codes_sent ON mail_codes (sent_at);
+
+CREATE TABLE IF NOT EXISTS mail_log (
+  id      INTEGER PRIMARY KEY AUTOINCREMENT,
+  uid     INTEGER NOT NULL,
+  email   TEXT    NOT NULL DEFAULT '',
+  purpose TEXT    NOT NULL DEFAULT '',
+  ip      TEXT    NOT NULL DEFAULT '',
+  sent_at TEXT    NOT NULL DEFAULT (datetime('now','+8 hours'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_mail_log_uid_time ON mail_log (uid, sent_at);

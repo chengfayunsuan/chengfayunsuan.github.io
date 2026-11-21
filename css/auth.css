@@ -509,3 +509,53 @@
 }
 
 .check__a:hover { color: var(--red); }
+
+/* 验证码行：输入框占满，发送按钮贴右 */
+.auth__code {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.auth__code .field__i {
+  /* field__i 本身是 width:100%，在 flex 行里会把自己撑满再叠上按钮的宽度，
+     窄屏直接顶出屏幕。这里换成按剩余空间分，才能跟按钮并排不溢出。 */
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+}
+
+.auth__code .btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* 再窄就把按钮换到下一行，别硬挤输入框 */
+@media (max-width: 380px) {
+  .auth__code { flex-wrap: wrap; }
+  .auth__code .btn { flex: 1 1 100%; }
+}
+
+/* 行内小字链接：忘记密码、返回登录 */
+.auth__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--red);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.auth__link:hover { color: var(--ink); }
+
+.auth__alt {
+  margin: 14px 0 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* 两个验证条各自独立，宽度撑满表单 */
+#resetForm .auth__verify { margin-top: 4px; }

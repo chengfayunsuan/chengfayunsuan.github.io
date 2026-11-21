@@ -7,7 +7,7 @@
 <meta name="description" content="Sign in or create a Chengfa account. Once you are in, you can browse public surveys, take part and accumulate points.">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/css/style.css?v=16">
-<link rel="stylesheet" href="/css/auth.css?v=9">
+<link rel="stylesheet" href="/css/auth.css?v=11">
 </head>
 <body class="auth-page">
 
@@ -64,7 +64,7 @@
           <input class="field__i" id="password" name="password" type="password"
                  autocomplete="current-password" placeholder="Your password" required>
           <p class="field__e" id="pwErr" hidden></p>
-          <p class="field__h" id="pwHint">Forgot your password? Open a ticket under Contact Support with your registered email, and the site owner will verify and reset it.</p>
+          <p class="field__h" id="pwHint"><button class="auth__link" type="button" id="forgotLink">Forgot your password?</button></p>
         </div>
 
         <div class="field" id="agreeRow">
@@ -89,6 +89,61 @@
 
         <p class="auth__note" id="authNote">
           Sessions last 30 days. Sign out after using a shared device.
+        </p>
+
+      </form>
+
+      <!-- ---------- Forgot password: reset by emailed code ---------- -->
+      <form class="auth__form" id="resetForm" hidden novalidate>
+
+        <div class="field">
+          <label class="field__l" for="rsEmail">Registered email</label>
+          <input class="field__i" id="rsEmail" name="email" type="email"
+                 autocomplete="email" placeholder="name@example.com" spellcheck="false">
+          <p class="field__e" id="rsEmailErr" hidden></p>
+        </div>
+
+        <div class="field">
+          <label class="field__l" for="rsCode">Email code</label>
+          <div class="auth__code">
+            <input class="field__i" id="rsCode" name="code" type="text" inputmode="numeric"
+                   maxlength="6" autocomplete="one-time-code" placeholder="6 digits">
+            <button class="btn btn--ghost btn--s" type="button" id="rsSend">Send code</button>
+          </div>
+          <p class="field__e" id="rsCodeErr" hidden></p>
+          <p class="field__h" id="rsCodeHint">Valid for 10 minutes. Up to 3 emails per account per day.</p>
+        </div>
+
+        <div class="field">
+          <label class="field__l" for="rsPw">New password</label>
+          <input class="field__i" id="rsPw" name="password" type="password"
+                 autocomplete="new-password" placeholder="At least 8 characters, letters and numbers">
+          <p class="field__e" id="rsPwErr" hidden></p>
+        </div>
+
+        <div class="field">
+          <label class="field__l" for="rsPw2">Confirm new password</label>
+          <input class="field__i" id="rsPw2" name="confirm" type="password"
+                 autocomplete="new-password" placeholder="Type it again">
+        </div>
+
+        <button class="auth__verify" id="verifyBox2" type="button" data-state="idle">
+          <span class="auth__verify__mark" aria-hidden="true"></span>
+          <span class="auth__verify__text" id="verifyText2" role="status" aria-live="polite">Tap to complete the human check</span>
+          <span class="auth__verify__tag" id="verifyTag2">VERIFY</span>
+          <span class="cf-turnstile" id="tsSlot2" aria-hidden="true"></span>
+        </button>
+
+        <button class="btn auth__submit" type="submit" id="rsSubmit">
+          Reset password <span aria-hidden="true">→</span>
+        </button>
+
+        <p class="auth__note" id="rsNote">
+          All devices will be signed out. Sign in again with the new password.
+        </p>
+
+        <p class="auth__alt">
+          <button class="auth__link" type="button" id="rsBack">← Back to sign in</button>
         </p>
 
       </form>
@@ -117,7 +172,7 @@
 
 <script src="/js/config.js?v=8"></script>
 <script src="/js/core.js?v=38"></script>
-<script src="/js/auth.js?v=10" defer></script>
+<script src="/js/auth.js?v=12" defer></script>
 
 <!-- Turnstile：显式渲染 + 隐形模式，官方控件不占版面；本地换测试钥匙 -->
 <script>

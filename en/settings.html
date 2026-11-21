@@ -11,7 +11,7 @@
   <meta name="robots" content="noindex">
   <link rel="stylesheet" href="/css/style.css?v=16">
   <link rel="stylesheet" href="/css/home.css?v=16">
-  <link rel="stylesheet" href="/css/settings.css?v=19">
+  <link rel="stylesheet" href="/css/settings.css?v=20">
   <link rel="stylesheet" href="/css/relation.css?v=2">
   <link rel="stylesheet" href="/css/customize.css?v=12">
   <script src="/js/config.js?v=8"></script>
@@ -299,12 +299,27 @@
                   <label class="fld__l" for="newPw2">Confirm new password</label>
                   <input class="fld" id="newPw2" name="confirm" type="password" autocomplete="new-password">
                 </div>
+                <div class="edit__f">
+                  <label class="fld__l" for="pwCode">Email code</label>
+                  <input class="fld" id="pwCode" name="code" type="text" inputmode="numeric" maxlength="6"
+                    autocomplete="one-time-code" placeholder="6 digits">
+                  <p class="edit__h">Sent to your registered email, valid 10 minutes</p>
+                </div>
+                <div class="edit__f">
+                  <label class="fld__l">Didn't get it?</label>
+                  <button class="btn btn--ghost btn--s" type="button" id="pwSend">Send code</button>
+                </div>
+                <div class="edit__f">
+                  <label class="fld__l">Daily limit</label>
+                  <p class="edit__h">Up to 3 emails per account per day, shared with email verification and recovery</p>
+                </div>
               </div>
               <div class="edit__a">
                 <button class="btn btn--red btn--s" type="submit" id="savePw">Save</button>
                 <button class="btn btn--ghost btn--s" type="button" data-cancel="pw">Cancel</button>
               </div>
               <p class="edit__e" id="pwErr" hidden></p>
+              <p class="edit__ok" id="pwOk" hidden></p>
             </form>
 
         </div>
@@ -547,7 +562,7 @@
     </div>
   </footer>
 
-  <script src="/js/settings.js?v=22" defer></script>
+  <script src="/js/settings.js?v=24" defer></script>
   <script src="/js/personalize.js?v=8" defer></script>
 <script src="/en/dict.js?v=7"></script>
 <script src="/js/i18n-en.js?v=6" defer></script>

@@ -5,6 +5,11 @@
 (function () {
   'use strict';
 
+  /* /en/ 与中文页共用这一份脚本。只有密码/验证码这几块做了双语，
+     其余区域仍由 i18n-en.js 扫静态 DOM 翻译。 */
+  var EN = /^\/en(\/|$)/.test(location.pathname);
+  function T(zh, en) { return EN ? en : zh; }
+
   var ROLES = { owner: '站长', admin: '管理员', premium: '大会员', user: '用户' };
   var STATUS = { active: '正常', frozen: '已冻结', banned: '已封禁' };
 
@@ -592,7 +597,15 @@
       $('vfOk').hidden = true;
       $('vfCode').focus();
     }
-    if (which === 'pw') { $('oldPw').value = ''; $('newPw').value = ''; $('newPw2').value = ''; $('oldPw').focus(); }
+    if (which === 'pw') {
+      $('oldPw').value = '';
+      $('newPw').value = '';
+      $('newPw2').value = '';
+      $('pwCode').value = '';
+      $('pwErr').hidden = true;
+      $('pwOk').hidden = true;
+      $('oldPw').focus();
+    }
   }
 
   function closeAll() {
@@ -804,38 +817,149 @@
       });
   });
 
-  /* 密码：旧密码验证通过才允许改，改完其它设备下线 */
+  /* 密码：旧密码 + 邮箱验证码双确认，改完其它设备下线 */
 
-  var PW_ERR = {
+  var PW_ERR = EN ? {
+    invalid_password: 'New password must be 8-72 characters.',
+    weak_password: 'New password needs both letters and numbers.',
+    wrong_password: 'Current password is wrong.',
+    same_password: 'New password is the same as the old one.',
+    password_required: 'Enter your current password.',
+    bad_code: 'The code is 6 digits. Check the email.',
+    no_code: 'No code yet. Tap Send code first.',
+    wrong_code: 'Wrong code. Check the email.',
+    expired: 'That code expired. Send a new one.',
+    too_many_tries: 'Too many wrong codes. Send a new one.',
+    too_soon: 'Just sent one. Please wait a moment.',
+    too_many: 'That is 3 emails today. Try again tomorrow.',
+    mail_unconfigured: 'Email sending is not configured yet.',
+    mail_failed: 'The email did not go out. Try again later.',
+    no_email: 'No email on this account. Please open a ticket.',
+    account_locked: 'Account status blocks this change. Open a ticket first.',
+    unauthorized: 'Session expired. Refresh the page.'
+  } : {
     invalid_password: '新密码需 8 至 72 位。',
     weak_password: '新密码要同时包含字母和数字。',
     wrong_password: '当前密码不正确。',
     same_password: '新密码和当前密码一样，换一个。',
     password_required: '请输入当前密码。',
+    bad_code: '验证码是 6 位数字，检查一下邮件。',
+    no_code: '还没发验证码，先点「发送验证码」。',
+    wrong_code: '验证码不对，检查一下邮件。',
+    expired: '验证码过期了，重新发一条。',
+    too_many_tries: '试太多次了，重新发一条。',
+    too_soon: '刚发过一封，等一会儿再发。',
+    too_many: '今天 3 封已经发完了，明天再来。',
+    mail_unconfigured: '站长还没配发信服务，暂时发不出邮件。',
+    mail_failed: '邮件没发出去，稍后再试。',
+    no_email: '账户没绑邮箱，没法发验证码，先提交工单。',
     account_locked: '账户当前状态不能修改密码，先提交工单。',
     unauthorized: '登录状态已失效，请刷新页面。'
   };
+
+  /* 发送验证码：一个账号一天 3 封，验证邮箱 / 找回密码 / 改密码共用这份额度 */
+  var pwSend = $('pwSend');
+  var pwTimer = null;
+
+  var PW_SEND_IDLE = T('发送验证码', 'Send code');
+
+  function pwCooldown(sec) {
+    var left = Math.max(1, Number(sec) || 60);
+    clearInterval(pwTimer);
+    pwSend.disabled = true;
+    pwSend.textContent = T(left + ' 秒后重发', 'Resend in ' + left + 's');
+    pwTimer = setInterval(function () {
+      left--;
+      if (left <= 0) {
+        clearInterval(pwTimer);
+        pwSend.disabled = false;
+        pwSend.textContent = T('重新发送', 'Resend code');
+        return;
+      }
+      pwSend.textContent = T(left + ' 秒后重发', 'Resend in ' + left + 's');
+    }, 1000);
+  }
+
+  if (pwSend) {
+    pwSend.addEventListener('click', function () {
+      $('pwErr').hidden = true;
+      $('pwOk').hidden = true;
+      pwSend.disabled = true;
+      pwSend.textContent = T('发送中', 'Sending…');
+
+      fetch('/api/user/password/code', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, body: d }; }); })
+        .then(function (r) {
+          var d = r.body || {};
+          if (r.ok && d.ok) {
+            var remain = d.left === undefined ? 2 : d.left;
+            $('pwOk').textContent = T(
+              '验证码已发到 ' + (d.email || '注册邮箱') + '，10 分钟内有效。今天还剩 ' + remain + ' 次。',
+              'Code sent to ' + (d.email || 'your email') + '. Valid 10 minutes. ' + remain + ' left today.');
+            $('pwOk').hidden = false;
+            pwCooldown(60);
+            $('pwCode').focus();
+            return;
+          }
+          if (d.error === 'too_soon') {
+            showErr('pwErr', T('这个账号刚发过一封，' + (d.wait || 60) + ' 秒后再发。',
+              'This account just got one. Wait ' + (d.wait || 60) + 's.'));
+            pwCooldown(d.wait || 60);
+            return;
+          }
+          if (d.error === 'too_many') {
+            showErr('pwErr', T('今天 3 封已经发完了，明天再来。',
+              'That is 3 emails today. Try again tomorrow.'));
+            pwCooldown(3600);
+            return;
+          }
+          if (d.error === 'mail_unconfigured' && d.devCode) {
+            /* 本地没配发信服务时后端会把码带回来 */
+            $('pwCode').value = d.devCode;
+            showErr('pwErr', T('发信服务没配（本地调试模式），已把验证码填好。',
+              'Mail is not configured (local debug). Code filled in for you.'));
+            pwSend.disabled = false;
+            pwSend.textContent = PW_SEND_IDLE;
+            return;
+          }
+          showErr('pwErr', PW_ERR[d.error] || d.message || T('发送失败，稍后再试。', 'Sending failed. Try again.'));
+          pwSend.disabled = false;
+          pwSend.textContent = PW_SEND_IDLE;
+        })
+        .catch(function () {
+          showErr('pwErr', T('网络连接失败。', 'Network error.'));
+          pwSend.disabled = false;
+          pwSend.textContent = PW_SEND_IDLE;
+        });
+    });
+  }
 
   $('formPw').addEventListener('submit', function (ev) {
     ev.preventDefault();
     var oldPw = $('oldPw').value;
     var a = $('newPw').value;
     var b = $('newPw2').value;
+    var code = $('pwCode').value.replace(/\D/g, '').slice(0, 6);
     $('pwErr').hidden = true;
 
-    if (!oldPw) { showErr('pwErr', '请输入当前密码。'); return; }
-    if (a.length < 8 || a.length > 72) { showErr('pwErr', '新密码需 8 至 72 位。'); return; }
-    if (!/[a-zA-Z]/.test(a) || !/[0-9]/.test(a)) { showErr('pwErr', '新密码要同时包含字母和数字。'); return; }
-    if (a !== b) { showErr('pwErr', '两次输入的新密码不一致。'); return; }
+    if (!oldPw) { showErr('pwErr', T('请输入当前密码。', 'Enter your current password.')); return; }
+    if (a.length < 8 || a.length > 72) { showErr('pwErr', T('新密码需 8 至 72 位。', 'New password must be 8-72 characters.')); return; }
+    if (!/[a-zA-Z]/.test(a) || !/[0-9]/.test(a)) { showErr('pwErr', T('新密码要同时包含字母和数字。', 'New password needs both letters and numbers.')); return; }
+    if (a !== b) { showErr('pwErr', T('两次输入的新密码不一致。', 'The two passwords do not match.')); return; }
+    if (code.length !== 6) {
+      showErr('pwErr', T('验证码是 6 位数字，检查一下邮件。', 'The code is 6 digits. Check the email.'));
+      $('pwCode').focus();
+      return;
+    }
 
     var btn = $('savePw');
     btn.disabled = true;
-    btn.textContent = '保存中';
+    btn.textContent = T('保存中', 'Saving…');
 
     fetch('/api/user/password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ old: oldPw, new: a })
+      body: JSON.stringify({ old: oldPw, new: a, code: code })
     })
       .then(function (res) { return res.json().then(function (d) { return { ok: res.ok, body: d }; }); })
       .then(function (r) {
@@ -843,17 +967,24 @@
           $('oldPw').value = '';
           $('newPw').value = '';
           $('newPw2').value = '';
+          $('pwCode').value = '';
+          $('pwOk').hidden = true;
           closeAll();
-          say('密码已更新，其它设备已下线');
+          say(T('密码已更新，其它设备已下线', 'Password updated. Other devices signed out.'));
           return;
         }
         var code = r.body && r.body.error;
-        showErr('pwErr', PW_ERR[code] || '保存失败，请稍后重试。');
+        if (code === 'wrong_code' && r.body.left !== undefined) {
+          showErr('pwErr', T('验证码不对，还能试 ' + r.body.left + ' 次。',
+            'Wrong code. ' + r.body.left + ' attempts left.'));
+        } else {
+          showErr('pwErr', PW_ERR[code] || T('保存失败，请稍后重试。', 'Save failed. Try again.'));
+        }
       })
-      .catch(function () { showErr('pwErr', '网络连接失败，未保存。'); })
+      .catch(function () { showErr('pwErr', T('网络连接失败，未保存。', 'Network error. Nothing saved.')); })
       .then(function () {
         btn.disabled = false;
-        btn.textContent = '保存';
+        btn.textContent = T('保存', 'Save');
       });
   });
 

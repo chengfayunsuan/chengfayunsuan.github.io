@@ -35,10 +35,13 @@ export async function onRequest(context) {
     if (path === 'auth/login' && request.method === 'POST') return await login(request, env, url);
     if (path === 'auth/logout' && request.method === 'POST') return await logout(request, env, url);
     if (path === 'auth/me' && request.method === 'GET') return await me(request, env);
+    if (path === 'auth/reset/code' && request.method === 'POST') return await resetSendCode(request, env);
+    if (path === 'auth/reset/verify' && request.method === 'POST') return await resetPassword(request, env);
     if (path === 'ip/check' && request.method === 'GET') return await ipCheck(request, env);
     if (path === 'user/profile' && request.method === 'PATCH') return await updateProfile(request, env);
     if (path === 'user/email' && request.method === 'POST') return await updateEmail(request, env);
     if (path === 'user/password' && request.method === 'POST') return await updatePassword(request, env);
+    if (path === 'user/password/code' && request.method === 'POST') return await passwordSendCode(request, env);
     if (path === 'user/email/code' && request.method === 'POST') return await emailSendCode(request, env);
     if (path === 'user/email/verify' && request.method === 'POST') return await emailVerify(request, env);
     if (path === 'user/bans' && request.method === 'GET') return await userBans(request, env);
@@ -739,15 +742,17 @@ async function updateEmail(request, env) {
   return json({ ok: true, user: await profileOf(env, user.id) });
 }
 
-/* ---------------- 邮箱验证 ----------------
-   6 位数字码，10 分钟过期，60 秒才能重发，一天最多 10 条，错 5 次锁死。
+/* ---------------- 邮箱验证码（三处共用） ----------------
+   验证邮箱 / 忘记密码 / 更改密码 都走这一套：
+   6 位数字，10 分钟过期，60 秒才能重发，一个账号一天最多 3 封，一条码错 5 次作废。
+   配额跨这三处合并计算 —— 一个人一天就是 3 封，不分用途。
    发信走 Zoho ZeptoMail / CPaaS（env.ZEPTOMAIL_API_KEY + MAIL_FROM）。
    没配发信服务时：码照样入库，只在本地调试（MAIL_DEBUG=1）时回传，方便把流程跑通。 */
 
-const EMAIL_CODE_TTL = 600;     /* 有效期，秒 */
-const EMAIL_CODE_GAP = 60;      /* 两条之间至少隔这么久 */
-const EMAIL_CODE_DAY = 10;      /* 一天最多发几条 */
-const EMAIL_CODE_TRIES = 5;     /* 一条码最多试几次 */
+const MAIL_CODE_TTL = 600;      /* 有效期，秒 */
+const MAIL_CODE_GAP = 60;       /* 两条之间至少隔这么久 */
+const MAIL_CODE_DAY = 3;        /* 一天最多发几封，三处共用 */
+const MAIL_CODE_TRIES = 5;      /* 一条码最多试几次 */
 
 function code6() {
   const n = crypto.getRandomValues(new Uint32Array(1))[0] % 1000000;
@@ -773,10 +778,40 @@ function parseFrom(raw) {
   return { address: 'noreply@chengfa.org', name: 'Chengfa' };
 }
 
-async function mailSend(env, to, code) {
+/* 三种用途各写各的抬头，收到信的人一眼知道这封是干什么的 */
+const MAIL_COPY = {
+  verify: {
+    subject: 'Chengfa · 验证邮箱',
+    body: function (code) {
+      return '你的验证码是 ' + code + '，10 分钟内有效。\n\n'
+        + '在「设置 · 账户与安全」里填进去，就能把这个邮箱标记为已验证。\n'
+        + '不是本人操作就忽略这封邮件，你的账户没有任何变化。';
+    }
+  },
+  reset: {
+    subject: 'Chengfa · 重置密码',
+    body: function (code) {
+      return '你的验证码是 ' + code + '，10 分钟内有效。\n\n'
+        + '在登录页的「忘记密码」里填进去，就能设置一个新密码。\n'
+        + '重置后所有设备上的登录状态都会失效，需要重新登录。\n'
+        + '不是你本人提交的，直接忽略这封邮件，原密码照旧可用。';
+    }
+  },
+  password: {
+    subject: 'Chengfa · 修改密码',
+    body: function (code) {
+      return '你的验证码是 ' + code + '，10 分钟内有效。\n\n'
+        + '在「设置 · 账户与安全」改密码时填进去，才算本人操作。\n'
+        + '不是你本人提交的，说明密码可能已经泄露，请立刻改密码并联系客服。';
+    }
+  }
+};
+
+async function mailSend(env, to, code, purpose) {
   const key = env.ZEPTOMAIL_API_KEY;
   if (!key) return 'mail_unconfigured';
 
+  const copy = MAIL_COPY[purpose] || MAIL_COPY.verify;
   const from = parseFrom(env.MAIL_FROM);
   try {
     /* Zoho ZeptoMail / CPaaS：认证头是 Zoho-enczapikey + token（不是 Bearer）。
@@ -791,8 +826,8 @@ async function mailSend(env, to, code) {
       body: JSON.stringify({
         from: from,
         to: [{ email_address: { address: to, name: '' } }],
-        subject: 'Chengfa · 邮箱验证码 ' + code,
-        textbody: '你的验证码是 ' + code + '，10 分钟内有效。不是本人操作就忽略这封邮件。'
+        subject: copy.subject + ' ' + code,
+        textbody: copy.body(code)
       })
     });
     if (!res.ok) {
@@ -814,6 +849,120 @@ async function codeAgeSeconds(env, at) {
   return Math.max(0, Number(r && r.s) || 0);
 }
 
+/* ---------- 配额 ---------- */
+
+/* 这个账号今天发了几封、上一封距今多久。三处用途共用一份配额。 */
+async function mailQuota(env, uid) {
+  const last = await env.DB.prepare(
+    `SELECT CAST((julianday(datetime('now','+8 hours')) - julianday(sent_at)) * 86400 AS INTEGER) AS age
+       FROM mail_log WHERE uid = ? ORDER BY id DESC LIMIT 1`
+  ).bind(uid).first();
+  const usedRow = await env.DB.prepare(
+    "SELECT COUNT(*) AS n FROM mail_log WHERE uid = ? AND date(sent_at) = date(datetime('now','+8 hours'))"
+  ).bind(uid).first();
+
+  const used = Number(usedRow && usedRow.n) || 0;
+  const age = last ? Math.max(0, Number(last.age) || 0) : 999999;
+  return {
+    used: used,
+    left: Math.max(0, MAIL_CODE_DAY - used),
+    wait: age < MAIL_CODE_GAP ? MAIL_CODE_GAP - age : 0
+  };
+}
+
+function mailLimitFail(out) {
+  return json({
+    ok: false,
+    error: out.error,
+    left: out.left || 0,
+    wait: out.wait || 0,
+    message: out.error === 'too_many'
+      ? '今天验证码已经发了 3 封，明天再来'
+      : '这个账号刚发过一封，' + (out.wait || 60) + ' 秒后再发'
+  }, 429);
+}
+
+/* 发信没成功，或者配额到了，统一从这里出去 */
+function mailFail(env, out) {
+  if (out.error === 'too_soon' || out.error === 'too_many') return mailLimitFail(out);
+
+  const body = {
+    ok: false,
+    error: out.error,
+    message: out.error === 'mail_unconfigured'
+      ? '站长还没配发信服务，暂时发不出邮件'
+      : '邮件没发出去，稍后再试'
+  };
+  if (env.MAIL_DEBUG === '1' && out.code) body.devCode = out.code;
+  return json(body, out.error === 'mail_unconfigured' ? 503 : 502);
+}
+
+/* 发一条码：查配额 → 落库 → 发信。
+   发信失败就把这条流水撤掉，不白扣用户的额度。 */
+async function mailIssue(env, uid, email, purpose, ip) {
+  const q = await mailQuota(env, uid);
+  /* 当天额度用完就先说这个 —— 让用户干等 60 秒再来撞同一堵墙没有意义 */
+  if (q.left <= 0) return { error: 'too_many', wait: 0, left: 0 };
+  if (q.wait > 0) return { error: 'too_soon', wait: q.wait, left: q.left };
+
+  const code = code6();
+  await env.DB.prepare(
+    `INSERT INTO mail_codes (uid, purpose, email, code, tries, sent_at)
+     VALUES (?, ?, ?, ?, 0, datetime('now','+8 hours'))
+     ON CONFLICT(uid, purpose) DO UPDATE SET
+       email = excluded.email, code = excluded.code, tries = 0, sent_at = excluded.sent_at`
+  ).bind(uid, purpose, email, code).run();
+
+  const ins = await env.DB.prepare(
+    "INSERT INTO mail_log (uid, email, purpose, ip, sent_at) VALUES (?, ?, ?, ?, datetime('now','+8 hours'))"
+  ).bind(uid, email, purpose, String(ip || '').slice(0, 80)).run();
+
+  const err = await mailSend(env, email, code, purpose);
+  if (err) {
+    await env.DB.batch([
+      env.DB.prepare('DELETE FROM mail_log WHERE id = ?').bind(ins.meta.last_row_id),
+      env.DB.prepare('DELETE FROM mail_codes WHERE uid = ? AND purpose = ? AND code = ?').bind(uid, purpose, code)
+    ]);
+    return { error: err, code: code };
+  }
+
+  return { ok: true, email: maskMail(email), left: q.left - 1 };
+}
+
+/* 校验一条码；tries 只在错的时候加，过期和超次不消耗 */
+async function mailCheck(env, uid, purpose, code) {
+  const row = await env.DB.prepare(
+    'SELECT * FROM mail_codes WHERE uid = ? AND purpose = ?'
+  ).bind(uid, purpose).first();
+  if (!row) return { error: 'no_code', message: '先发一条验证码' };
+  if ((Number(row.tries) || 0) >= MAIL_CODE_TRIES) {
+    return { error: 'too_many_tries', message: '试太多次了，重新发一条' };
+  }
+  if (await codeAgeSeconds(env, row.sent_at) > MAIL_CODE_TTL) {
+    return { error: 'expired', message: '验证码过期了，重新发一条' };
+  }
+  if (String(row.code) !== code) {
+    await env.DB.prepare('UPDATE mail_codes SET tries = tries + 1 WHERE uid = ? AND purpose = ?')
+      .bind(uid, purpose).run();
+    return {
+      error: 'wrong_code',
+      left: Math.max(0, MAIL_CODE_TRIES - ((Number(row.tries) || 0) + 1))
+    };
+  }
+  return { row: row };
+}
+
+function codeFail(chk) {
+  return json({
+    ok: false,
+    error: chk.error,
+    left: chk.left,
+    message: chk.message || '验证码不对'
+  }, chk.error === 'too_many_tries' ? 429 : 400);
+}
+
+/* ---------- 场景一：验证注册邮箱（已登录） ---------- */
+
 async function emailSendCode(request, env) {
   const session = await currentSession(request, env);
   if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
@@ -825,41 +974,9 @@ async function emailSendCode(request, env) {
   if (!me || !me.email) return json({ ok: false, error: 'no_email' }, 400);
   if (me.email_verified) return json({ ok: false, error: 'already_verified' }, 400);
 
-  const row = await env.DB.prepare('SELECT * FROM email_codes WHERE uid = ?').bind(me.id).first();
-  let hits = 1;
-
-  if (row) {
-    const age = await codeAgeSeconds(env, row.sent_at);
-    if (age < EMAIL_CODE_GAP) {
-      return json({ ok: false, error: 'too_soon', wait: EMAIL_CODE_GAP - age }, 429);
-    }
-    hits = age < 86400 ? (Number(row.hits) || 0) + 1 : 1;
-    if (hits > EMAIL_CODE_DAY) {
-      return json({ ok: false, error: 'too_many', message: '今天验证码发太多了，明天再来' }, 429);
-    }
-  }
-
-  const code = code6();
-  await env.DB.prepare(
-    `INSERT INTO email_codes (uid, email, code, tries, hits, sent_at)
-     VALUES (?, ?, ?, 0, ?, datetime('now','+8 hours'))
-     ON CONFLICT(uid) DO UPDATE SET
-       email = excluded.email, code = excluded.code, tries = 0,
-       hits = excluded.hits, sent_at = excluded.sent_at`
-  ).bind(me.id, me.email, code, hits).run();
-
-  const err = await mailSend(env, me.email, code);
-  if (err) {
-    const out = {
-      ok: false,
-      error: err,
-      message: err === 'mail_unconfigured' ? '站长还没配发信服务，暂时发不出邮件' : '邮件没发出去，稍后再试'
-    };
-    if (env.MAIL_DEBUG === '1') out.devCode = code;
-    return json(out, err === 'mail_unconfigured' ? 503 : 502);
-  }
-
-  return json({ ok: true, email: maskMail(me.email) });
+  const out = await mailIssue(env, me.id, me.email, 'verify', ipOf(request));
+  if (!out.ok) return mailFail(env, out);
+  return json(out);
 }
 
 async function emailVerify(request, env) {
@@ -871,35 +988,107 @@ async function emailVerify(request, env) {
   const code = String((body && body.code) || '').replace(/\D/g, '').slice(0, 6);
   if (code.length !== 6) return json({ ok: false, error: 'bad_code' }, 400);
 
-  const row = await env.DB.prepare('SELECT * FROM email_codes WHERE uid = ?').bind(session.uid).first();
-  if (!row) return json({ ok: false, error: 'no_code', message: '先发一条验证码' }, 400);
-  if ((Number(row.tries) || 0) >= EMAIL_CODE_TRIES) {
-    return json({ ok: false, error: 'too_many_tries', message: '试太多次了，重新发一条' }, 429);
-  }
-
-  if (await codeAgeSeconds(env, row.sent_at) > EMAIL_CODE_TTL) {
-    return json({ ok: false, error: 'expired', message: '验证码过期了，重新发一条' }, 400);
-  }
-
-  if (String(row.code) !== code) {
-    await env.DB.prepare('UPDATE email_codes SET tries = tries + 1 WHERE uid = ?').bind(session.uid).run();
-    return json({
-      ok: false, error: 'wrong_code',
-      left: Math.max(0, EMAIL_CODE_TRIES - ((Number(row.tries) || 0) + 1))
-    }, 400);
-  }
+  const chk = await mailCheck(env, session.uid, 'verify', code);
+  if (chk.error) return codeFail(chk);
 
   await env.DB.batch([
     env.DB.prepare(
       "UPDATE users SET email_verified = 1, updated_at = datetime('now','+8 hours') WHERE id = ? AND email = ?"
-    ).bind(session.uid, row.email),
-    env.DB.prepare('DELETE FROM email_codes WHERE uid = ?').bind(session.uid)
+    ).bind(session.uid, chk.row.email),
+    env.DB.prepare("DELETE FROM mail_codes WHERE uid = ? AND purpose = 'verify'").bind(session.uid)
   ]);
 
   return json({ ok: true, verified: true, user: await profileOf(env, session.uid) });
 }
 
-// 改密码：要旧密码，改完把其它设备上的会话全部踢掉
+/* ---------- 场景二：忘记密码（未登录，靠邮箱找账号） ---------- */
+
+async function resetSendCode(request, env) {
+  const body = await readJson(request);
+  if (!body) return json({ ok: false, error: 'bad_request' }, 400);
+
+  /* 不需要登录的接口，不挡人机验证就成了免费发信机 */
+  const ts = await verifyTurnstile(request, env, body.turnstileToken);
+  if (ts) return json({ ok: false, error: ts }, 403);
+
+  const email = String(body.email || '').trim().toLowerCase();
+  if (!EMAIL_RE.test(email) || email.length > 120) {
+    return json({ ok: false, error: 'invalid_email' }, 400);
+  }
+
+  const user = await env.DB.prepare(
+    'SELECT id, email FROM users WHERE email = ? COLLATE NOCASE AND deleted_at IS NULL'
+  ).bind(email).first();
+
+  /* 邮箱没注册过也回成功：文案跟真发出去的一模一样，
+     别让人拿这个接口批量试哪些邮箱在站里存在 */
+  if (!user) return json({ ok: true, sent: false, email: maskMail(email), left: MAIL_CODE_DAY });
+
+  const out = await mailIssue(env, user.id, user.email, 'reset', ipOf(request));
+  if (!out.ok) return mailFail(env, out);
+  return json({ ok: true, sent: true, email: out.email, left: out.left });
+}
+
+async function resetPassword(request, env) {
+  const body = await readJson(request);
+  if (!body) return json({ ok: false, error: 'bad_request' }, 400);
+
+  const email = String(body.email || '').trim().toLowerCase();
+  const code = String(body.code || '').replace(/\D/g, '').slice(0, 6);
+  const pw = String(body.password || '');
+  if (!EMAIL_RE.test(email) || email.length > 120) return json({ ok: false, error: 'invalid_email' }, 400);
+  if (code.length !== 6) return json({ ok: false, error: 'bad_code' }, 400);
+  const bad = pwProblem(pw);
+  if (bad) return json({ ok: false, error: bad }, 400);
+
+  const user = await env.DB.prepare(
+    'SELECT id, email FROM users WHERE email = ? COLLATE NOCASE AND deleted_at IS NULL'
+  ).bind(email).first();
+  /* 不存在就当作码不对，别透出这个邮箱有没有账号 */
+  if (!user) return codeFail({ error: 'no_code', message: '验证码不对，重新发一条' });
+
+  const chk = await mailCheck(env, user.id, 'reset', code);
+  if (chk.error) return codeFail(chk);
+
+  const salt = randomSaltHex(16);
+  const hash = await pbkdf2Hex(pw, salt, PBKDF2_ITER);
+
+  await env.DB.batch([
+    /* 走过邮箱验证，顺手把邮箱标成已验证 */
+    env.DB.prepare(
+      `UPDATE users
+          SET pw_hash = ?, pw_salt = ?, pw_iter = ?, email_verified = 1,
+              updated_at = datetime('now','+8 hours')
+        WHERE id = ?`
+    ).bind(hash, salt, PBKDF2_ITER, user.id),
+    /* 密码换了，之前所有登录状态一律作废 */
+    env.DB.prepare('DELETE FROM sessions WHERE user_id = ?').bind(user.id),
+    env.DB.prepare("DELETE FROM mail_codes WHERE uid = ? AND purpose = 'reset'").bind(user.id),
+    /* 之前登录失败攒下的限流也一并清掉，别让用户刚改完密码又被锁 */
+    env.DB.prepare('DELETE FROM login_fails WHERE lower(email) = ?').bind(String(user.email || email).toLowerCase())
+  ]);
+
+  return json({ ok: true });
+}
+
+/* ---------- 场景三：改密码（已登录，先验邮箱） ---------- */
+
+async function passwordSendCode(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+  if (!isActive(session)) return locked();
+
+  const me = await env.DB.prepare(
+    'SELECT id, email FROM users WHERE id = ? AND deleted_at IS NULL'
+  ).bind(session.uid).first();
+  if (!me || !me.email) return json({ ok: false, error: 'no_email' }, 400);
+
+  const out = await mailIssue(env, me.id, me.email, 'password', ipOf(request));
+  if (!out.ok) return mailFail(env, out);
+  return json(out);
+}
+
+// 改密码：旧密码 + 邮箱验证码双确认，改完把其它设备上的会话全部踢掉
 async function updatePassword(request, env) {  const session = await currentSession(request, env);
   if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
   if (!isActive(session)) return locked();
@@ -909,28 +1098,38 @@ async function updatePassword(request, env) {  const session = await currentSess
 
   const oldPw = String(body.old || '');
   const newPw = String(body.new || '');
+  const code = String(body.code || '').replace(/\D/g, '').slice(0, 6);
   if (!oldPw) return json({ ok: false, error: 'password_required' }, 400);
   const bad = pwProblem(newPw);
   if (bad) return json({ ok: false, error: bad }, 400);
   if (oldPw === newPw) return json({ ok: false, error: 'same_password' }, 400);
+  if (code.length !== 6) return json({ ok: false, error: 'bad_code' }, 400);
 
   const user = await env.DB.prepare(
-    'SELECT id, pw_hash, pw_salt, pw_iter FROM users WHERE id = ? AND deleted_at IS NULL'
+    'SELECT id, email, pw_hash, pw_salt, pw_iter FROM users WHERE id = ? AND deleted_at IS NULL'
   ).bind(session.uid).first();
   if (!user) return json({ ok: false, error: 'unauthorized' }, 401);
 
   const hash = await pbkdf2Hex(oldPw, user.pw_salt, user.pw_iter || PBKDF2_ITER);
   if (hash !== user.pw_hash) return json({ ok: false, error: 'wrong_password' }, 403);
 
+  /* 旧密码对了才验码，省得码被白白试掉 */
+  const chk = await mailCheck(env, user.id, 'password', code);
+  if (chk.error) return codeFail(chk);
+
   const salt = randomSaltHex(16);
   const next = await pbkdf2Hex(newPw, salt, PBKDF2_ITER);
 
   await env.DB.batch([
     env.DB.prepare(
-      "UPDATE users SET pw_hash = ?, pw_salt = ?, pw_iter = ?, updated_at = datetime('now','+8 hours') WHERE id = ?"
+      `UPDATE users
+          SET pw_hash = ?, pw_salt = ?, pw_iter = ?, email_verified = 1,
+              updated_at = datetime('now','+8 hours')
+        WHERE id = ?`
     ).bind(next, salt, PBKDF2_ITER, user.id),
     /* 保留当前这条会话，其余下线（sessions 的用户列名是 user_id） */
-    env.DB.prepare('DELETE FROM sessions WHERE user_id = ? AND token_hash <> ?').bind(user.id, session.tokenHash)
+    env.DB.prepare('DELETE FROM sessions WHERE user_id = ? AND token_hash <> ?').bind(user.id, session.tokenHash),
+    env.DB.prepare("DELETE FROM mail_codes WHERE uid = ? AND purpose = 'password'").bind(user.id)
   ]);
 
   return json({ ok: true });
