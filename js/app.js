@@ -185,7 +185,9 @@
     admin_adjust: '人工调整',
     penalty: '违规扣罚',
     moonetix_reward: '广告墙奖励',
-    moonetix_reverse: '广告墙冲正'
+    moonetix_reverse: '广告墙冲正',
+    theoremreach_reward: '问卷墙奖励',
+    theoremreach_reverse: '问卷墙冲正'
   };
 
   function kindText(k) { return KIND[k] || k || '其他'; }

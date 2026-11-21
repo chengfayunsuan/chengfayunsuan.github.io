@@ -68,6 +68,8 @@ export async function onRequest(context) {
     if (path === 'moonetix/tasks' && request.method === 'GET') return await mtxTasks(request, env);
     if (path === 'moonetix/postback') return await mtxPostback(request, env, url);
     if (path === 'moonetix/mock/complete' && request.method === 'POST') return await mtxMockComplete(request, env);
+    if (path === 'theoremreach/link' && request.method === 'GET') return await trLink(request, env);
+    if (path === 'theoremreach/postback') return await trPostback(request, env, url);
     if (path.indexOf('admin/') === 0) return await adminApi(request, env, url, path);
     return json({ ok: false, error: 'not_found' }, 404);
   } catch (err) {
@@ -1264,13 +1266,19 @@ async function mtxSignatureOk(c, p) {
   return want === given ? 'ok' : 'invalid';
 }
 
-/* 入账 / 冲正，两个模式共用 */
+/* 入账 / 冲正，两个模式共用。
+   也供其它 offerwall / 问卷墙复用：provider 记到 mo_task 上区分来源，
+   kind / kindRev 决定流水类型，label 只用于明细里给人看的那句话。 */
 async function mtxApply(env, args) {
   const uid = Number(args.uid);
   const tid = String(args.tid);
   const status = Number(args.status);
   const units = Number(args.units);
   const meta = args.meta || {};
+  const provider = String(args.provider || 'moonetix');
+  const kind = String(args.kind || provider + '_reward');
+  const kindRev = String(args.kindRev || provider + '_reverse');
+  const label = String(args.label || '广告墙');
 
   if (status === 1) {
     const seen = await env.DB.prepare('SELECT id FROM mo_task WHERE transaction_id = ?').bind(tid).first();
@@ -1285,17 +1293,17 @@ async function mtxApply(env, args) {
     try {
       await env.DB.batch([
         env.DB.prepare(
-          `INSERT INTO mo_task (uid, transaction_id, event_id, offer_id, offer_name,
+          `INSERT INTO mo_task (uid, provider, transaction_id, event_id, offer_id, offer_name,
              reward_units, payout_usd, currency, status, ip)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)`
-        ).bind(uid, tid, meta.eventId || '', meta.offerId || '', meta.offerName || '',
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)`
+        ).bind(uid, provider, tid, meta.eventId || '', meta.offerId || '', meta.offerName || '',
           units, meta.payout || '', meta.currency || '', meta.ip || ''),
         env.DB.prepare('UPDATE users SET fc_units = ?, updated_at = datetime(\'now\',\'+8 hours\') WHERE id = ?')
           .bind(next, uid),
         env.DB.prepare(
           `INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, ?, ?, ?)`
-        ).bind(uid, units, next, 'moonetix_reward', tid,
-          meta.offerName ? '广告墙 · ' + meta.offerName : '广告墙奖励')
+        ).bind(uid, units, next, kind, tid,
+          meta.offerName ? label + ' · ' + meta.offerName : label + '奖励')
       ]);
     } catch (err) {
       /* transaction_id 撞唯一索引 = 同一个回调打了两次，按成功回，别让对方重试 */
@@ -1313,9 +1321,9 @@ async function mtxApply(env, args) {
   ).bind(tid).first();
   if (!row) {
     await env.DB.prepare(
-      `INSERT OR IGNORE INTO mo_task (uid, transaction_id, event_id, reward_units, status, reversed_at)
-       VALUES (?, ?, 'unknown-reversal', 0, 2, datetime('now','+8 hours'))`
-    ).bind(uid, tid).run();
+      `INSERT OR IGNORE INTO mo_task (uid, provider, transaction_id, event_id, reward_units, status, reversed_at)
+       VALUES (?, ?, ?, 'unknown-reversal', 0, 2, datetime('now','+8 hours'))`
+    ).bind(uid, provider, tid).run();
     return { ok: true, unknown: true };
   }
   if (row.status === 2) return { ok: true, duplicated: true };
@@ -1339,8 +1347,8 @@ async function mtxApply(env, args) {
       .bind(next, uid),
     env.DB.prepare(
       `INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, ?, ?, ?)`
-    ).bind(uid, -want, next, 'moonetix_reverse', tid,
-      next < 0 ? '广告墙冲正（余额不足，已转负 ' + mtxFc(next) + '）' : '广告墙冲正')
+    ).bind(uid, -want, next, kindRev, tid,
+      next < 0 ? label + '冲正（余额不足，已转负 ' + mtxFc(next) + '）' : label + '冲正')
   ]);
 
   return { ok: true, reversed: mtxFc(want), balance: mtxFc(next) };
@@ -1425,6 +1433,115 @@ async function mtxMockComplete(request, env) {
   return json({ ok: true, tid: tid, reward: offer.reward, balance: res.balance });
 }
 
+/* ---------------- TheoremReach 问卷墙 ----------------
+ *
+ * 和 Moonetix 分工不同：Moonetix 是 offerwall（广告主任务），TheoremReach 是
+ * survey router（问卷墙）。用户在它那边答完卷，它服务端回调 Reward Callback URL，
+ * 我们只认这个回调入账，前端说完成了不算数。
+ *
+ * 面板上要填的东西（都是静态地址，不需要宏）：
+ *   Reward Callback URL  https://chengfa.org/api/theoremreach/postback
+ *   Include Reversals    Enabled（事后被驳回的卷要从同一个口子扣回来）
+ *
+ * 参数名做了别名兼容，它发哪一种都能接：
+ *   user_id / uid / user          本站 uid
+ *   reward_amount / amount / reward
+ *   txn_id / transaction_id / tx / tid
+ *   auth_token                    用于确认这一发确实是它打的
+ *   反转：is_reversal / reversal / reversed 取 1 或 true，或者金额给成负数
+ *
+ * 环境变量：
+ *   THEOREMREACH_API_KEY  面板里的 API Key，同时用来校验 auth_token
+ *   THEOREMREACH_XB_PER   1 个 reward_amount 折多少 XB，默认 1
+ */
+
+const TR_WALL = 'https://theoremreach.com/respondent_entry/direct';
+
+function trConf(env) {
+  const apiKey = String(env.THEOREMREACH_API_KEY || '').trim();
+  /* 它回来的 auth_token 一般就是 API key；万一面板给的是另一个值，
+     配 THEOREMREACH_AUTH_TOKEN 覆盖，不用改代码 */
+  const token = String(env.THEOREMREACH_AUTH_TOKEN || '').trim() || apiKey;
+  const per = Number(env.THEOREMREACH_XB_PER || 1);
+  return { apiKey, token, xbPer: isFinite(per) && per > 0 ? per : 1, live: !!(apiKey && token) };
+}
+
+/* 墙链接：user_id 用本站 uid，回调时原样回来 */
+async function trLink(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+  if (!isActive(session)) return locked();
+
+  const c = trConf(env);
+  if (!c.live) {
+    return json({
+      ok: true,
+      demo: false,
+      url: '',
+      note: '问卷墙还没配 API key，等接入后在这里放出入口'
+    });
+  }
+
+  return json({
+    ok: true,
+    demo: false,
+    url: TR_WALL + '?api_key=' + encodeURIComponent(c.apiKey) + '&user_id=' + Number(session.uid)
+  });
+}
+
+async function trPostback(request, env, url) {
+  const c = trConf(env);
+  const p = await mtxParams(request, url);   /* body 只能读一次，校验和入账共用 */
+
+  /* 没配 key 就拒。宁可让它重试，也不能让一个不带校验的回调给谁加钱 */
+  if (!c.live) return mtxText('not configured', 503);
+
+  const tok = String(p.auth_token || p.authtoken || p.token || '').trim();
+  if (tok !== c.token) {
+    /* 只打键名不打值 */
+    console.error('tr postback bad auth_token, keys:', Object.keys(p).join(','));
+    return mtxText('bad auth_token', 403);
+  }
+
+  const uid = Number(p.user_id || p.uid || p.user || 0);
+  const tid = String(p.txn_id || p.tx || p.transaction_id || p.tid || '').trim();
+  const rawAmount = p.reward_amount != null ? p.reward_amount
+    : (p.amount != null ? p.amount : (p.reward != null ? p.reward : ''));
+  const amount = Number(rawAmount);
+  const flag = String(p.is_reversal || p.reversal || p.reversed || '').trim();
+
+  if (!(uid > 0) || !tid) return mtxText('bad parameters', 400);
+  if (!isFinite(amount)) return mtxText('bad parameters', 400);
+
+  const reversed = /^(1|true|yes|reversed)$/i.test(flag) || amount < 0;
+  const units = Math.round(Math.abs(amount) * c.xbPer * FC_SCALE);
+
+  /* 0 元事件（筛选未通过常见）不写账，但仍回 200，否则它会一直重试 */
+  if (units <= 0) return mtxText('ok ignored', 200);
+
+  const res = await mtxApply(env, {
+    uid: uid,
+    tid: tid,
+    status: reversed ? 2 : 1,
+    units: units,
+    provider: 'theoremreach',
+    label: '问卷墙',
+    meta: {
+      offerId: p.survey_id || p.offer_id || '',
+      offerName: p.survey_name || p.offer_name || '',
+      payout: p.payout || '',
+      currency: 'XB',
+      ip: request.headers.get('CF-Connecting-IP') || ''
+    }
+  });
+
+  if (!res.ok) {
+    console.error('tr postback apply failed:', res.error, 'uid=' + uid, 'tid=' + tid);
+    return mtxText(res.error || 'error', 400);
+  }
+  return mtxText('ok', 200);
+}
+
 /* 自己的广告墙记录 */
 async function mtxTasks(request, env) {
   const session = await currentSession(request, env);
@@ -1432,7 +1549,7 @@ async function mtxTasks(request, env) {
 
   const rows = await env.DB.prepare(
     `SELECT transaction_id, offer_name, reward_units, status, created_at, reversed_at
-       FROM mo_task WHERE uid = ? ORDER BY id DESC LIMIT 50`
+       FROM mo_task WHERE uid = ? AND provider = 'moonetix' ORDER BY id DESC LIMIT 50`
   ).bind(session.uid).all();
 
   const items = (rows.results || []).map(function (r) {
@@ -1448,7 +1565,7 @@ async function mtxTasks(request, env) {
 
   const sum = await env.DB.prepare(
     `SELECT COALESCE(SUM(CASE WHEN status = 1 THEN reward_units ELSE 0 END), 0) AS live,
-            COUNT(*) AS n FROM mo_task WHERE uid = ?`
+            COUNT(*) AS n FROM mo_task WHERE uid = ? AND provider = 'moonetix'`
   ).bind(session.uid).first();
 
   return json({
@@ -1464,7 +1581,8 @@ const LEDGER_KINDS = [
   'signup_bonus', 'survey_reward', 'survey_reject',
   'withdraw_lock', 'withdraw_refund', 'withdraw_paid',
   'cdk_redeem', 'admin_adjust', 'penalty',
-  'moonetix_reward', 'moonetix_reverse'
+  'moonetix_reward', 'moonetix_reverse',
+  'theoremreach_reward', 'theoremreach_reverse'
 ];
 
 async function ledger(request, env, url) {
