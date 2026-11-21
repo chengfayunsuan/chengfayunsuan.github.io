@@ -114,7 +114,7 @@
     if (!state.viewer.signedIn) {
       btn.textContent = '登录后关注';
       btn.addEventListener('click', function () {
-        location.href = '/login';
+        location.href = window.CF && CF.goto ? CF.goto('/login') : '/login';
       });
       return;
     }
@@ -558,7 +558,7 @@
       logoutBtn.textContent = '退出中';
       fetch('/api/auth/logout', { method: 'POST' })
         .catch(function () {})
-        .then(function () { location.replace('/'); });
+        .then(function () { location.replace(window.CF && CF.goto ? CF.goto('/') : '/'); });
     });
   }
 

@@ -113,7 +113,7 @@
 
   function loadWall() {
     return getJSON('/api/moonetix/link').then(function (r) {
-      if (r.status === 401) { location.replace('/login?next=/earn'); return; }
+      if (r.status === 401) { location.replace((window.CF && CF.goto ? CF.goto('/login') : '/login') + '?next=/earn'); return; }
       if (r.body && r.body.ok) {
         wall = r.body;
         paintWall();
@@ -232,7 +232,7 @@
 
   function refresh() {
     return getJSON('/api/auth/me').then(function (r) {
-      if (r.status === 401) { location.replace('/login?next=/earn'); return null; }
+      if (r.status === 401) { location.replace((window.CF && CF.goto ? CF.goto('/login') : '/login') + '?next=/earn'); return null; }
       if (r.body && r.body.ok) { me = r.body.user; paintNav(me); }
       return me;
     });

@@ -300,7 +300,7 @@
   function loadMe() {
     fetch('/api/auth/me', { headers: { Accept: 'application/json' } })
       .then(function (r) {
-        if (r.status === 401) { location.replace('/login?next=' + encodeURIComponent(location.pathname + location.search)); return null; }
+        if (r.status === 401) { location.replace((window.CF && CF.goto ? CF.goto('/login') : '/login') + '?next=' + encodeURIComponent(location.pathname + location.search)); return null; }
         return r.json();
       })
       .then(function (d) {
@@ -361,7 +361,7 @@
 
     fetch('/api/surveys/paper?id=' + id + (window.CF_FP ? '&fp=' + encodeURIComponent(window.CF_FP) : ''), { headers: { Accept: 'application/json' } })
       .then(function (r) {
-        if (r.status === 401) { location.replace('/login?next=' + encodeURIComponent(location.pathname + location.search)); return null; }
+        if (r.status === 401) { location.replace((window.CF && CF.goto ? CF.goto('/login') : '/login') + '?next=' + encodeURIComponent(location.pathname + location.search)); return null; }
         return r.json();
       })
       .then(function (d) {
@@ -407,7 +407,16 @@
         if (paper.requirement) {
           var req = $('svReq');
           req.hidden = false;
-          req.textContent = '要求：' + paper.requirement;
+          req.textContent = '';
+          var lab = document.createElement('span');
+          lab.className = 'sv-req__k';
+          lab.textContent = '要求：';
+          req.appendChild(lab);
+          /* 样本条件是问卷商写的原文，标记跳过翻译 */
+          var rv = document.createElement('span');
+          rv.setAttribute('data-tr-skip', '');
+          rv.textContent = paper.requirement;
+          req.appendChild(rv);
         }
 
         paintQuestions(d.questions);

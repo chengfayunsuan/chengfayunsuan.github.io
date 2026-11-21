@@ -20,7 +20,9 @@
         /* 资料先写缓存，落地页可秒显 */
         if (window.CF && CF.cache) CF.cache.set(data.user);
         /* 已登录但账户受限，直接送去工单页 */
-        location.replace(data.user.status && data.user.status !== 'active' ? '/support' : nextPath());
+        location.replace(data.user.status && data.user.status !== 'active'
+          ? (window.CF && CF.goto ? CF.goto('/support') : '/support')
+          : nextPath());
         return;
       }
       revealAuth();
@@ -70,12 +72,13 @@
 
   /* ---------- 模式切换 ---------- */
 
-  /* 从 /login?next=/ledger 回来时跳回原页面；只接受站内路径，避免被拿去当跳板 */
+  /* 从 /login?next=/ledger 回来时跳回原页面；只接受站内路径，避免被拿去当跳板。
+     英文页上的登录入口（/en/login）跳回时也要回到 en 侧，统一过 CF.goto。 */
   function nextPath() {
     var raw = new URLSearchParams(location.search).get('next') || '';
-    if (raw.charAt(0) !== '/' || raw.charAt(1) === '/' || raw.charAt(1) === '\\') return '/home';
-    if (raw.indexOf('/login') === 0) return '/home';
-    return raw;
+    if (raw.charAt(0) !== '/' || raw.charAt(1) === '/' || raw.charAt(1) === '\\') return window.CF && CF.goto ? CF.goto('/home') : '/home';
+    if (raw.indexOf('/login') === 0 || raw.indexOf('/en/login') === 0) return window.CF && CF.goto ? CF.goto('/home') : '/home';
+    return window.CF && CF.goto ? CF.goto(raw) : raw;
   }
 
   function setMode(next) {
@@ -365,7 +368,7 @@
         if (data.restricted) {
           noteEl.classList.remove('is-error');
           noteEl.textContent = '账户当前受限，正在进入客服页…';
-          location.replace('/support');
+          location.replace(window.CF && CF.goto ? CF.goto('/support') : '/support');
           return;
         }
 

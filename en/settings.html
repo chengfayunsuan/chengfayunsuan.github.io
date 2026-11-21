@@ -13,9 +13,9 @@
   <link rel="stylesheet" href="/css/home.css?v=16">
   <link rel="stylesheet" href="/css/settings.css?v=19">
   <link rel="stylesheet" href="/css/relation.css?v=2">
-  <link rel="stylesheet" href="/css/customize.css?v=11">
+  <link rel="stylesheet" href="/css/customize.css?v=12">
   <script src="/js/config.js?v=7"></script>
-  <script src="/js/core.js?v=36"></script>
+  <script src="/js/core.js?v=38"></script>
 </head>
 
 <body data-page="settings">
@@ -459,10 +459,15 @@
         </div>
 
         <div class="cz">
+          <div class="cz__tabs">
+            <button class="cz__tab is-on" type="button" data-th-scope="user">Front-end theme</button>
+            <button class="cz__tab" type="button" data-th-scope="admin">Admin theme</button>
+          </div>
+
           <div class="th-pre">
             <div class="th-pre__x">
               <b>Presets</b>
-              <i>Swap the site's main colour in one click; everything else stays in harmony. The admin area is blue by default.</i>
+              <i>Front end and admin keep separate copies and never interfere. The admin defaults to blue; once you pick a preset, that preset wins.</i>
             </div>
             <div class="th-pre__b" id="thPresets"></div>
           </div>
@@ -487,7 +492,7 @@
           </div>
 
           <div class="cz__foot">
-            <p class="cz__note">Colours are stored in a cookie on this device and do not follow you elsewhere. Click Apply and the whole site changes instantly; reset to the default at any time.</p>
+            <p class="cz__note">Colors are stored in a local cookie and do not follow you to other devices. Front end and admin are saved separately: changes under Admin theme only affect admin pages, and regular visitors never see this section.</p>
             <div class="cz__acts">
               <button class="btn btn--ghost" type="button" id="thReset">Reset</button>
               <button class="btn btn--red" type="button" id="thSave">Apply</button>
@@ -543,9 +548,9 @@
   </footer>
 
   <script src="/js/settings.js?v=22" defer></script>
-  <script src="/js/personalize.js?v=7" defer></script>
-<script src="/en/dict.js?v=2"></script>
-<script src="/js/i18n-en.js?v=5" defer></script>
+  <script src="/js/personalize.js?v=8" defer></script>
+<script src="/en/dict.js?v=3"></script>
+<script src="/js/i18n-en.js?v=6" defer></script>
 </body>
 
 </html>

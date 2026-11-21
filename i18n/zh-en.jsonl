@@ -1118,3 +1118,21 @@
 {"zh":"问卷通过（待质检）：","en":"Response passed (pending review): "}
 {"zh":"问卷打回冲正：","en":"Response rejected, reversed: "}
 {"zh":"视频","en":"video"}
+{"zh":"前台配色","en":"Front-end theme"}
+{"zh":"后台配色","en":"Admin theme"}
+{"zh":"前台和后台各存一份，互不干扰。后台默认是蓝的，选了就以后台的为准。","en":"Front end and admin keep separate copies and never interfere. The admin defaults to blue; once you pick a preset, that preset wins."}
+{"zh":"颜色存在本机 cookie 里，换设备不带走。前台与后台分开保存：在「后台配色」里改动只影响后台页面，普通访客看不到这一栏。","en":"Colors are stored in a local cookie and do not follow you to other devices. Front end and admin are saved separately: changes under Admin theme only affect admin pages, and regular visitors never see this section."}
+{"zh":"实验台：","en":"Lab: "}
+{"zh":"广告墙 · ","en":"Ads wall · "}
+{"zh":"提现申请 · ","en":"Withdrawal · "}
+{"zh":"兑换码充值","en":"Code top-up"}
+{"zh":"站内测试问卷","en":"In-house test survey"}
+{"zh":"前台默认配色","en":"Front-end default"}
+{"zh":"前台自定义 · 已保存","en":"Front-end custom · saved"}
+{"zh":"后台默认配色","en":"Admin default"}
+{"zh":"后台自定义 · 已保存","en":"Admin custom · saved"}
+{"zh":"有未保存的改动","en":"Unsaved changes"}
+{"zh":"账户已被封禁：参与问卷、兑换与提现均已停用，只能提交工单与查看消息。","en":"Account banned: surveys, redemption and withdrawal are all disabled. You can only submit tickets and read messages."}
+{"zh":"账户已被冻结：参与问卷、兑换与提现均已暂停，可提交工单说明情况。","en":"Account frozen: surveys, redemption and withdrawal are suspended. You can submit a ticket to explain your situation."}
+{"zh":"份可参与","en":" open to take"}
+{"zh":"点击填写个人简介","en":"Click to add a bio"}

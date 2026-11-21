@@ -33,19 +33,21 @@
   var SKIP = { SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, CODE: 1, PRE: 1 };
 
   /* 用户自己的东西一律不翻：用户名、问卷标题与供应商、商品名、消息正文。
-     标记优先看 data-tr-skip，下面这串选择器是给不由本脚本控制的节点兜底的。 */
+     标记优先看 data-tr-skip，下面这串选择器是给不由本脚本控制的节点兜底的。
+     注意 .svc__req 与 .lg-row__m 不在这里：它们的数据部分已在源头单独包了
+     data-tr-skip（app.js），整段保护会把「要求」标签和系统前缀也拦住。 */
   var RAW = [
     '[data-tr-skip]',
     '#navName', '.hm-nav__name',
-    '.svc__t', '.svc__prov-name', '.svc__topic', '.svc__req',
+    '.svc__t', '.svc__prov-name', '.svc__topic',
     '.st-item__t', '.st-item__s',
     '.ord__t', '.msg__b', '.lg-n',
     /* 下面这些是用户 / 问卷商 / 站长自己填的内容，翻了就是篡改 */
     '.ld-who', '.ld-name', '.nt', '.rel__name',
     '.sp-name', '.sp-bio', '.mw-offer__t', '.mw-offer__d',
     '.paper-q__t', '.paper-opt__t', '.tk__d', '.tk__re',
-    '.lg-row__m', '.hm-notice__i', '.msg__t', '.face__name',
-    '.er-row__n', '.er-row__m'
+    '.hm-notice__i', '.msg__t', '.face__name',
+    '.er-row__n'
   ].join(',');
 
   function raw(el) {

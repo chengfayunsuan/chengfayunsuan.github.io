@@ -131,14 +131,15 @@
       logoutBtn.textContent = '退出中';
       fetch('/api/auth/logout', { method: 'POST' })
         .catch(function () {})
-        .then(function () { location.replace('/'); });
+        .then(function () { location.replace(window.CF && CF.goto ? CF.goto('/') : '/'); });
     });
   }
 
   /* 未登录：直接去登录页，登录后回到当前页面 */
   function toLogin() {
     var next = location.pathname + location.search;
-    location.replace('/login?next=' + encodeURIComponent(next));
+    location.replace((window.CF && CF.goto ? CF.goto('/login') : '/login') +
+      '?next=' + encodeURIComponent(next));
   }
 
   var page = document.body.getAttribute('data-page');
@@ -326,7 +327,11 @@
       var em = document.createElement('em');
       em.textContent = '要求';
       req.appendChild(em);
-      req.appendChild(document.createTextNode(s.requirement));
+      /* 样本条件是问卷商写的原文，标记跳过翻译；「要求」标签本身可翻 */
+      var rv = document.createElement('span');
+      rv.setAttribute('data-tr-skip', '');
+      rv.textContent = s.requirement;
+      req.appendChild(rv);
       card.appendChild(req);
     }
 
@@ -396,7 +401,7 @@
                     hideCancel: true,
                     submitText: '去设置页看看',
                     fields: [],
-                    onSubmit: function () { location.href = '/settings'; }
+                    onSubmit: function () { location.href = window.CF && CF.goto ? CF.goto('/settings') : '/settings'; }
                   });
                 }
                 if (window.CF && CF.cache) CF.cache.clear();
@@ -1049,18 +1054,30 @@
 
         var m = document.createElement('span');
         m.className = 'lg-row__m';
-        /* 明细说明是服务端写进库的（「问卷通过：<问卷名>」这种），整句不能翻，
-           否则连问卷名一起改了。这里只把冒号前面那段固定的前缀换成英文，
-           后半段（问卷商给的标题）原样保留。 */
+        /* 明细说明是服务端写进库的（「问卷通过：<问卷名>」这种）。固定前缀（冒号或
+           「 · 」之前那段）换成英文，剩下的问卷名 / 任务名 / 用户备注是别人的内容，
+           包进 data-tr-skip 原样保留——不能交给运行时按词表拆翻，会把标题拆烂。 */
         var memo = it.memo || '—';
-        if (window.__EN_DICT) {
-          var ci = memo.indexOf('：');
-          if (ci > 0) {
-            var head = memo.slice(0, ci + 1);
-            if (window.__EN_DICT[head]) memo = window.__EN_DICT[head] + memo.slice(ci + 1);
-          }
+        var mm = window.__EN_DICT ? memo.match(/^([^：]*?)(?:：| · )/) : null;
+        if (mm && window.__EN_DICT[mm[0]]) {
+          m.textContent = window.__EN_DICT[mm[0]];
+          var mt = document.createElement('span');
+          mt.setAttribute('data-tr-skip', '');
+          mt.textContent = memo.slice(mm[0].length);
+          m.appendChild(mt);
+        } else if (mm && window.__EN_DICT[mm[1]]) {
+          m.textContent = window.__EN_DICT[mm[1]];
+          var mt2 = document.createElement('span');
+          mt2.setAttribute('data-tr-skip', '');
+          mt2.textContent = memo.slice(mm[1].length);
+          m.appendChild(mt2);
+        } else {
+          /* 整串命中或翻不到都整句保留：翻译不到的多半是用户自己写的内容 */
+          if (window.__EN_DICT && window.__EN_DICT[memo]) memo = window.__EN_DICT[memo];
+          m.textContent = memo;
+          m.setAttribute('data-tr-skip', '');
         }
-        m.textContent = memo;
+
 
         var d = document.createElement('span');
         d.className = 'lg-row__d ' + (s.out ? 'is-out' : 'is-in');

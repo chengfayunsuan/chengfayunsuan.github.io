@@ -12,6 +12,19 @@
   var CF = window.CF = window.CF || {};
 
   /* ============================================================
+     英文站前缀：en 页面上的 JS 跳转（登录回跳、401 踢回、退出）
+     都得回到 en 侧，别把人扔回中文页。
+     ============================================================ */
+  var EN_PREFIX = location.pathname.indexOf('/en') === 0 ? '/en' : '';
+
+  function gotoPath(path) {
+    if (!EN_PREFIX) return path;
+    if (path === '/') return '/en';
+    return EN_PREFIX + path;
+  }
+  CF.goto = gotoPath;
+
+  /* ============================================================
      外观：主题色
      六个颜色变量是整站配色的全部来源。前台与后台各存一份 cookie，
      互不干扰：前台 cf-theme，后台 cf-theme-admin。
@@ -226,16 +239,17 @@
     return out;
   }
 
-  /* 合并默认与自定义：返回 [{href,t,key,def,fixed}]，反引号键排在最前 */
+  /* 合并默认与自定义：返回 [{href,t,key,def,fixed}]，反引号键排在最前。
+     en 页面上数字键直达也要落在英文页，href 统一过一遍 gotoPath。 */
   function hotList(scope, cfg) {
     var def = scope === 'admin' ? NAV_ADMIN : NAV_USER;
     var custom = (cfg || loadHot())[scope] || {};
     var fix = NAV_FIXED[scope] || NAV_FIXED.user;
-    var out = [{ href: fix.href, t: fix.t, key: fix.k, def: fix.k, fixed: true }];
+    var out = [{ href: gotoPath(fix.href), t: fix.t, key: fix.k, def: fix.k, fixed: true }];
     for (var i = 0; i < def.length; i++) {
       var item = def[i];
       out.push({
-        href: item.href,
+        href: gotoPath(item.href),
         t: item.t,
         key: custom[item.href] || item.k,
         def: item.k
@@ -370,7 +384,7 @@
         out.textContent = '退出中';
         fetch('/api/auth/logout', { method: 'POST' })
           .catch(function () {})
-          .then(function () { location.replace('/'); });
+          .then(function () { location.replace(gotoPath('/')); });
       }
       return;
     }
@@ -413,7 +427,13 @@
     return path;
   }
 
-  function routeOf(path) { return ROUTES[normalize(path)] || null; }
+  /* en 页的路由查找：先剥掉 /en 前缀再查表；swap 会照原样 fetch '/en/xxx'，
+     拿回来本来就是英文页，换进去的内容与脚本都还是英文侧的。 */
+  function routeOf(path) {
+    var p = normalize(path);
+    if (EN_PREFIX && p.indexOf('/en/') === 0) p = p.slice(3);
+    return ROUTES[p] || null;
+  }
 
   function groupOf(page) {
     if (page === 'home' || page === 'settings') return 'dock';
@@ -429,7 +449,7 @@
     var pg = (document.body || document.documentElement).getAttribute('data-page') || '';
     if (pg.indexOf('admin') !== 0) return;
     var b = document.querySelector('.brand');
-    if (b) b.setAttribute('href', '/home');
+    if (b) b.setAttribute('href', gotoPath('/home'));
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fixBrand);
   else fixBrand();
@@ -614,7 +634,7 @@
 
     var link = document.createElement('a');
     link.className = 'res-bar__a';
-    link.href = '/support';
+    link.href = gotoPath('/support');
     link.textContent = '提交工单 →';
     bar.appendChild(link);
 

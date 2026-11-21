@@ -67,7 +67,7 @@
       logoutBtn.textContent = '退出中';
       fetch('/api/auth/logout', { method: 'POST' })
         .catch(function () {})
-        .then(function () { location.replace('/'); });
+        .then(function () { location.replace(window.CF && CF.goto ? CF.goto('/') : '/'); });
     });
   }
 
@@ -172,7 +172,7 @@
   function load() {
     getJSON('/api/messages').then(function (r) {
       if (r.status === 401) {
-        location.replace('/login?next=' + encodeURIComponent('/messages'));
+        location.replace((window.CF && CF.goto ? CF.goto('/login') : '/login') + '?next=' + encodeURIComponent('/messages'));
         return;
       }
       if (!r.body || !r.body.ok) {
@@ -225,7 +225,7 @@
       paintNav(r.body.user);
     } else if (r.status === 401) {
       if (window.CF && CF.cache) CF.cache.clear();
-      location.replace('/login?next=' + encodeURIComponent('/messages'));
+      location.replace((window.CF && CF.goto ? CF.goto('/login') : '/login') + '?next=' + encodeURIComponent('/messages'));
       return;
     }
     if (window.CF && CF.refresh) CF.refresh();
