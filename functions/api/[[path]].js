@@ -1571,7 +1571,8 @@ async function trPostback(request, env, url, path) {
     params: hookParams(p),
     tokenLen: out.tokenLen,
     tokenOk: out.tokenOk,
-    result: out.status + ' ' + out.body + (out.how ? ' [' + out.how + ']' : ''),
+    result: out.status + ' ' + out.body + (out.how ? ' [' + out.how + ']' : '') +
+      (out.hash ? ' hash=' + out.hash : ''),
     ip: request.headers.get('CF-Connecting-IP') || ''
   });
 
@@ -1585,38 +1586,46 @@ async function trDecide(env, request, p, seg, url) {
   /* 没配 key 就拒。宁可让它重试，也不能让一个不带校验的回调给谁加钱 */
   if (!c.live) return { body: 'not configured', status: 503 };
 
+  /* 先把 hash 校验算出来（哪怕这条是 debug 探活），结论写进 hook_log。
+     这样「密钥对不对」有了客观凭据，不用靠猜。 */
+  const given = String(p.hash || '').trim();
+  let byHash = false;
+  let calcHead = '';
+  if (c.secretKey && given && url) {
+    try {
+      const calc = await trHashOf(c.secretKey, trSignedUrl(url));
+      byHash = calc === given;
+      calcHead = calc.slice(0, 8);
+    } catch (e) {
+      console.error('tr hash compute failed:', e && e.message);
+    }
+  }
+  const hashVerdict = !c.secretKey ? 'nokey'
+    : (!given ? 'none' : (byHash ? 'ok' : 'bad(' + calcHead + '!=' + given.slice(0, 8) + ')'));
+
   /* 面板上的 Test Server Callback 会带 debug=true。官方文档写得很明白：
      debug=true 一律忽略。这种请求只当探活，回 200 但不入账。 */
   if (/^(1|true|yes)$/i.test(String(p.debug || '').trim())) {
-    return { body: 'ok ignored debug', status: 200, how: 'debug' };
+    return { body: 'ok ignored debug', status: 200, how: 'debug', hash: hashVerdict };
   }
 
   /* 三道凭证，任一通过即可：
      1) hash  —— 官方方式，HMAC-SHA1(secret key, 整个 URL)
      2) 路径串 —— 回调地址末尾那截随机串，配了才启用
      3) auth_token —— 自家自测用 */
-  const given = String(p.hash || '').trim();
   const byPath = !!(c.pathKey && seg && seg === c.pathKey);
   const tok = String(p.auth_token || p.authtoken || p.token || '').trim();
   const byToken = !!(tok && tok === c.token);
 
-  let byHash = false;
-  if (c.secretKey && given && url) {
-    try {
-      byHash = (await trHashOf(c.secretKey, trSignedUrl(url))) === given;
-    } catch (e) {
-      console.error('tr hash compute failed:', e && e.message);
-    }
-  }
-
   if (!byHash && !byPath && !byToken) {
     console.error('tr postback auth fail: hashLen=' + given.length + ' tokenLen=' + tok.length +
-      ' byPath=' + byPath + ', keys:', Object.keys(p).join(','));
+      ' byPath=' + byPath + ', hash=' + hashVerdict + ', keys:', Object.keys(p).join(','));
     return {
       body: given ? 'bad hash' : 'bad auth_token',
       status: 403,
       tokenLen: tok.length,
-      tokenOk: 0
+      tokenOk: 0,
+      hash: hashVerdict
     };
   }
 
