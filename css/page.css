@@ -1092,3 +1092,11 @@
   color: inherit;
   font-weight: inherit;
 }
+
+/* 换算倍数写在大号 b 里面（1:100），别被 .pg-side span 的 11px 灰字规则吃掉 */
+.pg-side b span {
+  font-size: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  font-weight: inherit;
+}

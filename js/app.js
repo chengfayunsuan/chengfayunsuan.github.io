@@ -727,9 +727,14 @@
       var usd = !!(window.CF && CF.currency && CF.currency.mode === 'USD');
       var unit = window.CF ? CF.currency.code : 'XB';
       var MIN_XB = 50;
-      var minShow = usd ? CF.money(MIN_XB) : '50';
+      /* XD 模式下 50 元换算出来是 694.4444，向上留到分，免得取整后反而不够门槛 */
+      var minShow = usd ? String(Math.ceil(Number(CF.money(MIN_XB)) * 100) / 100) : '50';
 
-      function toCfb(v) { return usd ? v * CF.rate : v; }
+      /* 填的是当前币种，后端只认 XB：统一过 CF.toBase（XD 是 100 一美元，不能直接乘汇率） */
+      function toCfb(v) {
+        if (window.CF && CF.toBase) return CF.toBase(v);
+        return usd ? v / 100 * CF.rate : v;
+      }
 
       CF.modal({
         kicker: 'WITHDRAW',
@@ -739,7 +744,7 @@
         fields: [
           {
             name: 'amount', label: '提现金额（' + unit + '）', type: 'number',
-            value: minShow, min: minShow, step: usd ? '0.0001' : '0.01'
+            value: minShow, min: minShow, step: '0.01'
           },
           {
             name: 'channel', label: '收款渠道', type: 'select', value: 'alipay',

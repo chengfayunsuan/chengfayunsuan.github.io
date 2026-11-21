@@ -1,7 +1,8 @@
 /* ============================================================
    Chengfa · 全站可配置项
    内部货币以 XB（乘法币，人民币基准）记账，恒为原始数值。
-   XD（乘法刀，美元）显示时按实时汇率换算：XD = XB / usdCny。
+   XD（乘法刀，美元）显示时换算：XD = XB / usdCny × 100
+   —— 1 XB = 1 元人民币，100 XD = 1 美元，所以两者之间隔着实时汇率。
 
    两个互不影响的开关：
    cf-currency   数值按人民币还是美元算   CNY / USD
@@ -11,6 +12,8 @@
      data-cur="amount"  金额，原始 XB 值存 data-cfb
      data-cur="code"    币种单位，跟随显示形式（XB 或 乘法币）
      data-cur="name"    固定显示中文名
+     data-cur="cash"    当前币种对应的法币（人民币 / 美元）
+     data-cur="pair"    多少单位换 1 法币（XB 是 1，XD 是 100）
    动态插入的节点由 MutationObserver 自动接管，渲染方不用手动刷新。
    ============================================================ */
 (function () {
@@ -18,6 +21,9 @@
     CNY: { code: 'XB', name: '乘法币' },
     USD: { code: 'XD', name: '乘法刀' }
   };
+
+  /* 1 美元 = 100 乘法刀。改这个数，全站显示一起变。 */
+  var XD_PER_USD = 100;
 
   var FX_KEY = 'cf-fx';
   var FX_DEFAULT = 7.0;
@@ -58,8 +64,14 @@
   /* 把 XB 基准值转成当前模式应显示的数字字符串 */
   function money(v) {
     var n = Number(v) || 0;
-    if (mode() === 'USD') n = n / window.CF.rate;
+    if (mode() === 'USD') n = n / window.CF.rate * XD_PER_USD;
     return trim(n.toFixed(4));
+  }
+
+  /* 反向：用户在当前模式下填的数字，换回 XB 基准值（后端只认 XB） */
+  function toBase(v) {
+    var n = Number(v) || 0;
+    return mode() === 'USD' ? n / XD_PER_USD * window.CF.rate : n;
   }
 
   /* 单个节点套用 */
@@ -82,7 +94,11 @@
       el.textContent = MODES[m].name;
     } else if (key === 'cash') {
       /* 折算对应的真实货币：乘法币对人民币，乘法刀对美元 */
-      el.textContent = m === 'USD' ? '美元' : '人民币';
+      var en = document.documentElement.lang === 'en';
+      el.textContent = m === 'USD' ? (en ? 'USD' : '美元') : (en ? 'CNY' : '人民币');
+    } else if (key === 'pair') {
+      /* 多少单位换 1 法币。左边那个 1:1 跟着币种一起变，不然会写成「1:1 XD 折美元」。 */
+      el.textContent = m === 'USD' ? String(XD_PER_USD) : '1';
     }
   }
 
@@ -153,8 +169,12 @@
   window.CF = {
     currency: { mode: 'CNY', code: 'XB', name: '乘法币', style: 'code' },
     rate: loadFx(),
+    /* 1 美元等于多少 XD */
+    xdPerUsd: XD_PER_USD,
     /* 金额显示：传 XB 基准值，返回当前模式下的数字 */
     money: money,
+    /* 金额录入：传当前模式的数字，返回 XB 基准值 */
+    toBase: toBase,
     /* 给金额节点标记原始 XB 值，并立即套用当前显示 */
     amount: function (el, v) {
       if (!el) return;
