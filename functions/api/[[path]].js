@@ -1545,30 +1545,51 @@ async function trDecide(env, request, p) {
   /* 没配 key 就拒。宁可让它重试，也不能让一个不带校验的回调给谁加钱 */
   if (!c.live) return { body: 'not configured', status: 503 };
 
+  /* 面板上的 Test Server Callback 会带 debug=true，并且回传的是假
+     offer_id / ip=127.0.0.1。这种请求只当探活：回 200，不入账、不校验签名，
+     否则点一次测试就得给谁发钱 */
+  if (/^(1|true|yes)$/i.test(String(p.debug || '').trim())) {
+    return { body: 'ok ignored debug', status: 200 };
+  }
+
   const tok = String(p.auth_token || p.authtoken || p.token || '').trim();
-  if (tok !== c.token) {
-    /* 只打长度和键名，不打值：长度能看出它发的是 Api Key 还是 Secret Key */
-    console.error('tr postback bad auth_token, len=' + tok.length +
-      ' expectLen=' + c.token.length + ', keys:', Object.keys(p).join(','));
-    return { body: 'bad auth_token', status: 403, tokenLen: tok.length, tokenOk: 0 };
+  const hash = String(p.hash || '').trim();
+  if (!tok || tok !== c.token) {
+    /* 它的真实回调带的是 hash，auth_token 只有我们自测时才有。
+       hash 的算法还没接上，所以真实回调一律拒，但要在响应里说明白。 */
+    console.error('tr postback auth fail: tokenLen=' + tok.length +
+      ' hashLen=' + hash.length + ', keys:', Object.keys(p).join(','));
+    return {
+      body: hash && !tok ? 'hash not supported yet' : 'bad auth_token',
+      status: 403,
+      tokenLen: tok.length,
+      tokenOk: 0
+    };
   }
 
   const uid = Number(p.user_id || p.uid || p.user || 0);
   const tid = String(p.txn_id || p.tx || p.transaction_id || p.tid || '').trim();
   const rawAmount = p.reward_amount != null ? p.reward_amount
-    : (p.amount != null ? p.amount : (p.reward != null ? p.reward : ''));
+    : (p.reward != null ? p.reward : (p.amount != null ? p.amount : ''));
   const amount = Number(rawAmount);
   const flag = String(p.is_reversal || p.reversal || p.reversed || '').trim();
+  const statusNum = (p.status == null || p.status === '') ? 1 : Number(p.status);
   const ok = { tokenLen: tok.length, tokenOk: 1 };
 
   if (!tid) return { body: 'bad parameters', status: 400, ...ok };
   if (!isFinite(amount)) return { body: 'bad parameters', status: 400, ...ok };
+  if (!isFinite(statusNum)) return { body: 'bad parameters', status: 400, ...ok };
 
   /* 面板上的 TEST 会拿一个假 user_id 打过来。本站 uid 一定是正整数，
      认不出数字的当测试请求：回 200 让它显示通过，但一分钱都不入账 */
   if (!Number.isInteger(uid) || uid <= 0) return { body: 'ok ignored test', status: 200, ...ok };
 
-  const reversed = /^(1|true|yes|reversed)$/i.test(flag) || amount < 0;
+  /* status：1 完成、2 冲正（同一 txn_id 再来一次）；其余（筛选未通过等）不入账 */
+  if (statusNum !== 1 && statusNum !== 2) {
+    return { body: 'ok ignored status ' + statusNum, status: 200, ...ok };
+  }
+
+  const reversed = statusNum === 2 || /^(1|true|yes|reversed)$/i.test(flag) || amount < 0;
   const units = Math.round(Math.abs(amount) * c.xbPer * FC_SCALE);
 
   /* 0 元事件（筛选未通过常见）不写账，但仍回 200，否则它会一直重试 */
