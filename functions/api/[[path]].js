@@ -1462,15 +1462,47 @@ function trConf(env) {
   /* 它回来的 auth_token 一般就是 API key；万一面板给的是另一个值，
      配 THEOREMREACH_AUTH_TOKEN 覆盖，不用改代码 */
   const token = String(env.THEOREMREACH_AUTH_TOKEN || '').trim() || apiKey;
-  const per = Number(env.THEOREMREACH_XB_PER || 1);
-  /* 回调地址末尾那截随机串：它真实的 hash 算法没公布，改用「只有双方知道的
-     URL」当凭证。仓库是公开的，所以这串必须放环境变量，不能写进代码。 */
+  /* 官方回调的真实凭证：secret key + HMAC-SHA1(整条 URL)。拿到就优先用它 */
+  const secretKey = String(env.THEOREMREACH_SECRET_KEY || '').trim();
+  /* 回调地址末尾那截随机串是第二道门：URL 只有双方知道，且不放仓库 */
   const pathKey = String(env.THEOREMREACH_POSTBACK_KEY || '').trim();
+  /* 分给用户的比例（按它实付的美元算）与单笔上限（防止它某个 bug 一次打进天价） */
+  const share = Number(env.THEOREMREACH_SHARE || 0.6);
+  const maxXb = Number(env.THEOREMREACH_MAX_XB || 500);
+  const per = Number(env.THEOREMREACH_XB_PER || 1);
   return {
-    apiKey, token, pathKey,
+    apiKey, token, secretKey, pathKey,
+    share: isFinite(share) && share > 0 && share <= 1 ? share : 0.6,
+    maxXb: isFinite(maxXb) && maxXb > 0 ? maxXb : 500,
     xbPer: isFinite(per) && per > 0 ? per : 1,
-    live: !!(apiKey && (token || pathKey))
+    live: !!(token || pathKey || secretKey)
   };
+}
+
+/* 字节转 base64（Workers 里没有 Buffer） */
+function bytesToB64(bytes) {
+  let s = '';
+  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+  return btoa(s);
+}
+
+/* 官方算法：HMAC-SHA1(secret key, 整条 URL) → base64 → + 换 -、/ 换 _、去掉 = */
+async function trHashOf(secret, msg) {
+  const enc = new TextEncoder();
+  const k = await crypto.subtle.importKey(
+    'raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']
+  );
+  const sig = await crypto.subtle.sign('HMAC', k, enc.encode(msg));
+  return bytesToB64(new Uint8Array(sig)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+/* 签名原文 = 收到的这条 URL 去掉 hash 参数本身，其余参数保持原顺序、原编码。
+   官方示例里 hash 是拼在末尾的，所以这里的重建结果应与它签的完全一致。 */
+function trSignedUrl(url) {
+  let q = url.search || '';
+  if (q.charAt(0) === '?') q = q.slice(1);
+  const parts = q ? q.split('&').filter(function (kv) { return !/^hash=/.test(kv); }) : [];
+  return url.protocol + '//' + url.host + url.pathname + (parts.length ? '?' + parts.join('&') : '');
 }
 
 /* 墙链接：user_id 用本站 uid，回调时原样回来 */
@@ -1527,7 +1559,7 @@ async function trPostback(request, env, url, path) {
 
   let out;
   try {
-    out = await trDecide(env, request, p, seg);
+    out = await trDecide(env, request, p, seg, url);
   } catch (err) {
     console.error('tr postback crashed:', err && err.message);
     out = { body: 'server_error', status: 500 };
@@ -1539,7 +1571,7 @@ async function trPostback(request, env, url, path) {
     params: hookParams(p),
     tokenLen: out.tokenLen,
     tokenOk: out.tokenOk,
-    result: out.status + ' ' + out.body,
+    result: out.status + ' ' + out.body + (out.how ? ' [' + out.how + ']' : ''),
     ip: request.headers.get('CF-Connecting-IP') || ''
   });
 
@@ -1547,64 +1579,86 @@ async function trPostback(request, env, url, path) {
 }
 
 /* 真正的判定：只看参数，不碰响应对象，方便外面记日志 */
-async function trDecide(env, request, p, seg) {
+async function trDecide(env, request, p, seg, url) {
   const c = trConf(env);
 
   /* 没配 key 就拒。宁可让它重试，也不能让一个不带校验的回调给谁加钱 */
   if (!c.live) return { body: 'not configured', status: 503 };
 
-  /* 面板上的 Test Server Callback 会带 debug=true，并且回传的是假
-     offer_id / ip=127.0.0.1。这种请求只当探活：回 200，不入账、不校验签名，
-     否则点一次测试就得给谁发钱 */
+  /* 面板上的 Test Server Callback 会带 debug=true。官方文档写得很明白：
+     debug=true 一律忽略。这种请求只当探活，回 200 但不入账。 */
   if (/^(1|true|yes)$/i.test(String(p.debug || '').trim())) {
-    return { body: 'ok ignored debug', status: 200 };
+    return { body: 'ok ignored debug', status: 200, how: 'debug' };
   }
 
-  /* 两道凭证任选其一：
-     1) 回调地址末尾的随机串（它真实回调走这条，因为 hash 算法没公布）
-     2) auth_token 与本方 key 相等（自家自测走这条） */
+  /* 三道凭证，任一通过即可：
+     1) hash  —— 官方方式，HMAC-SHA1(secret key, 整个 URL)
+     2) 路径串 —— 回调地址末尾那截随机串，配了才启用
+     3) auth_token —— 自家自测用 */
+  const given = String(p.hash || '').trim();
   const byPath = !!(c.pathKey && seg && seg === c.pathKey);
   const tok = String(p.auth_token || p.authtoken || p.token || '').trim();
-  const hash = String(p.hash || '').trim();
+  const byToken = !!(tok && tok === c.token);
 
-  if (!byPath && (!tok || tok !== c.token)) {
-    console.error('tr postback auth fail: byPath=' + byPath + ' tokenLen=' + tok.length +
-      ' hashLen=' + hash.length + ', keys:', Object.keys(p).join(','));
+  let byHash = false;
+  if (c.secretKey && given && url) {
+    try {
+      byHash = (await trHashOf(c.secretKey, trSignedUrl(url))) === given;
+    } catch (e) {
+      console.error('tr hash compute failed:', e && e.message);
+    }
+  }
+
+  if (!byHash && !byPath && !byToken) {
+    console.error('tr postback auth fail: hashLen=' + given.length + ' tokenLen=' + tok.length +
+      ' byPath=' + byPath + ', keys:', Object.keys(p).join(','));
     return {
-      body: hash && !tok ? 'hash not supported yet' : 'bad auth_token',
+      body: given ? 'bad hash' : 'bad auth_token',
       status: 403,
       tokenLen: tok.length,
       tokenOk: 0
     };
   }
 
+  const how = byHash ? 'hash' : (byPath ? 'path' : 'token');
+
   const uid = Number(p.user_id || p.uid || p.user || 0);
-  const tid = String(p.txn_id || p.tx || p.transaction_id || p.tid || '').trim();
-  const rawAmount = p.reward_amount != null ? p.reward_amount
-    : (p.reward != null ? p.reward : (p.amount != null ? p.amount : ''));
-  const amount = Number(rawAmount);
-  const flag = String(p.is_reversal || p.reversal || p.reversed || '').trim();
-  const statusNum = (p.status == null || p.status === '') ? 1 : Number(p.status);
-  const ok = { tokenLen: tok.length, tokenOk: 1 };
+  const tid = String(p.tx_id || p.txn_id || p.tx || p.transaction_id || p.tid || '').trim();
+  const reward = Number(p.reward != null ? p.reward : (p.reward_amount != null ? p.reward_amount : 0));
+  const usd = Number(p.currency);   /* 官方：currency 是这笔实际付给发布方的美元金额 */
+  const flag = String(p.reversal || p.is_reversal || p.reversed || '').trim();
+  const ok = { tokenLen: tok.length, tokenOk: 1, how: how };
 
   if (!tid) return { body: 'bad parameters', status: 400, ...ok };
-  if (!isFinite(amount)) return { body: 'bad parameters', status: 400, ...ok };
-  if (!isFinite(statusNum)) return { body: 'bad parameters', status: 400, ...ok };
+  if (!isFinite(reward)) return { body: 'bad parameters', status: 400, ...ok };
 
   /* 面板上的 TEST 会拿一个假 user_id 打过来。本站 uid 一定是正整数，
      认不出数字的当测试请求：回 200 让它显示通过，但一分钱都不入账 */
   if (!Number.isInteger(uid) || uid <= 0) return { body: 'ok ignored test', status: 200, ...ok };
 
-  /* status：1 完成、2 冲正（同一 txn_id 再来一次）；其余（筛选未通过等）不入账 */
-  if (statusNum !== 1 && statusNum !== 2) {
-    return { body: 'ok ignored status ' + statusNum, status: 200, ...ok };
-  }
+  const reversed = /^(1|true|yes|reversal|reversed)$/i.test(flag) || reward < 0;
 
-  const reversed = statusNum === 2 || /^(1|true|yes|reversed)$/i.test(flag) || amount < 0;
-  const units = Math.round(Math.abs(amount) * c.xbPer * FC_SCALE);
+  /* 结算口径：它实付的 dollars 才是我们的收入，reward 只是它自己那套点数
+     （面板测试里 25 点对应 0.25 美元，即 100 点 = 1 美元）。所以按 currency 算：
+     用户拿 USD × 汇率 × 分成。currency 缺失时才退回按 reward 折。 */
+  let units;
+  if (isFinite(usd) && usd > 0) {
+    const rate = await fxValue(env);
+    units = Math.round(usd * rate * c.share * FC_SCALE);
+  } else {
+    units = Math.round(Math.abs(reward) * c.xbPer * FC_SCALE);
+  }
 
   /* 0 元事件（筛选未通过常见）不写账，但仍回 200，否则它会一直重试 */
   if (units <= 0) return { body: 'ok ignored', status: 200, ...ok };
+
+  /* 单笔保险丝：算出来超过上限就一分不发，只留记录等人工核对 */
+  const capUnits = Math.round(c.maxXb * FC_SCALE);
+  if (units > capUnits) {
+    console.error('tr postback over cap: units=' + units + ' cap=' + capUnits +
+      ' usd=' + usd + ' reward=' + reward + ' tid=' + tid);
+    return { body: 'ok skipped over cap', status: 200, ...ok };
+  }
 
   const res = await mtxApply(env, {
     uid: uid,
@@ -1614,11 +1668,11 @@ async function trDecide(env, request, p, seg) {
     provider: 'theoremreach',
     label: '问卷墙',
     meta: {
-      offerId: p.survey_id || p.offer_id || '',
-      offerName: p.survey_name || p.offer_name || '',
-      payout: p.payout || '',
+      offerId: p.offer_id || p.survey_id || '',
+      offerName: p.offer_name || p.survey_name || '',
+      payout: p.currency || '',
       currency: 'XB',
-      ip: request.headers.get('CF-Connecting-IP') || ''
+      ip: p.ip || request.headers.get('CF-Connecting-IP') || ''
     }
   });
 
@@ -1863,6 +1917,18 @@ async function fxRate(env) {
   }
 
   return json({ ok: true, usdCny: rate, updatedAt: updated });
+}
+
+/* 只要数字版汇率，给内部结算用（要一份 Response 再 clone 出来，省得把上面那段抄第二遍） */
+async function fxValue(env) {
+  try {
+    const res = await fxRate(env);
+    const d = await res.clone().json();
+    const v = Number(d && d.usdCny);
+    return v > 0 ? v : FX_FALLBACK;
+  } catch (e) {
+    return FX_FALLBACK;
+  }
 }
 
 /* ---------------- 工单 ---------------- */
