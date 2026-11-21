@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Support · Chengfa</title>
+<meta name="description" content="Chengfa support: a channel for questions about accounts, balances and surveys.">
+<meta name="theme-color" content="#E0291E">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=15">
+<link rel="stylesheet" href="/css/home.css?v=16">
+<link rel="stylesheet" href="/css/page.css?v=9">
+<script src="/js/config.js?v=7"></script>
+<script src="/js/core.js?v=36"></script>
+</head>
+<body data-page="support">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/en/home">
+      <span class="brand__mark" aria-hidden="true"></span>
+      Chengfa
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <a class="hm-nav__lang" href="/support" title="切回中文">中文</a>
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><button class="hm-nav__cur" type="button" data-cur-toggle aria-label="Switch display currency" title="Switch between CFB and CF$"><span data-cur="code">CFB</span></button>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/en/home">Me</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<div class="pg-bar">
+  <div class="wrap pg-bar__in">
+    <a class="pg-bar__a" href="/en/home">← Back to account</a>
+    <span class="pg-bar__k">SUPPORT</span>
+  </div>
+</div>
+
+<main class="pg">
+  <div class="wrap">
+
+    <div class="pg-head">
+      <div>
+        <span class="pg-k">SUPPORT</span>
+        <h1 class="pg-t">Contact Support</h1>
+        <p class="pg-d">
+          Questions about your account, balance, surveys or payouts can all be submitted here. Include the relevant reference number to speed things up; for money disputes, state the amount and the time in your description.
+        </p>
+      </div>
+
+      <div class="pg-side">
+        <b>24h</b>
+        <span>Replies on business days</span>
+      </div>
+    </div>
+
+    <div class="sp-cols">
+
+      <form class="sp-form" id="spForm" novalidate>
+        <h2 class="sp-form__t">Submit a ticket</h2>
+        <p class="sp-form__d">Your account is recorded automatically so we can verify who you are.</p>
+
+        <label class="sp-field">
+          <span>Issue type</span>
+          <select name="type">
+            <option value="account">Account and sign-in</option>
+            <option value="balance">Balance and payouts</option>
+            <option value="survey">Surveys and rewards</option>
+            <option value="report">Reports and appeals</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+
+        <label class="sp-field">
+          <span>Description</span>
+          <textarea name="detail" placeholder="What happened, when it happened, how much money was involved, or which reference number."></textarea>
+        </label>
+
+        <div class="sp-form__a">
+          <button class="btn btn--red" type="submit">Submit a ticket</button>
+          <span class="sp-form__h">After submitting, track progress under My tickets.</span>
+        </div>
+      </form>
+
+      <aside class="sp-box">
+        <p class="sp-box__t">DIRECT</p>
+        <a class="sp-box__m" href="mailto:support@chengfa.cc">support@chengfa.cc</a>
+        <p class="sp-box__d">Attach a screenshot or reference number and include your account UID so we do not have to come back and confirm your identity.</p>
+
+        <a class="sp-box__m" href="/en/settings#sec-ticket">My tickets →</a>
+        <p class="sp-box__d">Submitted tickets and their progress live in the tickets section of account settings.</p>
+
+        <div class="sp-time">
+          <dl>
+            <dt>Hours</dt>
+            <dd>Mon–Fri, 10:00–18:00</dd>
+            <dt>Response time</dt>
+            <dd>Usually within 24 hours; money disputes within 3 business days</dd>
+            <dt>Covers</dt>
+            <dd>Account, balance, surveys, payouts, reports</dd>
+          </dl>
+        </div>
+      </aside>
+
+    </div>
+
+    <div class="sp-faq">
+      <div class="sp-faq__h">
+        <span>FAQ</span>
+        <h2>FAQ</h2>
+      </div>
+
+      <div class="faq">
+        <details>
+          <summary>Why can I not see a single survey?</summary>
+          <p class="faq__a">
+            There are three common reasons: studies are targeted by sample criteria, so accounts with missing or ineligible details never match; this round's quota is already full; or you have already taken that survey. Completing your profile increases the number of surveys you match.
+          </p>
+        </details>
+
+        <details>
+          <summary>What is the difference between available and frozen?</summary>
+          <p class="faq__a">
+            Available is what you can withdraw or redeem right now; frozen is the amount already requested and under review. On approval it is deducted from frozen; if rejected it returns to available.
+          </p>
+        </details>
+
+        <details>
+          <summary>Why was my payout rejected?</summary>
+          <p class="faq__a">
+            Common causes are a payout account whose real-name details do not match the registrant, an account with an incomplete profile, or repeated requests in a short window. The amount returns immediately after a rejection, and you can fix the details and resubmit.
+          </p>
+        </details>
+
+        <details>
+          <summary>How do I level up, and where does experience come from?</summary>
+          <p class="faq__a">
+            Experience only comes from verified surveys, and if a response is invalidated the matching experience is deducted. Levels cannot be adjusted by hand and experience is never sold.
+          </p>
+        </details>
+
+        <details>
+          <summary>Can other people see my balance?</summary>
+          <p class="faq__a">
+            The public profile shows your CFB balance, level, reputation and completed payout history. It never shows your email, IP, sign-in history or payout account details.
+          </p>
+        </details>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 Chengfa</span>
+      <span>Take surveys · Earn rewards · Redeem payouts</span>
+    </div>
+    <p class="foot__legal"><a href="/en/privacy">Privacy Policy</a> · <a href="/en/terms">Terms of Service</a> · <a href="/en/support">Contact Support</a></p>
+  </div>
+</footer>
+
+<script src="/js/app.js?v=19" defer></script>
+<script src="/en/dict.js?v=2"></script>
+<script src="/js/i18n-en.js?v=5" defer></script>
+</body>
+</html>

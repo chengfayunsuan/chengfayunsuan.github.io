@@ -13,11 +13,16 @@
 
   /* ============================================================
      外观：主题色
-     六个颜色变量是整站配色的全部来源，用户可在设置里改，存 cookie。
-     这里在 head 阶段同步执行一次，避免先闪一帧默认红再变色。
+     六个颜色变量是整站配色的全部来源。前台与后台各存一份 cookie，
+     互不干扰：前台 cf-theme，后台 cf-theme-admin。
+     这里在 head 阶段同步执行一次，避免先闪一帧默认色再变色。
      ============================================================ */
 
-  var THEME_KEY = 'cf-theme';
+  var PAGE_SCOPE = location.pathname.indexOf('/admin') === 0 ? 'admin' : 'user';
+
+  function themeKey(scope) {
+    return (scope || PAGE_SCOPE) === 'admin' ? 'cf-theme-admin' : 'cf-theme';
+  }
 
   var THEME_DEF = {
     red: '#E0291E',
@@ -102,7 +107,7 @@
     var meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', t.red);
 
-    /* 标记「用户改过配色」：后台的默认蓝让位给用户自己的主题 */
+    /* 标记「用户改过配色」：后台默认蓝（admin.css）让位给用户自己的主题 */
     var same = true;
     for (k in THEME_DEF) if (t[k].toLowerCase() !== THEME_DEF[k].toLowerCase()) same = false;
     if (same) document.documentElement.removeAttribute('data-theme');
@@ -112,8 +117,8 @@
     return t;
   }
 
-  function loadTheme() {
-    var raw = readCookie(THEME_KEY);
+  function loadTheme(scope) {
+    var raw = readCookie(themeKey(scope));
     if (!raw) return null;
     try {
       var o = JSON.parse(raw);
@@ -122,7 +127,8 @@
   }
 
   CF.theme = {
-    KEY: THEME_KEY,
+    KEY: 'cf-theme',
+    scope: PAGE_SCOPE,
     DEF: THEME_DEF,
     LIST: THEME_LIST,
     current: null,
@@ -130,17 +136,21 @@
     read: loadTheme,
     /* 只应用不保存：设置页拿来做即时预览 */
     apply: applyTheme,
-    save: function (obj) {
+    save: function (obj, scope) {
       var t = {};
       for (var k in THEME_DEF) t[k] = (obj && obj[k]) || THEME_DEF[k];
-      writeCookie(THEME_KEY, JSON.stringify(t));
-      return applyTheme(t);
+      writeCookie(themeKey(scope), JSON.stringify(t));
+      /* 只给当前这一侧立即换色；改另一侧的存进 cookie，那边页面自己生效 */
+      if (!scope || scope === PAGE_SCOPE) applyTheme(t);
+      return t;
     },
-    reset: function () {
-      dropCookie(THEME_KEY);
-      return applyTheme(null);
+    reset: function (scope) {
+      dropCookie(themeKey(scope));
+      if (!scope || scope === PAGE_SCOPE) return applyTheme(null);
+      var t = {};
+      for (var k in THEME_DEF) t[k] = THEME_DEF[k];
+      return t;
     },
-    /* 预设：正红 / 后台蓝 */
     /* 预设：主色 + 深一档，名字给按钮用 */
     presets: function () { return THEME_PRESETS; },
     preset: function (name) {
@@ -154,124 +164,6 @@
   };
 
   applyTheme(loadTheme());
-
-  /* ============================================================
-     导航上的换色圆点：前台、后台都是同一颗
-     点开选预设，当场生效，存在本机 cookie。
-     后台页面本来就只有站长 / 管理员能进，所以那颗色点也只他们看得见。
-     ============================================================ */
-
-  function mountThemeSwitch() {
-    var nav = document.querySelector('.nav__in .hm-nav');
-    if (!nav || nav.querySelector('.nav__theme')) return;
-
-    var style = document.createElement('style');
-    style.textContent = [
-      '.nav__theme{flex:0 0 auto;width:22px;height:22px;padding:0;border:1px solid var(--hair);',
-      'border-radius:50%;background:var(--paper);cursor:pointer;display:inline-flex;',
-      'align-items:center;justify-content:center;transition:transform .15s}',
-      '.nav__theme:hover{transform:scale(1.08)}',
-      '.nav__theme i{display:block;width:12px;height:12px;border-radius:50%;background:var(--red)}',
-      '.th-pop{position:fixed;z-index:9999;width:250px;padding:12px 12px 10px;border:1px solid var(--hair);',
-      'background:var(--paper);box-shadow:0 18px 40px rgba(0,0,0,.14)}',
-      '.th-pop[hidden]{display:none}',
-      '.th-pop__h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;',
-      'font-size:11px;letter-spacing:.12em;color:var(--gray)}',
-      '.th-pop__h span{letter-spacing:0;font-size:10px}',
-      '.th-pop__b{display:flex;flex-wrap:wrap;gap:8px}',
-      '.th-pop__c{width:24px;height:24px;padding:0;border:1px solid var(--hair);border-radius:50%;cursor:pointer}',
-      '.th-pop__c.is-on{outline:2px solid var(--ink);outline-offset:2px}',
-      '.th-pop__f{margin-top:11px;padding-top:9px;border-top:1px solid var(--hair)}',
-      '.th-pop__f button{padding:0;border:0;background:none;font:inherit;font-size:12px;color:var(--gray);cursor:pointer}',
-      '.th-pop__f button:hover{color:var(--ink)}'
-    ].join('');
-    document.head.appendChild(style);
-
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'nav__theme';
-    btn.title = '换主题色';
-    btn.setAttribute('aria-label', '换主题色');
-    btn.innerHTML = '<i aria-hidden="true"></i>';
-
-    var presets = CF.theme.presets();
-    var pop = document.createElement('div');
-    pop.className = 'th-pop';
-    pop.hidden = true;
-    pop.innerHTML = '<div class="th-pop__h">主题色<span>只存这台设备</span></div>' +
-      '<div class="th-pop__b">' +
-      presets.map(function (p) {
-        return '<button class="th-pop__c" type="button" data-th="' + p.key + '"' +
-          ' style="background:' + p.red + '" title="' + p.label + '"' +
-          ' aria-label="' + p.label + '"></button>';
-      }).join('') +
-      '</div>' +
-      '<div class="th-pop__f"><button type="button" data-th-reset>恢复默认</button></div>';
-
-    nav.insertBefore(btn, nav.firstChild);
-    document.body.appendChild(pop);
-
-    function mark() {
-      var cur = CF.theme.current || CF.theme.DEF;
-      var list = pop.querySelectorAll('[data-th]');
-      for (var i = 0; i < list.length; i++) {
-        var p = CF.theme.preset(list[i].getAttribute('data-th'));
-        list[i].classList.toggle('is-on',
-          String(p.red).toLowerCase() === String(cur.red).toLowerCase());
-      }
-    }
-
-    function open() {
-      mark();
-      pop.hidden = false;
-      var r = btn.getBoundingClientRect();
-      var w = pop.offsetWidth || 250;
-      var left = Math.min(window.innerWidth - w - 12, Math.max(12, r.right - w));
-      pop.style.top = (r.bottom + 10) + 'px';
-      pop.style.left = left + 'px';
-    }
-
-    btn.addEventListener('click', function (ev) {
-      ev.stopPropagation();
-      if (pop.hidden) open(); else pop.hidden = true;
-    });
-
-    pop.addEventListener('click', function (ev) {
-      ev.stopPropagation();
-
-      var c = ev.target.closest('[data-th]');
-      if (c) {
-        /* 只换主色，其它几色沿用当前设置，别把人家调好的墨色冲掉 */
-        var cur = CF.theme.current || CF.theme.DEF;
-        var p = CF.theme.preset(c.getAttribute('data-th'));
-        var next = {};
-        for (var k in cur) next[k] = cur[k];
-        next.red = p.red;
-        next['red-deep'] = p['red-deep'];
-        CF.theme.save(next);
-        mark();
-        pop.hidden = true;
-        return;
-      }
-
-      if (ev.target.closest('[data-th-reset]')) {
-        CF.theme.reset();
-        mark();
-        pop.hidden = true;
-      }
-    });
-
-    document.addEventListener('click', function () { pop.hidden = true; });
-    document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') pop.hidden = true; });
-    window.addEventListener('resize', function () { pop.hidden = true; });
-  }
-
-  /* core.js 在 head 里同步执行，这会儿 body 还没解析出来 */
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', mountThemeSwitch);
-  } else {
-    mountThemeSwitch();
-  }
 
   /* ============================================================
      快捷键：数字键 1-9 / 0 直达导航项

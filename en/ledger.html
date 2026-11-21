@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ledger · Chengfa</title>
+<meta name="description" content="Chengfa ledger: every survey reward, payout and redemption, entry by entry.">
+<meta name="theme-color" content="#E0291E">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=15">
+<link rel="stylesheet" href="/css/home.css?v=16">
+<link rel="stylesheet" href="/css/page.css?v=9">
+<script src="/js/config.js?v=7"></script>
+<script src="/js/core.js?v=36"></script>
+</head>
+<body data-page="ledger">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/en/home">
+      <span class="brand__mark" aria-hidden="true"></span>
+      Chengfa
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <a class="hm-nav__lang" href="/ledger" title="切回中文">中文</a>
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><button class="hm-nav__cur" type="button" data-cur-toggle aria-label="Switch display currency" title="Switch between CFB and CF$"><span data-cur="code">CFB</span></button>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/en/home">Me</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<div class="pg-bar">
+  <div class="wrap pg-bar__in">
+    <a class="pg-bar__a" href="/en/home">← Back to account</a>
+    <span class="pg-bar__k">LEDGER</span>
+  </div>
+</div>
+
+<main class="pg">
+  <div class="wrap">
+
+    <div class="pg-head">
+      <div>
+        <span class="pg-k">LEDGER</span>
+        <h1 class="pg-t">Ledger</h1>
+        <p class="pg-d">
+          Every balance change is written to the ledger before it reaches the balance, so you can check each entry by time and type. When an amount looks off, use the reference number to trace the survey or payout behind it.
+        </p>
+      </div>
+
+      <div class="pg-side">
+        <b id="lgCount">0</b>
+        <span>entries</span>
+      </div>
+    </div>
+
+    <div class="lg-sum">
+      <div class="lg-sum__i">
+        <span class="lg-sum__k">Total in</span>
+        <p class="lg-sum__n is-in">
+          <b id="lgIn">0</b><i data-cur="code">CFB</i>
+        </p>
+      </div>
+      <div class="lg-sum__i">
+        <span class="lg-sum__k">Total out</span>
+        <p class="lg-sum__n is-out">
+          <b id="lgOut">0</b><i data-cur="code">CFB</i>
+        </p>
+      </div>
+      <div class="lg-sum__i">
+        <span class="lg-sum__k">Available</span>
+        <p class="lg-sum__n">
+          <b id="lgNow">0</b><i data-cur="code">CFB</i>
+        </p>
+      </div>
+    </div>
+
+    <div class="pg-tools">
+      <div class="pg-tabs">
+        <button class="pg-tab is-on" type="button" data-filter="all">All</button>
+        <button class="pg-tab" type="button" data-filter="in">In</button>
+        <button class="pg-tab" type="button" data-filter="out">Out</button>
+        <button class="pg-tab" type="button" data-filter="survey">Survey</button>
+        <button class="pg-tab" type="button" data-filter="withdraw">Payout</button>
+        <button class="pg-tab" type="button" data-filter="cdk">Redeem</button>
+      </div>
+      <span class="pg-tools__r">Newest first</span>
+    </div>
+
+    <div class="lg-table">
+      <div class="lg-head">
+        <span>Time</span>
+        <span>Type</span>
+        <span>Details</span>
+        <span>Change</span>
+        <span>Balance</span>
+      </div>
+
+      <div id="lgBody"></div>
+    </div>
+
+    <p class="pg-empty" id="lgEmpty" hidden>No money has moved in this account yet.</p>
+
+    <div class="lg-more" id="lgMore" hidden>
+      <button class="btn btn--ghost" type="button">Load more</button>
+    </div>
+
+    <div class="pg-note">
+      <span class="stamp stamp--red">NOTE</span>
+      <p>
+        Balances are recorded in the smallest whole unit and trailing zeros are dropped on display, so what you see matches the ledger exactly. When you request a payout the amount moves from available to frozen, and it only leaves frozen once it is approved.
+      </p>
+    </div>
+
+  </div>
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 Chengfa</span>
+      <span>Take surveys · Earn rewards · Redeem payouts</span>
+    </div>
+    <p class="foot__legal"><a href="/en/privacy">Privacy Policy</a> · <a href="/en/terms">Terms of Service</a> · <a href="/en/support">Contact Support</a></p>
+  </div>
+</footer>
+
+<script src="/js/app.js?v=19" defer></script>
+<script src="/en/dict.js?v=2"></script>
+<script src="/js/i18n-en.js?v=5" defer></script>
+</body>
+</html>

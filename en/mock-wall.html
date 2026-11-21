@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ad wall (mock) · Chengfa</title>
+<meta name="description" content="An in-site mock ad wall, used to verify the callback crediting path before a real provider is connected.">
+<meta name="theme-color" content="#0B1B33">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="/css/style.css?v=15">
+<link rel="stylesheet" href="/css/mock-wall.css?v=1">
+</head>
+<body data-page="mockwall" class="mw">
+
+<div class="mw-bar">
+  <span class="mw-bar__brand">MOONETIX <i>Mock wall</i></span>
+  <a class="mw-bar__back" href="/en/earn">← Back to Earn</a>
+</div>
+
+<main class="mw-main">
+
+  <div class="mw-head">
+    <span class="mw-k">OFFERS</span>
+    <h1 class="mw-t">Pick one and get credited when done</h1>
+    <p class="mw-d">
+      This page is not a third-party site. It is our own mock-up of an ad wall. Clicking 'Mark complete' makes the browser call our API, which then credits the reward with exactly the same logic as a real callback, so it exercises the same code path as a live integration.
+    </p>
+    <p class="mw-uid">Account UID <b id="mwUid">—</b> · every entry gets its own transaction ID</p>
+  </div>
+
+  <div class="mw-grid" id="mwGrid"></div>
+
+  <p class="mw-note" id="mwNote">Loading…</p>
+
+  <div class="mw-foot">
+    <a class="mw-btn mw-btn--ghost" href="/en/earn">Back to Earn to see the record</a>
+    <a class="mw-btn mw-btn--ghost" href="/en/ledger">Open the ledger</a>
+  </div>
+
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="/js/config.js?v=7"></script>
+<script src="/js/mock-wall.js?v=1" defer></script>
+<script src="/en/dict.js?v=2"></script>
+<script src="/js/i18n-en.js?v=5" defer></script>
+</body>
+</html>

@@ -1049,7 +1049,18 @@
 
         var m = document.createElement('span');
         m.className = 'lg-row__m';
-        m.textContent = it.memo || '—';
+        /* 明细说明是服务端写进库的（「问卷通过：<问卷名>」这种），整句不能翻，
+           否则连问卷名一起改了。这里只把冒号前面那段固定的前缀换成英文，
+           后半段（问卷商给的标题）原样保留。 */
+        var memo = it.memo || '—';
+        if (window.__EN_DICT) {
+          var ci = memo.indexOf('：');
+          if (ci > 0) {
+            var head = memo.slice(0, ci + 1);
+            if (window.__EN_DICT[head]) memo = window.__EN_DICT[head] + memo.slice(ci + 1);
+          }
+        }
+        m.textContent = memo;
 
         var d = document.createElement('span');
         d.className = 'lg-row__d ' + (s.out ? 'is-out' : 'is-in');

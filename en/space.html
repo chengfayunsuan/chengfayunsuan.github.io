@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profile · Chengfa</title>
+<meta name="description" content="The public profile of a Chengfa user.">
+<meta name="theme-color" content="#E0291E">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=15">
+<link rel="stylesheet" href="/css/home.css?v=16">
+<link rel="stylesheet" href="/css/space.css?v=8">
+<link rel="stylesheet" href="/css/relation.css?v=2">
+<script src="/js/config.js?v=7"></script>
+<script src="/js/core.js?v=36"></script>
+</head>
+<body data-page="space">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/en/home">
+      <span class="brand__mark" aria-hidden="true"></span>
+      Chengfa
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav" id="navAuthed" hidden>
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><button class="hm-nav__cur" type="button" data-cur-toggle aria-label="Switch display currency" title="Switch between CFB and CF$"><span data-cur="code">CFB</span></button>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/en/home">Me</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">Sign out</button>
+    </div>
+
+    <div class="hm-nav" id="navGuest">
+      <a class="hm-nav__exit" href="/en/login">Sign in</a>
+    </div>
+  </div>
+</header>
+
+<div class="sp-bar">
+  <div class="wrap sp-bar__in">
+    <a class="sp-bar__back" href="/en/home">← Back to account</a>
+    <span class="sp-bar__k">PUBLIC PROFILE</span>
+  </div>
+</div>
+
+<main id="app" hidden>
+
+  <!-- ============ 身份 ============ -->
+  <section class="sp-hero">
+    <div class="wrap">
+      <div class="sp-hero__in">
+
+        <div class="sp-id">
+          <div class="sp-meta">
+            <span class="mono">UID <b id="uid">—</b></span>
+            <span class="face__role" id="role" data-role="user">User</span>
+            <span class="sp-status" id="statusBox">Status <b id="status">Normal</b></span>
+          </div>
+
+          <h1 class="sp-name" id="name">—</h1>
+
+          <p class="sp-sub" id="sub">Joined — · 1 day in</p>
+
+          <div class="sp-soc" id="socialRow">
+            <button class="sp-soc__i" type="button" data-scope="following">
+              Following:<b id="followN">0</b>
+            </button>
+            <button class="sp-soc__i" type="button" data-scope="followers">
+              Followers:<b id="fansN">0</b>
+            </button>
+          </div>
+
+          <p class="sp-restrict" id="restrictNote" hidden></p>
+
+          <p class="sp-bio" id="bio"></p>
+
+          <div class="sp-do" id="followBox" hidden>
+            <button class="btn btn--red btn--s" id="followBtn" type="button">Follow</button>
+          </div>
+
+          <p class="sp-self" id="selfNote" hidden>
+            This is your own profile.<a href="/en/settings">Open settings</a>
+          </p>
+        </div>
+
+        <div class="sp-side">
+          <span class="sp-k"><span data-cur="name">Cash</span>Balance</span>
+
+          <div class="sp-bal">
+            <b id="fc">0</b>
+            <i data-cur="code">CFB</i>
+          </div>
+
+          <p class="sp-bal__f">
+            Frozen <b id="fcFrozen">0</b>
+            <span data-cur="code">CFB</span>
+          </p>
+
+          <div class="sp-duo">
+            <div class="sp-duo__i">
+              <span class="sp-k">Level</span>
+              <div class="sp-duo__v"><i>LV</i><b id="lv">1</b></div>
+            </div>
+            <div class="sp-duo__i">
+              <span class="sp-k">Affinity</span>
+              <div class="sp-duo__v"><b id="aff">0</b></div>
+            </div>
+          </div>
+
+          <div class="sp-exp">
+            <span class="sp-exp__bar"><i id="expBar"></i></span>
+            <span class="sp-exp__x"><b id="expNow">0</b> / <span id="expNext">100</span></span>
+          </div>
+          <p class="sp-exp__h" id="expHint">—</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 提现记录 ============ -->
+  <section class="sp-sec" id="payoutSec">
+    <div class="wrap">
+      <div class="sp-h">
+        <span class="sp-h__n">01</span>
+        <h2 class="sp-h__t">Payout history</h2>
+      </div>
+
+      <div class="po">
+        <div class="po__sum">
+          <div class="po__cell">
+            <span class="sp-k">Payouts paid</span>
+            <p class="po__n"><b id="poCount">0</b><span class="po__u"> entries</span></p>
+          </div>
+          <div class="po__cell">
+            <span class="sp-k">Total paid</span>
+            <p class="po__n"><b id="poTotal">0</b><span class="po__u" data-cur="code">CFB</span></p>
+          </div>
+          <div class="po__cell">
+            <span class="sp-k">Most recent</span>
+            <p class="po__n po__n--date"><b id="poLast">—</b></p>
+          </div>
+        </div>
+
+        <ul class="po__list" id="poList"></ul>
+
+        <p class="po__empty" id="poEmpty" hidden>This account has no completed payouts yet.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 操作 ============ -->
+  <section class="sp-sec sp-sec--last">
+    <div class="wrap">
+      <div class="sp-acts">
+        <button class="btn btn--red btn--s" id="copyLink" type="button">Copy profile link</button>
+        <a class="btn btn--ghost btn--s" href="/en/home">Back to my account</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ 空态：查无此人 ============ -->
+<section class="sp-none" id="none" hidden>
+  <div class="wrap">
+    <p class="sp-none__k">NO SUCH USER</p>
+    <h1 class="sp-none__t" id="noneT">No such user</h1>
+    <p class="sp-none__d" id="noneD">The UID may be mistyped, or the account has been closed.</p>
+    <p class="sp-none__a">
+      <a class="btn btn--red" href="/en/home">Back to account</a>
+    </p>
+  </div>
+</section>
+
+<!-- ============ 小窗口：关注与粉丝 ============ -->
+<div class="sheet" id="relSheet" hidden>
+  <div class="sheet__mask" data-sheet-close></div>
+
+  <div class="sheet__box" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet__head">
+      <span class="sheet__t" id="sheetTitle">Following and followers</span>
+      <button class="sheet__x" id="sheetClose" type="button">Close</button>
+    </div>
+
+    <div class="rel__tabs sheet__tabs">
+      <button class="rel__tab is-on" type="button" data-scope="following">
+        Follow <b id="tabFollow">0</b>
+      </button>
+      <button class="rel__tab" type="button" data-scope="followers">
+        Followers <b id="tabFans">0</b>
+      </button>
+    </div>
+
+    <ul class="rel__list" id="relList"></ul>
+
+    <p class="rel__empty" id="relEmpty" hidden></p>
+
+    <button class="rel__more" id="relMore" type="button" hidden>Load more</button>
+  </div>
+</div>
+
+<div class="hm-load" id="loading">
+  <span class="hm-load__mark" aria-hidden="true"></span>
+  <span>Loading profile</span>
+</div>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 Chengfa</span>
+      <span>Take surveys · Earn rewards · Redeem payouts</span>
+    </div>
+    <p class="foot__legal"><a href="/en/privacy">Privacy Policy</a> · <a href="/en/terms">Terms of Service</a> · <a href="/en/support">Contact Support</a></p>
+  </div>
+</footer>
+
+<script src="/js/space.js?v=12" defer></script>
+<script src="/en/dict.js?v=2"></script>
+<script src="/js/i18n-en.js?v=5" defer></script>
+</body>
+</html>

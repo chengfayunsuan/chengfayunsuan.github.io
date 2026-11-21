@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Settings · Chengfa</title>
+  <meta name="description" content="Chengfa account settings: identity, balance, security and preferences.">
+  <meta name="theme-color" content="#E0291E">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="/css/style.css?v=15">
+  <link rel="stylesheet" href="/css/home.css?v=16">
+  <link rel="stylesheet" href="/css/settings.css?v=19">
+  <link rel="stylesheet" href="/css/relation.css?v=2">
+  <link rel="stylesheet" href="/css/customize.css?v=11">
+  <script src="/js/config.js?v=7"></script>
+  <script src="/js/core.js?v=36"></script>
+</head>
+
+<body data-page="settings">
+
+  <header class="nav">
+    <div class="wrap nav__in">
+      <a class="brand" href="/en/home">
+        <span class="brand__mark" aria-hidden="true"></span>
+        Chengfa
+        <span class="brand__en">CHENGFA</span>
+      </a>
+
+      <div class="hm-nav">
+      <a class="hm-nav__lang" href="/settings" title="切回中文">中文</a>
+        <span class="hm-nav__bal">
+          <b id="navBal">0</b><button class="hm-nav__cur" type="button" data-cur-toggle aria-label="Switch display currency" title="Switch between CFB and CF$"><span data-cur="code">CFB</span></button>
+        </span>
+        <span class="hm-nav__sep" aria-hidden="true"></span>
+        <span class="hm-nav__name" id="navName">Loading</span>
+        <button class="hm-nav__exit" id="logoutBtn" type="button">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="dock" aria-label="Menu">
+    <div class="wrap dock__in">
+      <a class="dock__i" href="/en/hall">
+        <span class="dock__n">01</span><span class="dock__t">Survey hall</span>
+      </a>
+      <a class="dock__i" href="/en/store">
+        <span class="dock__n">02</span><span class="dock__t">Redeem</span>
+      </a>
+      <a class="dock__i" href="/en/ledger">
+        <span class="dock__n">03</span><span class="dock__t">Ledger</span>
+      </a>
+      <a class="dock__i" href="/en/ladder">
+        <span class="dock__n">04</span><span class="dock__t">Leaderboard</span>
+      </a>
+      <a class="dock__i" href="/en/messages" data-msg-dock>
+        <span class="dock__n">05</span><span class="dock__t">Messages</span>
+      </a>
+      <a class="dock__i" href="/en/support">
+        <span class="dock__n">06</span><span class="dock__t">Contact Support</span>
+      </a>
+      <a class="dock__i is-on" href="/en/settings" aria-current="page">
+        <span class="dock__n">07</span><span class="dock__t">Settings</span>
+      </a>
+    </div>
+  </nav>
+
+  <main id="app" hidden>
+
+    <!-- ============ 页头 ============ -->
+    <section class="set-top">
+      <div class="wrap">
+        <div class="set-top__row">
+          <div>
+            <span class="set-k">ACCOUNT SETTINGS</span>
+            <h1 class="set-t">Settings</h1>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 01 账户概览 ============ -->
+    <section class="blk" id="sec-id">
+      <div class="wrap">
+        <div class="blk__h">
+          <span class="blk__n">01</span>
+          <h2 class="blk__t">Account overview</h2>
+
+          <form class="find find--mini" id="findForm" novalidate>
+            <input class="fld" id="findInput" type="search" name="q" maxlength="20" placeholder="UID or username"
+              autocomplete="off" aria-label="Find a user">
+            <button class="btn btn--ghost btn--s" type="submit">Find a user</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card__top">
+            <div class="card__meta">
+              <span class="mono">UID <b id="setUid">—</b></span>
+              <span class="plate" id="setRole">User</span>
+            </div>
+          </div>
+
+          <div class="card__row">
+            <div class="card__id">
+              <p class="card__name" id="setUser">—</p>
+              <p class="card__sub">
+                <span id="setJoined">—</span>
+                <span class="card__sep" aria-hidden="true">·</span>
+                <span>Account status:<span id="setStatus">—</span></span>
+              </p>
+            </div>
+
+            <div class="card__side">
+              <div class="card__money">
+                <p class="card__frz">Frozen <b id="setFrozen">0</b> <i data-cur="code">CFB</i></p>
+                <p class="card__bal">
+                  <span class="card__n" id="setFc">0</span>
+                  <i class="card__cur" data-cur="code">CFB</i>
+                </p>
+              </div>
+
+              <div class="set-soc">
+                <button class="set-soc__i" type="button" data-scope="following">
+                  Following:<b id="setFollowN">0</b>
+                </button>
+                <button class="set-soc__i" type="button" data-scope="followers">
+                  Followers:<b id="setFansN">0</b>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card__body">
+            <div class="card__stats">
+              <div><b id="stDone">0</b><span>Surveys completed</span></div>
+              <div><b id="stDays">1</b><span>Days since joining</span></div>
+              <div><b id="stLevel">1</b><span>Current level</span></div>
+              <div><b id="stAff">0</b><span>Affinity</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 02 兑换记录 ============ -->
+    <section class="blk" id="sec-redeem">
+      <div class="wrap">
+        <div class="blk__h">
+          <span class="blk__n">02</span>
+          <h2 class="blk__t">Redemption history</h2>
+        </div>
+
+        <div class="tb-wrap">
+          <table class="tb">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Item</th>
+                <th class="ta-r">Charged</th>
+                <th>Code / reference</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="redeemBody">
+              <tr class="tb__empty">
+                <td colspan="5">No redemptions yet. Once a redemption succeeds, the entry and its code appear here.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 03 账号安全 ============ -->
+    <section class="blk" id="sec-sec">
+      <div class="wrap">
+        <div class="blk__h">
+          <span class="blk__n">03</span>
+          <h2 class="blk__t">Sign-in security</h2>
+        </div>
+
+        <div class="row3">
+
+          <!-- 用户名 -->
+          <div class="row3__i">
+            <div class="row" id="rowName">
+              <div class="row__l">
+                <span class="row__k">Username</span>
+                <span class="row__v" id="curName">—</span>
+                <span class="row__h">2 to 20 characters</span>
+              </div>
+              <button class="btn btn--ghost btn--s" type="button" data-edit="name">Change</button>
+            </div>
+
+
+          </div>
+
+          <!-- 邮箱 -->
+          <div class="row3__i">
+            <div class="row" id="rowEmail">
+              <div class="row__l">
+                <span class="row__k">Email <span class="row__tag" id="emailTag" hidden>Unverified</span></span>
+                <span class="row__v" id="curEmail">—</span>
+                <span class="row__h">Used to sign in and to recover your password. After a change you must verify the new address.</span>
+              </div>
+              <div class="row__acts">
+                <button class="btn btn--ghost btn--s" type="button" id="emailVerifyBtn">Verify email</button>
+                <button class="btn btn--ghost btn--s" type="button" data-edit="email">Change</button>
+              </div>
+            </div>
+
+
+          </div>
+
+          <!-- 密码 -->
+          <div class="row3__i">
+            <div class="row" id="rowPw">
+              <div class="row__l">
+                <span class="row__k">Password</span>
+                <span class="row__v">••••••••</span>
+                <span class="row__h">Use a password you do not use elsewhere, and change it as soon as you suspect a leak.</span>
+              </div>
+              <button class="btn btn--ghost btn--s" type="button" data-edit="pw">Change</button>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="sec-edit" id="secEdit" hidden>
+
+            <form class="edit" id="formName" hidden novalidate>
+              <div class="edit__grid">
+                <div class="edit__f">
+                  <label class="fld__l" for="newName">New username</label>
+                  <input class="fld" id="newName" name="username" type="text" maxlength="20" autocomplete="nickname"
+                    placeholder="Enter a new username">
+                </div>
+              </div>
+              <div class="edit__a">
+                <button class="btn btn--red btn--s" type="submit" id="saveName">Save</button>
+                <button class="btn btn--ghost btn--s" type="button" data-cancel="name">Cancel</button>
+              </div>
+              <p class="edit__e" id="nameErr" hidden></p>
+            </form>
+
+            <form class="edit" id="formEmail" hidden novalidate>
+              <div class="edit__grid">
+                <div class="edit__f">
+                  <label class="fld__l" for="newEmail">New email</label>
+                  <input class="fld" id="newEmail" name="email" type="email" spellcheck="false" autocomplete="email"
+                    placeholder="name@example.com">
+                </div>
+                <div class="edit__f">
+                  <label class="fld__l" for="emailPw">Current password</label>
+                  <input class="fld" id="emailPw" name="password" type="password" autocomplete="current-password"
+                    placeholder="Confirm it is really you">
+                </div>
+              </div>
+              <div class="edit__a">
+                <button class="btn btn--red btn--s" type="submit" id="saveEmail">Save</button>
+                <button class="btn btn--ghost btn--s" type="button" data-cancel="email">Cancel</button>
+              </div>
+              <p class="edit__e" id="emailErr" hidden></p>
+            </form>
+
+            <form class="edit" id="formVerify" hidden novalidate>
+              <div class="edit__grid">
+                <div class="edit__f">
+                  <label class="fld__l" for="vfCode">Email code</label>
+                  <input class="fld" id="vfCode" name="code" type="text" inputmode="numeric" maxlength="6"
+                    autocomplete="one-time-code" placeholder="6 digits">
+                </div>
+                <div class="edit__f">
+                  <label class="fld__l">Didn't get it?</label>
+                  <button class="btn btn--ghost btn--s" type="button" id="vfSend">Send code</button>
+                </div>
+              </div>
+              <div class="edit__a">
+                <button class="btn btn--red btn--s" type="submit" id="vfDone">Submit</button>
+                <button class="btn btn--ghost btn--s" type="button" data-cancel="verify">Cancel</button>
+              </div>
+              <p class="edit__e" id="vfErr" hidden></p>
+              <p class="edit__ok" id="vfOk" hidden></p>
+            </form>
+
+            <form class="edit" id="formPw" hidden novalidate>
+              <div class="edit__grid">
+                <div class="edit__f">
+                  <label class="fld__l" for="oldPw">Current password</label>
+                  <input class="fld" id="oldPw" name="old" type="password" autocomplete="current-password">
+                </div>
+                <div class="edit__f">
+                  <label class="fld__l" for="newPw">New password</label>
+                  <input class="fld" id="newPw" name="new" type="password" autocomplete="new-password">
+                </div>
+                <div class="edit__f">
+                  <label class="fld__l" for="newPw2">Confirm new password</label>
+                  <input class="fld" id="newPw2" name="confirm" type="password" autocomplete="new-password">
+                </div>
+              </div>
+              <div class="edit__a">
+                <button class="btn btn--red btn--s" type="submit" id="savePw">Save</button>
+                <button class="btn btn--ghost btn--s" type="button" data-cancel="pw">Cancel</button>
+              </div>
+              <p class="edit__e" id="pwErr" hidden></p>
+            </form>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 04 登录与网络 ============ -->
+    <section class="blk" id="sec-net">
+      <div class="wrap">
+        <div class="blk__h">
+          <span class="blk__n">04</span>
+          <h2 class="blk__t">Sign-in and network</h2>
+        </div>
+
+        <ul class="kv">
+          <li>
+            <span class="kv__k">IP</span>
+            <b class="kv__v mono" id="curIp">—</b>
+          </li>
+          <li>
+            <span class="kv__k">Network</span>
+            <b class="kv__v" id="curNet">—</b>
+          </li>
+          <li>
+            <span class="kv__k">Last sign-in</span>
+            <b class="kv__v" id="lastLogin">—</b>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 05 封禁记录 ============ -->
+    <section class="blk" id="sec-ban">
+      <div class="wrap">
+        <div class="blk__h">
+          <span class="blk__n">05</span>
+          <h2 class="blk__t">Bans</h2>
+        </div>
+
+        <div class="ban">
+          <div class="ban__c">
+            <b id="banCount">0</b>
+            <span>Total bans</span>
+          </div>
+          <ol class="ban__l" id="banList">
+            <li class="ban__empty">No bans on record.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 06 问卷商风控 ============ -->
+    <section class="blk" id="sec-risk">
+      <div class="wrap">
+        <div class="blk__h">
+          <span class="blk__n">06</span>
+          <h2 class="blk__t">Provider risk level</h2>
+        </div>
+
+        <div class="tb-wrap">
+          <table class="tb">
+            <thead>
+              <tr>
+                <th>Survey provider</th>
+                <th>Risk level</th>
+                <th class="ta-r">Last updated</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody id="riskBody">
+              <tr class="tb__empty">
+                <td colspan="4">No risk data reported by providers yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 07 我的工单 ============ -->
+    <section class="blk" id="sec-ticket">
+      <div class="wrap">
+        <div class="blk__h">
+          <span class="blk__n">07</span>
+          <h2 class="blk__t">My tickets</h2>
+        </div>
+
+        <ul class="tk" id="ticketList">
+          <li class="tk__empty">
+            No tickets yet. Account, balance, payout or survey review questions can all be raised here, and replies also arrive as in-site messages.
+          </li>
+        </ul>
+
+        <div class="tk__act">
+          <a class="btn btn--red" href="/en/support">Submit a ticket <span aria-hidden="true">→</span></a>
+          <span class="tk__h">Replies also arrive as in-site messages; track progress in the list above.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 08 自定义设置 ============ -->
+    <section class="blk" id="sec-keys">
+      <div class="wrap">
+        <div class="blk__h">
+          <span class="blk__n">08</span>
+          <h2 class="blk__t">Shortcuts</h2>
+          <span class="cz-tag is-on" id="hkState">Enabled</span>
+        </div>
+
+        <div class="cz cz--fold" id="hkFold">
+          <div class="cz__head">
+            <div class="cz__x">
+              <b>Number-key jump</b>
+              <i id="hkSum">11 user items · expand to see the keys</i>
+            </div>
+            <div class="cz__acts">
+              <label class="cz-sw">
+                <input type="checkbox" id="hkOn" checked>
+                <span class="cz-sw__b"></span>
+                <span class="cz-sw__t">Enable</span>
+              </label>
+              <button class="btn btn--ghost btn--s" type="button" id="hkToggle"
+                aria-expanded="false" aria-controls="hkBody">Expand</button>
+            </div>
+          </div>
+
+          <div class="cz__body" id="hkBody" hidden>
+            <p class="cz__intro">On any page, press a number key on the top row to jump straight to that feature. Numbers follow the directory order, with 0 for the tenth item. Typing in an input field does not trigger it. The key left of 1 (either ` or ~) returns to your account home, shares the same on/off switch, and cannot be rebound.</p>
+
+            <div class="cz__tabs">
+              <button class="cz__tab is-on" type="button" data-hk-scope="user">User · 11 items</button>
+              <button class="cz__tab" type="button" data-hk-scope="admin">Admin · 11 items</button>
+            </div>
+
+            <ul class="hk" id="hkList"></ul>
+
+            <div class="cz__foot">
+              <p class="cz__note">Click Rebind and press any number or letter to assign it; clashes swap automatically. The ` key always returns home and cannot be rebound. Bindings live only in this browser.</p>
+              <div class="cz__acts"><button class="btn btn--ghost" type="button" id="hkReset">Reset keys</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="blk" id="sec-theme">
+      <div class="wrap">
+        <div class="blk__h">
+          <span class="blk__n">09</span>
+          <h2 class="blk__t">Theme colour</h2>
+          <span class="cz-tag" id="thState">Default</span>
+        </div>
+
+        <div class="cz">
+          <div class="th-pre">
+            <div class="th-pre__x">
+              <b>Presets</b>
+              <i>Swap the site's main colour in one click; everything else stays in harmony. The admin area is blue by default.</i>
+            </div>
+            <div class="th-pre__b" id="thPresets"></div>
+          </div>
+
+          <div class="th-body">
+            <ul class="th-pal" id="thPal"></ul>
+
+            <div class="th-demo" id="thDemo">
+              <div class="th-demo__h"><span>PREVIEW</span><b>Preview</b></div>
+              <div class="th-demo__b">
+                <div class="th-demo__bal"><span>CFB balance</span><strong>32.50</strong><em>CFB</em></div>
+                <div class="th-demo__sw">
+                  <span class="th-demo__btn">Primary button</span>
+                  <span class="th-demo__btn th-demo__btn--ghost">Secondary button</span>
+                </div>
+                <div class="th-demo__lv"><span class="th-demo__lvk">LV 3</span><span class="th-demo__lvt">40 more experience to reach LV4</span></div>
+                <div class="th-demo__bar"><i style="width:62%"></i></div>
+                <p class="th-demo__p">Body text uses ink, captions and labels use muted grey, and hairlines are a lightened ink. This is a sample; changes show up in this card immediately.</p>
+                <div class="th-demo__band" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cz__foot">
+            <p class="cz__note">Colours are stored in a cookie on this device and do not follow you elsewhere. Click Apply and the whole site changes instantly; reset to the default at any time.</p>
+            <div class="cz__acts">
+              <button class="btn btn--ghost" type="button" id="thReset">Reset</button>
+              <button class="btn btn--red" type="button" id="thSave">Apply</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="hm-load" id="loading">
+    <span class="hm-load__mark" aria-hidden="true"></span>
+    <span>Loading your account</span>
+  </div>
+
+  <div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ============ 小窗口：关注与粉丝 ============ -->
+  <div class="sheet" id="relSheet" hidden>
+    <div class="sheet__mask" data-sheet-close></div>
+
+    <div class="sheet__box" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+      <div class="sheet__head">
+        <span class="sheet__t" id="sheetTitle">Following and followers</span>
+        <button class="sheet__x" id="sheetClose" type="button">Close</button>
+      </div>
+
+      <div class="rel__tabs sheet__tabs">
+        <button class="rel__tab is-on" type="button" data-scope="following">
+          Follow <b id="tabFollow">0</b>
+        </button>
+        <button class="rel__tab" type="button" data-scope="followers">
+          Followers <b id="tabFans">0</b>
+        </button>
+      </div>
+
+      <ul class="rel__list" id="relList"></ul>
+
+      <p class="rel__empty" id="relEmpty" hidden></p>
+
+      <button class="rel__more" id="relMore" type="button" hidden>Load more</button>
+    </div>
+  </div>
+
+  <footer class="foot">
+    <div class="wrap">
+      <div class="foot__bar foot__bar--single">
+        <span>© 2026 Chengfa</span>
+        <span>Take surveys · Earn rewards · Redeem payouts</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/settings.js?v=22" defer></script>
+  <script src="/js/personalize.js?v=7" defer></script>
+<script src="/en/dict.js?v=2"></script>
+<script src="/js/i18n-en.js?v=5" defer></script>
+</body>
+
+</html>

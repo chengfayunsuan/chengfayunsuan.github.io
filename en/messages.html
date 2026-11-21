@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messages · Chengfa</title>
+<meta name="description" content="Chengfa messages: redemption deliveries, payout reviews and system notices.">
+<meta name="theme-color" content="#E0291E">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=15">
+<link rel="stylesheet" href="/css/home.css?v=16">
+<link rel="stylesheet" href="/css/page.css?v=9">
+<link rel="stylesheet" href="/css/msg.css?v=2">
+<script src="/js/config.js?v=7"></script>
+<script src="/js/core.js?v=36"></script>
+</head>
+<body data-page="messages">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/en/home">
+      <span class="brand__mark" aria-hidden="true"></span>
+      Chengfa
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <a class="hm-nav__lang" href="/messages" title="切回中文">中文</a>
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><button class="hm-nav__cur" type="button" data-cur-toggle aria-label="Switch display currency" title="Switch between CFB and CF$"><span data-cur="code">CFB</span></button>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/en/home">Me</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<nav class="dock" aria-label="Menu">
+  <div class="wrap dock__in">
+    <a class="dock__i" href="/en/hall">
+      <span class="dock__n">01</span><span class="dock__t">Survey hall</span>
+    </a>
+    <a class="dock__i" href="/en/store">
+      <span class="dock__n">02</span><span class="dock__t">Redeem</span>
+    </a>
+    <a class="dock__i" href="/en/ledger">
+      <span class="dock__n">03</span><span class="dock__t">Ledger</span>
+    </a>
+    <a class="dock__i" href="/en/ladder">
+      <span class="dock__n">04</span><span class="dock__t">Leaderboard</span>
+    </a>
+    <a class="dock__i is-on" href="/en/messages" aria-current="page">
+      <span class="dock__n">05</span><span class="dock__t">Messages</span>
+    </a>
+    <a class="dock__i" href="/en/support">
+      <span class="dock__n">06</span><span class="dock__t">Contact Support</span>
+    </a>
+    <a class="dock__i" href="/en/settings">
+      <span class="dock__n">07</span><span class="dock__t">Settings</span>
+    </a>
+  </div>
+</nav>
+
+<main class="pg">
+  <div class="wrap">
+
+    <div class="pg-head">
+      <div>
+        <span class="pg-k">INBOX</span>
+        <h1 class="pg-t">Messages</h1>
+        <p class="pg-d">
+          Redemption deliveries, payout review results and system notices all arrive here. Click any message to read it in full and mark it as read.
+        </p>
+      </div>
+
+      <div class="pg-side">
+        <b id="msgUnread">0</b>
+        <span>unread</span>
+      </div>
+    </div>
+
+    <div class="msg-bar">
+      <div class="msg-bar__tabs" role="tablist">
+        <button class="msg-tab is-on" type="button" data-f="all">All</button>
+        <button class="msg-tab" type="button" data-f="unread">Unread </button>
+      </div>
+      <button class="msg-readall" type="button" id="msgReadAll">Mark all as read</button>
+    </div>
+
+    <div class="msg-list" id="msgList"></div>
+    <p class="msg-empty" id="msgEmpty" hidden>No messages yet.</p>
+
+  </div>
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 Chengfa</span>
+      <span>Take surveys · Earn rewards · Redeem payouts</span>
+    </div>
+    <p class="foot__legal"><a href="/en/privacy">Privacy Policy</a> · <a href="/en/terms">Terms of Service</a> · <a href="/en/support">Contact Support</a></p>
+  </div>
+</footer>
+
+<script src="/js/messages.js?v=1" defer></script>
+<script src="/en/dict.js?v=2"></script>
+<script src="/js/i18n-en.js?v=5" defer></script>
+</body>
+</html>

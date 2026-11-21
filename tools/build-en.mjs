@@ -29,11 +29,26 @@ const PAGES = [
   'pages/hall.html',
   'pages/home.html',
   'pages/earn.html',
-  'pages/store.html'
+  'pages/store.html',
+  'pages/ledger.html',
+  'pages/ladder.html',
+  'pages/messages.html',
+  'pages/notices.html',
+  'pages/support.html',
+  'pages/privacy.html',
+  'pages/terms.html',
+  'pages/settings.html',
+  'pages/survey.html',
+  'pages/space.html',
+  'pages/mock-wall.html'
 ];
 
 /* 已经有英文版的路径。英文页里的链接只有命中这里才加 /en，否则指回中文页，避免 404 */
-const EN_PATHS = ['/', '/login', '/hall', '/home', '/earn', '/store'];
+const EN_PATHS = [
+  '/', '/login', '/hall', '/home', '/earn', '/store',
+  '/ledger', '/ladder', '/messages', '/notices', '/support',
+  '/privacy', '/terms', '/settings', '/survey', '/space', '/mock-wall'
+];
 
 const CN = /[\u4e00-\u9fa5]/;
 
@@ -48,7 +63,12 @@ if (fs.existsSync(DICT_FILE)) {
     if (!t || t[0] !== '{') continue;
     try {
       const o = JSON.parse(t);
-      if (o && o.zh && o.en) dict[norm(o.zh)] = o.en;
+      if (o && o.zh && o.en) {
+        dict[norm(o.zh)] = o.en;
+        /* 有些文案是「空格 + 量词」这种片段（' 笔'、' 秒'），空格是它的一部分。
+           norm 会把首尾空格剪掉，导致运行时按原样匹配不上，所以再存一份原样的。 */
+        if (o.zh !== norm(o.zh)) dict[o.zh] = o.en;
+      }
     } catch (e) {}
   }
 }
@@ -170,7 +190,7 @@ function convert(file, isEn) {
   }
 
   /* 末尾挂运行时翻译，补 JS 拼出来的文案 */
-  html = html.replace('</body>', '<script src="/en/dict.js?v=1"></script>\n<script src="/js/i18n-en.js?v=2" defer></script>\n</body>');
+  html = html.replace('</body>', '<script src="/en/dict.js?v=2"></script>\n<script src="/js/i18n-en.js?v=5" defer></script>\n</body>');
 
   return html;
 }

@@ -223,10 +223,14 @@
   }
 
   /* ============================================================
-     二、主题配色
+     二、主题配色（前台 / 后台各一份，cookie 分开存）
      ============================================================ */
 
-  var draft = {};
+  var thScope = 'user';
+  var drafts = { user: {}, admin: {} };
+  var dirty = false;
+
+  function draft() { return drafts[thScope]; }
 
   function baseOf(saved) {
     var out = {};
@@ -234,14 +238,20 @@
     return out;
   }
 
+  function loadDraft() {
+    drafts[thScope] = baseOf(CF.theme.read(thScope));
+    return drafts[thScope];
+  }
+
   function paintPal() {
     var box = $('thPal');
     if (!box) return;
 
+    var d = draft();
     var html = '';
     for (var i = 0; i < CF.theme.LIST.length; i++) {
       var it = CF.theme.LIST[i];
-      var v = draft[it.key];
+      var v = d[it.key];
       html += '<li class="th-pal__i" data-th-row="' + it.key + '">' +
         '<span class="th-pal__x"><b>' + esc(it.label) + '</b><i>' + esc(it.hint) + '</i></span>' +
         '<input class="th-pal__c" type="color" value="' + esc(v) + '" data-th-color="' + it.key + '" aria-label="' + esc(it.label) + '">' +
@@ -254,11 +264,12 @@
   function paintDemo() {
     var d = $('thDemo');
     if (!d) return;
-    for (var k in draft) d.style.setProperty('--' + k, draft[k]);
-    d.style.setProperty('--red-rgb', CF.theme.hexRgb(draft.red));
-    d.style.setProperty('--ink-rgb', CF.theme.hexRgb(draft.ink));
-    d.style.setProperty('--paper-rgb', CF.theme.hexRgb(draft.paper));
-    d.style.setProperty('--paper2-rgb', CF.theme.hexRgb(draft['paper-2']));
+    var dd = draft();
+    for (var k in dd) d.style.setProperty('--' + k, dd[k]);
+    d.style.setProperty('--red-rgb', CF.theme.hexRgb(dd.red));
+    d.style.setProperty('--ink-rgb', CF.theme.hexRgb(dd.ink));
+    d.style.setProperty('--paper-rgb', CF.theme.hexRgb(dd.paper));
+    d.style.setProperty('--paper2-rgb', CF.theme.hexRgb(dd['paper-2']));
   }
 
   function renderPresets() {
@@ -276,39 +287,46 @@
 
   function paintPreset() {
     var btns = document.querySelectorAll('[data-theme-preset]');
+    var d = draft();
     for (var i = 0; i < btns.length; i++) {
       var p = CF.theme.preset(btns[i].getAttribute('data-theme-preset'));
-      var same = String(draft.red).toLowerCase() === p.red.toLowerCase() &&
-        String(draft['red-deep']).toLowerCase() === p['red-deep'].toLowerCase();
+      var same = String(d.red).toLowerCase() === p.red.toLowerCase() &&
+        String(d['red-deep']).toLowerCase() === p['red-deep'].toLowerCase();
       btns[i].classList.toggle('is-on', same);
     }
   }
 
-  function paintState(dirty) {
-    var st = $('thState');
-    if (!st) return;
-    var saved = CF.theme.read();
-    var txt = '默认配色';
-    if (saved) txt = '自定义 · 已保存';
-    if (dirty) txt = '有未保存的改动';
-    st.textContent = txt;
-    st.className = 'cz-tag' + (dirty || saved ? ' is-on' : '');
+  function paintScopeTabs() {
+    var tabs = document.querySelectorAll('[data-th-scope]');
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].classList.toggle('is-on', tabs[i].getAttribute('data-th-scope') === thScope);
+    }
   }
 
-  var dirty = false;
+  function paintState(dirtyNow) {
+    var st = $('thState');
+    if (!st) return;
+    var saved = CF.theme.read(thScope);
+    var side = thScope === 'admin' ? '后台' : '前台';
+    var txt = side + '默认配色';
+    if (saved) txt = side + '自定义 · 已保存';
+    if (dirtyNow) txt = '有未保存的改动';
+    st.textContent = txt;
+    st.className = 'cz-tag' + (dirtyNow || saved ? ' is-on' : '');
+  }
 
   function setDraft(key, val, fromText) {
     var v = String(val || '').trim();
     if (v.charAt(0) !== '#') v = '#' + v;
     if (!/^#[0-9a-fA-F]{6}$/.test(v)) return false;
-    draft[key] = v.toLowerCase();
+    draft()[key] = v.toLowerCase();
     dirty = true;
 
     /* 同步另一侧的输入框 */
     var color = document.querySelector('[data-th-color="' + key + '"]');
-    if (color && fromText) color.value = draft[key];
+    if (color && fromText) color.value = draft()[key];
     var hex = document.querySelector('[data-th-hex="' + key + '"]');
-    if (hex && !fromText) hex.value = draft[key];
+    if (hex && !fromText) hex.value = draft()[key];
     if (hex) hex.classList.remove('is-bad');
 
     paintDemo();
@@ -317,7 +335,26 @@
     return true;
   }
 
+  function repaintTheme() {
+    paintScopeTabs();
+    paintPal();
+    paintDemo();
+    paintPreset();
+    paintState(false);
+  }
+
   function bindThemeUI() {
+    var tabs = document.querySelectorAll('[data-th-scope]');
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].addEventListener('click', function () {
+        if (thScope === this.getAttribute('data-th-scope')) return;
+        thScope = this.getAttribute('data-th-scope');
+        dirty = false;
+        loadDraft();
+        repaintTheme();
+      });
+    }
+
     var box = $('thPal');
     if (box) {
       box.addEventListener('input', function (ev) {
@@ -337,18 +374,18 @@
         if (!t.hasAttribute || !t.hasAttribute('data-th-hex')) return;
         var key = t.getAttribute('data-th-hex');
         if (!/^#[0-9a-fA-F]{6}$/.test(t.value)) {
-          t.value = draft[key];
+          t.value = draft()[key];
           t.classList.remove('is-bad');
         }
       }, true);
     }
 
     var pre = document.querySelectorAll('[data-theme-preset]');
-    for (var i = 0; i < pre.length; i++) {
-      pre[i].addEventListener('click', function () {
+    for (var j = 0; j < pre.length; j++) {
+      pre[j].addEventListener('click', function () {
         var p = CF.theme.preset(this.getAttribute('data-theme-preset'));
-        draft.red = p.red.toLowerCase();
-        draft['red-deep'] = p['red-deep'].toLowerCase();
+        draft().red = p.red.toLowerCase();
+        draft()['red-deep'] = p['red-deep'].toLowerCase();
         dirty = true;
         paintPal();
         paintDemo();
@@ -360,24 +397,23 @@
     var save = $('thSave');
     if (save) {
       save.addEventListener('click', function () {
-        CF.theme.save(draft);
+        CF.theme.save(draft(), thScope);
         dirty = false;
         paintState(false);
-        say('配色已保存，整站立即生效');
+        say(thScope === 'admin'
+          ? '后台配色已保存，后台页面立即生效'
+          : '前台配色已保存，整站立即生效');
       });
     }
 
     var reset = $('thReset');
     if (reset) {
       reset.addEventListener('click', function () {
-        draft = CF.theme.reset();
-        draft = baseOf(null);
+        CF.theme.reset(thScope);
+        loadDraft();
         dirty = false;
-        paintPal();
-        paintDemo();
-        paintPreset();
-        paintState(false);
-        say('已恢复默认配色');
+        repaintTheme();
+        say(thScope === 'admin' ? '已恢复后台默认配色' : '已恢复前台默认配色');
       });
     }
   }
@@ -389,9 +425,11 @@
     scope = (document.body.getAttribute('data-page') || '').indexOf('admin') === 0 ? 'admin' : 'user';
     catching = null;
     dirty = false;
+    thScope = scope;
     document.body.setAttribute('data-hot-catch', '0');
 
-    draft = baseOf(CF.theme.read());
+    loadDraft();
+    drafts.admin = baseOf(CF.theme.read('admin'));
 
     bindHotUI();
     paintHot();
@@ -400,10 +438,7 @@
 
     renderPresets();
     bindThemeUI();
-    paintPal();
-    paintDemo();
-    paintPreset();
-    paintState(false);
+    repaintTheme();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

@@ -259,3 +259,862 @@
 {"zh":"已退出","en":"Signed out"}
 {"zh":"复制成功","en":"Copied"}
 {"zh":"网络不稳，稍后再试","en":"Connection unstable, try again"}
+{"zh":"载入更多","en":"Load more"}
+{"zh":"最后更新：2026 年 11 月 17 日","en":"Last updated: November 17, 2026"}
+{"zh":"相关文档：","en":"Related documents:"}
+{"zh":"关注与粉丝","en":"Following and followers"}
+{"zh":"提交工单","en":"Submit a ticket"}
+{"zh":"问卷商","en":"Survey provider"}
+{"zh":"关注：","en":"Following:"}
+{"zh":"粉丝：","en":"Followers:"}
+{"zh":"全部","en":"All"}
+{"zh":"时间","en":"Time"}
+{"zh":"说明","en":"Details"}
+{"zh":"关闭","en":"Close"}
+{"zh":"关注","en":"Follow"}
+{"zh":"粉丝","en":"Followers"}
+{"zh":"网络环境判断：访问站内页面时会用你的出口 IP 查一次网络属性（是否为代理、VPN、机房网络），结果缓存 24 小时。查询通过第三方 ip-api.com 完成，只发送 IP，不附带任何账号或行为信息。这项判断用于阻止用代理批量刷问卷——问卷商对代理流量一律判废，本站若不拦，被扣的是全体用户的奖励池。","en":"Network checks: when you open a page we look up your exit IP once to see whether it is a proxy, VPN or datacenter network, and cache the result for 24 hours. The lookup goes through the third-party service ip-api.com and sends only the IP address, with no account or behavioural data attached. This check exists to stop proxy users from mass-farming surveys. Providers reject proxy traffic outright, and if we let it through, every user's reward pool pays for it."}
+{"zh":"有。账户里的「赚积分」页接入了一个广告墙，任务由第三方广告主发布——试用一个应用、看一段演示、","en":"Yes. The Earn page in your account connects to an ad wall, where tasks are posted by third-party advertisers: try an app, watch a demo,"}
+{"zh":"广告主把推广任务放在 Moonetix 广告墙上：试用一个应用、看一段演示、注册一个试用账号。","en":"Advertisers post campaigns on the Moonetix ad wall: try an app, watch a demo, or sign up for a trial account."}
+{"zh":"可以。积分对应委托方已支付的调研费用，并非平台自行发行。十元提现门槛的设置原因在于，","en":"Yes. Points correspond to research fees already paid by clients; the platform does not issue them on its own. The ten-yuan payout threshold exists because"}
+{"zh":"本站是一个市场调研的参与入口。你在这里注册账户、从问卷大厅选取开放的调研项目、完成问卷后累计奖励，","en":"This site is an entry point for market research. You register an account, pick open studies from the survey hall, and accumulate rewards as you complete them,"}
+{"zh":"判定标准共三项：全部题目选择同一选项、作答时间显著短于正常阅读所需时间、答案与前序筛选题相互矛盾。","en":"Three criteria: the same option picked on every question, a completion time far shorter than normal reading requires, or answers that contradict the earlier screening questions."}
+{"zh":"注册和登录时使用 Cloudflare Turnstile 做真人校验。该服务会处理你的 IP 地址和浏览器信号，用于判断请求是否来自自动化程序。本站只接收「通过 / 未通过」的结论，不保存校验过程的原始数据。","en":"Registration and sign-in use Cloudflare Turnstile to check that you are human. The service processes your IP address and browser signals to decide whether a request comes from an automated program. We only receive a pass or fail verdict and never store the raw verification data."}
+{"zh":"打开站内任意页面时，服务器会记一条访问日志：访问时间、页面路径、IP 地址、网络归属（国家 / 省份 / 城市、运营商与所属网络）、来源域名、浏览器标识，以及浏览器随请求一并发送的语言偏好与请求类型标识。","en":"Opening any page records a visit log: the time, page path, IP address, network location (country, province, city, carrier and network), referring domain, browser identifier, plus the language preference and request-type flags the browser sends along with the request."}
+{"zh":"站内任何页面按键盘上排的数字键，直接跳到对应功能。默认按功能目录的编号走，第 10 项用 0。在输入框里打字时不会触发。1 左边那个键（` 或 ~ 都行）回账户首页，跟数字键同一套开关，键位固定不可改。","en":"On any page, press a number key on the top row to jump straight to that feature. Numbers follow the directory order, with 0 for the tenth item. Typing in an input field does not trigger it. The key left of 1 (either ` or ~) returns to your account home, shares the same on/off switch, and cannot be rebound."}
+{"zh":"多数问卷耗时三至十五分钟，收益依据题目数量与调研难度确定，通常折合人民币数元至二十元。","en":"Most surveys take three to fifteen minutes, and the reward depends on the number of questions and the difficulty of the study, usually a few yuan up to twenty."}
+{"zh":"品牌方与研究机构需要真实用户的反馈，并为此支付调研费用。完成一份时长三至十五分钟的问卷即可获得相应积分。","en":"Brands and research firms need feedback from real users and pay for it. Completing a survey that takes three to fifteen minutes earns the corresponding points."}
+{"zh":"不需要。注册、问卷大厅、积分明细、兑换与提现均已上线，填写用户名、邮箱与密码即可开通，","en":"No. Registration, the survey hall, the points ledger, redemption and payouts are all live: just fill in a username, email and password,"}
+{"zh":"这页不是第三方网站，是本站照着广告墙的样子做的模拟版。点「标记完成」，","en":"This page is not a third-party site. It is our own mock-up of an ad wall. Clicking 'Mark complete'"}
+{"zh":"常见原因有三种：问卷按样本条件投放，资料缺项或不符合条件的账户不会匹配到；","en":"There are three common reasons: studies are targeted by sample criteria, so accounts with missing or ineligible details never match;"}
+{"zh":"问卷由委托方发布，通过审核后在此处显示。新问卷上线时，站内消息会发出提醒。","en":"Surveys are published by clients and appear here once approved. We send an in-site message when new surveys go live."}
+{"zh":"积分累计至等值十元后可申请提现，转入支付宝或微信账户；","en":"Once your points reach the equivalent of ten yuan you can request a payout to Alipay or WeChat;"}
+{"zh":"委托方会限定样本条件，包括年龄段、城市、职业或特定产品的使用频率。名额满额或条件不符时，","en":"Clients set sample criteria such as age bracket, city, occupation or how often you use a particular product. When quotas fill up or you do not match,"}
+{"zh":"余额以整数最小单位记账，展示时省略小数末尾的零，因此显示的数值与实际记账完全一致。","en":"Balances are recorded in the smallest whole unit and trailing zeros are dropped on display, so what you see matches the ledger exactly."}
+{"zh":"法币榜统计当前可用余额，提现后排名会下降；等级由经验累计决定，经验只来自通过核验的问卷。","en":"The cash board ranks by available balance, so it drops after a payout. Level comes from accumulated experience, and experience only comes from verified surveys."}
+{"zh":"常见原因是收款账户与注册人实名信息不一致、账号未完成基础资料，","en":"Common causes are a payout account whose real-name details do not match the registrant, or an account that has not completed its basic profile,"}
+{"zh":"这份政策说明乘法（以下称「本站」）在你注册和参与调研的过程中会碰到哪些信息、为什么需要它们、","en":"This policy explains what information Chengfa (the site) encounters while you register and take part in research, why we need it,"}
+{"zh":"本站面向 18 周岁以上的用户。市场调研通常对参与者年龄有要求，未满 18 周岁请不要注册；","en":"The site is for users aged 18 and over. Market research usually sets age requirements, so please do not register if you are under 18;"}
+{"zh":"使用邮箱完成注册，耗时约三十秒。填写年龄段、所在城市与职业等基础信息，","en":"Register with your email; it takes about thirty seconds. Fill in your age bracket, city and occupation,"}
+{"zh":"当前没有与你的资料匹配的问卷，或本轮名额已经招满。新问卷上线时，站内消息会发出提醒；","en":"No surveys match your profile right now, or this round's quota is already full. We send an in-site message when new surveys go live;"}
+{"zh":"平台不设邀请码。注册完成后即可浏览全部问卷，积分于答卷审核通过后即时入账；","en":"There are no invite codes. Once registered you can browse every survey, and points are credited as soon as a response is approved;"}
+{"zh":"提现申请提交后金额进入冻结，审核通过七个工作日内打款；兑换码类商品即时发放，","en":"Once you request a payout the amount is frozen, and it is paid within seven working days of approval. Code rewards are delivered instantly,"}
+{"zh":"积分累计至等值十元后即可提交申请。审核通过后七个工作日内到账，","en":"Once your points reach the equivalent of ten yuan you can submit a request. It arrives within seven working days of approval,"}
+{"zh":"条款调整时会在站内公告并更新顶部日期，重大变更会通过站内消息单独通知。","en":"When these terms change we post a site notice and update the date at the top; major changes are also announced by in-site message."}
+{"zh":"问卷列表标注题目类型、预计耗时与积分额度。中途退出不计入积分，","en":"Every listing shows the question type, the estimated time and the point value. Quitting halfway does not earn points,"}
+{"zh":"：你参与某份问卷时，问卷商需要知道你是一个独立的、真实的参与者，因此会获得本站生成的参与标识、问卷编号与参与时间。你的邮箱和密码不会提供给他们。","en":": when you take a survey the provider needs to know you are a distinct, real participant, so they receive a participation ID we generate, the survey ID and the participation time. Your email and password are never shared with them."}
+{"zh":"不计入积分。问卷按完成状态结算，中途退出视为该份样本作废，委托方亦不会为不完整的答卷付费。","en":"no points. Surveys settle on completion; quitting halfway voids that sample, and the client does not pay for an incomplete response either."}
+{"zh":"余额是当前可以提现或兑换的部分；冻结是已经提交提现申请、正在审核的部分。","en":"Available is what you can withdraw or redeem right now; frozen is the amount already requested and under review."}
+{"zh":"委托方获取的是脱敏统计结果与匿名答卷，不包含手机号、邮箱及真实姓名。","en":"Clients receive aggregated, de-identified results and anonymous responses. Phone numbers, emails and real names are never included."}
+{"zh":"乘法币可提现至支付宝或微信，也可即时兑换数字兑换码。两条路径折算比例一致，","en":"CFB can be paid out to Alipay or WeChat, or redeemed instantly for digital codes. Both routes use the same conversion rate,"}
+{"zh":"平台收益来源于委托方支付的调研费用。委托方提出调研需求，平台负责问卷分发与数据回收，","en":"The platform earns from research fees paid by clients. A client submits a study, and we handle distribution and data collection,"}
+{"zh":"账户、余额、问卷与提现的问题都可以在这里提交。附上相关单号，","en":"Questions about your account, balance, surveys or payouts can all be submitted here. Include the relevant reference number,"}
+{"zh":"答卷的具体内容由问卷商的页面直接收集，不经过本站服务器。本站只保存「你参与过这份问卷」这一条记录，用于避免重复参与和后续核对奖励。","en":"Response content is collected on the provider's own page and never passes through our servers. We only store the fact that you took part, to prevent repeat participation and to reconcile rewards later."}
+{"zh":"墙由第三方托管，在你的账号名下展开任务列表；同一个账号 ID 每次打开都是同一个人，","en":"The wall is hosted by a third party and opens the task list under your account; the same account ID is the same person every time,"}
+{"zh":"每一笔余额变动都先记流水再落余额，可按时间与类型逐笔核对。","en":"Every balance change is written to the ledger before it reaches the balance, so you can check each entry by time and type."}
+{"zh":"法币为主榜，等级为次榜。法币取决于已完成问卷的结算金额，等级取决于累计经验，","en":"Cash is the main board and level the secondary one. Cash reflects the settled value of completed surveys, level reflects accumulated experience,"}
+{"zh":"公开主页展示乘法币余额、等级、好感度与已完成的提现记录，","en":"The public profile shows your CFB balance, level, reputation and completed payout history,"}
+{"zh":"以下情况问卷商可能判定答卷无效，本站会相应撤回奖励：答题时间异常、答案前后矛盾、随意勾选、未通过质量抽查、重复参与同一项目。","en":"Providers may invalidate a response, and we then claw back the reward, when: the time taken is abnormal, answers contradict each other, options are picked at random, a quality check fails, or the same study is taken twice."}
+{"zh":"经验只来自通过核验的问卷，答卷被判定无效时对应经验一并扣回。","en":"Experience only comes from verified surveys; if a response is invalidated, the matching experience is deducted as well."}
+{"zh":"注册即表示你已读过并同意以下内容。条款写得直白，重点是三件事：","en":"By registering you confirm that you have read and agree to the following. The terms are plain, and three things matter most:"}
+{"zh":"政策有实质变化时，会在本站公告并通过站内消息通知，同时更新页面顶部的日期。","en":"If the policy changes materially we post a site notice, send an in-site message, and update the date at the top of the page."}
+{"zh":"积分可自由选择用途。既可按等值金额提现，亦可兑换指定平台的数字兑换码，","en":"You can use your points however you like: withdraw the cash equivalent, or redeem them for digital codes on selected platforms,"}
+{"zh":"收支明细 · 乘法","en":"Ledger · Chengfa"}
+{"zh":"LEDGER / 收支明细","en":"LEDGER"}
+{"zh":"每一笔余额变动都先记流水再落余额，可按时间与类型逐笔核对。 出现金额差异时，用单号追溯对应的问卷或提现申请。","en":"Every balance change is written to the ledger before it reaches the balance, so you can check each entry by time and type. When an amount looks off, use the reference number to trace the survey or payout behind it."}
+{"zh":"笔记录","en":"entries"}
+{"zh":"累计收入","en":"Total in"}
+{"zh":"累计支出","en":"Total out"}
+{"zh":"当前可用","en":"Available"}
+{"zh":"收入","en":"In"}
+{"zh":"支出","en":"Out"}
+{"zh":"问卷","en":"Survey"}
+{"zh":"按时间倒序","en":"Newest first"}
+{"zh":"类型","en":"Type"}
+{"zh":"变动","en":"Change"}
+{"zh":"账户还没有任何资金变动。","en":"No money has moved in this account yet."}
+{"zh":"NOTE / 说明","en":"NOTE"}
+{"zh":"余额以整数最小单位记账，展示时省略小数末尾的零，因此显示的数值与实际记账完全一致。 提现申请提交后，金额从可用余额划入冻结，审核通过才从冻结中扣除。","en":"Balances are recorded in the smallest whole unit and trailing zeros are dropped on display, so what you see matches the ledger exactly. When you request a payout the amount moves from available to frozen, and it only leaves frozen once it is approved."}
+{"zh":"乘法收支明细：逐笔查看问卷奖励、提现与兑换记录。","en":"Chengfa ledger: every survey reward, payout and redemption, entry by entry."}
+{"zh":"天梯榜 · 乘法","en":"Leaderboard · Chengfa"}
+{"zh":"LADDER / 天梯榜","en":"LADDER"}
+{"zh":"法币为主榜，等级为次榜。法币取决于已完成问卷的结算金额，等级取决于累计经验， 两者不互相换算，各有各的榜。","en":"Cash is the main board and level the secondary one. Cash reflects the settled value of completed surveys, level reflects accumulated experience. The two never convert into each other; each has its own board."}
+{"zh":"仅列活跃账户","en":"Active accounts only"}
+{"zh":"按法币","en":"By cash"}
+{"zh":"按等级","en":"By level"}
+{"zh":"封禁与注销账户不计入","en":"Banned and closed accounts are excluded"}
+{"zh":"榜单还没有数据。","en":"The board is empty for now."}
+{"zh":"RULE / 规则","en":"RULE"}
+{"zh":"法币榜统计当前可用余额，提现后排名会下降；等级由经验累计决定，经验只来自通过核验的问卷。 榜单只展示公开信息，点击用户名可查看对方的公开主页。","en":"The cash board ranks by available balance, so it drops after a payout; level comes from accumulated experience, and experience only comes from verified surveys. The board only shows public information; click a username to open that person's public profile."}
+{"zh":"乘法天梯榜：按乘法币与等级排序的公开榜单。","en":"Chengfa leaderboard: a public ranking by CFB balance and level."}
+{"zh":"站内消息 · 乘法","en":"Messages · Chengfa"}
+{"zh":"兑换发货、提现审核结果与系统通知都会发到这里，点击任意一条可以展开全文并标记已读。","en":"Redemption deliveries, payout review results and system notices all arrive here. Click any message to read it in full and mark it as read."}
+{"zh":"条未读","en":"unread"}
+{"zh":"未读","en":"Unread"}
+{"zh":"全部标为已读","en":"Mark all as read"}
+{"zh":"还没有任何消息。","en":"No messages yet."}
+{"zh":"乘法站内消息：兑换发货、提现审核与系统通知。","en":"Chengfa messages: redemption deliveries, payout reviews and system notices."}
+{"zh":"公告 · 乘法","en":"Notices · Chengfa"}
+{"zh":"← 返回账户","en":"← Back to account"}
+{"zh":"暂时没有公告。","en":"No notices right now."}
+{"zh":"乘法的站点公告：规则调整、维护安排与活动通知。","en":"Chengfa site notices: rule changes, maintenance windows and announcements."}
+{"zh":"答题 · 乘法","en":"Survey · Chengfa"}
+{"zh":"← 回问卷大厅","en":"← Back to the survey hall"}
+{"zh":"用时 0 秒","en":"0 s elapsed"}
+{"zh":"用时","en":"Elapsed"}
+{"zh":"正在载入问卷…","en":"Loading survey…"}
+{"zh":"公司网址（不用填）","en":"Company website (leave empty)"}
+{"zh":"0 / 0 题","en":"0 / 0 questions"}
+{"zh":"题","en":"questions"}
+{"zh":"秒","en":"s"}
+{"zh":"提交答卷","en":"Submit"}
+{"zh":"回问卷大厅","en":"Back to the survey hall"}
+{"zh":"看收支明细","en":"View ledger"}
+{"zh":"答卷只用于兑换积分","en":"Used only to earn points"}
+{"zh":"乘法 · 站内问卷答题","en":"Chengfa · Survey"}
+{"zh":"广告墙（模拟） · 乘法","en":"Ad wall (mock) · Chengfa"}
+{"zh":"模拟墙","en":"Mock wall"}
+{"zh":"← 回到赚积分","en":"← Back to Earn"}
+{"zh":"OFFERS / 可做的任务","en":"OFFERS"}
+{"zh":"选一项，做完入账","en":"Pick one and get credited when done"}
+{"zh":"这页不是第三方网站，是本站照着广告墙的样子做的模拟版。点「标记完成」， 浏览器会请求本站接口，接口再按真实回调的那套逻辑入账——所以走的是和正式接入完全相同的代码路径。","en":"This page is not a third-party site. It is our own mock-up of an ad wall. Clicking 'Mark complete' makes the browser call our API, which then credits the reward with exactly the same logic as a real callback, so it exercises the same code path as a live integration."}
+{"zh":"账户 UID","en":"Account UID"}
+{"zh":"· 每一笔都会生成独立的交易号","en":"· every entry gets its own transaction ID"}
+{"zh":"加载中…","en":"Loading…"}
+{"zh":"回到赚积分看记录","en":"Back to Earn to see the record"}
+{"zh":"去收支明细","en":"Open the ledger"}
+{"zh":"站内模拟的广告墙，用于在没有接入真实服务商前验证回调入账链路。","en":"An in-site mock ad wall, used to verify the callback crediting path before a real provider is connected."}
+{"zh":"联系客服 · 乘法","en":"Support · Chengfa"}
+{"zh":"SUPPORT / 联系客服","en":"SUPPORT"}
+{"zh":"账户、余额、问卷与提现的问题都可以在这里提交。附上相关单号， 处理会快很多；涉及资金的争议请在描述中写明金额与时间。","en":"Questions about your account, balance, surveys or payouts can all be submitted here. Include the relevant reference number to speed things up; for money disputes, state the amount and the time in your description."}
+{"zh":"工作日内回复","en":"Replies on business days"}
+{"zh":"提交时自动记录账户，便于核对身份。","en":"Your account is recorded automatically so we can verify who you are."}
+{"zh":"问题类型","en":"Issue type"}
+{"zh":"账户与登录","en":"Account and sign-in"}
+{"zh":"余额与提现","en":"Balance and payouts"}
+{"zh":"问卷与奖励","en":"Surveys and rewards"}
+{"zh":"举报与申诉","en":"Reports and appeals"}
+{"zh":"其他","en":"Other"}
+{"zh":"详细描述","en":"Description"}
+{"zh":"提交后可在「我的工单」查看处理进度。","en":"After submitting, track progress under My tickets."}
+{"zh":"DIRECT / 直接联系","en":"DIRECT"}
+{"zh":"正文附截图或单号，并写明账户 UID，处理时不用再来回确认身份。","en":"Attach a screenshot or reference number and include your account UID so we do not have to come back and confirm your identity."}
+{"zh":"我的工单 →","en":"My tickets →"}
+{"zh":"已提交的工单与处理进度在账户设置的工单区块查看。","en":"Submitted tickets and their progress live in the tickets section of account settings."}
+{"zh":"受理时间","en":"Hours"}
+{"zh":"周一至周五 10:00–18:00","en":"Mon–Fri, 10:00–18:00"}
+{"zh":"回复时长","en":"Response time"}
+{"zh":"一般 24 小时内，资金争议 3 个工作日内","en":"Usually within 24 hours; money disputes within 3 business days"}
+{"zh":"处理范围","en":"Covers"}
+{"zh":"账户、余额、问卷、提现、举报","en":"Account, balance, surveys, payouts, reports"}
+{"zh":"问卷为什么一份都看不到？","en":"Why can I not see a single survey?"}
+{"zh":"常见原因有三种：问卷按样本条件投放，资料缺项或不符合条件的账户不会匹配到； 本轮名额已招满；或该问卷你已经参与过。补全账户资料后，可匹配的问卷会增加。","en":"There are three common reasons: studies are targeted by sample criteria, so accounts with missing or ineligible details never match; this round's quota is already full; or you have already taken that survey. Completing your profile increases the number of surveys you match."}
+{"zh":"余额和冻结金额有什么区别？","en":"What is the difference between available and frozen?"}
+{"zh":"余额是当前可以提现或兑换的部分；冻结是已经提交提现申请、正在审核的部分。 审核通过后从冻结中扣除，驳回则原路退回余额。","en":"Available is what you can withdraw or redeem right now; frozen is the amount already requested and under review. On approval it is deducted from frozen; if rejected it returns to available."}
+{"zh":"提现为什么被驳回？","en":"Why was my payout rejected?"}
+{"zh":"常见原因是收款账户与注册人实名信息不一致、账号未完成基础资料， 或同一账户短时间内多次提交。驳回后金额立即退回，可修正信息后重新提交。","en":"Common causes are a payout account whose real-name details do not match the registrant, an account with an incomplete profile, or repeated requests in a short window. The amount returns immediately after a rejection, and you can fix the details and resubmit."}
+{"zh":"等级怎么升？经验从哪里来？","en":"How do I level up, and where does experience come from?"}
+{"zh":"经验只来自通过核验的问卷，答卷被判定无效时对应经验一并扣回。 等级不设人工调整通道，也不出售经验。","en":"Experience only comes from verified surveys, and if a response is invalidated the matching experience is deducted. Levels cannot be adjusted by hand and experience is never sold."}
+{"zh":"别人能看到我的余额吗？","en":"Can other people see my balance?"}
+{"zh":"公开主页展示乘法币余额、等级、好感度与已完成的提现记录， 不展示邮箱、IP、登录记录与提现账户信息。","en":"The public profile shows your CFB balance, level, reputation and completed payout history. It never shows your email, IP, sign-in history or payout account details."}
+{"zh":"发生了什么、什么时候发生、涉及多少金额或哪个单号。","en":"What happened, when it happened, how much money was involved, or which reference number."}
+{"zh":"乘法客服：账户、余额、问卷相关问题的反馈渠道。","en":"Chengfa support: a channel for questions about accounts, balances and surveys."}
+{"zh":"用户主页 · 乘法","en":"Profile · Chengfa"}
+{"zh":"PUBLIC PROFILE / 公开主页","en":"PUBLIC PROFILE"}
+{"zh":"注册于 — · 已加入 1 天","en":"Joined — · 1 day in"}
+{"zh":"这是你自己的主页。","en":"This is your own profile."}
+{"zh":"去账户设置","en":"Open settings"}
+{"zh":"等级","en":"Level"}
+{"zh":"成功提现","en":"Payouts paid"}
+{"zh":"笔","en":"entries"}
+{"zh":"累计金额","en":"Total paid"}
+{"zh":"最近一笔","en":"Most recent"}
+{"zh":"该账户还没有成功的提现记录。","en":"This account has no completed payouts yet."}
+{"zh":"复制主页链接","en":"Copy profile link"}
+{"zh":"回到我的账户","en":"Back to my account"}
+{"zh":"没有这个用户","en":"No such user"}
+{"zh":"UID 可能写错了，或者该账户已经注销。","en":"The UID may be mistyped, or the account has been closed."}
+{"zh":"正在载入主页","en":"Loading profile"}
+{"zh":"乘法用户的公开主页。","en":"The public profile of a Chengfa user."}
+{"zh":"账户设置 · 乘法","en":"Settings · Chengfa"}
+{"zh":"账户概览","en":"Account overview"}
+{"zh":"查找用户","en":"Find a user"}
+{"zh":"账户状态：","en":"Account status:"}
+{"zh":"兑换成功记录","en":"Redemption history"}
+{"zh":"项目","en":"Item"}
+{"zh":"扣除","en":"Charged"}
+{"zh":"兑换码 / 单号","en":"Code / reference"}
+{"zh":"暂无兑换记录。兑换成功后，条目与兑换码会出现在这里。","en":"No redemptions yet. Once a redemption succeeds, the entry and its code appear here."}
+{"zh":"账号安全","en":"Sign-in security"}
+{"zh":"2 至 20 个字符","en":"2 to 20 characters"}
+{"zh":"更改","en":"Change"}
+{"zh":"注册邮箱","en":"Email"}
+{"zh":"未验证","en":"Unverified"}
+{"zh":"用于登录与找回密码。更换后需要在新邮箱完成一次验证。","en":"Used to sign in and to recover your password. After a change you must verify the new address."}
+{"zh":"验证邮箱","en":"Verify email"}
+{"zh":"登录密码","en":"Password"}
+{"zh":"建议与其他站点使用不同密码，怀疑泄露时立即更换。","en":"Use a password you do not use elsewhere, and change it as soon as you suspect a leak."}
+{"zh":"新用户名","en":"New username"}
+{"zh":"保存","en":"Save"}
+{"zh":"取消","en":"Cancel"}
+{"zh":"新邮箱","en":"New email"}
+{"zh":"当前密码","en":"Current password"}
+{"zh":"邮箱验证码","en":"Email code"}
+{"zh":"没收到？","en":"Didn't get it?"}
+{"zh":"发送验证码","en":"Send code"}
+{"zh":"提交验证","en":"Submit"}
+{"zh":"新密码","en":"New password"}
+{"zh":"确认新密码","en":"Confirm new password"}
+{"zh":"登录与网络","en":"Sign-in and network"}
+{"zh":"网络","en":"Network"}
+{"zh":"最近登录","en":"Last sign-in"}
+{"zh":"封禁记录","en":"Bans"}
+{"zh":"累计封禁次数","en":"Total bans"}
+{"zh":"没有封禁记录。","en":"No bans on record."}
+{"zh":"问卷商风控等级","en":"Provider risk level"}
+{"zh":"风控等级","en":"Risk level"}
+{"zh":"最近更新","en":"Last updated"}
+{"zh":"尚无问卷商回传风控数据。","en":"No risk data reported by providers yet."}
+{"zh":"我的工单","en":"My tickets"}
+{"zh":"还没有工单。账户、余额、提现或问卷审核的问题都可以在这里提，回复会同时发到站内消息。","en":"No tickets yet. Account, balance, payout or survey review questions can all be raised here, and replies also arrive as in-site messages."}
+{"zh":"回复会同时发到站内消息，可在上方列表查看处理进度。","en":"Replies also arrive as in-site messages; track progress in the list above."}
+{"zh":"快捷导航","en":"Shortcuts"}
+{"zh":"已开启","en":"On"}
+{"zh":"数字键直达","en":"Number-key jump"}
+{"zh":"用户端 11 项 · 点「展开」看键位","en":"11 user items · expand to see the keys"}
+{"zh":"启用","en":"Enable"}
+{"zh":"展开","en":"Expand"}
+{"zh":"用户端 · 11 项","en":"User · 11 items"}
+{"zh":"后台 · 11 项","en":"Admin · 11 items"}
+{"zh":"用户端","en":"User"}
+{"zh":"后台","en":"Admin"}
+{"zh":"点「改键」后按任意数字或字母即可绑定；撞键会自动交换。` 键固定回首页，不参与改键。键位只存在这台电脑的浏览器里。","en":"Click Rebind and press any number or letter to assign it; clashes swap automatically. The ` key always returns home and cannot be rebound. Bindings live only in this browser."}
+{"zh":"恢复默认键位","en":"Reset keys"}
+{"zh":"主题配色","en":"Theme colour"}
+{"zh":"默认配色","en":"Default"}
+{"zh":"预设配色","en":"Presets"}
+{"zh":"一键换掉整站主色，其余颜色保持协调。后台默认本来就是蓝的。","en":"Swap the site's main colour in one click; everything else stays in harmony. The admin area is blue by default."}
+{"zh":"配色预览","en":"Preview"}
+{"zh":"乘法币余额","en":"CFB balance"}
+{"zh":"主按钮","en":"Primary button"}
+{"zh":"次按钮","en":"Secondary button"}
+{"zh":"再获得 40 点经验升至 LV4","en":"40 more experience to reach LV4"}
+{"zh":"正文用墨色，说明与编号用次要灰，分隔线由墨色调淡。这里是示例，改动会即时反映在这扇小窗里。","en":"Body text uses ink, captions and labels use muted grey, and hairlines are a lightened ink. This is a sample; changes show up in this card immediately."}
+{"zh":"颜色存在本机 cookie 里，换设备不带走。点「确定生效」后整站立即换色，恢复默认随时可以。","en":"Colours are stored in a cookie on this device and do not follow you elsewhere. Click Apply and the whole site changes instantly; reset to the default at any time."}
+{"zh":"恢复默认","en":"Reset"}
+{"zh":"确定生效","en":"Apply"}
+{"zh":"UID 或用户名","en":"UID or username"}
+{"zh":"输入新的用户名","en":"Enter a new username"}
+{"zh":"确认是你本人操作","en":"Confirm it is really you"}
+{"zh":"6 位数字","en":"6 digits"}
+{"zh":"乘法账户设置。查看身份、余额、安全与偏好。","en":"Chengfa account settings: identity, balance, security and preferences."}
+{"zh":"隐私政策 · 乘法","en":"Privacy Policy · Chengfa"}
+{"zh":"LEGAL / 隐私政策","en":"LEGAL"}
+{"zh":"这份政策说明乘法（以下称「本站」）在你注册和参与调研的过程中会碰到哪些信息、为什么需要它们、 以及会不会给别人。写的是实际发生的事，不是模板套话。","en":"This policy explains what information Chengfa (the site) encounters while you register and take part in research, why we need it, and whether we ever hand it to anyone else. It describes what actually happens, not boilerplate."}
+{"zh":"一、本站做什么","en":"1. What this site does"}
+{"zh":"本站是一个市场调研的参与入口。你在这里注册账户、从问卷大厅选取开放的调研项目、完成问卷后累计奖励， 奖励可用于提现或兑换数字权益。问卷本身由第三方调研机构（以下称「问卷商」）提供和运营，本站负责把入口、 身份与结算管好。","en":"This site is an entry point for market research. You register an account, pick open studies from the survey hall, and accumulate rewards as you complete them; rewards can be withdrawn or redeemed for digital benefits. The surveys themselves are provided and run by third-party research firms (providers). We take care of the gateway, identity and settlement."}
+{"zh":"二、我们收集哪些信息","en":"2. What we collect"}
+{"zh":"1. 注册与登录","en":"1. Registration and sign-in"}
+{"zh":"邮箱地址：作为登录凭据，也是找回账户的唯一途径。","en":"Email address: your sign-in credential and the only way to recover your account."}
+{"zh":"用户名：站内显示用，可以随时在设置页修改。","en":"Username: shown across the site and changeable in settings at any time."}
+{"zh":"密码：只保存不可逆的哈希值与随机盐，任何人都无法还原出原始密码，包括本站管理员。","en":"Password: only an irreversible hash and a random salt are stored. Nobody can recover the original password, including the site owner."}
+{"zh":"注册与登录记录：IP 地址、网络归属（运营商与地区）、浏览器标识、最后登录时间。用于识别异常登录和防止批量注册。","en":"Registration and sign-in records: IP address, network location (carrier and region), browser identifier, last sign-in time. Used to spot abnormal sign-ins and block bulk registration."}
+{"zh":"2. 参与调研","en":"2. Taking surveys"}
+{"zh":"你点开过哪一份问卷、什么时候点的。","en":"Which survey you opened, and when."}
+{"zh":"3. 账务与兑换","en":"3. Money and redemptions"}
+{"zh":"余额、冻结金额、每一笔收支流水及其来源。","en":"Balance, frozen amount, and every ledger entry with its source."}
+{"zh":"提现申请：金额、渠道、你填写的收款账号。","en":"Payout requests: amount, channel and the payout account you entered."}
+{"zh":"兑换订单：商品、金额、发放的卡密或单号。","en":"Redemption orders: item, amount, and the code or reference issued."}
+{"zh":"4. 沟通与通知","en":"4. Communication and notices"}
+{"zh":"你提交的工单内容、发送的站内消息，以及本站发给你的通知。","en":"Ticket content you submit, messages you send, and notices we send you."}
+{"zh":"5. 安全验证","en":"5. Security checks"}
+{"zh":"被判定为代理 / VPN 网络后仍点开问卷的，账号会被封禁并扣 8 点经验。封禁记录在设置页可查，可以提交工单申诉。","en":"If you open a survey after being flagged as a proxy or VPN network, the account is banned and loses 8 experience. Bans are visible in settings, and you can appeal with a ticket."}
+{"zh":"6. 页面访问日志","en":"6. Page access logs"}
+{"zh":"日志只用于统计访问量、区分真人访问与自动探测，仅站长可见，不对外提供，也不用于广告画像。","en":"Logs are used only to count traffic and separate real visits from automated probes. They are visible to the site owner alone, never shared, and never used for ad profiling."}
+{"zh":"日志保留 90 天，到期自动删除。删除后无法恢复。","en":"Logs are kept for 90 days and deleted automatically. Deletion is permanent."}
+{"zh":"三、这些信息用来做什么","en":"3. What we use it for"}
+{"zh":"让你能登录、看到自己的余额与记录。","en":"So you can sign in and see your own balance and records."}
+{"zh":"把奖励算对、发对，把钱结算清楚。","en":"So rewards are calculated and paid correctly, and settlement is clean."}
+{"zh":"识别多账号、脚本刷量、虚假资料等作弊行为，保护问卷商和你自己的奖励池。","en":"To detect multi-accounting, scripted farming and fake profiles, protecting both providers and your own reward pool."}
+{"zh":"在你提交工单或提现时联系你、核对信息。","en":"To contact you and verify details when you submit a ticket or request a payout."}
+{"zh":"本站不会把你的信息用于广告投放，也不会做用户画像出售。","en":"We never use your information for ad targeting, and we do not build profiles to sell."}
+{"zh":"四、会不会提供给第三方","en":"4. Do we share it with third parties"}
+{"zh":"会，但只限完成服务所必需的部分：","en":"Yes, but only what is necessary to deliver the service:"}
+{"zh":"支付渠道","en":"Payment channels"}
+{"zh":"：处理提现时，把收款账号和金额交给对应的支付宝、微信、PayPal 或 Payoneer。","en":": for a payout we pass the receiving account and the amount to the relevant Alipay, WeChat, PayPal or Payoneer."}
+{"zh":"基础设施","en":"Infrastructure"}
+{"zh":"：本站托管在 Cloudflare，数据存放在 Cloudflare 的数据库与边缘网络中。","en":": the site is hosted on Cloudflare, and data lives in Cloudflare's database and edge network."}
+{"zh":"法律要求","en":"Legal requirements"}
+{"zh":"：接到有权机关的正式要求时，按法定范围提供。","en":": provided within the legal scope when a competent authority makes a formal request."}
+{"zh":"本站不出售你的个人信息，也不把它交给与调研无关的第三方。","en":"We do not sell your personal information, and we do not hand it to third parties unrelated to research."}
+{"zh":"五、Cookie 与本地存储","en":"5. Cookies and local storage"}
+{"zh":"本站只用必要的少量存储，没有广告追踪器：","en":"We use only a small amount of necessary storage, with no ad trackers:"}
+{"zh":"：登录状态凭证，HttpOnly，有效期 30 天，退出登录即失效。","en":": your sign-in credential, HttpOnly, valid for 30 days, revoked on sign-out."}
+{"zh":"：你选择的计价币种与单位写法。","en":": the currency and unit format you picked."}
+{"zh":"：汇率缓存，避免每次打开页面都请求一次。","en":": an exchange-rate cache so we do not request it on every page load."}
+{"zh":"：当前标签页内缓存的账户摘要，关闭标签页即清除。","en":": an account summary cached in the current tab, cleared when the tab closes."}
+{"zh":"Cloudflare Turnstile 会写入自己的校验 Cookie，用途见上文「安全验证」。","en":"Cloudflare Turnstile writes its own verification cookie; see Security checks above."}
+{"zh":"除登录凭证外，其余都只是显示偏好，清空浏览器数据即可移除，不影响账户本身。","en":"Apart from the sign-in credential, everything is a display preference that clearing browser data removes without affecting your account."}
+{"zh":"六、保存多久","en":"6. How long we keep it"}
+{"zh":"账户信息：直到你注销。","en":"Account information: until you close the account."}
+{"zh":"收支流水、提现与兑换记录：注销后仍按财务留存要求保存，但会与你的身份脱钩。","en":"Ledger, payout and redemption records: kept after closure as financial retention rules require, but detached from your identity."}
+{"zh":"登录记录：一般保存 180 天，超出后自动清理。","en":"Sign-in records: usually 180 days, then cleaned up automatically."}
+{"zh":"七、你的权利","en":"7. Your rights"}
+{"zh":"查看与更正","en":"Access and correction"}
+{"zh":"：用户名、简介、头像在「账户设置」里随时可改。","en":": username, bio and avatar can be changed in account settings at any time."}
+{"zh":"注销账户","en":"Closing your account"}
+{"zh":"：通过「联系客服」提交工单，注明需要注销。我们会在 7 个工作日内处理，注销后账户无法登录、主页不再公开。","en":": submit a ticket via Contact support stating that you want the account closed. We handle it within 7 business days; afterwards the account cannot sign in and the profile is no longer public."}
+{"zh":"删除数据","en":"Deleting data"}
+{"zh":"：可以要求删除与账户关联的非必要数据。依法必须留存的财务记录除外。","en":": you can ask us to delete non-essential data linked to your account, except financial records we must keep by law."}
+{"zh":"：随时点右上角「退出」，登录凭证立即作废。","en":": click Sign out in the top right at any time and the credential is revoked immediately."}
+{"zh":"八、未成年人","en":"8. Minors"}
+{"zh":"本站面向 18 周岁以上的用户。市场调研通常对参与者年龄有要求，未满 18 周岁请不要注册； 如果发现账户属于未成年人，本站会停用并删除相关信息。","en":"The site is for users aged 18 and over. Market research usually sets age requirements, so please do not register if you are under 18. If we find that an account belongs to a minor, we disable it and delete the related information."}
+{"zh":"九、政策变更","en":"9. Policy changes"}
+{"zh":"政策有实质变化时，会在本站公告并通过站内消息通知，同时更新页面顶部的日期。 继续使用即视为接受更新后的版本。","en":"If the policy changes materially we post a site notice, send an in-site message, and update the date at the top of the page. Continued use counts as acceptance of the updated version."}
+{"zh":"十、怎么联系","en":"10. How to reach us"}
+{"zh":"与隐私相关的任何问题、注销请求或数据查询，都可以通过「联系客服」提交工单，或发邮件到","en":"For any privacy question, closure request or data query, submit a ticket via Contact support, or email"}
+{"zh":"。我们会在 7 个工作日内答复。","en":". We reply within 7 business days."}
+{"zh":"乘法收集哪些信息、用来做什么、会不会提供给第三方，以及你可以怎么处理自己的数据。","en":"What Chengfa collects, what we use it for, whether we share it with third parties, and how you can manage your own data."}
+{"zh":"用户协议 · 乘法","en":"Terms of Service · Chengfa"}
+{"zh":"LEGAL / 用户协议","en":"LEGAL"}
+{"zh":"注册即表示你已读过并同意以下内容。条款写得直白，重点是三件事： 本站不是赚钱渠道、参与必须真实、作弊会被清退。","en":"By registering you confirm that you have read and agree to the following. The terms are plain, and three things matter: this site is not a way to make a living, participation must be genuine, and cheating gets you removed."}
+{"zh":"一、服务性质","en":"1. Nature of the service"}
+{"zh":"本站是市场调研的","en":"This site is an entry point for"}
+{"zh":"参与入口","en":"market research"}
+{"zh":"，把第三方问卷商的调研项目集中展示给你，并负责账户、奖励与结算。","en":", bringing studies from third-party providers together in one place and taking care of your account, rewards and settlement."}
+{"zh":"问卷由问卷商提供和运营，答卷是否有效、能否计入奖励，最终以问卷商的判定为准。","en":"Surveys are provided and operated by the providers; whether a response is valid and counts toward rewards is ultimately their call."}
+{"zh":"本站不承诺收益。","en":"We do not promise earnings."}
+{"zh":"可参与的问卷数量、单份金额、发放节奏都由问卷商决定，会随时变化。这里不是兼职、不是投资、不是「日赚多少」的项目。","en":"How many surveys are available, what each pays and how often they appear are all decided by providers and change constantly. This is not a side job, not an investment, and not a make-a-certain-amount-per-day scheme."}
+{"zh":"本站可以随时调整、暂停或下线任意功能，包括问卷大厅、兑换商品与提现通道。","en":"We may adjust, pause or retire any feature at any time, including the survey hall, redemption items and payout channels."}
+{"zh":"二、账户","en":"2. Accounts"}
+{"zh":"注册需使用真实可收信的邮箱，并设置符合强度要求的密码。","en":"Register with a real email address that can receive mail, and set a password that meets the strength requirements."}
+{"zh":"一人一号。","en":"One person, one account."}
+{"zh":"同一自然人不得注册或控制多个账户。同一设备、同一网络下的大量账户会被合并审查。","en":"One person may not register or control multiple accounts. Many accounts on the same device or network are reviewed together."}
+{"zh":"账户仅限本人使用，不得出租、出借、出售或转让。","en":"Accounts are for your own use only and may not be rented, lent, sold or transferred."}
+{"zh":"你有责任保管好自己的密码。因密码泄露造成的损失，本站不承担赔偿责任，但会协助你冻结账户。","en":"You are responsible for keeping your password safe. We are not liable for losses caused by a leaked password, but we will help you freeze the account."}
+{"zh":"注册需年满 18 周岁。","en":"You must be 18 or older to register."}
+{"zh":"三、奖励与积分","en":"3. Rewards and points"}
+{"zh":"奖励以站内记账单位「乘法币」记录，1 乘法币对应 1 元人民币的兑换基准，可在导航栏切换为按美元显示。","en":"Rewards are recorded in the site's unit, CFB (Chengfa Coin). One CFB corresponds to a one-yuan conversion baseline, and you can switch the display to US dollars in the navigation bar."}
+{"zh":"奖励在你","en":"Rewards are credited after you"}
+{"zh":"完成并提交","en":"complete and submit"}
+{"zh":"问卷后计入。问卷商回传有效确认之前，金额可能处于待确认状态。","en":"a survey. Until the provider confirms validity, the amount may sit in a pending state."}
+{"zh":"因问卷商调整单价或下架项目产生的差额，以最终结算为准。","en":"If a provider changes the price or delists a study, any difference is settled at the final amount."}
+{"zh":"四、禁止行为","en":"4. Prohibited behaviour"}
+{"zh":"出现下列任一行为，本站有权在不事先通知的情况下冻结或封禁账户，并扣回相应奖励：","en":"For any of the following we may freeze or ban an account without prior notice and claw back the corresponding rewards:"}
+{"zh":"使用脚本、自动化工具、模拟器或任何非人工方式答题。","en":"Answering with scripts, automation tools, emulators or any non-manual method."}
+{"zh":"注册或控制多个账户，或与他人串通批量参与。","en":"Registering or controlling multiple accounts, or coordinating bulk participation with others."}
+{"zh":"伪造身份、地区、设备信息以骗取不符合条件的问卷。","en":"Faking your identity, region or device information to unlock surveys you do not qualify for."}
+{"zh":"代答、出借账户，或组织他人代为答题。","en":"Answering on someone else's behalf, lending an account, or organising others to answer for you."}
+{"zh":"在答卷中提交虚假、误导性或与本人无关的信息。","en":"Submitting false, misleading or unrelated information in a response."}
+{"zh":"对本站进行扫描、攻击、爬取数据，或绕过人机验证与频率限制。","en":"Scanning, attacking or scraping the site, or bypassing human verification and rate limits."}
+{"zh":"利用兑换、提现环节的漏洞获取不当利益。","en":"Exploiting bugs in redemption or payout to gain an improper benefit."}
+{"zh":"五、提现与兑换","en":"5. Payouts and redemptions"}
+{"zh":"提现需达到起提金额，且同一时间只能有一笔申请在处理中。","en":"A payout must reach the minimum amount, and only one request may be in progress at a time."}
+{"zh":"提交提现后，对应金额从可用余额转入冻结；审核通过后打款，被驳回则原路退回。","en":"Once you request a payout the amount moves from available to frozen; it is paid on approval and returned to available if rejected."}
+{"zh":"收款账户需与注册人信息一致。因账号填写错误导致的打款失败或损失，由你自行承担。","en":"The receiving account must match the registrant's details. Failures or losses caused by a mistyped account are your responsibility."}
+{"zh":"兑换码类商品即时发放，一经发放不支持退换；兑换码由第三方提供，有效性以发行方为准。","en":"Code items are delivered instantly and cannot be returned once issued. Codes come from third parties, and validity is determined by the issuer."}
+{"zh":"订阅类商品需人工开通，通常在两个工作日内完成，结果通过站内消息通知。","en":"Subscription items are activated manually, usually within two business days, with the result sent by in-site message."}
+{"zh":"兑换与提现可能因库存、通道或合规审查暂停，恢复后不影响已累计的余额。","en":"Redemptions and payouts may pause for stock, channel or compliance reasons; when they resume, your accumulated balance is unaffected."}
+{"zh":"六、账号处理","en":"6. Account actions"}
+{"zh":"：账户存在异常但尚未确认违规时，登录与提现会被临时限制，核实后解除或转为封禁。","en":": if an account looks abnormal but a violation is not yet confirmed, sign-in and payouts are temporarily limited, then either lifted or turned into a ban after review."}
+{"zh":"封禁","en":"Ban"}
+{"zh":"：确认违规的账户将被停用，未结算奖励不予发放。","en":": an account confirmed to have violated these terms is disabled and unsettled rewards are not paid."}
+{"zh":"注销","en":"Closure"}
+{"zh":"：你可以随时申请注销。注销后账户无法恢复，未提现余额视为放弃。","en":": you can request closure at any time. A closed account cannot be restored, and any unwithdrawn balance is treated as forfeited."}
+{"zh":"账户被处理时，如有异议可通过「联系客服」提交工单申诉，我们会在 7 个工作日内答复。","en":"If you disagree with an action on your account, appeal with a ticket via Contact support; we reply within 7 business days."}
+{"zh":"七、免责","en":"7. Liability"}
+{"zh":"问卷商页面由第三方运营，其内容、可用性与数据收集行为不在本站控制范围内。","en":"Provider pages are run by third parties; their content, availability and data collection are outside our control."}
+{"zh":"因网络故障、云服务中断、不可抗力导致的服务暂停，本站会尽快恢复，但不承担由此产生的间接损失。","en":"If a network fault, cloud outage or force majeure interrupts the service, we restore it as soon as possible but are not liable for indirect losses."}
+{"zh":"你因参与调研而与问卷商之间产生的争议，本站可协助沟通，但不作为争议一方。","en":"In a dispute with a provider arising from your participation we can help communicate, but we are not a party to it."}
+{"zh":"八、协议变更","en":"8. Changes to these terms"}
+{"zh":"条款调整时会在站内公告并更新顶部日期，重大变更会通过站内消息单独通知。 变更后继续使用即视为接受。如果你不同意，可以停止使用并申请注销。","en":"When the terms change we post a site notice and update the date at the top; major changes are also announced by in-site message. Continued use after a change counts as acceptance. If you disagree, you may stop using the site and request closure."}
+{"zh":"九、联系方式","en":"9. Contact"}
+{"zh":"通过「联系客服」提交工单，或发邮件到","en":"Submit a ticket via Contact support, or email"}
+{"zh":"乘法的服务性质、账户规则、奖励与提现条件、禁止行为与账号处理方式。","en":"Chengfa's service nature, account rules, reward and payout conditions, prohibited behaviour and account actions."}
+{"zh":" 星","en":" stars"}
+{"zh":"要求","en":"Requirements"}
+{"zh":"剩 ","en":"only "}
+{"zh":" 件","en":" left"}
+{"zh":"微信","en":"WeChat"}
+{"zh":"复制","en":"Copy"}
+{"zh":"好感","en":"Reputation"}
+{"zh":"登录","en":"Sign in"}
+{"zh":"注册","en":"Sign up"}
+{"zh":"主色","en":"Accent"}
+{"zh":"墨色","en":"Ink"}
+{"zh":"纸色","en":"Paper"}
+{"zh":"正红","en":"Crimson"}
+{"zh":"松绿","en":"Pine"}
+{"zh":"陶橙","en":"Clay"}
+{"zh":"黛紫","en":"Violet"}
+{"zh":"皂黑","en":"Charcoal"}
+{"zh":"公告","en":"Notices"}
+{"zh":"工单","en":"Tickets"}
+{"zh":"流量","en":"Traffic"}
+{"zh":"确认","en":"Confirm"}
+{"zh":" 笔","en":" entries"}
+{"zh":"站长","en":"Owner"}
+{"zh":"用户","en":"User"}
+{"zh":"正常","en":"Normal"}
+{"zh":"系统","en":"System"}
+{"zh":"奖励","en":"Reward"}
+{"zh":"消息","en":"Messages"}
+{"zh":"重试","en":"Retry"}
+{"zh":"共 ","en":"Total "}
+{"zh":" 项","en":" items"}
+{"zh":"收起","en":"Collapse"}
+{"zh":"改键","en":"Rebind"}
+{"zh":"常驻","en":"Pinned"}
+{"zh":" 键","en":" key"}
+{"zh":"冻结","en":"Frozen"}
+{"zh":"解除","en":"Lifted"}
+{"zh":"操作","en":"Action"}
+{"zh":" 天","en":" days"}
+{"zh":" 题","en":" questions"}
+{"zh":"通过","en":"Passed"}
+{"zh":"失败","en":"Failed"}
+{"zh":"超速","en":"Too fast"}
+{"zh":"满额","en":"Quota full"}
+{"zh":"被踢","en":"Terminated"}
+{"zh":"打回","en":"Rejected"}
+{"zh":"完成","en":"Complete"}
+{"zh":" 秒","en":" s"}
+{"zh":"约 ","en":"about "}
+{"zh":"退出中","en":"Signing out"}
+{"zh":" 分钟","en":" min"}
+{"zh":"已参与","en":"Joined"}
+{"zh":"不限量","en":"Unlimited"}
+{"zh":"已兑完","en":"Out of stock"}
+{"zh":"兑换「","en":"Redeem "}
+{"zh":"卡密：","en":"Code: "}
+{"zh":"知道了","en":"Got it"}
+{"zh":"支付宝","en":"Alipay"}
+{"zh":"兑换码","en":"Redemption code"}
+{"zh":"已完成","en":"Completed"}
+{"zh":"待发货","en":"Pending delivery"}
+{"zh":"已退款","en":"Refunded"}
+{"zh":"审核中","en":"Under review"}
+{"zh":"已打款","en":"Paid"}
+{"zh":"已驳回","en":"Rejected"}
+{"zh":"提现至","en":"Payout to "}
+{"zh":"未命名","en":"Untitled"}
+{"zh":"次要灰","en":"Muted grey"}
+{"zh":"后台蓝","en":"Admin blue"}
+{"zh":"深海青","en":"Deep teal"}
+{"zh":"赚积分","en":"Earn"}
+{"zh":"天梯榜","en":"Leaderboard"}
+{"zh":"广告墙","en":"Ad wall"}
+{"zh":"该功能","en":"This feature"}
+{"zh":"在账 ","en":"Balance "}
+{"zh":"已冲正","en":"Reversed"}
+{"zh":"管理员","en":"Admin"}
+{"zh":"大会员","en":"Premium member"}
+{"zh":"已冻结","en":"Frozen"}
+{"zh":"已封禁","en":"Banned"}
+{"zh":"未读 ","en":"Unread "}
+{"zh":"未提供","en":"Not provided"}
+{"zh":"已入账","en":"Credited"}
+{"zh":"已关闭","en":"Closed"}
+{"zh":"已开启","en":"Enabled"}
+{"zh":"默认 ","en":"Default "}
+{"zh":"已复制","en":"Copied"}
+{"zh":"已处理","en":"Handled"}
+{"zh":"处理中","en":"Processing"}
+{"zh":"已验证","en":"Verified"}
+{"zh":"未记录","en":"Not recorded"}
+{"zh":"保存中","en":"Saving"}
+{"zh":"发送中","en":"Sending"}
+{"zh":"校验中","en":"Verifying"}
+{"zh":" 次。","en":" times."}
+{"zh":"查找中","en":"Searching"}
+{"zh":"已关注","en":"Following"}
+{"zh":"用时 ","en":"Elapsed "}
+{"zh":"被打回","en":"Rejected"}
+{"zh":" 秒。","en":" s."}
+{"zh":"要求：","en":"Requirement: "}
+{"zh":"注册赠送","en":"Sign-up bonus"}
+{"zh":"问卷奖励","en":"Survey reward"}
+{"zh":"答卷驳回","en":"Response rejected"}
+{"zh":"提现冻结","en":"Payout frozen"}
+{"zh":"提现退回","en":"Payout returned"}
+{"zh":"提现完成","en":"Payout completed"}
+{"zh":"人工调整","en":"Manual adjustment"}
+{"zh":"违规扣罚","en":"Violation penalty"}
+{"zh":"账户受限","en":"Account limited"}
+{"zh":"网络受限","en":"Network restricted"}
+{"zh":"开始答题","en":"Start survey"}
+{"zh":"进入问卷","en":"Open survey"}
+{"zh":"由","en":"by"}
+{"zh":"未知错误","en":"Unknown error"}
+{"zh":"余额不足","en":"Insufficient balance"}
+{"zh":"立即兑换","en":"Redeem now"}
+{"zh":"收款账号","en":"Receiving account"}
+{"zh":"开通信息","en":"Activation details"}
+{"zh":"确认兑换","en":"Confirm redemption"}
+{"zh":"兑换中…","en":"Redeeming…"}
+{"zh":"兑换成功","en":"Redeemed"}
+{"zh":"，起提 ","en":", minimum "}
+{"zh":"收款渠道","en":"Payout channel"}
+{"zh":"提交申请","en":"Submit request"}
+{"zh":"点击复制","en":"Click to copy"}
+{"zh":"网络错误","en":"Network error"}
+{"zh":"处理中…","en":"Processing…"}
+{"zh":"登录成功","en":"Signed in"}
+{"zh":"主色·深","en":"Accent dark"}
+{"zh":"纸色·深","en":"Paper dark"}
+{"zh":"换主题色","en":"Change theme colour"}
+{"zh":"账户首页","en":"Account home"}
+{"zh":"后台概览","en":"Admin overview"}
+{"zh":"用户管理","en":"Users"}
+{"zh":"提现审核","en":"Payout review"}
+{"zh":"兑换订单","en":"Redemption orders"}
+{"zh":"问卷管理","en":"Surveys"}
+{"zh":"商品兑换","en":"Store items"}
+{"zh":"我知道了","en":"Got it"}
+{"zh":"尚未开放","en":"Not open yet"}
+{"zh":"暂不可用","en":"Unavailable"}
+{"zh":"暂无记录","en":"No records"}
+{"zh":"标记完成","en":"Mark complete"}
+{"zh":"入账中…","en":"Crediting…"}
+{"zh":"入账成功","en":"Credited"}
+{"zh":"取消关注","en":"Unfollow"}
+{"zh":"你的邮箱","en":"your email"}
+{"zh":"刚发过，","en":"Already sent,"}
+{"zh":"再获得 ","en":" more experience to reach LV"}
+{"zh":"机器作答","en":"Automated answers"}
+{"zh":"接口异常","en":"API error"}
+{"zh":"中途终止","en":"Terminated"}
+{"zh":"配额已满","en":"Quota full"}
+{"zh":"质检终止","en":"Quality terminated"}
+{"zh":"被打回了","en":"Rejected"}
+{"zh":"提现至微信","en":"Payout to WeChat"}
+{"zh":"广告墙奖励","en":"Ad wall reward"}
+{"zh":"广告墙冲正","en":"Ad wall reversal"}
+{"zh":"操作失败：","en":"Action failed: "}
+{"zh":"兑换并提现","en":"Redeem and withdraw"}
+{"zh":"可提余额 ","en":"Withdrawable "}
+{"zh":"提现金额（","en":"Amount ("}
+{"zh":"兑换充值码","en":"Redeem a top-up code"}
+{"zh":"提交失败：","en":"Submit failed: "}
+{"zh":"账户已创建","en":"Account created"}
+{"zh":"回账户首页","en":"Back to account home"}
+{"zh":"回后台概览","en":"Back to admin overview"}
+{"zh":" · 共 ","en":" · total "}
+{"zh":"生成链接…","en":"Generating link…"}
+{"zh":"查看全部 ","en":"View all "}
+{"zh":"入账失败：","en":"Credit failed: "}
+{"zh":"已绑定到 ","en":"Bound to "}
+{"zh":"站长回复：","en":"Owner reply: "}
+{"zh":"已取消关注","en":"Unfollowed"}
+{"zh":"邮箱已验证","en":"Email verified"}
+{"zh":"登录后关注","en":"Sign in to follow"}
+{"zh":"答卷已提交","en":"Response submitted"}
+{"zh":"开卷太频繁","en":"Opening surveys too often"}
+{"zh":"提现至支付宝","en":"Payout to Alipay"}
+{"zh":"问卷补发差额","en":"Survey adjustment"}
+{"zh":"兑换 CDK","en":"Redeem a CD key"}
+{"zh":"账号已被封禁","en":"Account banned"}
+{"zh":"去设置页看看","en":"Check settings"}
+{"zh":"起提金额为 ","en":"The minimum payout is "}
+{"zh":"请填写密码。","en":"Please enter your password."}
+{"zh":"，正在进入…","en":", entering…"}
+{"zh":"提交工单 →","en":"Submit a ticket →"}
+{"zh":"数据中心机房","en":"Datacenter network"}
+{"zh":"没连上服务端","en":"Could not reach the server"}
+{"zh":" 条公告 →","en":" notices →"}
+{"zh":"查看公告 →","en":"View notices →"}
+{"zh":"没有未读消息","en":"No unread messages"}
+{"zh":"，当前余额 ","en":", current balance "}
+{"zh":"暂时没有公告","en":"No notices right now"}
+{"zh":" · 后台 ","en":" · admin "}
+{"zh":"未填写原因。","en":"No reason given."}
+{"zh":"已关注该用户","en":"Now following this user"}
+{"zh":"不能关注自己","en":"You cannot follow yourself"}
+{"zh":"用户名已更新","en":"Username updated"}
+{"zh":" 秒后再发。","en":" s before sending again."}
+{"zh":"该用户不存在","en":"No such user"}
+{"zh":"缺少 UID","en":"Missing UID"}
+{"zh":"该账户已注销","en":"This account is closed"}
+{"zh":"主页载入失败","en":"Could not load the profile"}
+{"zh":" 质检还剩 ","en":" quality check, "}
+{"zh":"还有题目没选","en":"Some questions are unanswered"}
+{"zh":"低于起提金额。","en":"Below the minimum payout amount."}
+{"zh":"该商品已下架。","en":"This item is no longer available."}
+{"zh":"已复制到剪贴板","en":"Copied to clipboard"}
+{"zh":"请输入兑换码。","en":"Enter the redemption code."}
+{"zh":"请填写用户名。","en":"Enter a username."}
+{"zh":"广告墙还没开放","en":"The ad wall is not open yet"}
+{"zh":"个人简介已保存","en":"Profile saved"}
+{"zh":"已全部标为已读","en":"All marked as read"}
+{"zh":"取不到墙状态：","en":"Could not read wall status: "}
+{"zh":"有未保存的改动","en":"You have unsaved changes"}
+{"zh":"已恢复默认配色","en":"Default colours restored"}
+{"zh":"验证码已发到 ","en":"Code sent to "}
+{"zh":"今天发太多了。","en":"Too many sent today."}
+{"zh":"网络连接失败。","en":"Network connection failed."}
+{"zh":"找到 UID ","en":"Found UID "}
+{"zh":" · 已加入 ","en":" · joined "}
+{"zh":"主页链接已复制","en":"Profile link copied"}
+{"zh":"请选择收款渠道。","en":"Choose a payout channel."}
+{"zh":"请填写收款账号。","en":"Enter the receiving account."}
+{"zh":"兑换码格式不对。","en":"That code format is not valid."}
+{"zh":"SUB / 订阅","en":"SUB"}
+{"zh":"充值成功，到账 ","en":"Top-up complete, credited "}
+{"zh":"还没有兑换记录。","en":"No redemptions yet."}
+{"zh":"还没有提现记录。","en":"No payouts yet."}
+{"zh":"请填写邮箱地址。","en":"Enter your email address."}
+{"zh":"已验证，可以提交","en":"Verified, you can submit"}
+{"zh":"页面底色、卡片底","en":"Page and card backgrounds"}
+{"zh":" · 功能开发中","en":" · in development"}
+{"zh":"接入状态获取失败","en":"Could not read integration status"}
+{"zh":"保存失败，请重试","en":"Save failed, please try again"}
+{"zh":"操作失败，请重试","en":"Action failed, please try again"}
+{"zh":"账户已恢复正常。","en":"The account is active again."}
+{"zh":"还没有人关注你。","en":"Nobody follows you yet."}
+{"zh":"关注人数已达上限","en":"You have reached the following limit"}
+{"zh":"当前密码不正确。","en":"Current password is incorrect."}
+{"zh":"先发一条验证码。","en":"Send a code first."}
+{"zh":"请输入当前密码。","en":"Enter your current password."}
+{"zh":"先歇一会儿再交。","en":"Take a short break before submitting again."}
+{"zh":"兑换 · 人工发货","en":"Redeem · manual delivery"}
+{"zh":"将从可用余额扣除 ","en":"Will be deducted from available "}
+{"zh":"正在校验请求来源…","en":"Verifying the request source…"}
+{"zh":"正在向本站发回调…","en":"Sending the callback to our server…"}
+{"zh":" CFB，交易号 ","en":" CFB, transaction "}
+{"zh":"后台键位已恢复默认","en":"Admin keys reset to default"}
+{"zh":"自定义 · 已保存","en":"Custom · saved"}
+{"zh":"还没有关注任何人。","en":"Not following anyone yet."}
+{"zh":"」，正在进入主页…","en":"', opening the profile…"}
+{"zh":"这里填写个人简介。","en":"Write your bio here."}
+{"zh":"该账户还没有粉丝。","en":"This account has no followers yet."}
+{"zh":" 点经验升至 LV","en":" more experience to reach LV"}
+{"zh":"UID 格式不正确","en":"UID format is not valid"}
+{"zh":"问卷不存在或已下架","en":"This survey does not exist or is no longer available"}
+{"zh":"这份问卷现在打不开","en":"This survey cannot be opened right now"}
+{"zh":"复制失败，请手动选中","en":"Copy failed, please select it manually"}
+{"zh":"当前筛选下没有记录。","en":"No records under this filter."}
+{"zh":"\n单号：","en":"\nRef: "}
+{"zh":" · 乘法","en":" · Chengfa"}
+{"zh":"网络连接失败，请重试","en":"Network connection failed, please try again"}
+{"zh":"用户名或密码不正确。","en":"Wrong username or password."}
+{"zh":"请在下方确认你是真人","en":"Confirm you are human below"}
+{"zh":"验证未通过，点此重试","en":"Verification failed, click to retry"}
+{"zh":"验证已超时，点此重试","en":"Verification timed out, click to retry"}
+{"zh":"正文、边框、深色底块","en":"Body text, borders, dark blocks"}
+{"zh":"次级底色、条纹、悬停","en":"Secondary fills, stripes, hover"}
+{"zh":"说明文字、编号、占位","en":"Captions, labels, placeholders"}
+{"zh":"当前出口 IP 属于","en":"Your exit IP belongs to"}
+{"zh":"代理或 VPN 网络","en":"a proxy or VPN network"}
+{"zh":"取不到状态，刷新试试","en":"Could not read the status, try refreshing"}
+{"zh":"LIVE / 已接入","en":"LIVE"}
+{"zh":"未读消息已经看完了。","en":"You are all caught up."}
+{"zh":"没有可用的模拟任务。","en":"No mock tasks available."}
+{"zh":" · 点「展开」改键","en":" · expand to rebind"}
+{"zh":"数字键快捷导航已开启","en":"Number-key navigation on"}
+{"zh":"数字键快捷导航已关闭","en":"Number-key navigation off"}
+{"zh":"用户端键位已恢复默认","en":"User keys reset to default"}
+{"zh":"，10 分钟内有效。","en":", valid for 10 minutes."}
+{"zh":"发送失败，稍后再试。","en":"Sending failed, try again later."}
+{"zh":"验证码不对，还能试 ","en":"Wrong code, you can try "}
+{"zh":"验证失败，稍后再试。","en":"Verification failed, try again later."}
+{"zh":"结局由问卷商回调带回","en":"The outcome arrives via the provider callback"}
+{"zh":"正在交给问卷商核验…","en":"Handing over to the provider for review…"}
+{"zh":"提现申请，资金转入冻结","en":"payout requested, funds moved to frozen"}
+{"zh":"请填写正确的提现金额。","en":"Enter a valid payout amount."}
+{"zh":"支付宝账号或绑定手机号","en":"Alipay account or linked phone number"}
+{"zh":"请填写完整的收款账号。","en":"Enter the full receiving account."}
+{"zh":"兑换成功，等待人工发货","en":"Redeemed, waiting for manual delivery"}
+{"zh":"网络连接失败，请重试。","en":"Network connection failed, please try again."}
+{"zh":"提现申请已提交，单号 ","en":"Payout requested, reference "}
+{"zh":"用户名不能全部为数字。","en":"The username cannot be all digits."}
+{"zh":"密码长度不足 8 位。","en":"Password is shorter than 8 characters."}
+{"zh":"服务端数据库尚未就绪。","en":"The server database is not ready yet."}
+{"zh":"操作失败，请稍后重试。","en":"Action failed, please try again later."}
+{"zh":"正在准备链接，稍等一秒","en":"Preparing the link, one moment"}
+{"zh":"该账户当前状态不可关注","en":"This account cannot be followed in its current state"}
+{"zh":"保存失败，请稍后重试。","en":"Save failed, please try again later."}
+{"zh":"网络连接失败，未保存。","en":"Network connection failed, nothing was saved."}
+{"zh":"这个邮箱已经验证过了。","en":"This email is already verified."}
+{"zh":"验证码是 6 位数字。","en":"The code is 6 digits."}
+{"zh":"查找失败，请稍后重试。","en":"Search failed, please try again later."}
+{"zh":"2026 年 10 月","en":"October 2026"}
+{"zh":"回大厅点入口就能进去。","en":"Go back to the hall and open the entry."}
+{"zh":"库存不足，暂时无法兑换。","en":"Out of stock, cannot redeem right now."}
+{"zh":"这个兑换码已经被用过了。","en":"This code has already been used."}
+{"zh":"已提交提现申请，等待审核","en":"Payout requested, waiting for review"}
+{"zh":"服务器出错，请稍后重试。","en":"Server error, please try again later."}
+{"zh":"COMING / 待开放","en":"COMING"}
+{"zh":"账户受限，广告墙暂不可用","en":"Account limited, the ad wall is unavailable"}
+{"zh":"ERROR / 获取失败","en":"ERROR"}
+{"zh":"网络连接失败，简介未保存","en":"Network connection failed, the bio was not saved"}
+{"zh":" 条 · 最新的排在最前","en":" entries · newest first"}
+{"zh":"配色已保存，整站立即生效","en":"Colours saved, applied across the site now"}
+{"zh":"列表载入失败，稍后重试。","en":"Could not load the list, try again later."}
+{"zh":"网络连接失败，操作未生效","en":"Network connection failed, nothing changed"}
+{"zh":"邮箱格式不对，检查一下。","en":"That email format looks wrong, please check it."}
+{"zh":"请输入当前密码确认身份。","en":"Enter your current password to confirm."}
+{"zh":"邮箱已更新，新邮箱待验证","en":"Email updated, the new address needs verification"}
+{"zh":"这就是当前邮箱，不用改。","en":"That is already your email."}
+{"zh":"试太多次了，重新发一条。","en":"Too many attempts, send a new code."}
+{"zh":"两次输入的新密码不一致。","en":"The two new passwords do not match."}
+{"zh":"该账户还没有关注任何人。","en":"This account does not follow anyone yet."}
+{"zh":"答得太快，被判超速作废。","en":"Answered too fast and voided as speeding."}
+{"zh":"这台设备已经交过这份问卷","en":"This device has already taken this survey"}
+{"zh":"想再做一份，得换台设备。","en":"To do another, switch to a different device."}
+{"zh":"这个网络已经交过这份问卷","en":"This network has already taken this survey"}
+{"zh":"载入失败，刷新一下再试。","en":"Could not load, try refreshing."}
+{"zh":"网络不稳，再点一次提交。","en":"Network is unstable, tap submit again."}
+{"zh":"商品载入失败，请刷新重试。","en":"Could not load the item, refresh and retry."}
+{"zh":"明细载入失败，请刷新重试。","en":"Could not load the ledger, refresh and retry."}
+{"zh":"榜单载入失败，请刷新重试。","en":"Could not load the board, refresh and retry."}
+{"zh":"至少 8 位，含字母与数字","en":"At least 8 characters, letters and digits"}
+{"zh":"密码需同时包含字母与数字。","en":"The password must contain letters and digits."}
+{"zh":"该邮箱已注册，请直接登录。","en":"That email is already registered, just sign in."}
+{"zh":"问卷大厅和兑换码照常能用。","en":"The survey hall and codes still work as usual."}
+{"zh":"登录状态已失效，请刷新页面","en":"Your session has expired, please refresh the page"}
+{"zh":"消息载入失败，请刷新重试。","en":"Could not load messages, refresh and retry."}
+{"zh":"公告载入失败，请稍后刷新。","en":"Could not load notices, refresh later."}
+{"zh":"网络连接失败，请稍后刷新。","en":"Network connection failed, refresh later."}
+{"zh":"这个邮箱已被其他账号使用。","en":"That email is already used by another account."}
+{"zh":"验证码过期了，重新发一条。","en":"The code expired, send a new one."}
+{"zh":"密码已更新，其它设备已下线","en":"Password updated, other devices signed out"}
+{"zh":"请输入 UID 或用户名。","en":"Enter a UID or username."}
+{"zh":"该用户还没有填写个人简介。","en":"This user has not written a bio yet."}
+{"zh":"换了网络之后可以再来一次。","en":"You can try again from a different network."}
+{"zh":"这份问卷要跳转到问卷商页面","en":"This survey opens on the provider's page"}
+{"zh":"账户信息载入失败，请刷新重试","en":"Could not load account details, refresh and retry"}
+{"zh":"登录状态已失效，请重新登录。","en":"Your session has expired, please sign in again."}
+{"zh":"与实名一致的账号或绑定手机号","en":"Account or linked phone matching your real name"}
+{"zh":"，请填写不低于该数值的金额。","en":", enter at least that amount."}
+{"zh":"超出可用余额，当前最多可提 ","en":"Above your available balance; you can withdraw up to "}
+{"zh":"请填写用户名，或填注册邮箱。","en":"Enter a username, or your registered email."}
+{"zh":"该用户名已被使用，请换一个。","en":"That username is taken, pick another."}
+{"zh":"模拟墙（尚未接入真实服务商）","en":"Mock wall (no live provider connected)"}
+{"zh":"LIMITED / 账户受限","en":"LIMITED"}
+{"zh":"OFFLINE / 连接失败","en":"OFFLINE"}
+{"zh":"这个用户名已被占用，换一个。","en":"That username is taken, choose another."}
+{"zh":"登录状态已失效，请刷新页面。","en":"Your session has expired, please refresh the page."}
+{"zh":" 色值\">","en":" hex\">"}
+{"zh":"新密码需 8 至 72 位。","en":"The new password must be 8 to 72 characters."}
+{"zh":"新密码要同时包含字母和数字。","en":"The new password needs both letters and digits."}
+{"zh":"该账户已注销，主页不再公开。","en":"This account is closed and its profile is no longer public."}
+{"zh":"复制被拒绝，请手动复制地址栏","en":"Copy was blocked, please copy the address bar manually"}
+{"zh":"答卷通过质检，奖励已经入账。","en":"The response passed review and the reward has been credited."}
+{"zh":"答卷未通过有效性核验，奖励收回","en":"The response failed validation, the reward was withdrawn"}
+{"zh":"留空则通过站内消息联系你补填。","en":"Leave it empty and we will ask you by in-site message."}
+{"zh":"请填写详细描述，至少 5 个字","en":"Please describe the issue in at least 5 characters"}
+{"zh":"邮箱格式不正确，请检查后重试。","en":"That email format is wrong, please check and retry."}
+{"zh":"账户当前受限，正在进入客服页…","en":"Account limited, opening the support page…"}
+{"zh":" · 待建，接口与表结构未开放","en":" · planned, API and schema not open yet"}
+{"zh":"Moonetix 广告墙已接入","en":"Moonetix ad wall is connected"}
+{"zh":"账户载入失败，请刷新页面重试。","en":"Could not load the account, please refresh and retry."}
+{"zh":"新密码和当前密码一样，换一个。","en":"The new password matches the current one, choose another."}
+{"zh":"网络连接失败，请检查网络后刷新","en":"Network connection failed, check your connection and refresh"}
+{"zh":"服务暂时不可用，稍后刷新重试。","en":"The service is temporarily unavailable, refresh and retry later."}
+{"zh":"尝试次数过多，请二十分钟后再试。","en":"Too many attempts, please try again in twenty minutes."}
+{"zh":"请求格式有误，请刷新页面后重试。","en":"The request format was invalid, refresh the page and retry."}
+{"zh":"网络连接失败，请检查网络后重试。","en":"Network connection failed, check your connection and retry."}
+{"zh":"按钮按下、印章描边、深一档的强调","en":"Pressed buttons, stamp outlines, deeper accents"}
+{"zh":"这个网络看起来像代理 / VPN","en":"This network looks like a proxy or VPN"}
+{"zh":"觉得有误可以在联系客服提交工单。","en":"If you think this is wrong, submit a ticket via Contact support."}
+{"zh":"网络连接失败，请检查网络后刷新。","en":"Network connection failed, check your connection and refresh."}
+{"zh":"兑换 Steam 充值卡 30 元","en":"Redeem a 30-yuan Steam card"}
+{"zh":"可用余额不足，先去做问卷攒够再来。","en":"Not enough available balance; take surveys to build it up first."}
+{"zh":"兑换码不存在，检查一下有没有输错。","en":"That code does not exist, check for typos."}
+{"zh":"需要开通的手机号 / 账号，可留空","en":"Phone number or account to activate, optional"}
+{"zh":"请先阅读并同意用户协议与隐私说明。","en":"Please read and accept the Terms of Service and Privacy Policy first."}
+{"zh":"人机验证未通过，请重新验证后再试。","en":"Human verification failed, please verify again."}
+{"zh":"请先点击上方「点击完成人机验证」。","en":"Please click 'Complete human verification' above first."}
+{"zh":"按钮、进度条、强调块、可选中的标记","en":"Buttons, progress bars, accent blocks, selectable marks"}
+{"zh":"已在新的标签页打开，完成后回来刷新","en":"Opened in a new tab, refresh here when you are done"}
+{"zh":"该账户已被封禁，公开资料不再展示。","en":"This account is banned and its public details are hidden."}
+{"zh":"该账户已被冻结，公开资料暂停展示。","en":"This account is frozen and its public details are paused."}
+{"zh":"已达到当前等级上限，等待等级结算。","en":"You have reached the current level cap, waiting for settlement."}
+{"zh":"UID 是一串数字，从 1 开始。","en":"A UID is a number, starting at 1."}
+{"zh":"问卷商那边接口出错，答卷没能保存。","en":"The provider's API failed, so the response could not be saved."}
+{"zh":"这份问卷的名额刚好在提交前收满了。","en":"This survey's quota filled up just before you submitted."}
+{"zh":"这是商品专用码，请到对应商品处兑换。","en":"This is an item-specific code, redeem it on that item's page."}
+{"zh":"账户当前状态无法操作，联系客服确认。","en":"This account cannot perform that action; contact support."}
+{"zh":"工单已提交，可在「我的工单」查看进度","en":"Ticket submitted, track it under My tickets"}
+{"zh":"注册不收取任何费用，无需绑定银行卡。","en":"Registration is free and needs no bank card."}
+{"zh":"密码长度需在 8 至 72 位之间。","en":"The password must be 8 to 72 characters long."}
+{"zh":"人机验证服务暂时不可用，请联系站长。","en":"Human verification is temporarily unavailable, please contact the owner."}
+{"zh":"DEMO / 模拟模式（仅站长可见）","en":"DEMO / mock mode (owner only)"}
+{"zh":"站长还没配发信服务，暂时发不出邮件。","en":"The owner has not set up email yet, so no mail can be sent."}
+{"zh":"该账户当前状态异常，公开资料不展示。","en":"This account is in an abnormal state and its public details are hidden."}
+{"zh":"质检没过：奖励已经扣回，经验 −8。","en":"Review failed: the reward was clawed back and experience −8."}
+{"zh":"STATUS 4 · 质检终止 / ","en":"STATUS 4 · quality terminated / "}
+{"zh":"同一台机器只能算一次，换网络也一样。","en":"One entry per machine, even on another network."}
+{"zh":"账号需与实名信息一致，不一致会被驳回。","en":"The account must match your real-name details or it will be rejected."}
+{"zh":"人机验证服务尚未配置完成，请联系站长。","en":"Human verification is not configured yet, please contact the owner."}
+{"zh":"已经接入真实服务商，模拟墙自动停用了。","en":"A live provider is connected, so the mock wall is disabled."}
+{"zh":"已接入真实服务商，这页模拟墙不再使用。","en":"A live provider is connected; this mock wall is no longer used."}
+{"zh":"账户当前状态不能修改资料，先提交工单。","en":"This account cannot change its details right now; submit a ticket first."}
+{"zh":"账户当前状态不能修改密码，先提交工单。","en":"This account cannot change its password right now; submit a ticket first."}
+{"zh":"答题过程中命中了排除条件，会话被终止。","en":"An exclusion rule was hit during the survey and the session ended."}
+{"zh":"质检没通过：奖励已经扣回，经验 −8。","en":"Review failed: the reward was clawed back and experience −8."}
+{"zh":"地址里少了问卷编号。回大厅重新点一次。","en":"The survey ID is missing from the address. Open it again from the hall."}
+{"zh":"同一份问卷同一个 IP 只能参与一次。","en":"One response per IP for each survey."}
+{"zh":"登录状态已失效，回「赚积分」页重新登录。","en":"Your session expired; sign in again from the Earn page."}
+{"zh":" 项任务，点「标记完成」即发起一次入账。","en":" tasks; clicking Mark complete credits once."}
+{"zh":"表单里有不该被填的字段，被判成脚本作答。","en":"A field that should stay empty was filled, so this was flagged as scripted."}
+{"zh":"刷新页面重试。一直失败可以到联系客服反馈。","en":"Refresh and retry. If it keeps failing, tell us via Contact support."}
+{"zh":"没有这个 UID 或用户名，检查一下再试。","en":"No such UID or username, check it and try again."}
+{"zh":"当前浏览器不支持自动复制，请手动复制地址栏","en":"This browser cannot copy automatically; copy the address bar manually"}
+{"zh":"这个网络被判定为代理 / VPN，不能接问卷","en":"This network is flagged as a proxy or VPN, so surveys are unavailable"}
+{"zh":"账户注销后主页不再公开，相关内容也不再展示。","en":"Once closed, the profile is no longer public and related content is hidden."}
+{"zh":"这个出口 IP 被判定为代理 / VPN 网络","en":"This exit IP is flagged as a proxy or VPN network"}
+{"zh":"已有一笔提现正在审核，等它处理完再提交下一笔。","en":"A payout is already under review; wait for it before submitting another."}
+{"zh":"。提交后金额进入冻结，审核通过七个工作日内到账。","en":". After submitting, the amount is frozen and paid within seven working days of approval."}
+{"zh":"广告主结算后由服务端回调入账，重复回调只记一次。","en":"Credited by the server callback after the advertiser settles; duplicate callbacks count once."}
+{"zh":"问卷商说这份要过质检，先入账，过一会儿再看结果。","en":"The provider wants this one reviewed: credited now, result to follow."}
+{"zh":"使用用户名与密码进入账户，忘了用户名就填注册邮箱。","en":"Sign in with your username and password; if you forget the username, use your registered email."}
+{"zh":"完成后奖励由服务商回调本站入账，重复回调只入一次。","en":"The reward is credited by the provider callback; duplicate callbacks count once."}
+{"zh":"充值码直接加到可用余额，不区分面额，兑换后即时到账。","en":"Top-up codes add straight to your available balance, any denomination, instantly."}
+{"zh":"创建账户后可浏览全部公开问卷，参与市场调研并累积积分。","en":"Once registered you can browse every public survey, take part in research and earn points."}
+{"zh":"这个 IP 已经交过这份问卷了，换个网络可以再来一次。","en":"This IP has already taken this survey; try again from another network."}
+{"zh":"服务端没能返回广告墙链接。刷新重试；持续失败请提交工单。","en":"The server did not return an ad wall link. Refresh and retry; if it keeps failing, submit a ticket."}
+{"zh":"模拟墙只对站长与管理员开放，普通账户在这里点不动是正常的。","en":"The mock wall is only for the owner and admins; normal accounts cannot use it here."}
+{"zh":"主页地址需要带上 UID，例如 /space?uid=1。","en":"The profile address needs a UID, for example /space?uid=1."}
+{"zh":"UID 可能写错了。UID 从 1 开始，按注册顺序发放。","en":"The UID may be wrong. UIDs start at 1 and are issued in registration order."}
+{"zh":"抽空填问卷，偶尔写点东西。对长问卷有耐心，对诱导性提问没有。","en":"Fills in surveys when there is time, writes once in a while. Patient with long surveys, not with leading questions."}
+{"zh":"冻结或封禁状态下不能参与广告墙。设置页的封禁记录里能看到原因，","en":"A frozen or banned account cannot take part in the ad wall. The reason is in the ban list on the settings page,"}
+{"zh":"这里填写个人简介。这段文字用于检查较长内容在版面中的换行表现。","en":"Write your bio here. This text checks how longer content wraps in the layout."}
+{"zh":"<span class=\"hk__fix\">固定</span>","en":"<span class=\"hk__fix\">Fixed</span>"}
+{"zh":"固定","en":"Fixed"}
+{"zh":"UID 是一串数字，从 1 开始。检查地址里的 uid 参数。","en":"A UID is a number starting at 1. Check the uid parameter in the address."}
+{"zh":"账户已被冻结：参与问卷、兑换与提现均已暂停，可提交工单说明情况。","en":"Account frozen: surveys, redemptions and payouts are paused; you can submit a ticket to explain."}
+{"zh":"检测到代理 / VPN 网络，账号已被封禁。去设置页看封禁记录。","en":"A proxy or VPN network was detected and the account is banned. See the ban list in settings."}
+{"zh":"用户名限 2 至 20 字，可用中文、字母、数字、下划线与连字符。","en":"Usernames are 2 to 20 characters: letters, digits, underscores and hyphens."}
+{"zh":"账户已被封禁：参与问卷、兑换与提现均已停用，只能提交工单与查看消息。","en":"Account banned: surveys, redemptions and payouts are disabled; you can only submit tickets and read messages."}
+{"zh":"用户名需 2 至 20 个字符，可用中文、字母、数字、下划线或连字符。","en":"Usernames are 2 to 20 characters: letters, digits, underscores or hyphens."}
+{"zh":"点开墙、完成一件任务、看它走回调入账。配好密钥后这一页自动切到真实广告墙。","en":"Open the wall, finish one task and watch the callback credit it. Once keys are set, this page switches to the live ad wall."}
+{"zh":"格式不符合要求，2 至 20 个字符，可用中文、字母、数字、下划线或连字符。","en":"That format does not fit: 2 to 20 characters, letters, digits, underscores or hyphens."}
+{"zh":"接入第三方服务商之后，这里会出现可做的任务。现在的账户、问卷、兑换都不受影响——","en":"Once a third-party provider is connected, tasks will appear here. Accounts, surveys and redemptions are unaffected for now."}
+{"zh":"进入我的账户 <span aria-hidden=\"true\">→</span>","en":"Go to my account <span aria-hidden=\"true\">→</span>"}
+{"zh":"进入我的账户","en":"Go to my account"}
+{"zh":"链接由服务端用你的 UID 与签名盐生成，墙里显示的是与你的地区和设备匹配的任务。","en":"The link is generated server-side from your UID and signing salt; the wall shows tasks matching your region and device."}
+{"zh":"还没有配置 Moonetix 的 App ID 与签名密钥，这里先用站内模拟墙跑通整条链路：","en":"The Moonetix App ID and signing key are not configured yet, so the in-site mock wall is used to exercise the whole path:"}
+{"zh":"。按站规，问卷任务只接受真实本地网络，点开即封号并扣 8 点经验，现在只能提交工单和查看消息。","en":". Under site rules, survey tasks only accept real local networks; opening one on this network bans the account and costs 8 experience, leaving only tickets and messages."}
+{"zh":"<li>质检结论：答卷无效</li><li>奖励冲正，经验 −8，参与记录标记为打回</li>","en":"<li>Review verdict: response invalid</li><li>Reward reversed, experience −8, participation marked as rejected</li>"}
+{"zh":"质检结论：答卷无效","en":"Review verdict: response invalid"}
+{"zh":"奖励冲正，经验 −8，参与记录标记为打回","en":"Reward reversed, experience −8, participation marked as rejected"}
+{"zh":"<div class=\"th-pop__h\">主题色<span>只存这台设备</span></div>","en":"<div class=\"th-pop__h\">Theme colour<span>saved on this device only</span></div>"}
+{"zh":"只存这台设备","en":"saved on this device only"}
+{"zh":"。站内的问卷任务要求真实本地网络，用这种网络点开问卷会被判定为异常，账号直接封禁，并且扣 8 点经验。","en":". Survey tasks here require a real local network; opening one on this network is treated as abnormal and bans the account with a loss of 8 experience."}
+{"zh":"<div class=\"th-pop__f\"><button type=\"button\" data-th-reset>恢复默认</button></div>","en":"<div class=\"th-pop__f\"><button type=\"button\" data-th-reset>Reset</button></div>"}
+{"zh":"乘法币","en":"CFB"}
+{"zh":"乘法刀","en":"CF$"}
+{"zh":"问卷大厅","en":"Survey hall"}
+{"zh":"兑换中心","en":"Redeem"}
+{"zh":"账户设置","en":"Settings"}
+{"zh":"收支明细","en":"Ledger"}
+{"zh":"站内消息","en":"Messages"}
+{"zh":" 色值","en":" hex"}
+{"zh":"法币","en":"Cash"}
+{"zh":"法币余额","en":"Cash balance"}
+{"zh":"主题色","en":"Theme colour"}
+{"zh":"问卷通过：","en":"Response passed: "}
+{"zh":"问卷通过（待质检）：","en":"Response passed (pending review): "}
+{"zh":"问卷打回冲正：","en":"Response rejected, reversed: "}
+{"zh":"视频","en":"video"}

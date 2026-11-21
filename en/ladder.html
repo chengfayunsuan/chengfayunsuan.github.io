@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leaderboard · Chengfa</title>
+<meta name="description" content="Chengfa leaderboard: a public ranking by CFB balance and level.">
+<meta name="theme-color" content="#E0291E">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/css/style.css?v=15">
+<link rel="stylesheet" href="/css/home.css?v=16">
+<link rel="stylesheet" href="/css/page.css?v=9">
+<script src="/js/config.js?v=7"></script>
+<script src="/js/core.js?v=36"></script>
+</head>
+<body data-page="ladder">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/en/home">
+      <span class="brand__mark" aria-hidden="true"></span>
+      Chengfa
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <a class="hm-nav__lang" href="/ladder" title="切回中文">中文</a>
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><button class="hm-nav__cur" type="button" data-cur-toggle aria-label="Switch display currency" title="Switch between CFB and CF$"><span data-cur="code">CFB</span></button>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/en/home">Me</a>
+      <button class="hm-nav__exit" id="logoutBtn" type="button">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<div class="pg-bar">
+  <div class="wrap pg-bar__in">
+    <a class="pg-bar__a" href="/en/home">← Back to account</a>
+    <span class="pg-bar__k">LADDER</span>
+  </div>
+</div>
+
+<main class="pg">
+  <div class="wrap">
+
+    <div class="pg-head">
+      <div>
+        <span class="pg-k">LADDER</span>
+        <h1 class="pg-t">Leaderboard</h1>
+        <p class="pg-d">
+          Cash is the main board and level the secondary one. Cash reflects the settled value of completed surveys, level reflects accumulated experience. The two never convert into each other; each has its own board.
+        </p>
+      </div>
+
+      <div class="pg-side">
+        <b>TOP 50</b>
+        <span>Active accounts only</span>
+      </div>
+    </div>
+
+    <div class="pg-tools">
+      <div class="pg-tabs">
+        <button class="pg-tab is-on" type="button" data-by="fc">By cash</button>
+        <button class="pg-tab" type="button" data-by="level">By level</button>
+      </div>
+      <span class="pg-tools__r">Banned and closed accounts are excluded</span>
+    </div>
+
+    <ul class="ld-hero" id="ldHero"></ul>
+
+    <ul class="ld-list" id="ldList"></ul>
+
+    <p class="pg-empty" id="ldEmpty" hidden>The board is empty for now.</p>
+
+    <div class="pg-note">
+      <span class="stamp stamp--red">RULE</span>
+      <p>
+        The cash board ranks by available balance, so it drops after a payout; level comes from accumulated experience, and experience only comes from verified surveys. The board only shows public information; click a username to open that person's public profile.
+      </p>
+    </div>
+
+  </div>
+</main>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 Chengfa</span>
+      <span>Take surveys · Earn rewards · Redeem payouts</span>
+    </div>
+    <p class="foot__legal"><a href="/en/privacy">Privacy Policy</a> · <a href="/en/terms">Terms of Service</a> · <a href="/en/support">Contact Support</a></p>
+  </div>
+</footer>
+
+<script src="/js/app.js?v=19" defer></script>
+<script src="/en/dict.js?v=2"></script>
+<script src="/js/i18n-en.js?v=5" defer></script>
+</body>
+</html>

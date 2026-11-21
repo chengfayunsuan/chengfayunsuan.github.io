@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Survey · Chengfa</title>
+<meta name="description" content="Chengfa · Survey">
+<meta name="theme-color" content="#E0291E">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/style.css?v=15">
+<link rel="stylesheet" href="/css/home.css?v=16">
+<link rel="stylesheet" href="/css/page.css?v=9">
+<link rel="stylesheet" href="/css/survey.css?v=3">
+<script src="/js/config.js?v=7"></script>
+<script src="/js/core.js?v=36"></script>
+</head>
+<body data-page="survey">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="/en/hall">
+      <span class="brand__mark" aria-hidden="true"></span>
+      Chengfa
+      <span class="brand__en">CHENGFA</span>
+    </a>
+
+    <div class="hm-nav">
+      <a class="hm-nav__lang" href="/survey" title="切回中文">中文</a>
+      <span class="hm-nav__bal">
+        <b id="navBal">0</b><button class="hm-nav__cur" type="button" data-cur-toggle aria-label="Switch display currency" title="Switch between CFB and CF$"><span data-cur="code">CFB</span></button>
+      </span>
+      <span class="hm-nav__sep" aria-hidden="true"></span>
+      <a class="hm-nav__name" id="navName" href="/en/home">Me</a>
+    </div>
+  </div>
+</header>
+
+<main id="app">
+  <section class="paper-pg">
+    <div class="wrap">
+
+      <div class="paper-top">
+        <a class="paper-back" href="/en/hall">← Back to the survey hall</a>
+        <span class="paper-timer" id="svTimer">0 s elapsed</span>
+      </div>
+
+      <!-- 卷子信息 -->
+      <div class="paper-card" id="svCard">
+        <div class="paper-card__h">
+          <span class="paper-card__k">SURVEY</span>
+          <span class="paper-card__r" id="svReward">—</span>
+        </div>
+        <h1 class="paper-card__t" id="svTitle">Loading survey…</h1>
+        <p class="paper-card__m" id="svMeta">—</p>
+        <p class="paper-card__req" id="svReq" hidden></p>
+      </div>
+
+      <!-- 载入中 / 无法作答 -->
+      <div class="paper-note" id="svNote" hidden></div>
+
+      <!-- 答题 -->
+      <form class="paper-form" id="svForm" hidden>
+        <div id="svQs"></div>
+
+        <!-- 蜜罐：真人看不见也不会填，脚本会把所有 input 都填上 -->
+        <div class="paper-hp" aria-hidden="true">
+          <label>Company website (leave empty)
+            <input type="text" name="company_url" id="svHp" tabindex="-1" autocomplete="off">
+          </label>
+        </div>
+
+        <div class="paper-submit">
+          <span class="paper-progress" id="svProgress">0 / 0 questions</span>
+          <button class="btn btn--red" type="submit" id="svSend">Submit</button>
+        </div>
+        <p class="paper-tip" id="svTip"></p>
+      </form>
+
+      <!-- 结果 -->
+      <div class="paper-result" id="svResult" hidden>
+        <div class="paper-result__k" id="svResKind">RESULT</div>
+        <h2 class="paper-result__t" id="svResTitle">—</h2>
+        <p class="paper-result__d" id="svResDesc">—</p>
+        <ul class="paper-steps" id="svSteps"></ul>
+        <div class="paper-result__acts">
+          <a class="btn btn--red" href="/en/hall">Back to the survey hall</a>
+          <a class="btn btn--ghost" href="/en/ledger">View ledger</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar foot__bar--single">
+      <span>© 2026 Chengfa</span>
+      <span>Used only to earn points</span>
+    </div>
+    <p class="foot__legal"><a href="/en/privacy">Privacy Policy</a> · <a href="/en/terms">Terms of Service</a> · <a href="/en/support">Contact Support</a></p>
+  </div>
+</footer>
+
+<div class="hm-toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="/js/fp.js?v=1" defer></script>
+<script src="/js/survey.js?v=9" defer></script>
+<script src="/en/dict.js?v=2"></script>
+<script src="/js/i18n-en.js?v=5" defer></script>
+</body>
+</html>

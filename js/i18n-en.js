@@ -39,7 +39,13 @@
     '#navName', '.hm-nav__name',
     '.svc__t', '.svc__prov-name', '.svc__topic', '.svc__req',
     '.st-item__t', '.st-item__s',
-    '.ord__t', '.msg__b', '.lg-n'
+    '.ord__t', '.msg__b', '.lg-n',
+    /* 下面这些是用户 / 问卷商 / 站长自己填的内容，翻了就是篡改 */
+    '.ld-who', '.ld-name', '.nt', '.rel__name',
+    '.sp-name', '.sp-bio', '.mw-offer__t', '.mw-offer__d',
+    '.paper-q__t', '.paper-opt__t', '.tk__d', '.tk__re',
+    '.lg-row__m', '.hm-notice__i', '.msg__t', '.face__name',
+    '.er-row__n', '.er-row__m'
   ].join(',');
 
   function raw(el) {

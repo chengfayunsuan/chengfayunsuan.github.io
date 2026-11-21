@@ -13,9 +13,9 @@
   <link rel="stylesheet" href="/css/home.css?v=16">
   <link rel="stylesheet" href="/css/settings.css?v=19">
   <link rel="stylesheet" href="/css/relation.css?v=2">
-  <link rel="stylesheet" href="/css/customize.css?v=11">
+  <link rel="stylesheet" href="/css/customize.css?v=12">
   <script src="/js/config.js?v=7"></script>
-  <script src="/js/core.js?v=36"></script>
+  <script src="/js/core.js?v=37"></script>
 </head>
 
 <body data-page="settings">
@@ -29,6 +29,7 @@
       </a>
 
       <div class="hm-nav">
+      <a class="hm-nav__lang" href="/en/settings" title="Switch to English">EN</a>
         <span class="hm-nav__bal">
           <b id="navBal">0</b><button class="hm-nav__cur" type="button" data-cur-toggle aria-label="切换显示币种" title="点击在乘法币与乘法刀之间切换"><span data-cur="code">CFB</span></button>
         </span>
@@ -458,10 +459,15 @@
         </div>
 
         <div class="cz">
+          <div class="cz__tabs">
+            <button class="cz__tab is-on" type="button" data-th-scope="user">前台配色</button>
+            <button class="cz__tab" type="button" data-th-scope="admin">后台配色</button>
+          </div>
+
           <div class="th-pre">
             <div class="th-pre__x">
               <b>预设配色</b>
-              <i>一键换掉整站主色，其余颜色保持协调。后台默认本来就是蓝的。</i>
+              <i>前台和后台各存一份，互不干扰。后台默认是蓝的，选了就以后台的为准。</i>
             </div>
             <div class="th-pre__b" id="thPresets"></div>
           </div>
@@ -486,7 +492,7 @@
           </div>
 
           <div class="cz__foot">
-            <p class="cz__note">颜色存在本机 cookie 里，换设备不带走。点「确定生效」后整站立即换色，恢复默认随时可以。</p>
+            <p class="cz__note">颜色存在本机 cookie 里，换设备不带走。前台与后台分开保存：在「后台配色」里改动只影响后台页面，普通访客看不到这一栏。</p>
             <div class="cz__acts">
               <button class="btn btn--ghost" type="button" id="thReset">恢复默认</button>
               <button class="btn btn--red" type="button" id="thSave">确定生效</button>
@@ -542,7 +548,7 @@
   </footer>
 
   <script src="/js/settings.js?v=22" defer></script>
-  <script src="/js/personalize.js?v=7" defer></script>
+  <script src="/js/personalize.js?v=8" defer></script>
 </body>
 
 </html>

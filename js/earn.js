@@ -186,7 +186,12 @@
 
       var title = document.createElement('div');
       title.className = 'er-row__t';
-      title.textContent = t.name;
+      /* 任务名是广告主给的，英文站上不能翻；但「已冲正」这种状态标签要能翻，
+         所以任务名单独包一层 er-row__n，翻译脚本只跳过这一层 */
+      var nameEl = document.createElement('span');
+      nameEl.className = 'er-row__n';
+      nameEl.textContent = t.name;
+      title.appendChild(nameEl);
       if (t.status === 2) {
         var tag = document.createElement('span');
         tag.className = 'er-tag is-rev';
