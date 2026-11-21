@@ -351,6 +351,8 @@
 
     /* 站内作答的问卷没有外链，入口指向本站答题页 */
     var inline = !!s.inline;
+    /* 外部问卷墙的卷（id 带 tr- 前缀）：点了就是跳走，不进站内的参与记录 */
+    var external = /^tr-/.test(String(s.id || ''));
     var usable = (!!s.entry || inline) && !restricted;
     var netBlocked = !!netSuspect && usable;
 
@@ -382,7 +384,7 @@
           ev.preventDefault();
           say('这个网络被判定为代理 / VPN，不能接问卷');
 
-          try {
+          if (!external) try {
             fetch('/api/surveys/join', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -414,7 +416,7 @@
           return;
         }
 
-        if (s.joined) return;
+        if (s.joined || external) return;
         try {
           fetch('/api/surveys/join', {
             method: 'POST',
@@ -489,10 +491,7 @@
       });
     });
 
-    getJSON('/api/surveys').then(function (r) {
-      if (r.status === 200 && r.body && r.body.ok) {
-        all = r.body.items || [];
-      }
+    function afterLoad() {
       if (count) count.textContent = String(all.length);
 
       if (!all.length) {
@@ -502,6 +501,29 @@
       }
 
       paint();
+    }
+
+    function loadStation() {
+      getJSON('/api/surveys').then(function (r) {
+        if (r.status === 200 && r.body && r.body.ok) {
+          all = r.body.items || [];
+        }
+        afterLoad();
+      });
+    }
+
+    /* 大厅优先摆外部问卷墙的真实库存——那些是真有钱的卷。
+       拿不到（没开权限、上游抽风、当地确实没库存）再退回站内问卷，绝不留白屏。 */
+    getJSON('/api/surveys/tr').then(function (r) {
+      if (r.status === 200 && r.body && r.body.ok) {
+        var ext = r.body.items || [];
+        if (ext.length) {
+          all = ext;
+          afterLoad();
+          return;
+        }
+      }
+      loadStation();
     });
   }
 

@@ -51,6 +51,7 @@ export async function onRequest(context) {
     if (path === 'ticket' && request.method === 'GET') return await ticketMine(request, env);
     if (path === 'fx' && request.method === 'GET') return await fxRate(env);
     if (path === 'surveys' && request.method === 'GET') return await surveyList(request, env);
+    if (path === 'surveys/tr' && request.method === 'GET') return await trSurveyList(request, env);
     if (path === 'surveys/join' && request.method === 'POST') return await surveyJoin(request, env);
     if (path === 'surveys/paper' && request.method === 'GET') return await surveyPaper(request, env, url);
     if (path === 'surveys/submit' && request.method === 'POST') return await surveySubmit(request, env);
@@ -1798,6 +1799,114 @@ async function trDecide(env, request, p, seg, url) {
     return { body: res.error || 'error', status: 400, ...ok };
   }
   return { body: 'ok', status: 200, ...ok };
+}
+
+/* ---------------- Surveys API：把 TR 的问卷搬进自家大厅 ----------------
+ *
+ * 和 Router 分工不同：Router 是「把用户送去别人的墙」，这个是「把问卷列表拉回来，
+ * 摆在我们自己的大厅里」，数据来自 GET api.theoremreach.com/api/publishers/v1/surveys。
+ *
+ * 三条硬规矩（官方文档写死的，违反就是 422 或签名失效）：
+ *   1. 每次请求必须带 ip，缺了直接 422 Missing user ip address
+ *   2. 整条 URL 参与签名，hash 拼在最后一位
+ *   3. 返回的 entry_link 是未签名的；只能往它后面追加参数，不要重排、不要重编码，
+ *      追加完再整条签 —— 漏签用户看到的是 "V_URL: False - URL Hash Signature Invalid"
+ *
+ * 我们顺手把 offerwall 参数（exchange_rate / partner_id / 币名）补上去，
+ * 这样墙上的货币名和兑换率也是 XD、69，跟本站口径对得上。
+ */
+
+const TR_API_SURVEYS = 'https://api.theoremreach.com/api/publishers/v1/surveys';
+
+/* 把未签名的 entry_link 补成可直接跳的链接 */
+async function trSignEntry(c, s, uid) {
+  let u = String((s && s.entry_link) || '').trim();
+  if (!u) return '';
+  /* user_id 必须换成本站当前用户，列表可能是按别人拉的 */
+  u = u.replace(/([?&])user_id=[^&]*/, '$1user_id=' + Number(uid));
+  u += '&exchange_rate=' + c.exchangeRate
+    + '&currency_name_plural=' + encodeURIComponent(c.curName)
+    + '&currency_name_singular=' + encodeURIComponent(c.curName)
+    + '&display_name=' + encodeURIComponent('Chengfa');
+  if (c.partnerId) u += '&partner_id=' + encodeURIComponent(c.partnerId);
+  return u + '&hash=' + (await trHashOf(c.secretKey, u));
+}
+
+async function trSurveyList(request, env) {
+  const session = await currentSession(request, env);
+  if (!session) return json({ ok: false, error: 'unauthorized' }, 401);
+  if (!isActive(session)) return locked();
+
+  const c = trConf(env);
+  if (!c.apiKey || !c.secretKey) return json({ ok: true, items: [], note: 'not_configured' });
+
+  const ip = String(request.headers.get('CF-Connecting-IP') || '').trim();
+  if (!ip) return json({ ok: false, error: 'no_ip' }, 400);
+
+  const cc = String((request.cf && request.cf.country) || '').toUpperCase();
+  const qs = [
+    'api_key=' + encodeURIComponent(c.apiKey),
+    'user_id=' + Number(session.uid),
+    'ip=' + encodeURIComponent(ip)
+  ];
+  if (/^[A-Z]{2}$/.test(cc)) qs.push('country_code=' + cc);
+  qs.push('max_result_count=30');
+  qs.push('max_loi=30');
+
+  const base = TR_API_SURVEYS + '?' + qs.join('&');
+  const signed = base + '&hash=' + (await trHashOf(c.secretKey, base));
+
+  let payload = null;
+  let upErr = '';
+  try {
+    const r = await fetch(signed, { headers: { Accept: 'application/json' } });
+    const text = await r.text();
+    if (r.ok) {
+      payload = JSON.parse(text);
+    } else {
+      upErr = r.status + ' ' + text.slice(0, 160);
+    }
+  } catch (e) {
+    upErr = String((e && e.message) || e).slice(0, 160);
+  }
+
+  if (!payload) {
+    console.error('tr surveys upstream:', upErr);
+    /* 上游挂了不要把大厅搞成白屏，回一个空列表让前端走回退 */
+    return json({ ok: false, error: 'upstream', detail: upErr }, 200);
+  }
+
+  const fx = await fxValue(env);
+  const list = Array.isArray(payload.surveys) ? payload.surveys : [];
+  const items = [];
+  for (let i = 0; i < list.length && items.length < 30; i++) {
+    const s = list[i];
+    const usd = Number(s.cpi) || 0;
+    if (usd <= 0) continue;
+    const entry = await trSignEntry(c, s, session.uid);
+    if (!entry) continue;
+    items.push({
+      id: 'tr-' + s.campaign_id,
+      provider: 'TheoremReach',
+      title: '问卷 #' + s.campaign_id,
+      /* 上游不给问卷标题，只有 loi/cpi/incidence，用耗时给个粗档位当标签 */
+      topic: (Number(s.loi) || 0) <= 5 ? '快速' : ((Number(s.loi) || 0) <= 12 ? '常规' : '深度'),
+      /* price 一律 XB 口径（元），前端按当前币种自己换。
+         这里只保留到分：问卷报价用不着四位小数，卡片主数字短一点才好看 */
+      price: formatFc(Math.round(usd * fx * c.share * 100) * 100),
+      durationMin: Number(s.loi) || 0,
+      stars: Math.round(Number(s.average_rating) || 0),
+      grade: '',
+      requirement: '通过率 ' + Math.round(Number(s.incidence) || 0) + '%'
+        + (Number(s.completes_required) ? ' · 需 ' + Number(s.completes_required) + ' 份' : ''),
+      entry: entry,
+      featured: false,
+      /* 上游顺序就是官方推荐顺序，倒着编号让「时间·最新」也按推荐排 */
+      createdAt: String(99999999 - i)
+    });
+  }
+
+  return json({ ok: true, items: items, count: items.length, country: cc });
 }
 
 /* 自己的广告墙记录 */
