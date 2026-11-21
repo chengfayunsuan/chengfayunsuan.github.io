@@ -6,10 +6,31 @@
  * 这里在边缘先挡一道：不是站长或管理员就根本拿不到这份 HTML。
  *
  * 只拦后台路径，其余请求原样放行。
+ *
+ * 未授权一律返回 404（复用站点 404.html 页面），不给登录跳转、不给任何
+ * 「这里有个后台」的提示——外人敲 /admin 看到的就是一个不存在的页面。
  */
 
 const ADMIN_ROLES = ['owner', 'admin'];
 const COOKIE_NAME = 'cf_session';
+
+/* 伪 404：拿站点自己的 404.html 当内容，状态码给 404。
+   fetch 的是 /404.html，不匹配守卫路径，不会再绕回这里。 */
+async function adminNotFound(url) {
+  try {
+    const r = await fetch(new URL('/404.html', url).toString());
+    if (r.ok) {
+      return new Response(r.body, {
+        status: 404,
+        headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
+      });
+    }
+  } catch (e) { /* 取不到就用下面的兜底 */ }
+  return new Response('<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><title>404</title></head><body><h1>404</h1></body></html>', {
+    status: 404,
+    headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
+  });
+}
 
 function readCookie(request, name) {
   const raw = request.headers.get('Cookie') || '';
@@ -102,9 +123,7 @@ export async function onRequest(context) {
 
   try {
     const token = readCookie(request, COOKIE_NAME);
-    if (!token) {
-      return Response.redirect(new URL('/login?next=/admin', url).toString(), 302);
-    }
+    if (!token) return await adminNotFound(url);
 
     const tokenHash = await sha256Hex(token);
     const row = await env.DB.prepare(
@@ -117,11 +136,11 @@ export async function onRequest(context) {
     const expired = !row || new Date(row.expires_at).getTime() < Date.now();
 
     if (expired || row.deleted_at || row.status !== 'active') {
-      return Response.redirect(new URL('/login?next=/admin', url).toString(), 302);
+      return await adminNotFound(url);
     }
 
     if (ADMIN_ROLES.indexOf(row.role) < 0) {
-      return Response.redirect(new URL('/home', url).toString(), 302);
+      return await adminNotFound(url);
     }
 
     return next();
