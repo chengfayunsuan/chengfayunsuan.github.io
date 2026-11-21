@@ -69,7 +69,7 @@ export async function onRequest(context) {
     if (path === 'moonetix/postback') return await mtxPostback(request, env, url);
     if (path === 'moonetix/mock/complete' && request.method === 'POST') return await mtxMockComplete(request, env);
     if (path === 'theoremreach/link' && request.method === 'GET') return await trLink(request, env);
-    if (path === 'theoremreach/postback') return await trPostback(request, env, url);
+    if (path.indexOf('theoremreach/postback') === 0) return await trPostback(request, env, url, path);
     if (path.indexOf('admin/') === 0) return await adminApi(request, env, url, path);
     return json({ ok: false, error: 'not_found' }, 404);
   } catch (err) {
@@ -1463,7 +1463,14 @@ function trConf(env) {
      配 THEOREMREACH_AUTH_TOKEN 覆盖，不用改代码 */
   const token = String(env.THEOREMREACH_AUTH_TOKEN || '').trim() || apiKey;
   const per = Number(env.THEOREMREACH_XB_PER || 1);
-  return { apiKey, token, xbPer: isFinite(per) && per > 0 ? per : 1, live: !!(apiKey && token) };
+  /* 回调地址末尾那截随机串：它真实的 hash 算法没公布，改用「只有双方知道的
+     URL」当凭证。仓库是公开的，所以这串必须放环境变量，不能写进代码。 */
+  const pathKey = String(env.THEOREMREACH_POSTBACK_KEY || '').trim();
+  return {
+    apiKey, token, pathKey,
+    xbPer: isFinite(per) && per > 0 ? per : 1,
+    live: !!(apiKey && (token || pathKey))
+  };
 }
 
 /* 墙链接：user_id 用本站 uid，回调时原样回来 */
@@ -1514,12 +1521,13 @@ async function hookLog(env, a) {
   }
 }
 
-async function trPostback(request, env, url) {
+async function trPostback(request, env, url, path) {
   const p = await mtxParams(request, url);   /* body 只能读一次，校验和入账共用 */
+  const seg = String(path || '').replace('theoremreach/postback', '').replace(/^\/+|\/+$/g, '');
 
   let out;
   try {
-    out = await trDecide(env, request, p);
+    out = await trDecide(env, request, p, seg);
   } catch (err) {
     console.error('tr postback crashed:', err && err.message);
     out = { body: 'server_error', status: 500 };
@@ -1539,7 +1547,7 @@ async function trPostback(request, env, url) {
 }
 
 /* 真正的判定：只看参数，不碰响应对象，方便外面记日志 */
-async function trDecide(env, request, p) {
+async function trDecide(env, request, p, seg) {
   const c = trConf(env);
 
   /* 没配 key 就拒。宁可让它重试，也不能让一个不带校验的回调给谁加钱 */
@@ -1552,12 +1560,15 @@ async function trDecide(env, request, p) {
     return { body: 'ok ignored debug', status: 200 };
   }
 
+  /* 两道凭证任选其一：
+     1) 回调地址末尾的随机串（它真实回调走这条，因为 hash 算法没公布）
+     2) auth_token 与本方 key 相等（自家自测走这条） */
+  const byPath = !!(c.pathKey && seg && seg === c.pathKey);
   const tok = String(p.auth_token || p.authtoken || p.token || '').trim();
   const hash = String(p.hash || '').trim();
-  if (!tok || tok !== c.token) {
-    /* 它的真实回调带的是 hash，auth_token 只有我们自测时才有。
-       hash 的算法还没接上，所以真实回调一律拒，但要在响应里说明白。 */
-    console.error('tr postback auth fail: tokenLen=' + tok.length +
+
+  if (!byPath && (!tok || tok !== c.token)) {
+    console.error('tr postback auth fail: byPath=' + byPath + ' tokenLen=' + tok.length +
       ' hashLen=' + hash.length + ', keys:', Object.keys(p).join(','));
     return {
       body: hash && !tok ? 'hash not supported yet' : 'bad auth_token',
