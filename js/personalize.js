@@ -44,6 +44,7 @@
     function allow(u) {
       if (u && (u.role === 'owner' || u.role === 'admin')) {
         document.body.classList.add('has-adm-tab');
+        updateSum();
       }
     }
 
@@ -54,6 +55,39 @@
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) { allow(d && (d.user || d)); })
       .catch(function () {});
+  }
+
+  /* 折起来那一行只写项数，展开才看键位 */
+  function isAdminCtx() {
+    var page = document.body.getAttribute('data-page') || '';
+    return page.indexOf('admin') === 0 || document.body.classList.contains('has-adm-tab');
+  }
+
+  function updateSum(cfg) {
+    var sum = $('hkSum');
+    if (!sum) return;
+    cfg = cfg || CF.keys.read();
+    var text = '用户端 ' + CF.keys.list('user', cfg).length + ' 项';
+    if (isAdminCtx()) text += ' · 后台 ' + CF.keys.list('admin', cfg).length + ' 项';
+    sum.textContent = text + ' · 点「展开」改键';
+  }
+
+  /* 折页：默认收起，只占一行；点了才展开 */
+  function initFold() {
+    var fold = $('hkFold');
+    var btn = $('hkToggle');
+    var body = $('hkBody');
+    if (!fold || !btn || !body) return;
+
+    function setOpen(open) {
+      body.hidden = !open;
+      fold.classList.toggle('is-open', open);
+      btn.textContent = open ? '收起' : '展开';
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
+    btn.addEventListener('click', function () { setOpen(body.hidden); });
+    setOpen(false);
   }
 
   function paintHot() {
@@ -67,6 +101,8 @@
       st.textContent = cfg.on === false ? '已关闭' : '已开启';
       st.className = 'cz-tag' + (cfg.on === false ? '' : ' is-on');
     }
+
+    updateSum(cfg);
 
     var tabs = document.querySelectorAll('[data-hk-scope]');
     for (var t = 0; t < tabs.length; t++) {
@@ -360,6 +396,7 @@
     bindHotUI();
     paintHot();
     gateAdminTab();
+    initFold();
 
     renderPresets();
     bindThemeUI();

@@ -593,3 +593,56 @@ body:not([data-page^="admin"]):not(.has-adm-tab) .hk { border-top: 1px solid var
   .hk__i { grid-template-columns: 42px minmax(0, 1fr) 96px; }
   .hk__d { display: none; }
 }
+
+/* ---------- 折页：默认只占一行，点开才展开 ---------- */
+
+.cz--fold .cz__head {
+  align-items: center;
+  padding: 15px 22px;
+  border-bottom: 0;
+}
+
+.cz--fold.is-open .cz__head { border-bottom: 1px solid var(--hair); }
+
+.cz--fold .cz__x {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cz--fold .cz__x b { flex: 0 0 auto; font-size: 15px; }
+
+.cz--fold .cz__x i {
+  margin: 0;
+  max-width: none;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.cz--fold .cz__acts { align-items: center; }
+
+.cz--fold .cz__acts .btn { padding: 8px 16px; }
+
+.cz__intro {
+  margin: 0;
+  padding: 14px 22px;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--gray);
+  border-bottom: 1px solid var(--hair);
+}
+
+@media (max-width: 640px) {
+  .cz--fold .cz__head { flex-direction: row; align-items: center; gap: 10px; padding: 13px 16px; }
+  .cz--fold .cz__x { gap: 8px; }
+  .cz--fold .cz__x b { font-size: 14px; }
+  .cz--fold .cz__x i { font-size: 11px; }
+}
+
+/* 窄屏上「数字键直达」这行只留标题和开关，说明放出去也看不全 */
+@media (max-width: 520px) {
+  .cz--fold .cz__x i { display: none; }
+}

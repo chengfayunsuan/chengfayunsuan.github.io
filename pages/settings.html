@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="/css/home.css?v=16">
   <link rel="stylesheet" href="/css/settings.css?v=19">
   <link rel="stylesheet" href="/css/relation.css?v=2">
-  <link rel="stylesheet" href="/css/customize.css?v=6">
+  <link rel="stylesheet" href="/css/customize.css?v=11">
   <script src="/js/config.js?v=7"></script>
   <script src="/js/core.js?v=36"></script>
 </head>
@@ -413,29 +413,37 @@
           <span class="cz-tag is-on" id="hkState">已开启</span>
         </div>
 
-        <div class="cz">
+        <div class="cz cz--fold" id="hkFold">
           <div class="cz__head">
             <div class="cz__x">
               <b>数字键直达</b>
-              <i>站内任何页面按键盘上排的数字键，直接跳到对应功能。默认按功能目录的编号走，第 10 项用 0。在输入框里打字时不会触发。1 左边那个键（` 或 ~ 都行）回账户首页，跟数字键同一套开关，键位固定不可改。</i>
+              <i id="hkSum">用户端 11 项 · 点「展开」看键位</i>
             </div>
-            <label class="cz-sw">
-              <input type="checkbox" id="hkOn" checked>
-              <span class="cz-sw__b"></span>
-              <span class="cz-sw__t">启用</span>
-            </label>
+            <div class="cz__acts">
+              <label class="cz-sw">
+                <input type="checkbox" id="hkOn" checked>
+                <span class="cz-sw__b"></span>
+                <span class="cz-sw__t">启用</span>
+              </label>
+              <button class="btn btn--ghost btn--s" type="button" id="hkToggle"
+                aria-expanded="false" aria-controls="hkBody">展开</button>
+            </div>
           </div>
 
-          <div class="cz__tabs">
-            <button class="cz__tab is-on" type="button" data-hk-scope="user">用户端 · 11 项</button>
-            <button class="cz__tab" type="button" data-hk-scope="admin">后台 · 11 项</button>
-          </div>
+          <div class="cz__body" id="hkBody" hidden>
+            <p class="cz__intro">站内任何页面按键盘上排的数字键，直接跳到对应功能。默认按功能目录的编号走，第 10 项用 0。在输入框里打字时不会触发。1 左边那个键（` 或 ~ 都行）回账户首页，跟数字键同一套开关，键位固定不可改。</p>
 
-          <ul class="hk" id="hkList"></ul>
+            <div class="cz__tabs">
+              <button class="cz__tab is-on" type="button" data-hk-scope="user">用户端 · 11 项</button>
+              <button class="cz__tab" type="button" data-hk-scope="admin">后台 · 11 项</button>
+            </div>
 
-          <div class="cz__foot">
-            <p class="cz__note">点「改键」后按任意数字或字母即可绑定；撞键会自动交换。` 键固定回首页，不参与改键。键位只存在这台电脑的浏览器里。</p>
-            <div class="cz__acts"><button class="btn btn--ghost" type="button" id="hkReset">恢复默认键位</button></div>
+            <ul class="hk" id="hkList"></ul>
+
+            <div class="cz__foot">
+              <p class="cz__note">点「改键」后按任意数字或字母即可绑定；撞键会自动交换。` 键固定回首页，不参与改键。键位只存在这台电脑的浏览器里。</p>
+              <div class="cz__acts"><button class="btn btn--ghost" type="button" id="hkReset">恢复默认键位</button></div>
+            </div>
           </div>
         </div>
       </div>
@@ -533,8 +541,8 @@
     </div>
   </footer>
 
-  <script src="/js/settings.js?v=21" defer></script>
-  <script src="/js/personalize.js?v=6" defer></script>
+  <script src="/js/settings.js?v=22" defer></script>
+  <script src="/js/personalize.js?v=7" defer></script>
 </body>
 
 </html>
