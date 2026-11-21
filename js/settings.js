@@ -1,5 +1,5 @@
 /* ============================================================
-   乘法 · 账户设置
+   Chengfa · 账户设置
    数据来自 /api/auth/me；用户名改写走 /api/user/profile
    ============================================================ */
 (function () {
@@ -289,7 +289,7 @@
     $('navName').textContent = u.username || '未命名';
     setAmt($('navBal'), u.fc);
 
-    /* 站长与管理员点左上角乘法进后台 */
+    /* 站长与管理员点左上角Chengfa进后台 */
     var brand = document.querySelector('.brand');
     if (brand && (u.role === 'owner' || u.role === 'admin')) brand.setAttribute('href', '/admin');
 
@@ -910,7 +910,7 @@
 
   var DEMO = {
     uid: 1,
-    username: '乘法',
+    username: 'Chengfa',
     role: 'owner',
     status: 'active',
     fc: '128.4500',

@@ -1,5 +1,5 @@
 /* ============================================================
-   乘法 · 公共层
+   Chengfa · 公共层
    1) 会话缓存：把 /api/auth/me 的用户资料存进 sessionStorage，
       页面先用缓存秒显，再后台校验，避免整页卡在接口上。
    2) 同导航组 SPA：功能目录（home / settings）与后台目录
@@ -443,7 +443,7 @@
 
   var current = (document.body || document.documentElement).getAttribute('data-page') || '';
 
-  /* 后台页面的左上角乘法回账户首页。
+  /* 后台页面的左上角Chengfa回账户首页。
      其它页面由各页脚本按角色把 brand 指到 /admin，后台里再指后台就成了死循环。 */
   function fixBrand() {
     var pg = (document.body || document.documentElement).getAttribute('data-page') || '';

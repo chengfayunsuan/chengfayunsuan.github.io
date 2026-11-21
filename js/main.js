@@ -1,4 +1,4 @@
-/* 乘法 · index 交互
+/* Chengfa · index 交互
    只做两件事：滚动进入、导航栏登录态 */
 
 (function () {

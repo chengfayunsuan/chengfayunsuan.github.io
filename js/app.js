@@ -1,5 +1,5 @@
 /* ============================================================
-   乘法 · 站内页面公用逻辑
+   Chengfa · 站内页面公用逻辑
    问卷大厅 / 兑换中心 / 收支明细 / 天梯榜 / 联系客服 共用。
    每页用 <body data-page="hall|store|ledger|ladder|support"> 声明自己。
    ============================================================ */
@@ -119,7 +119,7 @@
     }
     document.body.setAttribute('data-uid', me.uid);
 
-    /* 站长与管理员点左上角乘法进后台，其余保持原跳转 */
+    /* 站长与管理员点左上角Chengfa进后台，其余保持原跳转 */
     var brand = document.querySelector('.brand');
     if (brand && (me.role === 'owner' || me.role === 'admin')) brand.setAttribute('href', '/admin');
   }

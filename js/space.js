@@ -1,5 +1,5 @@
 /* ============================================================
-   乘法 · 用户公开主页
+   Chengfa · 用户公开主页
    数据来自 /api/pub/user；关注与粉丝只占两行数字，
    点开是小窗口，列表来自 /api/follow
    ============================================================ */
@@ -76,7 +76,7 @@
     none.hidden = false;
     $('noneT').textContent = title;
     $('noneD').textContent = desc;
-    document.title = title + ' · 乘法';
+    document.title = title + ' · Chengfa';
   }
 
   /* ---------- 关注与粉丝数字 ---------- */
@@ -465,7 +465,7 @@
   /* ---------- 渲染 ---------- */
 
   function render(u) {
-    document.title = (u.username || '用户') + ' · 乘法';
+    document.title = (u.username || '用户') + ' · Chengfa';
 
     state.uid = u.uid;
     state.viewer = u.viewer || { self: false, signedIn: false, following: false };
@@ -674,7 +674,7 @@
       setAmt($('navBal'), me.fc);
       $('navName').textContent = me.username || '我';
 
-      /* 站长与管理员点左上角乘法进后台 */
+      /* 站长与管理员点左上角Chengfa进后台 */
       var brand = document.querySelector('.brand');
       if (brand && (me.role === 'owner' || me.role === 'admin')) brand.setAttribute('href', '/admin');
       if (String(me.uid) === uid) $('selfNote').hidden = false;

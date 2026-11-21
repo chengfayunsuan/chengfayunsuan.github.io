@@ -1,5 +1,5 @@
 /* ============================================================
-   乘法 · 账户首页
+   Chengfa · 账户首页
    读取 /api/auth/me，渲染门面，未登录跳转登录页
    ============================================================ */
 (function () {
@@ -193,7 +193,7 @@
     if (window.CF && CF.amount) CF.amount($('navBal'), user.fc);
     else $('navBal').textContent = trimNum(user.fc);
 
-    /* 站长与管理员点左上角乘法进后台 */
+    /* 站长与管理员点左上角Chengfa进后台 */
     var brand = document.querySelector('.brand');
     if (brand && (user.role === 'owner' || user.role === 'admin')) brand.setAttribute('href', '/admin');
 
@@ -240,7 +240,7 @@
 
   var DEMO = {
     uid: 1,
-    username: '乘法',
+    username: 'Chengfa',
     role: 'owner',
     status: 'active',
     fc: '128.4500',

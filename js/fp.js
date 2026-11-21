@@ -1,5 +1,5 @@
 /* ============================================================
-   乘法 · 设备指纹
+   Chengfa · 设备指纹
    目的只有一个：同一台机器在同一份问卷上只能算一次，
    换 IP、换账号都绕不过去。算出来的是一串哈希，不含任何可反查个人的信息。
    ============================================================ */
@@ -29,9 +29,9 @@
       x.fillStyle = '#f60';
       x.fillRect(0, 0, 100, 20);
       x.fillStyle = '#069';
-      x.fillText('乘法 chengfa fp 0123', 2, 4);
+      x.fillText('Chengfa chengfa fp 0123', 2, 4);
       x.fillStyle = 'rgba(102,204,0,0.7)';
-      x.fillText('乘法 chengfa fp 0123', 4, 18);
+      x.fillText('Chengfa chengfa fp 0123', 4, 18);
       return c.toDataURL().slice(-96);
     } catch (e) {
       return '';

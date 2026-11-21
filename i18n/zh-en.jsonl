@@ -1,5 +1,5 @@
-{"zh":"© 2026 乘法 CHENGFA","en":"© 2026 Chengfa"}
-{"zh":"乘法","en":"Chengfa"}
+{"zh":"© 2026 Chengfa CHENGFA","en":"© 2026 Chengfa"}
+{"zh":"Chengfa","en":"Chengfa"}
 {"zh":"点击在乘法币与乘法刀之间切换","en":"Switch between XB and XD"}
 {"zh":"切换显示币种","en":"Switch display currency"}
 {"zh":"隐私政策","en":"Privacy Policy"}
@@ -33,7 +33,7 @@
 {"zh":"走 VPN、代理、机房网络的用户会被广告墙直接拦掉，这是服务商的规则，不是本站的限制。","en":"Users on VPNs, proxies or data-centre networks are blocked by the offerwall itself. That is the provider's rule, not a limit we imposed."}
 {"zh":"问卷收益来自委托方支付的调研费用，平台不设邀请返利与层级分成，也不存在先交费后接单。","en":"Survey rewards come from research fees paid by clients. There are no referral kickbacks, no multi-level cuts, and nothing to pay before you start."}
 {"zh":"任务由第三方广告主发布，本站只做展示与结算。遇到不到账，带上交易号提交工单查。","en":"Tasks are published by third-party advertisers; we only display them and settle the payout. If a reward is missing, open a ticket with the transaction ID."}
-{"zh":"登录或注册乘法账户。创建账户后可浏览公开问卷，参与市场调研并累积积分。","en":"Sign in or create a Chengfa account. Once you are in, you can browse public surveys, take part and accumulate points."}
+{"zh":"登录或注册Chengfa账户。创建账户后可浏览公开问卷，参与市场调研并累积积分。","en":"Sign in or create a Chengfa account. Once you are in, you can browse public surveys, take part and accumulate points."}
 {"zh":"忘了密码？到「联系客服」提交工单，注明注册邮箱，由站长核对后重置。","en":"Forgot your password? Open a ticket under Contact Support with your registered email, and the site owner will verify and reset it."}
 {"zh":"还没有广告墙记录。完成第一项任务后，这里会出现交易号、面额与状态。","en":"No offerwall activity yet. Your first completed task will show up here with its transaction ID, amount and status."}
 {"zh":"提现申请提交时，对应金额从可用余额划入冻结，审核驳回则原路退回。","en":"When a payout is requested, the amount moves from available to held. If it is rejected, it goes straight back."}
@@ -41,20 +41,20 @@
 {"zh":"答卷经有效性与完整性核验，通过即计入余额，可在收支明细中查到。","en":"Responses are checked for validity and completeness, then credited to your balance and listed in the ledger."}
 {"zh":"问卷收益来自委托方支付的调研费用，平台不设邀请返利与层级分成。","en":"Survey rewards come from fees paid by research clients. No referral kickbacks, no multi-level splits."}
 {"zh":"兑换码即时发放；提现经人工审核后七个工作日内到账，节假日顺延。","en":"Gift codes are issued instantly. Payouts are reviewed manually and arrive within seven business days, later across public holidays."}
-{"zh":"乘法赚积分：在广告墙完成第三方任务，奖励经服务端回调入账。","en":"Chengfa · Earn: complete third-party offers on the wall, rewards credited by server callback."}
+{"zh":"Chengfa赚积分：在广告墙完成第三方任务，奖励经服务端回调入账。","en":"Chengfa · Earn: complete third-party offers on the wall, rewards credited by server callback."}
 {"zh":"年龄段、城市与职业决定可参与的问卷范围，缺项会错过匹配。","en":"Age range, city and occupation decide which surveys you match. Missing fields mean missed matches."}
 {"zh":"每份问卷标注题目数量、预计耗时与奖励额度，开始后可暂存。","en":"Each survey lists its question count, expected time and reward. You can pause after starting."}
 {"zh":"登录状态保持 30 天。在公共设备上使用后请退出。","en":"Sessions last 30 days. Sign out after using a shared device."}
 {"zh":"本站为个人独立项目，广告墙任务由第三方广告主提供。","en":"This site is an independent personal project. Offerwall tasks are supplied by third-party advertisers."}
-{"zh":"乘法问卷大厅：查看可参与的调研问卷与奖励额度。","en":"Chengfa Survey Hall: browse surveys you qualify for and see what they pay."}
+{"zh":"Chengfa问卷大厅：查看可参与的调研问卷与奖励额度。","en":"Chengfa Survey Hall: browse surveys you qualify for and see what they pay."}
 {"zh":"服务端用你的 UID 和签名盐生成一次性链接","en":"The server builds a one-time link from your UID and the signing salt"}
 {"zh":"价格与库存实时读取，兑换后立即进入兑换记录。","en":"Prices and stock are read live; redemptions appear in your history immediately."}
 {"zh":"答卷经有效性与完整性核验，通过即计入余额。","en":"Responses are verified for validity and completeness, then credited to your balance."}
 {"zh":"年龄段、城市与职业决定可参与的问卷范围。","en":"Age range, city and occupation set the surveys you qualify for."}
-{"zh":"乘法账户中心。查看余额、等级与问卷入口。","en":"Your Chengfa account: balance, level and survey entry points."}
+{"zh":"Chengfa账户中心。查看余额、等级与问卷入口。","en":"Your Chengfa account: balance, level and survey entry points."}
 {"zh":"用于找回账号和接收通知，不会公开显示。","en":"Used for account recovery and notifications. Never shown publicly."}
 {"zh":"列表标注题目类型、预计耗时与积分额度。","en":"The list shows question type, expected time and reward."}
-{"zh":"乘法兑换中心：乘法币提现与数字兑换码。","en":"Chengfa Redeem: cash out XB or spend it on digital codes."}
+{"zh":"Chengfa兑换中心：乘法币提现与数字兑换码。","en":"Chengfa Redeem: cash out XB or spend it on digital codes."}
 {"zh":"使用注册时填写的邮箱与密码进入账户。","en":"Sign in with the email and password you registered with."}
 {"zh":"SURVEY HALL / 问卷大厅","en":"SURVEY HALL"}
 {"zh":"暂时没有可兑换的商品，稍后再来看看。","en":"Nothing to redeem right now — check back later."}
@@ -68,19 +68,19 @@
 {"zh":"ACCOUNT / 账户","en":"ACCOUNT"}
 {"zh":"Moonetix 广告墙","en":"Moonetix offerwall"}
 {"zh":"EARN / 赚积分","en":"EARN"}
-{"zh":"账户入口 · 乘法","en":"Account · Chengfa"}
-{"zh":"问卷大厅 · 乘法","en":"Survey Hall · Chengfa"}
+{"zh":"账户入口 · Chengfa","en":"Account · Chengfa"}
+{"zh":"问卷大厅 · Chengfa","en":"Survey Hall · Chengfa"}
 {"zh":"正在检查接入状态…","en":"Checking connection…"}
-{"zh":"兑换中心 · 乘法","en":"Redeem · Chengfa"}
+{"zh":"兑换中心 · Chengfa","en":"Redeem · Chengfa"}
 {"zh":"点击完成人机验证","en":"Tap to complete the human check"}
 {"zh":"法币 · 高到低","en":"Price · high to low"}
 {"zh":"星级 · 高到低","en":"Rating · high to low"}
 {"zh":"查看运作流程 →","en":"See how it works →"}
 {"zh":"点击简介即可编辑","en":"Click the bio to edit"}
-{"zh":"赚积分 · 乘法","en":"Earn · Chengfa"}
+{"zh":"赚积分 · Chengfa","en":"Earn · Chengfa"}
 {"zh":"我已阅读并同意","en":"I have read and agree to the"}
 {"zh":"时间 · 最新","en":"Time · newest"}
-{"zh":"账户 · 乘法","en":"Account · Chengfa"}
+{"zh":"账户 · Chengfa","en":"Account · Chengfa"}
 {"zh":"到账不是即时的","en":"Credits are not instant"}
 {"zh":"网络环境有要求","en":"Network requirements"}
 {"zh":"与合作方的关系","en":"Relationship with partners"}
@@ -190,7 +190,7 @@
 {"zh":"不计入积分。问卷按完成状态结算，中途退出视为该份样本作废，委托方亦不会为不完整的答卷付费。 建议确认时间充裕后再开始作答。","en":"Nothing is earned. Surveys settle on completion — quitting voids the sample, and the client does not pay for an incomplete response. Make sure you have time before you start."}
 {"zh":"委托方获取的是脱敏统计结果与匿名答卷，不包含手机号、邮箱及真实姓名。 平台不会向第三方出售联系方式，亦不会用于商业推广。","en":"Clients receive aggregated statistics and anonymous responses only — no phone numbers, emails or real names. We never sell contact details to third parties and never use them for marketing."}
 {"zh":"平台收益来源于委托方支付的调研费用。委托方提出调研需求，平台负责问卷分发与数据回收， 参与者按完成情况获得相应报酬。","en":"The platform earns from research fees paid by clients. Clients bring the brief, we handle distribution and data collection, and participants are paid according to what they complete."}
-{"zh":"乘法是一个问卷积分平台。用户注册后可参与市场调研问卷，按完成情况获取积分，积分支持提现至支付宝或微信，亦可兑换数字兑换码。","en":"Chengfa is a survey rewards platform. Sign up, take part in market research surveys, and earn points for completing them. Points can be withdrawn to Alipay or WeChat, or spent on digital gift codes."}
+{"zh":"Chengfa是一个问卷积分平台。用户注册后可参与市场调研问卷，按完成情况获取积分，积分支持提现至支付宝或微信，亦可兑换数字兑换码。","en":"Chengfa is a survey rewards platform. Sign up, take part in market research surveys, and earn points for completing them. Points can be withdrawn to Alipay or WeChat, or spent on digital gift codes."}
 {"zh":"积分可自由选择用途。既可按等值金额提现，亦可兑换指定平台的数字兑换码， 两种方式所占积分比例一致。","en":"Points are yours to use either way: withdraw at face value, or spend them on digital codes for the platforms listed. Both routes use the same conversion rate."}
 {"zh":"同一自然人重复注册、使用脚本作答或提交明显失真的答卷，均判定无效并扣回相应积分。该规则用于保障正常参与者的样本价值。","en":"Duplicate accounts, scripted responses and clearly unreliable answers are all invalidated with points clawed back. The rule protects the sample value that honest participants provide."}
 {"zh":"提供 Steam 充值卡、游戏激活码及常用软件年费会员。兑换后即时发放兑换码， 无需审核等待。","en":"Steam wallet cards, game keys and annual software subscriptions. Codes are issued the moment you redeem — no review queue."}
@@ -213,7 +213,7 @@
 {"zh":"单份问卷的耗时与收益如何？","en":"How long does a survey take and what does it pay?"}
 {"zh":"无效答卷的判定标准是什么？","en":"What makes a response invalid?"}
 {"zh":"元起提 · 单笔不设上限","en":" CNY minimum · no cap per payout"}
-{"zh":"乘法 · 问卷积分平台","en":"Chengfa · Survey Rewards Platform"}
+{"zh":"Chengfa · 问卷积分平台","en":"Chengfa · Survey Rewards Platform"}
 {"zh":"互联网产品体验测试","en":"Internet product usability tests"}
 {"zh":"广告与内容投放回访","en":"Ad and content placement follow-ups"}
 {"zh":"规则公开，标准明确","en":"Open rules, clear standards"}
@@ -293,7 +293,7 @@
 {"zh":"余额以整数最小单位记账，展示时省略小数末尾的零，因此显示的数值与实际记账完全一致。","en":"Balances are recorded in the smallest whole unit and trailing zeros are dropped on display, so what you see matches the ledger exactly."}
 {"zh":"法币榜统计当前可用余额，提现后排名会下降；等级由经验累计决定，经验只来自通过核验的问卷。","en":"The cash board ranks by available balance, so it drops after a payout. Level comes from accumulated experience, and experience only comes from verified surveys."}
 {"zh":"常见原因是收款账户与注册人实名信息不一致、账号未完成基础资料，","en":"Common causes are a payout account whose real-name details do not match the registrant, or an account that has not completed its basic profile,"}
-{"zh":"这份政策说明乘法（以下称「本站」）在你注册和参与调研的过程中会碰到哪些信息、为什么需要它们、","en":"This policy explains what information Chengfa (the site) encounters while you register and take part in research, why we need it,"}
+{"zh":"这份政策说明Chengfa（以下称「本站」）在你注册和参与调研的过程中会碰到哪些信息、为什么需要它们、","en":"This policy explains what information Chengfa (the site) encounters while you register and take part in research, why we need it,"}
 {"zh":"本站面向 18 周岁以上的用户。市场调研通常对参与者年龄有要求，未满 18 周岁请不要注册；","en":"The site is for users aged 18 and over. Market research usually sets age requirements, so please do not register if you are under 18;"}
 {"zh":"使用邮箱完成注册，耗时约三十秒。填写年龄段、所在城市与职业等基础信息，","en":"Register with your email; it takes about thirty seconds. Fill in your age bracket, city and occupation,"}
 {"zh":"当前没有与你的资料匹配的问卷，或本轮名额已经招满。新问卷上线时，站内消息会发出提醒；","en":"No surveys match your profile right now, or this round's quota is already full. We send an in-site message when new surveys go live;"}
@@ -319,7 +319,7 @@
 {"zh":"注册即表示你已读过并同意以下内容。条款写得直白，重点是三件事：","en":"By registering you confirm that you have read and agree to the following. The terms are plain, and three things matter most:"}
 {"zh":"政策有实质变化时，会在本站公告并通过站内消息通知，同时更新页面顶部的日期。","en":"If the policy changes materially we post a site notice, send an in-site message, and update the date at the top of the page."}
 {"zh":"积分可自由选择用途。既可按等值金额提现，亦可兑换指定平台的数字兑换码，","en":"You can use your points however you like: withdraw the cash equivalent, or redeem them for digital codes on selected platforms,"}
-{"zh":"收支明细 · 乘法","en":"Ledger · Chengfa"}
+{"zh":"收支明细 · Chengfa","en":"Ledger · Chengfa"}
 {"zh":"LEDGER / 收支明细","en":"LEDGER"}
 {"zh":"每一笔余额变动都先记流水再落余额，可按时间与类型逐笔核对。 出现金额差异时，用单号追溯对应的问卷或提现申请。","en":"Every balance change is written to the ledger before it reaches the balance, so you can check each entry by time and type. When an amount looks off, use the reference number to trace the survey or payout behind it."}
 {"zh":"笔记录","en":"entries"}
@@ -335,8 +335,8 @@
 {"zh":"账户还没有任何资金变动。","en":"No money has moved in this account yet."}
 {"zh":"NOTE / 说明","en":"NOTE"}
 {"zh":"余额以整数最小单位记账，展示时省略小数末尾的零，因此显示的数值与实际记账完全一致。 提现申请提交后，金额从可用余额划入冻结，审核通过才从冻结中扣除。","en":"Balances are recorded in the smallest whole unit and trailing zeros are dropped on display, so what you see matches the ledger exactly. When you request a payout the amount moves from available to frozen, and it only leaves frozen once it is approved."}
-{"zh":"乘法收支明细：逐笔查看问卷奖励、提现与兑换记录。","en":"Chengfa ledger: every survey reward, payout and redemption, entry by entry."}
-{"zh":"天梯榜 · 乘法","en":"Leaderboard · Chengfa"}
+{"zh":"Chengfa收支明细：逐笔查看问卷奖励、提现与兑换记录。","en":"Chengfa ledger: every survey reward, payout and redemption, entry by entry."}
+{"zh":"天梯榜 · Chengfa","en":"Leaderboard · Chengfa"}
 {"zh":"LADDER / 天梯榜","en":"LADDER"}
 {"zh":"法币为主榜，等级为次榜。法币取决于已完成问卷的结算金额，等级取决于累计经验， 两者不互相换算，各有各的榜。","en":"Cash is the main board and level the secondary one. Cash reflects the settled value of completed surveys, level reflects accumulated experience. The two never convert into each other; each has its own board."}
 {"zh":"仅列活跃账户","en":"Active accounts only"}
@@ -346,19 +346,19 @@
 {"zh":"榜单还没有数据。","en":"The board is empty for now."}
 {"zh":"RULE / 规则","en":"RULE"}
 {"zh":"法币榜统计当前可用余额，提现后排名会下降；等级由经验累计决定，经验只来自通过核验的问卷。 榜单只展示公开信息，点击用户名可查看对方的公开主页。","en":"The cash board ranks by available balance, so it drops after a payout; level comes from accumulated experience, and experience only comes from verified surveys. The board only shows public information; click a username to open that person's public profile."}
-{"zh":"乘法天梯榜：按乘法币与等级排序的公开榜单。","en":"Chengfa leaderboard: a public ranking by XB balance and level."}
-{"zh":"站内消息 · 乘法","en":"Messages · Chengfa"}
+{"zh":"Chengfa天梯榜：按乘法币与等级排序的公开榜单。","en":"Chengfa leaderboard: a public ranking by XB balance and level."}
+{"zh":"站内消息 · Chengfa","en":"Messages · Chengfa"}
 {"zh":"兑换发货、提现审核结果与系统通知都会发到这里，点击任意一条可以展开全文并标记已读。","en":"Redemption deliveries, payout review results and system notices all arrive here. Click any message to read it in full and mark it as read."}
 {"zh":"条未读","en":"unread"}
 {"zh":"未读","en":"Unread"}
 {"zh":"全部标为已读","en":"Mark all as read"}
 {"zh":"还没有任何消息。","en":"No messages yet."}
-{"zh":"乘法站内消息：兑换发货、提现审核与系统通知。","en":"Chengfa messages: redemption deliveries, payout reviews and system notices."}
-{"zh":"公告 · 乘法","en":"Notices · Chengfa"}
+{"zh":"Chengfa站内消息：兑换发货、提现审核与系统通知。","en":"Chengfa messages: redemption deliveries, payout reviews and system notices."}
+{"zh":"公告 · Chengfa","en":"Notices · Chengfa"}
 {"zh":"← 返回账户","en":"← Back to account"}
 {"zh":"暂时没有公告。","en":"No notices right now."}
-{"zh":"乘法的站点公告：规则调整、维护安排与活动通知。","en":"Chengfa site notices: rule changes, maintenance windows and announcements."}
-{"zh":"答题 · 乘法","en":"Survey · Chengfa"}
+{"zh":"Chengfa的站点公告：规则调整、维护安排与活动通知。","en":"Chengfa site notices: rule changes, maintenance windows and announcements."}
+{"zh":"答题 · Chengfa","en":"Survey · Chengfa"}
 {"zh":"← 回问卷大厅","en":"← Back to the survey hall"}
 {"zh":"用时 0 秒","en":"0 s elapsed"}
 {"zh":"用时","en":"Elapsed"}
@@ -371,8 +371,8 @@
 {"zh":"回问卷大厅","en":"Back to the survey hall"}
 {"zh":"看收支明细","en":"View ledger"}
 {"zh":"答卷只用于兑换积分","en":"Used only to earn points"}
-{"zh":"乘法 · 站内问卷答题","en":"Chengfa · Survey"}
-{"zh":"广告墙（模拟） · 乘法","en":"Ad wall (mock) · Chengfa"}
+{"zh":"Chengfa · 站内问卷答题","en":"Chengfa · Survey"}
+{"zh":"广告墙（模拟） · Chengfa","en":"Ad wall (mock) · Chengfa"}
 {"zh":"模拟墙","en":"Mock wall"}
 {"zh":"← 回到赚积分","en":"← Back to Earn"}
 {"zh":"OFFERS / 可做的任务","en":"OFFERS"}
@@ -384,7 +384,7 @@
 {"zh":"回到赚积分看记录","en":"Back to Earn to see the record"}
 {"zh":"去收支明细","en":"Open the ledger"}
 {"zh":"站内模拟的广告墙，用于在没有接入真实服务商前验证回调入账链路。","en":"An in-site mock ad wall, used to verify the callback crediting path before a real provider is connected."}
-{"zh":"联系客服 · 乘法","en":"Support · Chengfa"}
+{"zh":"联系客服 · Chengfa","en":"Support · Chengfa"}
 {"zh":"SUPPORT / 联系客服","en":"SUPPORT"}
 {"zh":"账户、余额、问卷与提现的问题都可以在这里提交。附上相关单号， 处理会快很多；涉及资金的争议请在描述中写明金额与时间。","en":"Questions about your account, balance, surveys or payouts can all be submitted here. Include the relevant reference number to speed things up; for money disputes, state the amount and the time in your description."}
 {"zh":"工作日内回复","en":"Replies on business days"}
@@ -418,8 +418,8 @@
 {"zh":"别人能看到我的余额吗？","en":"Can other people see my balance?"}
 {"zh":"公开主页展示乘法币余额、等级、好感度与已完成的提现记录， 不展示邮箱、IP、登录记录与提现账户信息。","en":"The public profile shows your XB balance, level, reputation and completed payout history. It never shows your email, IP, sign-in history or payout account details."}
 {"zh":"发生了什么、什么时候发生、涉及多少金额或哪个单号。","en":"What happened, when it happened, how much money was involved, or which reference number."}
-{"zh":"乘法客服：账户、余额、问卷相关问题的反馈渠道。","en":"Chengfa support: a channel for questions about accounts, balances and surveys."}
-{"zh":"用户主页 · 乘法","en":"Profile · Chengfa"}
+{"zh":"Chengfa客服：账户、余额、问卷相关问题的反馈渠道。","en":"Chengfa support: a channel for questions about accounts, balances and surveys."}
+{"zh":"用户主页 · Chengfa","en":"Profile · Chengfa"}
 {"zh":"PUBLIC PROFILE / 公开主页","en":"PUBLIC PROFILE"}
 {"zh":"注册于 — · 已加入 1 天","en":"Joined — · 1 day in"}
 {"zh":"这是你自己的主页。","en":"This is your own profile."}
@@ -435,8 +435,8 @@
 {"zh":"没有这个用户","en":"No such user"}
 {"zh":"UID 可能写错了，或者该账户已经注销。","en":"The UID may be mistyped, or the account has been closed."}
 {"zh":"正在载入主页","en":"Loading profile"}
-{"zh":"乘法用户的公开主页。","en":"The public profile of a Chengfa user."}
-{"zh":"账户设置 · 乘法","en":"Settings · Chengfa"}
+{"zh":"Chengfa用户的公开主页。","en":"The public profile of a Chengfa user."}
+{"zh":"账户设置 · Chengfa","en":"Settings · Chengfa"}
 {"zh":"账户概览","en":"Account overview"}
 {"zh":"查找用户","en":"Find a user"}
 {"zh":"账户状态：","en":"Account status:"}
@@ -507,10 +507,10 @@
 {"zh":"输入新的用户名","en":"Enter a new username"}
 {"zh":"确认是你本人操作","en":"Confirm it is really you"}
 {"zh":"6 位数字","en":"6 digits"}
-{"zh":"乘法账户设置。查看身份、余额、安全与偏好。","en":"Chengfa account settings: identity, balance, security and preferences."}
-{"zh":"隐私政策 · 乘法","en":"Privacy Policy · Chengfa"}
+{"zh":"Chengfa账户设置。查看身份、余额、安全与偏好。","en":"Chengfa account settings: identity, balance, security and preferences."}
+{"zh":"隐私政策 · Chengfa","en":"Privacy Policy · Chengfa"}
 {"zh":"LEGAL / 隐私政策","en":"LEGAL"}
-{"zh":"这份政策说明乘法（以下称「本站」）在你注册和参与调研的过程中会碰到哪些信息、为什么需要它们、 以及会不会给别人。写的是实际发生的事，不是模板套话。","en":"This policy explains what information Chengfa (the site) encounters while you register and take part in research, why we need it, and whether we ever hand it to anyone else. It describes what actually happens, not boilerplate."}
+{"zh":"这份政策说明Chengfa（以下称「本站」）在你注册和参与调研的过程中会碰到哪些信息、为什么需要它们、 以及会不会给别人。写的是实际发生的事，不是模板套话。","en":"This policy explains what information Chengfa (the site) encounters while you register and take part in research, why we need it, and whether we ever hand it to anyone else. It describes what actually happens, not boilerplate."}
 {"zh":"一、本站做什么","en":"1. What this site does"}
 {"zh":"本站是一个市场调研的参与入口。你在这里注册账户、从问卷大厅选取开放的调研项目、完成问卷后累计奖励， 奖励可用于提现或兑换数字权益。问卷本身由第三方调研机构（以下称「问卷商」）提供和运营，本站负责把入口、 身份与结算管好。","en":"This site is an entry point for market research. You register an account, pick open studies from the survey hall, and accumulate rewards as you complete them; rewards can be withdrawn or redeemed for digital benefits. The surveys themselves are provided and run by third-party research firms (providers). We take care of the gateway, identity and settlement."}
 {"zh":"二、我们收集哪些信息","en":"2. What we collect"}
@@ -574,8 +574,8 @@
 {"zh":"十、怎么联系","en":"10. How to reach us"}
 {"zh":"与隐私相关的任何问题、注销请求或数据查询，都可以通过「联系客服」提交工单，或发邮件到","en":"For any privacy question, closure request or data query, submit a ticket via Contact support, or email"}
 {"zh":"。我们会在 7 个工作日内答复。","en":". We reply within 7 business days."}
-{"zh":"乘法收集哪些信息、用来做什么、会不会提供给第三方，以及你可以怎么处理自己的数据。","en":"What Chengfa collects, what we use it for, whether we share it with third parties, and how you can manage your own data."}
-{"zh":"用户协议 · 乘法","en":"Terms of Service · Chengfa"}
+{"zh":"Chengfa收集哪些信息、用来做什么、会不会提供给第三方，以及你可以怎么处理自己的数据。","en":"What Chengfa collects, what we use it for, whether we share it with third parties, and how you can manage your own data."}
+{"zh":"用户协议 · Chengfa","en":"Terms of Service · Chengfa"}
 {"zh":"LEGAL / 用户协议","en":"LEGAL"}
 {"zh":"注册即表示你已读过并同意以下内容。条款写得直白，重点是三件事： 本站不是赚钱渠道、参与必须真实、作弊会被清退。","en":"By registering you confirm that you have read and agree to the following. The terms are plain, and three things matter: this site is not a way to make a living, participation must be genuine, and cheating gets you removed."}
 {"zh":"一、服务性质","en":"1. Nature of the service"}
@@ -630,7 +630,7 @@
 {"zh":"条款调整时会在站内公告并更新顶部日期，重大变更会通过站内消息单独通知。 变更后继续使用即视为接受。如果你不同意，可以停止使用并申请注销。","en":"When the terms change we post a site notice and update the date at the top; major changes are also announced by in-site message. Continued use after a change counts as acceptance. If you disagree, you may stop using the site and request closure."}
 {"zh":"九、联系方式","en":"9. Contact"}
 {"zh":"通过「联系客服」提交工单，或发邮件到","en":"Submit a ticket via Contact support, or email"}
-{"zh":"乘法的服务性质、账户规则、奖励与提现条件、禁止行为与账号处理方式。","en":"Chengfa's service nature, account rules, reward and payout conditions, prohibited behaviour and account actions."}
+{"zh":"Chengfa的服务性质、账户规则、奖励与提现条件、禁止行为与账号处理方式。","en":"Chengfa's service nature, account rules, reward and payout conditions, prohibited behaviour and account actions."}
 {"zh":" 星","en":" stars"}
 {"zh":"要求","en":"Requirements"}
 {"zh":"剩 ","en":"only "}
@@ -894,7 +894,7 @@
 {"zh":"复制失败，请手动选中","en":"Copy failed, please select it manually"}
 {"zh":"当前筛选下没有记录。","en":"No records under this filter."}
 {"zh":"\n单号：","en":"\nRef: "}
-{"zh":" · 乘法","en":" · Chengfa"}
+{"zh":" · Chengfa","en":" · Chengfa"}
 {"zh":"网络连接失败，请重试","en":"Network connection failed, please try again"}
 {"zh":"用户名或密码不正确。","en":"Wrong username or password."}
 {"zh":"请在下方确认你是真人","en":"Confirm you are human below"}

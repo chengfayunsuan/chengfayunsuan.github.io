@@ -1,5 +1,5 @@
 /* ============================================================
-   乘法 · 运营后台逻辑
+   Chengfa · 运营后台逻辑
    admin / admin-users / admin-withdrawals 三页共用。
    仅站长（owner）与管理员（admin）可用，其余跳回账户首页。
    ============================================================ */
@@ -162,7 +162,7 @@
     var name = $('navName');
     if (bal) setAmt(bal, me.fc);
     if (name) name.textContent = me.username || '我';
-    /* 后台页左上角「乘法」回账户首页 /home，HTML 里已是 /home，这里不覆盖 */
+    /* 后台页左上角「Chengfa」回账户首页 /home，HTML 里已是 /home，这里不覆盖 */
   }
 
   var logoutBtn = $('logoutBtn');

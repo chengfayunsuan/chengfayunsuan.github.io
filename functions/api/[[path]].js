@@ -1,5 +1,5 @@
 /**
- * 乘法 · 账户接口
+ * Chengfa · 账户接口
  *
  * POST  /api/auth/register   注册
  * POST  /api/auth/login      登录
@@ -765,7 +765,7 @@ async function mailSend(env, to, code) {
   const key = env.RESEND_API_KEY;
   if (!key) return 'mail_unconfigured';
 
-  const from = env.MAIL_FROM || '乘法 <onboarding@resend.dev>';
+  const from = env.MAIL_FROM || 'Chengfa <onboarding@resend.dev>';
   try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -773,7 +773,7 @@ async function mailSend(env, to, code) {
       body: JSON.stringify({
         from: from,
         to: [to],
-        subject: '乘法 · 邮箱验证码 ' + code,
+        subject: 'Chengfa · 邮箱验证码 ' + code,
         text: '你的验证码是 ' + code + '，10 分钟内有效。不是本人操作就忽略这封邮件。'
       })
     });
