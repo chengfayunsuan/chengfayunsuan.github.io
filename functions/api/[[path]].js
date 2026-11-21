@@ -1592,6 +1592,9 @@ async function trDecide(env, request, p) {
 
   if (!res.ok) {
     console.error('tr postback apply failed:', res.error, 'uid=' + uid, 'tid=' + tid);
+    /* uid 不存在（面板 TEST 用的 12345 就是这种）：回 200 免得对方把集成分标成失败，
+       但一条账都不写。真发生了查 hook_log 一眼就能看见，再人工补。 */
+    if (res.error === 'no_user') return { body: 'ok ignored no_user', status: 200, ...ok };
     return { body: res.error || 'error', status: 400, ...ok };
   }
   return { body: 'ok', status: 200, ...ok };
