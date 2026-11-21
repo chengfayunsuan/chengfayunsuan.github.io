@@ -1,0 +1,89 @@
+/* 问卷墙落地页（TheoremReach 答完卷回跳的五个终点）
+   只做一件事：告诉用户这次发生了啥、接下来去哪。
+   颜色全部走 style.css 的变量，用户改过配色也跟着变。 */
+
+.wl {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0;
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 56px 22px 72px;
+}
+
+.wl__brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: .3px;
+}
+
+.wl__brand i {
+  font-family: var(--num);
+  font-style: normal;
+  font-size: 12px;
+  letter-spacing: 1.4px;
+  color: var(--gray);
+}
+
+.wl__tag {
+  margin: 26px 0 0;
+  font-family: var(--num);
+  font-size: 12px;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  color: var(--red);
+}
+
+.wl__t {
+  margin: 8px 0 0;
+  font-size: clamp(26px, 4.6vw, 38px);
+  line-height: 1.18;
+  letter-spacing: -.6px;
+  color: var(--ink);
+}
+
+.wl__d {
+  margin: 16px 0 0;
+  font-size: 15px;
+  line-height: 1.85;
+  color: var(--ink);
+  opacity: .84;
+}
+
+.wl__en {
+  margin: 9px 0 0;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--gray);
+}
+
+.wl__amt {
+  margin: 18px 0 0;
+  padding: 9px 14px;
+  border: 1px solid var(--hair);
+  background: var(--paper-2);
+  font-family: var(--num);
+  font-size: 20px;
+  letter-spacing: .6px;
+  color: var(--ink);
+}
+
+.wl__a {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+@media (max-width: 480px) {
+  .wl { padding: 40px 18px 56px; }
+  .wl__a .btn { flex: 1 1 auto; justify-content: center; }
+}

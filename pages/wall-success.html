@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>答卷完成 · Chengfa</title>
+<meta name="description" content="问卷墙结算页：答卷完成，奖励已提交。">
+<meta name="theme-color" content="#E0291E">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/style.css?v=16">
+<link rel="stylesheet" href="/css/wall.css?v=1">
+<script src="/js/config.js?v=9"></script>
+</head>
+<body>
+
+<main class="wl">
+  <a class="wl__brand" href="/earn">Chengfa<i>CHENGFA</i></a>
+
+  <p class="wl__tag">Survey wall / 问卷墙</p>
+  <h1 class="wl__t">答卷完成</h1>
+  <p class="wl__d">奖励已提交，通常几秒内到账。到账金额看收支明细里的「问卷墙奖励」；偶尔会晚一些，也可能事后被服务商驳回而冲正。</p>
+  <p class="wl__en">Survey complete. The reward is submitted and usually lands within seconds.</p>
+  <p class="wl__amt" id="wlAmt" hidden></p>
+
+  <div class="wl__a">
+    <a class="btn btn--red" href="/earn">回赚积分</a>
+    <a class="btn btn--ghost" href="/ledger">看收支明细</a>
+  </div>
+</main>
+
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var raw = q.get('amount') || q.get('reward_amount') || q.get('reward') || '';
+  var n = Number(raw);
+  if (!isFinite(n) || n <= 0) return;
+  var el = document.getElementById('wlAmt');
+  if (!el) return;
+  var money = (window.CF && CF.money) ? CF.money(n) : String(n);
+  var unit = (window.CF && CF.currency) ? CF.currency.code : 'XB';
+  el.textContent = '本次 +' + money + ' ' + unit;
+  el.hidden = false;
+})();
+</script>
+</body>
+</html>
