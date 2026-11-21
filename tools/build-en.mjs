@@ -190,7 +190,7 @@ function convert(file, isEn) {
   }
 
   /* 末尾挂运行时翻译，补 JS 拼出来的文案 */
-  html = html.replace('</body>', '<script src="/en/dict.js?v=5"></script>\n<script src="/js/i18n-en.js?v=6" defer></script>\n</body>');
+  html = html.replace('</body>', '<script src="/en/dict.js?v=6"></script>\n<script src="/js/i18n-en.js?v=6" defer></script>\n</body>');
 
   return html;
 }

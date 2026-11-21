@@ -83,7 +83,7 @@
           <h1 class="face__name">商品与兑换码</h1>
           <p class="face__sub">上架商品 · 定价 · 库存 · 生成卡密</p>
           <div class="face__foot">
-            <p class="adm-lead">商品类型决定发货方式：兑换码类从卡密池取码即时发；订阅类进待发货由人工处理；现金类直接生成提现申请。</p>
+            <p class="adm-lead">商品类型决定发货方式：兑换码类下单后待审核，审核通过才发码；订阅类进待发货由人工处理；现金类直接生成提现申请。</p>
           </div>
         </div>
 
@@ -116,7 +116,7 @@
           <label class="svf__f">
             <span class="svf__l">类型</span>
             <select class="svf__i" id="itKind">
-              <option value="code">兑换码（即时发码）</option>
+              <option value="code">兑换码（审核后发码）</option>
               <option value="sub">订阅（人工发货）</option>
               <option value="cash">现金（生成提现）</option>
             </select>
@@ -139,7 +139,7 @@
 
           <label class="svf__f">
             <span class="svf__l">副标题</span>
-            <input class="svf__i" id="itSubtitle" type="text" maxlength="40" placeholder="即时发码 / 人工发货">
+            <input class="svf__i" id="itSubtitle" type="text" maxlength="40" placeholder="审核后发码 / 人工发货">
           </label>
 
           <label class="svf__f">
@@ -258,6 +258,6 @@
   </div>
 </footer>
 
-<script src="/js/admin-shop.js?v=2" defer></script>
+<script src="/js/admin-shop.js?v=3" defer></script>
 </body>
 </html>

@@ -699,17 +699,13 @@
                 setWallet(r.body.balance, null);
                 loadStore();
                 loadOrders();
-                if (r.body.code) {
-                  CF.modal({
-                    kicker: 'SUCCESS',
-                    title: '兑换成功',
-                    desc: '卡密：' + r.body.code + '\n单号：' + r.body.sn + '\n\n卡密同时写入兑换记录，可随时回来查看。',
-                    submitText: '知道了',
-                    hideCancel: true,
-                    onSubmit: function (_, m) { m.close(); }
-                  });
+                /* 兑换码类下单时不再拿到码：审核通过后后台才发码，站内消息通知 */
+                if (it.kind === 'code') {
+                  say('兑换申请已提交，审核通过后发放兑换码');
+                } else if (it.kind === 'cash') {
+                  say('已提交提现申请，等待审核');
                 } else {
-                  say(it.kind === 'cash' ? '已提交提现申请，等待审核' : '兑换成功，等待人工发货');
+                  say('兑换申请已提交，等待人工发货');
                 }
               } else {
                 api.setBusy(false);
@@ -839,7 +835,7 @@
 
     /* ---------- 记录 ---------- */
 
-    var ORDER_ST = { paid: '已完成', pending: '待发货', refunded: '已退款' };
+    var ORDER_ST = { paid: '已完成', pending: '待审核', refunded: '已退款' };
     var WD_ST = { pending: '审核中', paid: '已打款', rejected: '已驳回' };
 
     function orderRow(o) {

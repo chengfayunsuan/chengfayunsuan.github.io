@@ -1151,3 +1151,12 @@
 {"zh":"© 2026 乘法","en":"© 2026 Chengfa"}
 {"zh":"可以。积分对应委托方已支付的调研费用，并非平台自行发行。五十元提现门槛的设置原因在于，\n          低于该金额的转账手续费与金额本身接近，对双方均不经济。每笔积分的来源、对应问卷与发放时间，\n          均可在「积分明细」中查询。","en":"Yes. Points represent research fees the client has already paid, not currency the platform issues. The 50 CNY payout minimum exists because below that amount the transfer fee approaches the sum itself, which is uneconomic for both sides. Every point's origin, source survey and payout time is listed in the ledger."}
 {"zh":"提现申请提交后金额进入冻结，审核通过后十五个工作日内打款；兑换码类商品即时发放，\n        订阅类商品由人工在两个工作日内开通，结果通过站内消息通知。","en":"Once a payout is requested, the amount is held until it is approved, then paid out within fifteen business days. Gift codes are issued instantly; subscriptions are activated manually within two business days, and you are notified by in-site message."}
+{"zh":"乘法币可提现至支付宝或微信，也可申请兑换数字兑换码。两条路径折算比例一致，\n          不存在手续费差价，选择哪一种只取决于用途。","en":"XB can be withdrawn to Alipay or WeChat, or redeemed for digital codes after review. Both routes use the same rate with no fee spread — which one you pick only depends on what you need."}
+{"zh":"提现申请提交后金额进入冻结，审核通过后十五个工作日内打款；兑换码类商品在审核通过后发放，\n        订阅类商品由人工在两个工作日内开通，结果通过站内消息通知。","en":"Once a payout is requested, the amount is held until it is approved, then paid out within fifteen business days. Code items are issued after approval; subscriptions are activated manually within two business days, and you are notified by in-site message."}
+{"zh":"兑换码经审核后发放；提现经人工审核后十五个工作日内到账，节假日顺延。","en":"Codes are issued after review. Payouts are reviewed manually and arrive within fifteen business days, later across public holidays."}
+{"zh":"兑换码类商品经审核后发放，一经发放不支持退换；兑换码由第三方提供，有效性以发行方为准。","en":"Code items are issued after review and cannot be returned once issued. Codes come from third parties, and validity is determined by the issuer."}
+{"zh":"兑换申请已提交，审核通过后发放兑换码","en":"Redemption submitted; your code will be issued after review"}
+{"zh":"兑换申请已提交，等待人工发货","en":"Redemption submitted, waiting for manual delivery"}
+{"zh":"兑换码（审核后发码）","en":"Code (issued after review)"}
+{"zh":"待审核","en":"Pending review"}
+{"zh":"审核后发码 / 人工发货","en":"Issue after review / manual delivery"}

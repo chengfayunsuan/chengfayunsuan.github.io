@@ -1778,13 +1778,12 @@ async function storeRedeem(request, env) {
     return json({ ok: false, error: 'account_required' }, 400);
   }
 
-  /* 兑换码类：先锁一个未使用的码，没有就是缺货 */
-  let cdk = null;
+  /* 兑换码类：下单时只确认码池有货，真正的码在后台审核发货时才取、才给用户 */
   if (item.kind === 'code') {
-    cdk = await env.DB.prepare(
-      "SELECT id, code FROM cdk_codes WHERE status = 'free' AND item_id = ? ORDER BY id ASC LIMIT 1"
+    const free = await env.DB.prepare(
+      "SELECT id FROM cdk_codes WHERE status = 'free' AND item_id = ? LIMIT 1"
     ).bind(item.id).first();
-    if (!cdk) return json({ ok: false, error: 'out_of_stock' }, 400);
+    if (!free) return json({ ok: false, error: 'out_of_stock' }, 400);
   }
 
   const sn = orderSn('O');
@@ -1792,7 +1791,8 @@ async function storeRedeem(request, env) {
   const now = "datetime('now','+8 hours')";
 
   const stmts = [];
-  const orderStatus = item.kind === 'sub' ? 'pending' : 'paid';
+  /* 所有兑换先进入待发货：兑换码经审核发码，订阅人工开通，现金走提现审核 */
+  const orderStatus = 'pending';
 
   stmts.push(
     env.DB.prepare(
@@ -1804,7 +1804,7 @@ async function storeRedeem(request, env) {
     env.DB.prepare(
       `INSERT INTO orders (sn, uid, item_id, item_title, price_units, status, code, memo)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-    ).bind(sn, user.id, item.id, item.title, price, orderStatus, cdk ? cdk.code : '', memo)
+    ).bind(sn, user.id, item.id, item.title, price, orderStatus, '', memo)
   );
 
   stmts.push(
@@ -1812,15 +1812,6 @@ async function storeRedeem(request, env) {
       `INSERT INTO fc_ledger (uid, delta, balance, kind, ref, memo) VALUES (?, ?, ?, ?, ?, ?)`
     ).bind(user.id, -price, next, 'cdk_redeem', sn, '兑换 ' + item.title)
   );
-
-  if (cdk) {
-    stmts.push(
-      env.DB.prepare(
-        `UPDATE cdk_codes SET status = 'used', used_by = ?, used_at = datetime('now','+8 hours')
-          WHERE id = ? AND status = 'free'`
-      ).bind(user.id, cdk.id)
-    );
-  }
 
   if (item.stock > 0) {
     stmts.push(
@@ -1852,7 +1843,7 @@ async function storeRedeem(request, env) {
     ok: true,
     sn: sn,
     status: orderStatus,
-    code: cdk ? cdk.code : '',
+    code: '',
     price: formatFc(price),
     balance: formatFc(next)
   });
@@ -2976,15 +2967,44 @@ async function adminOrderDecide(request, env) {
   if (order.status === action) return json({ ok: true });
 
   if (action === 'paid') {
-    await env.DB.prepare(
-      "UPDATE orders SET status = 'paid' WHERE id = ?"
-    ).bind(id).run();
+    /* 兑换码商品：审核通过这一刻才从码池取码，之前用户看不到码 */
+    let code = order.code || '';
+    const item = order.item_id
+      ? await env.DB.prepare('SELECT kind FROM store_items WHERE id = ?').bind(order.item_id).first()
+      : null;
 
-    await env.DB.prepare(
-      `INSERT INTO messages (uid, kind, title, body) VALUES (?, 'system', ?, ?)`
-    ).bind(order.uid, '兑换已发货', '你兑换的「' + order.item_title + '」已完成发货，单号 ' + order.sn + '。').run();
+    if (item && item.kind === 'code' && !code) {
+      const cdk = await env.DB.prepare(
+        "SELECT id, code FROM cdk_codes WHERE status = 'free' AND item_id = ? ORDER BY id ASC LIMIT 1"
+      ).bind(order.item_id).first();
+      if (!cdk) return json({ ok: false, error: 'out_of_stock' }, 400);
+      code = cdk.code;
+    }
 
-    return json({ ok: true });
+    const stmts = [
+      env.DB.prepare("UPDATE orders SET status = 'paid', code = ? WHERE id = ?").bind(code, id)
+    ];
+
+    /* 刚取出的码标记为已用；老订单若已有码则不动 */
+    if (code && code !== order.code && item && item.kind === 'code') {
+      stmts.push(
+        env.DB.prepare(
+          "UPDATE cdk_codes SET status = 'used', used_by = ?, used_at = datetime('now','+8 hours') WHERE code = ? AND status = 'free'"
+        ).bind(order.uid, code)
+      );
+    }
+
+    const body = code
+      ? '你兑换的「' + order.item_title + '」已审核通过，兑换码：' + code + '，单号 ' + order.sn + '。可到兑换记录查看并复制。'
+      : '你兑换的「' + order.item_title + '」已完成发货，单号 ' + order.sn + '。';
+    stmts.push(
+      env.DB.prepare(
+        `INSERT INTO messages (uid, kind, title, body) VALUES (?, 'system', ?, ?)`
+      ).bind(order.uid, '兑换已发货', body)
+    );
+
+    await env.DB.batch(stmts);
+    return json({ ok: true, code: code });
   }
 
   /* 退款：钱退回可用余额，写流水；码若已发则作废 */

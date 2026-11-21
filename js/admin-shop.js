@@ -466,7 +466,7 @@
   function decide(o, action) {
     postJSON('/api/admin/orders/decide', { id: o.id, action: action }).then(function (r) {
       if (r.body && r.body.ok) {
-        say(action === 'paid' ? '已标记发货' : '已退款');
+        say(action === 'paid' ? '已审核发货，兑换码已站内通知用户' : '已退款');
         loadOrders();
       } else {
         say('操作失败：' + ((r.body && r.body.error) || '网络错误'));
