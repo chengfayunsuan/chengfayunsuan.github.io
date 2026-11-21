@@ -1459,6 +1459,12 @@ async function mtxMockComplete(request, env) {
 
 const TR_WALL = 'https://theoremreach.com/respondent_entry/direct';
 
+/* 对外只报 XD。两种币各管一段，别混：
+ *   XB —— 站内记账单位，锚人民币，1 XB = 1 元，不出门（台账、明细、余额都它）
+ *   XD —— 对外展示单位，锚美元，100 XD = 1 USD，问卷墙、报价、提现都它
+ * 这个数要跟 js/config.js 里的 XD_PER_USD 保持一致，改一处必须改两处。 */
+const XD_PER_USD = 100;
+
 function trConf(env) {
   const apiKey = String(env.THEOREMREACH_API_KEY || '').trim();
   /* 它回来的 auth_token 一般就是 API key；万一面板给的是另一个值，
@@ -1469,19 +1475,24 @@ function trConf(env) {
   /* 回调地址末尾那截随机串是第二道门：URL 只有双方知道，且不放仓库 */
   const pathKey = String(env.THEOREMREACH_POSTBACK_KEY || '').trim();
   /* 分给用户的比例（按它实付的美元算）与单笔上限（防止它某个 bug 一次打进天价） */
-  const share = Number(env.THEOREMREACH_SHARE || 0.69);
+  const shareRaw = Number(env.THEOREMREACH_SHARE || 0.69);
+  const share = isFinite(shareRaw) && shareRaw > 0 && shareRaw <= 1 ? shareRaw : 0.69;
   const maxXb = Number(env.THEOREMREACH_MAX_XB || 500);
   const per = Number(env.THEOREMREACH_XB_PER || 1);
-  /* 官方要求 entry 链接必须带这些：partner_id 对应面板里的 Placement，
-     exchange_rate 是「1 美元 = 多少个我们的币」，官方下限 10 */
+  /* 官方要求 entry 链接必须带这些：partner_id（面板里的 Placement）、
+     exchange_rate、currency_name_plural / singular。
+     exchange_rate 是「1 美元 = 多少个 XD」，必须报分成后的实际值
+     （100 × 0.69 = 69）：报 100 就等于墙上标 100、到账只有 69，那是骗人。
+     官方下限 10，69 稳稳过线。 */
   const partnerId = String(env.THEOREMREACH_PARTNER_ID || '').trim();
-  const rate = Number(env.THEOREMREACH_EXCHANGE_RATE || 10);
-  const curName = String(env.THEOREMREACH_CURRENCY || 'XB').trim() || 'XB';
+  const rateEnv = Number(env.THEOREMREACH_EXCHANGE_RATE || 0);
+  const rate = isFinite(rateEnv) && rateEnv >= 10 ? Math.round(rateEnv) : Math.round(XD_PER_USD * share);
+  const curName = String(env.THEOREMREACH_CURRENCY || 'XD').trim() || 'XD';
   return {
     apiKey, token, secretKey, pathKey, partnerId,
-    exchangeRate: isFinite(rate) && rate >= 10 ? Math.round(rate) : 10,
+    exchangeRate: rate,
     curName,
-    share: isFinite(share) && share > 0 && share <= 1 ? share : 0.69,
+    share: share,
     maxXb: isFinite(maxXb) && maxXb > 0 ? maxXb : 500,
     xbPer: isFinite(per) && per > 0 ? per : 1,
     live: !!(token || pathKey || secretKey)
@@ -1541,7 +1552,7 @@ async function trLink(request, env) {
    裸的 ?api_key&user_id 只是「能进」，官方要求的还有 currency_name_plural /
    exchange_rate / transaction_id / external_id / partner_id，并且整条 URL 要签 hash；
    不签或不传这些，它会走进默认流程（默认国家、默认汇率），奖励归属也对不上。
-   exchange_rate 下限 10，意思是 1 美元 = 10 个币。 */
+   exchange_rate 下限 10，意思是 1 美元 = 10 个币，我们报 69 XD（见 trConf）。 */
 async function trEntryUrl(c, uid, debug) {
   /* 没有 partner_id 就先别上签名链接：官方标了必填，少了可能被直接拒，
      比现在的裸链接更糟。等面板里拿到 Placements ID 再启用这一段。 */
