@@ -1160,3 +1160,14 @@
 {"zh":"兑换码（审核后发码）","en":"Code (issued after review)"}
 {"zh":"待审核","en":"Pending review"}
 {"zh":"审核后发码 / 人工发货","en":"Issue after review / manual delivery"}
+{"zh":"品牌方与研究机构需要真实用户的反馈，并为此支付调研费用。完成一份时长五至二十分钟的问卷即可获得相应积分。 积分累计至标准额度后可提现至支付宝，亦可兑换数字兑换码。","en":"Brands and research institutes pay for genuine user feedback. Completing a survey that takes five to twenty minutes earns you points. Once you reach the minimum, cash out to Alipay or redeem digital codes."}
+{"zh":"注册完成后即可浏览全部问卷，积分于答卷审核通过后即时入账； 等级与天梯榜仅用于展示活跃度，不影响参与资格与问卷单价。","en":"After signing up you can browse every survey, and points are credited as soon as a response passes review. Levels and the leaderboard only show activity — they do not affect eligibility or survey prices."}
+{"zh":"使用邮箱完成注册。填写年龄段、所在城市与职业等基础信息， 用于匹配符合条件的问卷。上述信息仅用于样本筛选，不作商业用途。","en":"Register with your email and fill in basic details such as age group, city and occupation to match you with eligible surveys. This information is only used for sample screening, never for commercial purposes."}
+{"zh":"积分累计至等值五十元后可申请提现，转入支付宝账户； 亦可直接兑换 Steam 充值卡等数字兑换码，到账速度快于现金提现。","en":"Once your points reach the equivalent of 50 CNY you can request a payout to Alipay, or redeem digital codes such as Steam wallet cards, which arrive faster than a cash payout."}
+{"zh":"提供 Steam 充值卡、游戏激活码等会员。兑换申请经审核后处理， 进度可在「积分明细」中查询。","en":"Steam wallet cards, game keys and memberships. Redemptions are processed after review, and the status appears in your ledger."}
+{"zh":"问卷来自真实的研究需求。花时间作答，问卷计入后即可获得奖励。","en":"Every survey comes from a real research need. Spend a few minutes answering, and once your response is counted you earn a reward."}
+{"zh":"家庭品牌偏好问卷","en":"Household brand preference survey"}
+{"zh":"品牌","en":"Brand"}
+{"zh":"多数问卷耗时五至二十分钟，收益依据题目数量与调研难度确定，通常折合人民币数元至二十元。 问卷长度与收益不必然正相关，部分样本稀缺的短问卷单价更高。列表页会标注预计耗时与积分额度。","en":"Most surveys take five to twenty minutes. Rewards depend on the number of questions and how hard they are to source, usually worth a few to twenty yuan. Length does not necessarily mean higher pay — some short surveys with rare samples pay more. The listing shows the estimated time and points."}
+{"zh":"不计入积分。问卷按完成状态结算，中途退出或刷新可能视为该份样本作废，委托方亦不会为不完整的答卷付费。 建议确认时间充裕后再开始作答。","en":"No points are credited. Surveys are settled on completion — leaving early or refreshing may void the sample, and the client will not pay for an incomplete response. Make sure you have enough time before you start."}
+{"zh":"委托方获取的是脱敏统计结果与匿名答卷，不包含手机号及真实姓名等信息。 平台不会向第三方出售联系方式，亦不会用于商业推广。","en":"Clients receive anonymized statistics and responses, with no phone numbers or real names. We never sell contact details to third parties or use them for marketing."}
