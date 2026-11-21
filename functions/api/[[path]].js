@@ -741,7 +741,7 @@ async function updateEmail(request, env) {
 
 /* ---------------- 邮箱验证 ----------------
    6 位数字码，10 分钟过期，60 秒才能重发，一天最多 10 条，错 5 次锁死。
-   发信走 Resend（env.RESEND_API_KEY + MAIL_FROM）。
+   发信走 Zoho ZeptoMail / CPaaS（env.ZEPTOMAIL_API_KEY + MAIL_FROM）。
    没配发信服务时：码照样入库，只在本地调试（MAIL_DEBUG=1）时回传，方便把流程跑通。 */
 
 const EMAIL_CODE_TTL = 600;     /* 有效期，秒 */
@@ -761,29 +761,47 @@ function maskMail(m) {
   return s.slice(0, Math.min(2, at)) + '***' + s.slice(at);
 }
 
+/* 发件人：MAIL_FROM 支持两种写法
+   - "Chengfa <noreply@chengfa.org>"  → 拆成 address + name
+   - "noreply@chengfa.org"           → address，name 用默认
+   Zoho 要求 address 必须是已验证域名下的邮箱，没配时给个占位，发不出去会记日志。 */
+function parseFrom(raw) {
+  const s = String(raw || '').trim();
+  const m = s.match(/^(.*?)<([^<>]+)>\s*$/);
+  if (m) return { address: m[2].trim(), name: m[1].trim() || 'Chengfa' };
+  if (s.indexOf('@') > 0) return { address: s, name: 'Chengfa' };
+  return { address: 'noreply@chengfa.org', name: 'Chengfa' };
+}
+
 async function mailSend(env, to, code) {
-  const key = env.RESEND_API_KEY;
+  const key = env.ZEPTOMAIL_API_KEY;
   if (!key) return 'mail_unconfigured';
 
-  const from = env.MAIL_FROM || 'Chengfa <onboarding@resend.dev>';
+  const from = parseFrom(env.MAIL_FROM);
   try {
-    const res = await fetch('https://api.resend.com/emails', {
+    /* Zoho ZeptoMail / CPaaS：认证头是 Zoho-enczapikey + token（不是 Bearer）。
+       v1.1/email 用 textbody 发明文；htmlbody 是另一条路径，别混。 */
+    const res = await fetch('https://api.zeptomail.com/v1.1/email', {
       method: 'POST',
-      headers: { Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' },
+      headers: {
+        Authorization: 'Zoho-enczapikey ' + key,
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      },
       body: JSON.stringify({
         from: from,
-        to: [to],
+        to: [{ email_address: { address: to, name: '' } }],
         subject: 'Chengfa · 邮箱验证码 ' + code,
-        text: '你的验证码是 ' + code + '，10 分钟内有效。不是本人操作就忽略这封邮件。'
+        textbody: '你的验证码是 ' + code + '，10 分钟内有效。不是本人操作就忽略这封邮件。'
       })
     });
     if (!res.ok) {
-      console.error('resend failed:', res.status, (await res.text().catch(() => '')).slice(0, 200));
+      console.error('zeptomail failed:', res.status, (await res.text().catch(() => '')).slice(0, 200));
       return 'mail_failed';
     }
     return '';
   } catch (e) {
-    console.error('resend error:', e && e.message);
+    console.error('zeptomail error:', e && e.message);
     return 'mail_failed';
   }
 }
