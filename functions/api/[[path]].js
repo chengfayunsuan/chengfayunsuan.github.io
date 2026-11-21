@@ -77,8 +77,10 @@ export async function onRequest(context) {
 
 /* ---------------- 人机验证 ---------------- */
 
-/* 只放行自家域名：生产域 + Pages 预览子域；其余一律拒 */
-const TURNSTILE_HOSTS = ['chengfa-761.pages.dev'];
+/* 只放行自家域名：生产域 + Pages 预览子域；其余一律拒
+   自定义域 chengfa.org 绑上后也要放行，否则新域上注册/登录的 Turnstile 验证会被 hostAllowed 拒掉。
+   hostAllowed 用 endsWith('.' + base)，加根域即可同时放行 www 等所有子域。 */
+const TURNSTILE_HOSTS = ['chengfa-761.pages.dev', 'chengfa.org'];
 
 function hostAllowed(host) {
   if (!host) return false;
