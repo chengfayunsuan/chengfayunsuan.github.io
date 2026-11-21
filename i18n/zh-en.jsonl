@@ -1,6 +1,6 @@
 {"zh":"© 2026 乘法 CHENGFA","en":"© 2026 Chengfa"}
 {"zh":"乘法","en":"Chengfa"}
-{"zh":"点击在乘法币与乘法刀之间切换","en":"Switch between CFB and CF$"}
+{"zh":"点击在乘法币与乘法刀之间切换","en":"Switch between XB and XD"}
 {"zh":"切换显示币种","en":"Switch display currency"}
 {"zh":"隐私政策","en":"Privacy Policy"}
 {"zh":"用户协议","en":"Terms of Service"}
@@ -21,12 +21,12 @@
 {"zh":"兑换中心","en":"Redeem"}
 {"zh":"赚积分","en":"Earn"}
 {"zh":"冻结中","en":"Frozen"}
-{"zh":"广告主把推广任务放在 Moonetix 广告墙上：试用一个应用、看一段演示、注册一个试用账号。 完成一项，广告主付钱，我们按约定比例折成乘法币发给你。奖励由服务商回调入账， 不是前端自己加的——所以到账会晚几十秒，也可能被冲正。","en":"Advertisers list their offers on the Moonetix offerwall: try an app, watch a demo, sign up for a trial. Finish one and the advertiser pays, and we convert that into CFB at our standard rate. The reward is credited by the provider's server callback, not by the page itself — so it lands a few seconds late and can be reversed."}
+{"zh":"广告主把推广任务放在 Moonetix 广告墙上：试用一个应用、看一段演示、注册一个试用账号。 完成一项，广告主付钱，我们按约定比例折成乘法币发给你。奖励由服务商回调入账， 不是前端自己加的——所以到账会晚几十秒，也可能被冲正。","en":"Advertisers list their offers on the Moonetix offerwall: try an app, watch a demo, sign up for a trial. Finish one and the advertiser pays, and we convert that into XB at our standard rate. The reward is credited by the provider's server callback, not by the page itself — so it lands a few seconds late and can be reversed."}
 {"zh":"问卷由委托方发布，通过审核后在此处显示。新问卷上线时，站内消息会发出提醒。 符合样本条件的问卷才会出现在列表中，条件不符或名额已满的问卷不显示。","en":"Surveys are published by research clients and appear here once approved. You get an in-site message when new ones go live. Only surveys that match your profile are listed — ones you do not qualify for, or that are full, stay hidden."}
 {"zh":"当前没有与你的资料匹配的问卷，或本轮名额已经招满。新问卷上线时，站内消息会发出提醒； 补全年龄段、城市与职业等信息后，可匹配的问卷会增加。","en":"Nothing matches your profile right now, or this round is full. New surveys trigger an in-site message. Filling in your age range, city and occupation will widen what you match."}
 {"zh":"提现申请提交后金额进入冻结，审核通过七个工作日内打款；兑换码类商品即时发放， 订阅类商品由人工在两个工作日内开通，结果通过站内消息通知。","en":"Once a payout is requested, the amount is held until it is approved, then paid out within seven business days. Gift codes are issued instantly; subscriptions are activated manually within two business days, and you are notified by in-site message."}
-{"zh":"乘法币可提现至支付宝或微信，也可即时兑换数字兑换码。两条路径折算比例一致， 不存在手续费差价，选择哪一种只取决于用途。","en":"CFB can be withdrawn to Alipay or WeChat, or spent instantly on digital codes. Both routes use the same rate with no fee spread — which one you pick only depends on what you need."}
-{"zh":"1 乘法币折 1 元人民币、1 乘法刀折 1 美元，两者数值相同，可点导航栏余额后的币种切换；提现与兑换码采用同一比例，不额外收取手续费。","en":"1 CFB = 1 CNY and 1 CF$ = 1 USD, same number either way. Use the currency switch next to your balance in the top bar. Withdrawals and gift codes use the same rate and carry no extra fee."}
+{"zh":"乘法币可提现至支付宝或微信，也可即时兑换数字兑换码。两条路径折算比例一致， 不存在手续费差价，选择哪一种只取决于用途。","en":"XB can be withdrawn to Alipay or WeChat, or spent instantly on digital codes. Both routes use the same rate with no fee spread — which one you pick only depends on what you need."}
+{"zh":"1 乘法币折 1 元人民币、1 乘法刀折 1 美元，两者数值相同，可点导航栏余额后的币种切换；提现与兑换码采用同一比例，不额外收取手续费。","en":"1 XB = 1 CNY and 1 XD = 1 USD, same number either way. Use the currency switch next to your balance in the top bar. Withdrawals and gift codes use the same rate and carry no extra fee."}
 {"zh":"墙由第三方托管，在你的账号名下展开任务列表；同一个账号 ID 每次打开都是同一个人， 所以奖励不会串号。","en":"The wall is hosted by a third party and opens under your account ID, so every visit is recognised as the same person and rewards never go to the wrong account."}
 {"zh":"广告主要先校验任务有没有真的完成，通常几十秒到几分钟。刚做完没看到余额变化，先等一会儿。","en":"The advertiser verifies the task first, which usually takes from tens of seconds to a few minutes. If the balance has not moved right away, give it a moment."}
 {"zh":"如果任务被判定无效（卸载太快、资料造假），服务商会发一条冲正回调，已发的奖励会被扣回。","en":"If a task is judged invalid — uninstalled too fast, fake details — the provider sends a reversal callback and the reward is taken back."}
@@ -54,7 +54,7 @@
 {"zh":"乘法账户中心。查看余额、等级与问卷入口。","en":"Your Chengfa account: balance, level and survey entry points."}
 {"zh":"用于找回账号和接收通知，不会公开显示。","en":"Used for account recovery and notifications. Never shown publicly."}
 {"zh":"列表标注题目类型、预计耗时与积分额度。","en":"The list shows question type, expected time and reward."}
-{"zh":"乘法兑换中心：乘法币提现与数字兑换码。","en":"Chengfa Redeem: cash out CFB or spend it on digital codes."}
+{"zh":"乘法兑换中心：乘法币提现与数字兑换码。","en":"Chengfa Redeem: cash out XB or spend it on digital codes."}
 {"zh":"使用注册时填写的邮箱与密码进入账户。","en":"Sign in with the email and password you registered with."}
 {"zh":"SURVEY HALL / 问卷大厅","en":"SURVEY HALL"}
 {"zh":"暂时没有可兑换的商品，稍后再来看看。","en":"Nothing to redeem right now — check back later."}
@@ -306,14 +306,14 @@
 {"zh":"不计入积分。问卷按完成状态结算，中途退出视为该份样本作废，委托方亦不会为不完整的答卷付费。","en":"no points. Surveys settle on completion; quitting halfway voids that sample, and the client does not pay for an incomplete response either."}
 {"zh":"余额是当前可以提现或兑换的部分；冻结是已经提交提现申请、正在审核的部分。","en":"Available is what you can withdraw or redeem right now; frozen is the amount already requested and under review."}
 {"zh":"委托方获取的是脱敏统计结果与匿名答卷，不包含手机号、邮箱及真实姓名。","en":"Clients receive aggregated, de-identified results and anonymous responses. Phone numbers, emails and real names are never included."}
-{"zh":"乘法币可提现至支付宝或微信，也可即时兑换数字兑换码。两条路径折算比例一致，","en":"CFB can be paid out to Alipay or WeChat, or redeemed instantly for digital codes. Both routes use the same conversion rate,"}
+{"zh":"乘法币可提现至支付宝或微信，也可即时兑换数字兑换码。两条路径折算比例一致，","en":"XB can be paid out to Alipay or WeChat, or redeemed instantly for digital codes. Both routes use the same conversion rate,"}
 {"zh":"平台收益来源于委托方支付的调研费用。委托方提出调研需求，平台负责问卷分发与数据回收，","en":"The platform earns from research fees paid by clients. A client submits a study, and we handle distribution and data collection,"}
 {"zh":"账户、余额、问卷与提现的问题都可以在这里提交。附上相关单号，","en":"Questions about your account, balance, surveys or payouts can all be submitted here. Include the relevant reference number,"}
 {"zh":"答卷的具体内容由问卷商的页面直接收集，不经过本站服务器。本站只保存「你参与过这份问卷」这一条记录，用于避免重复参与和后续核对奖励。","en":"Response content is collected on the provider's own page and never passes through our servers. We only store the fact that you took part, to prevent repeat participation and to reconcile rewards later."}
 {"zh":"墙由第三方托管，在你的账号名下展开任务列表；同一个账号 ID 每次打开都是同一个人，","en":"The wall is hosted by a third party and opens the task list under your account; the same account ID is the same person every time,"}
 {"zh":"每一笔余额变动都先记流水再落余额，可按时间与类型逐笔核对。","en":"Every balance change is written to the ledger before it reaches the balance, so you can check each entry by time and type."}
 {"zh":"法币为主榜，等级为次榜。法币取决于已完成问卷的结算金额，等级取决于累计经验，","en":"Cash is the main board and level the secondary one. Cash reflects the settled value of completed surveys, level reflects accumulated experience,"}
-{"zh":"公开主页展示乘法币余额、等级、好感度与已完成的提现记录，","en":"The public profile shows your CFB balance, level, reputation and completed payout history,"}
+{"zh":"公开主页展示乘法币余额、等级、好感度与已完成的提现记录，","en":"The public profile shows your XB balance, level, reputation and completed payout history,"}
 {"zh":"以下情况问卷商可能判定答卷无效，本站会相应撤回奖励：答题时间异常、答案前后矛盾、随意勾选、未通过质量抽查、重复参与同一项目。","en":"Providers may invalidate a response, and we then claw back the reward, when: the time taken is abnormal, answers contradict each other, options are picked at random, a quality check fails, or the same study is taken twice."}
 {"zh":"经验只来自通过核验的问卷，答卷被判定无效时对应经验一并扣回。","en":"Experience only comes from verified surveys; if a response is invalidated, the matching experience is deducted as well."}
 {"zh":"注册即表示你已读过并同意以下内容。条款写得直白，重点是三件事：","en":"By registering you confirm that you have read and agree to the following. The terms are plain, and three things matter most:"}
@@ -346,7 +346,7 @@
 {"zh":"榜单还没有数据。","en":"The board is empty for now."}
 {"zh":"RULE / 规则","en":"RULE"}
 {"zh":"法币榜统计当前可用余额，提现后排名会下降；等级由经验累计决定，经验只来自通过核验的问卷。 榜单只展示公开信息，点击用户名可查看对方的公开主页。","en":"The cash board ranks by available balance, so it drops after a payout; level comes from accumulated experience, and experience only comes from verified surveys. The board only shows public information; click a username to open that person's public profile."}
-{"zh":"乘法天梯榜：按乘法币与等级排序的公开榜单。","en":"Chengfa leaderboard: a public ranking by CFB balance and level."}
+{"zh":"乘法天梯榜：按乘法币与等级排序的公开榜单。","en":"Chengfa leaderboard: a public ranking by XB balance and level."}
 {"zh":"站内消息 · 乘法","en":"Messages · Chengfa"}
 {"zh":"兑换发货、提现审核结果与系统通知都会发到这里，点击任意一条可以展开全文并标记已读。","en":"Redemption deliveries, payout review results and system notices all arrive here. Click any message to read it in full and mark it as read."}
 {"zh":"条未读","en":"unread"}
@@ -416,7 +416,7 @@
 {"zh":"等级怎么升？经验从哪里来？","en":"How do I level up, and where does experience come from?"}
 {"zh":"经验只来自通过核验的问卷，答卷被判定无效时对应经验一并扣回。 等级不设人工调整通道，也不出售经验。","en":"Experience only comes from verified surveys, and if a response is invalidated the matching experience is deducted. Levels cannot be adjusted by hand and experience is never sold."}
 {"zh":"别人能看到我的余额吗？","en":"Can other people see my balance?"}
-{"zh":"公开主页展示乘法币余额、等级、好感度与已完成的提现记录， 不展示邮箱、IP、登录记录与提现账户信息。","en":"The public profile shows your CFB balance, level, reputation and completed payout history. It never shows your email, IP, sign-in history or payout account details."}
+{"zh":"公开主页展示乘法币余额、等级、好感度与已完成的提现记录， 不展示邮箱、IP、登录记录与提现账户信息。","en":"The public profile shows your XB balance, level, reputation and completed payout history. It never shows your email, IP, sign-in history or payout account details."}
 {"zh":"发生了什么、什么时候发生、涉及多少金额或哪个单号。","en":"What happened, when it happened, how much money was involved, or which reference number."}
 {"zh":"乘法客服：账户、余额、问卷相关问题的反馈渠道。","en":"Chengfa support: a channel for questions about accounts, balances and surveys."}
 {"zh":"用户主页 · 乘法","en":"Profile · Chengfa"}
@@ -495,7 +495,7 @@
 {"zh":"预设配色","en":"Presets"}
 {"zh":"一键换掉整站主色，其余颜色保持协调。后台默认本来就是蓝的。","en":"Swap the site's main colour in one click; everything else stays in harmony. The admin area is blue by default."}
 {"zh":"配色预览","en":"Preview"}
-{"zh":"乘法币余额","en":"CFB balance"}
+{"zh":"乘法币余额","en":"XB balance"}
 {"zh":"主按钮","en":"Primary button"}
 {"zh":"次按钮","en":"Secondary button"}
 {"zh":"再获得 40 点经验升至 LV4","en":"40 more experience to reach LV4"}
@@ -594,7 +594,7 @@
 {"zh":"你有责任保管好自己的密码。因密码泄露造成的损失，本站不承担赔偿责任，但会协助你冻结账户。","en":"You are responsible for keeping your password safe. We are not liable for losses caused by a leaked password, but we will help you freeze the account."}
 {"zh":"注册需年满 18 周岁。","en":"You must be 18 or older to register."}
 {"zh":"三、奖励与积分","en":"3. Rewards and points"}
-{"zh":"奖励以站内记账单位「乘法币」记录，1 乘法币对应 1 元人民币的兑换基准，可在导航栏切换为按美元显示。","en":"Rewards are recorded in the site's unit, CFB (Chengfa Coin). One CFB corresponds to a one-yuan conversion baseline, and you can switch the display to US dollars in the navigation bar."}
+{"zh":"奖励以站内记账单位「乘法币」记录，1 乘法币对应 1 元人民币的兑换基准，可在导航栏切换为按美元显示。","en":"Rewards are recorded in the site's unit, XB (Chengfa Coin). One XB corresponds to a one-yuan conversion baseline, and you can switch the display to US dollars in the navigation bar."}
 {"zh":"奖励在你","en":"Rewards are credited after you"}
 {"zh":"完成并提交","en":"complete and submit"}
 {"zh":"问卷后计入。问卷商回传有效确认之前，金额可能处于待确认状态。","en":"a survey. Until the provider confirms validity, the amount may sit in a pending state."}
@@ -880,7 +880,7 @@
 {"zh":"将从可用余额扣除 ","en":"Will be deducted from available "}
 {"zh":"正在校验请求来源…","en":"Verifying the request source…"}
 {"zh":"正在向本站发回调…","en":"Sending the callback to our server…"}
-{"zh":" CFB，交易号 ","en":" CFB, transaction "}
+{"zh":" XB，交易号 ","en":" XB, transaction "}
 {"zh":"后台键位已恢复默认","en":"Admin keys reset to default"}
 {"zh":"自定义 · 已保存","en":"Custom · saved"}
 {"zh":"还没有关注任何人。","en":"Not following anyone yet."}
@@ -1103,8 +1103,8 @@
 {"zh":"只存这台设备","en":"saved on this device only"}
 {"zh":"。站内的问卷任务要求真实本地网络，用这种网络点开问卷会被判定为异常，账号直接封禁，并且扣 8 点经验。","en":". Survey tasks here require a real local network; opening one on this network is treated as abnormal and bans the account with a loss of 8 experience."}
 {"zh":"<div class=\"th-pop__f\"><button type=\"button\" data-th-reset>恢复默认</button></div>","en":"<div class=\"th-pop__f\"><button type=\"button\" data-th-reset>Reset</button></div>"}
-{"zh":"乘法币","en":"CFB"}
-{"zh":"乘法刀","en":"CF$"}
+{"zh":"乘法币","en":"XB"}
+{"zh":"乘法刀","en":"XD"}
 {"zh":"问卷大厅","en":"Survey hall"}
 {"zh":"兑换中心","en":"Redeem"}
 {"zh":"账户设置","en":"Settings"}

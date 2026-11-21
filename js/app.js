@@ -235,7 +235,7 @@
     setAmt(num, s.price);
     var unit = document.createElement('i');
     unit.setAttribute('data-cur', 'code');
-    unit.textContent = 'CFB';
+    unit.textContent = 'XB';
     pay.appendChild(num);
     pay.appendChild(unit);
 
@@ -526,7 +526,7 @@
     return STORE_ERR[code] || ('操作失败：' + (code || '未知错误'));
   }
 
-  /* 弹层文案里的金额：按当前显示币种换算并带单位，避免说「扣 20」而界面是 CFD */
+  /* 弹层文案里的金额：按当前显示币种换算并带单位，避免说「扣 20」而界面是 XD */
   function curText(v) {
     if (!window.CF || !CF.money) return trimNum(String(v));
     return CF.money(v) + ' ' + CF.currency.code;
@@ -623,7 +623,7 @@
       setAmt(b, it.price);
       var u = document.createElement('i');
       u.setAttribute('data-cur', 'code');
-      u.textContent = 'CFB';
+      u.textContent = 'XB';
       p.appendChild(b);
       p.appendChild(u);
 
@@ -727,11 +727,11 @@
     /* ---------- 提现 ---------- */
 
     function openWithdraw() {
-      /* 输入框跟着当前显示币种走，提交前再换回 CFB；否则显示 CFD 时输入「10」实际扣的是 10 CFB */
+      /* 输入框跟着当前显示币种走，提交前再换回 XB；否则显示 XD 时输入「10」实际扣的是 10 XB */
       var usd = !!(window.CF && CF.currency && CF.currency.mode === 'USD');
-      var unit = window.CF ? CF.currency.code : 'CFB';
-      var MIN_CFB = 10;
-      var minShow = usd ? CF.money(MIN_CFB) : '10';
+      var unit = window.CF ? CF.currency.code : 'XB';
+      var MIN_XB = 10;
+      var minShow = usd ? CF.money(MIN_XB) : '10';
 
       function toCfb(v) { return usd ? v * CF.rate : v; }
 
@@ -762,7 +762,7 @@
           api.setError('');
           var typed = Number(v.amount);
           var amount = Math.round(toCfb(typed) * 10000) / 10000;
-          if (!isFinite(typed) || amount < MIN_CFB) {
+          if (!isFinite(typed) || amount < MIN_XB) {
             api.setError('起提金额为 ' + minShow + ' ' + unit + '，请填写不低于该数值的金额。');
             return;
           }
@@ -886,7 +886,7 @@
       setAmt(pb, o.price);
       var u = document.createElement('i');
       u.setAttribute('data-cur', 'code');
-      u.textContent = 'CFB';
+      u.textContent = 'XB';
       p.appendChild(pb);
       p.appendChild(u);
       row.appendChild(p);
@@ -930,7 +930,7 @@
       setAmt(pb, w.amount);
       var u = document.createElement('i');
       u.setAttribute('data-cur', 'code');
-      u.textContent = 'CFB';
+      u.textContent = 'XB';
       p.appendChild(pb);
       p.appendChild(u);
       row.appendChild(p);
@@ -1236,7 +1236,7 @@
         fc.appendChild(fcn);
         var fcu = document.createElement('i');
         fcu.setAttribute('data-cur', 'code');
-        fcu.textContent = 'CFB';
+        fcu.textContent = 'XB';
         fc.appendChild(fcu);
 
         row.appendChild(rk);

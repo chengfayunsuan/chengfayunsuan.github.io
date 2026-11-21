@@ -247,7 +247,7 @@
     setAmt(num, s.price);
     var unit = document.createElement('i');
     unit.setAttribute('data-cur', 'code');
-    unit.textContent = 'CFB';
+    unit.textContent = 'XB';
     price.appendChild(num);
     price.appendChild(unit);
 

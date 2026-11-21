@@ -79,7 +79,7 @@
     amount.appendChild(b);
     var u = document.createElement('i');
     u.setAttribute('data-cur', 'code');
-    u.textContent = 'CFB';
+    u.textContent = 'XB';
     u.style.fontStyle = 'normal';
     u.style.marginLeft = '3px';
     amount.appendChild(u);

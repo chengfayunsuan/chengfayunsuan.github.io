@@ -1,22 +1,22 @@
 /* ============================================================
    乘法 · 全站可配置项
-   内部货币以 CFB（乘法币，人民币基准）记账，恒为原始数值。
-   CFD（乘法刀，美元）显示时按实时汇率换算：CFD = CFB / usdCny。
+   内部货币以 XB（乘法币，人民币基准）记账，恒为原始数值。
+   XD（乘法刀，美元）显示时按实时汇率换算：XD = XB / usdCny。
 
    两个互不影响的开关：
    cf-currency   数值按人民币还是美元算   CNY / USD
-   cf-cur-style  单位写成字母还是汉字     code（CFB / CFD）/ name（乘法币 / 乘法刀）
+   cf-cur-style  单位写成字母还是汉字     code（XB / XD）/ name（乘法币 / 乘法刀）
 
    任何带 data-cur 的节点都由本文件统一套用：
-     data-cur="amount"  金额，原始 CFB 值存 data-cfb
-     data-cur="code"    币种单位，跟随显示形式（CFB 或 乘法币）
+     data-cur="amount"  金额，原始 XB 值存 data-cfb
+     data-cur="code"    币种单位，跟随显示形式（XB 或 乘法币）
      data-cur="name"    固定显示中文名
    动态插入的节点由 MutationObserver 自动接管，渲染方不用手动刷新。
    ============================================================ */
 (function () {
   var MODES = {
-    CNY: { code: 'CFB', name: '乘法币' },
-    USD: { code: 'CFD', name: '乘法刀' }
+    CNY: { code: 'XB', name: '乘法币' },
+    USD: { code: 'XD', name: '乘法刀' }
   };
 
   var FX_KEY = 'cf-fx';
@@ -55,7 +55,7 @@
     return style() === 'name' ? cur.name : cur.code;
   }
 
-  /* 把 CFB 基准值转成当前模式应显示的数字字符串 */
+  /* 把 XB 基准值转成当前模式应显示的数字字符串 */
   function money(v) {
     var n = Number(v) || 0;
     if (mode() === 'USD') n = n / window.CF.rate;
@@ -151,11 +151,11 @@
   var listeners = [];
 
   window.CF = {
-    currency: { mode: 'CNY', code: 'CFB', name: '乘法币', style: 'code' },
+    currency: { mode: 'CNY', code: 'XB', name: '乘法币', style: 'code' },
     rate: loadFx(),
-    /* 金额显示：传 CFB 基准值，返回当前模式下的数字 */
+    /* 金额显示：传 XB 基准值，返回当前模式下的数字 */
     money: money,
-    /* 给金额节点标记原始 CFB 值，并立即套用当前显示 */
+    /* 给金额节点标记原始 XB 值，并立即套用当前显示 */
     amount: function (el, v) {
       if (!el) return;
       el.setAttribute('data-cfb', v == null ? '0' : String(v));

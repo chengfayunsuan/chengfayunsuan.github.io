@@ -74,7 +74,7 @@
     p.appendChild(b);
     var u = document.createElement('i');
     u.setAttribute('data-cur', 'code');
-    u.textContent = 'CFB';
+    u.textContent = 'XB';
     p.appendChild(u);
     box.appendChild(p);
 
@@ -98,7 +98,7 @@
         if (r.body && r.body.ok) {
           box.classList.add('is-done');
           btn.textContent = '已入账';
-          noteText('已入账 ' + r.body.reward + ' CFB，交易号 ' + r.body.tid + '，当前余额 ' + r.body.balance + ' CFB。', 'ok');
+          noteText('已入账 ' + r.body.reward + ' XB，交易号 ' + r.body.tid + '，当前余额 ' + r.body.balance + ' XB。', 'ok');
           say('入账成功');
           return;
         }

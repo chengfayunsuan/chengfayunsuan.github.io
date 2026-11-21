@@ -921,7 +921,7 @@ async function updatePassword(request, env) {  const session = await currentSess
 /* ---------------- Moonetix 广告墙 ----------------
  *
  * Moonetix 是 offerwall 联盟（不是问卷商）：用户完成广告主的任务，服务商给发布方
- * 结算美元，我们按自定汇率折成 CFB 发给用户。奖励只能来自服务端回调，不能信前端。
+ * 结算美元，我们按自定汇率折成 XB 发给用户。奖励只能来自服务端回调，不能信前端。
  *
  * 两种模式：
  *   live —— 配齐 MOONETIX_APP_ID / MOONETIX_LINK_SALT / MOONETIX_POSTBACK_KEY，
@@ -934,7 +934,7 @@ async function updatePassword(request, env) {  const session = await currentSess
 
 const MTX_WALL = 'https://wall.moonetix.com/';
 
-/* 模拟墙里的任务，仅 demo 模式使用；面额是人话，单位 CFB */
+/* 模拟墙里的任务，仅 demo 模式使用；面额是人话，单位 XB */
 const MTX_DEMO_OFFERS = [
   { id: 'demo-video', name: '看完 30 秒产品视频', reward: 1.5 },
   { id: 'demo-install', name: '安装并打开一款应用', reward: 4 },
@@ -1198,7 +1198,7 @@ async function mtxMockComplete(request, env) {
     meta: {
       offerId: offer.id,
       offerName: offer.name,
-      currency: 'CFB',
+      currency: 'XB',
       payout: '0',
       ip: request.headers.get('CF-Connecting-IP') || ''
     }
@@ -2403,7 +2403,7 @@ async function surveySubmit(request, env) {
       steps: [
         '提交答卷（用时 ' + elapsed + ' 秒）',
         '问卷商确认有效：通过质检',
-        '奖励入账 +' + formatFc(reward) + ' CFB，经验 +1'
+        '奖励入账 +' + formatFc(reward) + ' XB，经验 +1'
       ]
     });
   }
@@ -2481,7 +2481,7 @@ async function surveySubmit(request, env) {
     user: await userStateOf(env, uid),
     steps: [
       '提交答卷（用时 ' + elapsed + ' 秒）',
-      '首次结算：+' + formatFc(reward) + ' CFB，经验 +1',
+      '首次结算：+' + formatFc(reward) + ' XB，经验 +1',
       '问卷商说这份要过质检，先入账，' + SURVEY_REJECT_DELAY + ' 秒后再看结果',
       '这 ' + SURVEY_REJECT_DELAY + ' 秒里余额是真的，可以先花'
     ]
@@ -2987,7 +2987,7 @@ async function adminOrderDecide(request, env) {
     ).bind(id),
     env.DB.prepare(
       `INSERT INTO messages (uid, kind, title, body) VALUES (?, 'system', ?, ?)`
-    ).bind(order.uid, '兑换已退款', '「' + order.item_title + '」已退款 ' + formatFc(order.price_units) + ' CFB，金额已回到可用余额。')
+    ).bind(order.uid, '兑换已退款', '「' + order.item_title + '」已退款 ' + formatFc(order.price_units) + ' XB，金额已回到可用余额。')
   ];
 
   if (order.code) {

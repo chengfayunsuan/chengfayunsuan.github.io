@@ -303,7 +303,7 @@
         setAmt(fc, u.fc);
         var fu = document.createElement('i');
         fu.setAttribute('data-cur', 'code');
-        fu.textContent = 'CFB';
+        fu.textContent = 'XB';
         fc.appendChild(fu);
 
         var fr = document.createElement('span');
@@ -311,7 +311,7 @@
         setAmt(fr, u.fcFrozen);
         var fru = document.createElement('i');
         fru.setAttribute('data-cur', 'code');
-        fru.textContent = 'CFB';
+        fru.textContent = 'XB';
         fr.appendChild(fru);
 
         /* 展开面板：调整法币 / 状态 / 角色 */
@@ -390,7 +390,7 @@
           var delta = Number(inN.value);
           if (!delta) { say('请先填调整金额，正加负减'); return; }
           postJSON('/api/admin/users/adjust', { uid: u.uid, delta: delta, memo: inM.value }).then(function (r) {
-            if (r.body && r.body.ok) { say('已调整，最新余额 ' + r.body.fc + ' CFB'); load(qInput.value); }
+            if (r.body && r.body.ok) { say('已调整，最新余额 ' + r.body.fc + ' XB'); load(qInput.value); }
             else say('操作失败：' + (r.body && r.body.error || '网络错误'));
           });
         });
@@ -472,7 +472,7 @@
         setAmt(amt, w.amount);
         var au = document.createElement('i');
         au.setAttribute('data-cur', 'code');
-        au.textContent = 'CFB';
+        au.textContent = 'XB';
         amt.appendChild(au);
 
         var acc = document.createElement('span');
@@ -773,8 +773,8 @@
       /* 余额概览 */
       var info = document.createElement('p');
       info.className = 'tkd__none';
-      info.textContent = '当前法币 ' + (t.userFc || '0') + ' CFB · 冻结 ' + (t.userFrozen || '0') +
-        ' CFB · 状态 ' + (STATUS[t.userStatus] || t.userStatus || '—') +
+      info.textContent = '当前法币 ' + (t.userFc || '0') + ' XB · 冻结 ' + (t.userFrozen || '0') +
+        ' XB · 状态 ' + (STATUS[t.userStatus] || t.userStatus || '—') +
         ' · 角色 ' + (ROLE[t.userRole] || t.userRole || '—');
       box.appendChild(info);
 
@@ -796,7 +796,7 @@
         btnAdj.disabled = true;
         postJSON('/api/admin/users/adjust', { uid: t.uid, delta: delta, memo: inM.value })
           .then(function (r) {
-            if (r.body && r.body.ok) { say('已调整，最新余额 ' + r.body.fc + ' CFB'); load(); }
+            if (r.body && r.body.ok) { say('已调整，最新余额 ' + r.body.fc + ' XB'); load(); }
             else say('操作失败：' + (r.body && r.body.error || '网络错误'));
             btnAdj.disabled = false;
           });

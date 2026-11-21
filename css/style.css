@@ -439,7 +439,8 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 /* 英文站标题是七個字母，中文那套字号摆不下，单独收一档 */
-html[lang="en"] .hero__title {
+html[lang="en"] .hero__title,
+.hero__title--en {
   font-size: clamp(52px, 9.4vw, 116px);
   letter-spacing: -.045em;
   line-height: .92;
@@ -1097,6 +1098,8 @@ html[lang="en"] .hero__title .x {
   .hero__tag span.txt { font-size: 11px; letter-spacing: .06em; padding-left: 10px; white-space: nowrap; }
 
   .hero__title { font-size: clamp(56px, 22vw, 96px); }
+  html[lang="en"] .hero__title,
+  .hero__title--en { font-size: clamp(34px, 10vw, 62px); }
   .hero__lead { font-size: 15px; }
   .hero__sub { font-size: 13px; line-height: 1.8; }
   .hero__actions .btn { flex: 1 1 100%; justify-content: center; }
