@@ -1846,24 +1846,6 @@ async function withdrawApply(request, env) {
   ).bind(user.id).first();
   if (pending && pending.n > 0) return json({ ok: false, error: 'has_pending' }, 400);
 
-  /* 奖励的使用节奏也要卡：24 小时内一条、7 天最多 3 条。
-     频繁小额提现是套现/洗号最典型的动作，节奏卡住比事后翻账省事。 */
-  const gap = await env.DB.prepare(
-    `SELECT CAST((julianday('now') - julianday(MAX(created_at))) * 86400 AS INTEGER) AS s
-       FROM withdrawals WHERE uid = ?`
-  ).bind(user.id).first();
-  if (gap && gap.s !== null && Number(gap.s) < 24 * 3600) {
-    const left = Math.ceil((24 * 3600 - Number(gap.s)) / 3600);
-    return json({ ok: false, error: 'withdraw_cooling', hoursLeft: left }, 429);
-  }
-
-  const week = await env.DB.prepare(
-    "SELECT COUNT(*) AS n FROM withdrawals WHERE uid = ? AND created_at >= datetime('now','-7 days')"
-  ).bind(user.id).first();
-  if ((Number(week && week.n) || 0) >= 3) {
-    return json({ ok: false, error: 'withdraw_weekly' }, 429);
-  }
-
   if (user.fc_units < units) return json({ ok: false, error: 'insufficient_balance' }, 400);
 
   const next = user.fc_units - units;
