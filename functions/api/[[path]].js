@@ -1702,7 +1702,7 @@ async function adminSurveyDelete(request, env) {
 
 /* ---------------- 兑换中心 / 提现 ---------------- */
 
-const WITHDRAW_MIN = 10;                       // 起提金额，单位 fc
+const WITHDRAW_MIN = 50;                       // 起提金额，单位 fc
 const WITHDRAW_CHANNELS = ['alipay', 'wechat', 'paypal', 'payoneer'];
 const CHANNEL_TEXT = {
   alipay: '支付宝', wechat: '微信', paypal: 'PayPal', payoneer: 'Payoneer'

@@ -730,8 +730,8 @@
       /* 输入框跟着当前显示币种走，提交前再换回 XB；否则显示 XD 时输入「10」实际扣的是 10 XB */
       var usd = !!(window.CF && CF.currency && CF.currency.mode === 'USD');
       var unit = window.CF ? CF.currency.code : 'XB';
-      var MIN_XB = 10;
-      var minShow = usd ? CF.money(MIN_XB) : '10';
+      var MIN_XB = 50;
+      var minShow = usd ? CF.money(MIN_XB) : '50';
 
       function toCfb(v) { return usd ? v * CF.rate : v; }
 
@@ -739,7 +739,7 @@
         kicker: 'WITHDRAW',
         title: '申请提现',
         desc: '可提余额 ' + curText(curFc) + '，起提 ' + minShow + ' ' + unit +
-          '。提交后金额进入冻结，审核通过七个工作日内到账。',
+          '。提交后金额进入冻结，审核通过十五个工作日内到账。',
         fields: [
           {
             name: 'amount', label: '提现金额（' + unit + '）', type: 'number',

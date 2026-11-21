@@ -24,7 +24,7 @@
 {"zh":"广告主把推广任务放在 Moonetix 广告墙上：试用一个应用、看一段演示、注册一个试用账号。 完成一项，广告主付钱，我们按约定比例折成乘法币发给你。奖励由服务商回调入账， 不是前端自己加的——所以到账会晚几十秒，也可能被冲正。","en":"Advertisers list their offers on the Moonetix offerwall: try an app, watch a demo, sign up for a trial. Finish one and the advertiser pays, and we convert that into XB at our standard rate. The reward is credited by the provider's server callback, not by the page itself — so it lands a few seconds late and can be reversed."}
 {"zh":"问卷由委托方发布，通过审核后在此处显示。新问卷上线时，站内消息会发出提醒。 符合样本条件的问卷才会出现在列表中，条件不符或名额已满的问卷不显示。","en":"Surveys are published by research clients and appear here once approved. You get an in-site message when new ones go live. Only surveys that match your profile are listed — ones you do not qualify for, or that are full, stay hidden."}
 {"zh":"当前没有与你的资料匹配的问卷，或本轮名额已经招满。新问卷上线时，站内消息会发出提醒； 补全年龄段、城市与职业等信息后，可匹配的问卷会增加。","en":"Nothing matches your profile right now, or this round is full. New surveys trigger an in-site message. Filling in your age range, city and occupation will widen what you match."}
-{"zh":"提现申请提交后金额进入冻结，审核通过七个工作日内打款；兑换码类商品即时发放， 订阅类商品由人工在两个工作日内开通，结果通过站内消息通知。","en":"Once a payout is requested, the amount is held until it is approved, then paid out within seven business days. Gift codes are issued instantly; subscriptions are activated manually within two business days, and you are notified by in-site message."}
+{"zh":"提现申请提交后金额进入冻结，审核通过十五个工作日内打款；兑换码类商品即时发放， 订阅类商品由人工在两个工作日内开通，结果通过站内消息通知。","en":"Once a payout is requested, the amount is held until it is approved, then paid out within fifteen business days. Gift codes are issued instantly; subscriptions are activated manually within two business days, and you are notified by in-site message."}
 {"zh":"乘法币可提现至支付宝或微信，也可即时兑换数字兑换码。两条路径折算比例一致， 不存在手续费差价，选择哪一种只取决于用途。","en":"XB can be withdrawn to Alipay or WeChat, or spent instantly on digital codes. Both routes use the same rate with no fee spread — which one you pick only depends on what you need."}
 {"zh":"1 乘法币折 1 元人民币、1 乘法刀折 1 美元，两者数值相同，可点导航栏余额后的币种切换；提现与兑换码采用同一比例，不额外收取手续费。","en":"1 XB = 1 CNY and 1 XD = 1 USD, same number either way. Use the currency switch next to your balance in the top bar. Withdrawals and gift codes use the same rate and carry no extra fee."}
 {"zh":"墙由第三方托管，在你的账号名下展开任务列表；同一个账号 ID 每次打开都是同一个人， 所以奖励不会串号。","en":"The wall is hosted by a third party and opens under your account ID, so every visit is recognised as the same person and rewards never go to the wrong account."}
@@ -40,7 +40,7 @@
 {"zh":"每一笔收入与支出都记入收支明细，可逐笔核对，出现差异用单号追溯。","en":"Every credit and debit is written to your ledger, so you can check line by line and trace any difference by its reference ID."}
 {"zh":"答卷经有效性与完整性核验，通过即计入余额，可在收支明细中查到。","en":"Responses are checked for validity and completeness, then credited to your balance and listed in the ledger."}
 {"zh":"问卷收益来自委托方支付的调研费用，平台不设邀请返利与层级分成。","en":"Survey rewards come from fees paid by research clients. No referral kickbacks, no multi-level splits."}
-{"zh":"兑换码即时发放；提现经人工审核后七个工作日内到账，节假日顺延。","en":"Gift codes are issued instantly. Payouts are reviewed manually and arrive within seven business days, later across public holidays."}
+{"zh":"兑换码即时发放；提现经人工审核后十五个工作日内到账，节假日顺延。","en":"Gift codes are issued instantly. Payouts are reviewed manually and arrive within fifteen business days, later across public holidays."}
 {"zh":"Chengfa赚积分：在广告墙完成第三方任务，奖励经服务端回调入账。","en":"Chengfa · Earn: complete third-party offers on the wall, rewards credited by server callback."}
 {"zh":"年龄段、城市与职业决定可参与的问卷范围，缺项会错过匹配。","en":"Age range, city and occupation decide which surveys you match. Missing fields mean missed matches."}
 {"zh":"每份问卷标注题目数量、预计耗时与奖励额度，开始后可暂存。","en":"Each survey lists its question count, expected time and reward. You can pause after starting."}
@@ -181,11 +181,11 @@
 {"zh":"多数问卷耗时三至十五分钟，收益依据题目数量与调研难度确定，通常折合人民币数元至二十元。 问卷长度与收益不必然正相关，部分样本稀缺的短问卷单价更高。列表页会标注预计耗时与积分额度。","en":"Most surveys take three to fifteen minutes, with rewards set by question count and research difficulty, usually a few CNY up to twenty. Length and reward do not always track each other — some short surveys pay more because the sample is scarce. The list shows expected time and reward for each one."}
 {"zh":"品牌方与研究机构需要真实用户的反馈，并为此支付调研费用。完成一份时长三至十五分钟的问卷即可获得相应积分。 积分累计至标准额度后可提现至支付宝或微信，亦可兑换数字兑换码。","en":"Brands and research firms need feedback from real users and pay research fees for it. Finish a three-to-fifteen-minute survey and you earn points. Once you reach the threshold you can withdraw to Alipay or WeChat, or spend the points on digital codes."}
 {"zh":"不需要。注册、问卷大厅、积分明细、兑换与提现均已上线，填写用户名、邮箱与密码即可开通， 不设邀请码，也不收取任何费用。没有可参与问卷时，大厅会显示空状态并说明原因。","en":"No. Registration, the Survey Hall, the ledger, redemptions and payouts are all live. Just pick a username, email and password — no invite code, no fee. When nothing is available, the hall shows an empty state explaining why."}
-{"zh":"积分累计至等值十元后可申请提现，转入支付宝或微信账户； 亦可直接兑换 Steam 充值卡、游戏激活码及软件会员等数字兑换码，到账速度快于现金提现。","en":"Once your points reach the equivalent of 10 CNY you can request a payout to Alipay or WeChat, or spend them directly on digital codes — Steam wallet cards, game keys, software subscriptions — which arrive faster than a cash payout."}
+{"zh":"积分累计至等值十元后可申请提现，转入支付宝或微信账户； 亦可直接兑换 Steam 充值卡、游戏激活码及软件会员等数字兑换码，到账速度快于现金提现。","en":"Once your points reach the equivalent of 50 CNY you can request a payout to Alipay or WeChat, or spend them directly on digital codes — Steam wallet cards, game keys, software subscriptions — which arrive faster than a cash payout."}
 {"zh":"委托方会限定样本条件，包括年龄段、城市、职业或特定产品的使用频率。名额满额或条件不符时， 问卷将无法进入。该限制由调研需求决定，与账户状态无关。","en":"Clients set the sample criteria: age range, city, occupation, or how often you use a particular product. When a quota is full or you do not match, the survey cannot be entered. That limit comes from the research brief, not from your account status."}
 {"zh":"使用邮箱完成注册，耗时约三十秒。填写年龄段、所在城市与职业等基础信息， 用于匹配符合条件的问卷。上述信息仅用于样本筛选，不作商业用途。","en":"Sign up with an email — it takes about thirty seconds. Add your age range, city and occupation so we can match you to surveys that fit. That information is used only for sample screening, never for marketing."}
 {"zh":"平台不设邀请码。注册完成后即可浏览全部问卷，积分于答卷审核通过后即时入账； 等级与天梯榜仅用于展示活跃度，不影响参与资格与问卷单价。","en":"There is no invite code. Once registered you can browse every survey, and points are credited as soon as a response passes review. Levels and the leaderboard only show activity — they do not affect eligibility or survey prices."}
-{"zh":"积分累计至等值十元后即可提交申请。审核通过后七个工作日内到账， 处理记录可在「积分明细」中查询。提现账户须与注册人实名信息一致。","en":"You can apply once your points reach the equivalent of 10 CNY. Approved payouts arrive within seven business days, and the record appears in your ledger. The receiving account must match your registered identity."}
+{"zh":"积分累计至等值十元后即可提交申请。审核通过后十五个工作日内到账， 处理记录可在「积分明细」中查询。提现账户须与注册人实名信息一致。","en":"You can apply once your points reach the equivalent of 50 CNY. Approved payouts arrive within fifteen business days, and the record appears in your ledger. The receiving account must match your registered identity."}
 {"zh":"问卷列表标注题目类型、预计耗时与积分额度。中途退出不计入积分， 内容明显失真的答卷将判定无效。建议确认时间充裕后再开始作答。","en":"The list shows question type, expected time and reward. Quitting halfway earns nothing, and responses that are clearly unreliable are invalidated. Make sure you have time before you start."}
 {"zh":"不计入积分。问卷按完成状态结算，中途退出视为该份样本作废，委托方亦不会为不完整的答卷付费。 建议确认时间充裕后再开始作答。","en":"Nothing is earned. Surveys settle on completion — quitting voids the sample, and the client does not pay for an incomplete response. Make sure you have time before you start."}
 {"zh":"委托方获取的是脱敏统计结果与匿名答卷，不包含手机号、邮箱及真实姓名。 平台不会向第三方出售联系方式，亦不会用于商业推广。","en":"Clients receive aggregated statistics and anonymous responses only — no phone numbers, emails or real names. We never sell contact details to third parties and never use them for marketing."}
@@ -195,7 +195,7 @@
 {"zh":"同一自然人重复注册、使用脚本作答或提交明显失真的答卷，均判定无效并扣回相应积分。该规则用于保障正常参与者的样本价值。","en":"Duplicate accounts, scripted responses and clearly unreliable answers are all invalidated with points clawed back. The rule protects the sample value that honest participants provide."}
 {"zh":"提供 Steam 充值卡、游戏激活码及常用软件年费会员。兑换后即时发放兑换码， 无需审核等待。","en":"Steam wallet cards, game keys and annual software subscriptions. Codes are issued the moment you redeem — no review queue."}
 {"zh":"问卷类平台的主要争议通常集中在结算环节。以下四项为平台运行的基本标准，全部公开可查。","en":"Most disputes around survey platforms come down to settlement. These four points are the standards we run on, all open for inspection."}
-{"zh":"申请后七个工作日内到账，处理进度可在积分明细中查询，不存在长期滞留的审核状态。","en":"Payouts arrive within seven business days of the request, progress is visible in the ledger, and nothing sits in review for weeks."}
+{"zh":"申请后十五个工作日内到账，处理进度可在积分明细中查询，不存在长期滞留的审核状态。","en":"Payouts arrive within fifteen business days of the request, progress is visible in the ledger, and nothing sits in review for weeks."}
 {"zh":"注册、参与问卷及提现均不收取任何费用。凡要求预先付款的任务均与平台无关。","en":"Registration, taking surveys and withdrawing are all free. Any task that asks you to pay upfront has nothing to do with this platform."}
 {"zh":"答卷以脱敏统计形式提交委托方，不包含手机号、邮箱及真实姓名等身份信息。","en":"Responses reach the client as aggregated statistics, with no phone number, email or real name attached."}
 {"zh":"面向用户的问卷积分平台。参与调研获取积分，积分可提现或兑换数字兑换码。","en":"A survey rewards platform for users. Take research surveys, earn points, then withdraw or redeem them for digital codes."}
@@ -288,7 +288,7 @@
 {"zh":"这页不是第三方网站，是本站照着广告墙的样子做的模拟版。点「标记完成」，","en":"This page is not a third-party site. It is our own mock-up of an ad wall. Clicking 'Mark complete'"}
 {"zh":"常见原因有三种：问卷按样本条件投放，资料缺项或不符合条件的账户不会匹配到；","en":"There are three common reasons: studies are targeted by sample criteria, so accounts with missing or ineligible details never match;"}
 {"zh":"问卷由委托方发布，通过审核后在此处显示。新问卷上线时，站内消息会发出提醒。","en":"Surveys are published by clients and appear here once approved. We send an in-site message when new surveys go live."}
-{"zh":"积分累计至等值十元后可申请提现，转入支付宝或微信账户；","en":"Once your points reach the equivalent of ten yuan you can request a payout to Alipay or WeChat;"}
+{"zh":"积分累计至等值十元后可申请提现，转入支付宝或微信账户；","en":"Once your points reach the equivalent of fifty yuan you can request a payout to Alipay or WeChat;"}
 {"zh":"委托方会限定样本条件，包括年龄段、城市、职业或特定产品的使用频率。名额满额或条件不符时，","en":"Clients set sample criteria such as age bracket, city, occupation or how often you use a particular product. When quotas fill up or you do not match,"}
 {"zh":"余额以整数最小单位记账，展示时省略小数末尾的零，因此显示的数值与实际记账完全一致。","en":"Balances are recorded in the smallest whole unit and trailing zeros are dropped on display, so what you see matches the ledger exactly."}
 {"zh":"法币榜统计当前可用余额，提现后排名会下降；等级由经验累计决定，经验只来自通过核验的问卷。","en":"The cash board ranks by available balance, so it drops after a payout. Level comes from accumulated experience, and experience only comes from verified surveys."}
@@ -298,8 +298,8 @@
 {"zh":"使用邮箱完成注册，耗时约三十秒。填写年龄段、所在城市与职业等基础信息，","en":"Register with your email; it takes about thirty seconds. Fill in your age bracket, city and occupation,"}
 {"zh":"当前没有与你的资料匹配的问卷，或本轮名额已经招满。新问卷上线时，站内消息会发出提醒；","en":"No surveys match your profile right now, or this round's quota is already full. We send an in-site message when new surveys go live;"}
 {"zh":"平台不设邀请码。注册完成后即可浏览全部问卷，积分于答卷审核通过后即时入账；","en":"There are no invite codes. Once registered you can browse every survey, and points are credited as soon as a response is approved;"}
-{"zh":"提现申请提交后金额进入冻结，审核通过七个工作日内打款；兑换码类商品即时发放，","en":"Once you request a payout the amount is frozen, and it is paid within seven working days of approval. Code rewards are delivered instantly,"}
-{"zh":"积分累计至等值十元后即可提交申请。审核通过后七个工作日内到账，","en":"Once your points reach the equivalent of ten yuan you can submit a request. It arrives within seven working days of approval,"}
+{"zh":"提现申请提交后金额进入冻结，审核通过十五个工作日内打款；兑换码类商品即时发放，","en":"Once you request a payout the amount is frozen, and it is paid within fifteen working days of approval. Code rewards are delivered instantly,"}
+{"zh":"积分累计至等值十元后即可提交申请。审核通过后十五个工作日内到账，","en":"Once your points reach the equivalent of fifty yuan you can submit a request. It arrives within fifteen working days of approval,"}
 {"zh":"条款调整时会在站内公告并更新顶部日期，重大变更会通过站内消息单独通知。","en":"When these terms change we post a site notice and update the date at the top; major changes are also announced by in-site message."}
 {"zh":"问卷列表标注题目类型、预计耗时与积分额度。中途退出不计入积分，","en":"Every listing shows the question type, the estimated time and the point value. Quitting halfway does not earn points,"}
 {"zh":"：你参与某份问卷时，问卷商需要知道你是一个独立的、真实的参与者，因此会获得本站生成的参与标识、问卷编号与参与时间。你的邮箱和密码不会提供给他们。","en":": when you take a survey the provider needs to know you are a distinct, real participant, so they receive a participation ID we generate, the survey ID and the participation time. Your email and password are never shared with them."}
@@ -1065,7 +1065,7 @@
 {"zh":"账户注销后主页不再公开，相关内容也不再展示。","en":"Once closed, the profile is no longer public and related content is hidden."}
 {"zh":"这个出口 IP 被判定为代理 / VPN 网络","en":"This exit IP is flagged as a proxy or VPN network"}
 {"zh":"已有一笔提现正在审核，等它处理完再提交下一笔。","en":"A payout is already under review; wait for it before submitting another."}
-{"zh":"。提交后金额进入冻结，审核通过七个工作日内到账。","en":". After submitting, the amount is frozen and paid within seven working days of approval."}
+{"zh":"。提交后金额进入冻结，审核通过十五个工作日内到账。","en":". After submitting, the amount is frozen and paid within fifteen working days of approval."}
 {"zh":"广告主结算后由服务端回调入账，重复回调只记一次。","en":"Credited by the server callback after the advertiser settles; duplicate callbacks count once."}
 {"zh":"问卷商说这份要过质检，先入账，过一会儿再看结果。","en":"The provider wants this one reviewed: credited now, result to follow."}
 {"zh":"使用用户名与密码进入账户，忘了用户名就填注册邮箱。","en":"Sign in with your username and password; if you forget the username, use your registered email."}
@@ -1136,3 +1136,18 @@
 {"zh":"账户已被冻结：参与问卷、兑换与提现均已暂停，可提交工单说明情况。","en":"Account frozen: surveys, redemption and withdrawal are suspended. You can submit a ticket to explain your situation."}
 {"zh":"份可参与","en":" open to take"}
 {"zh":"点击填写个人简介","en":"Click to add a bio"}
+
+{"zh":"乘法 · 问卷积分平台","en":"Chengfa · Survey Rewards Platform"}
+{"zh":"乘法","en":"Chengfa"}
+{"zh":"乘法是一个问卷积分平台。用户注册后可参与市场调研问卷，按完成情况获取积分，积分支持提现至支付宝或微信，亦可兑换数字兑换码。","en":"Chengfa is a survey rewards platform. Register to take market research surveys, earn points based on completion, cash out to Alipay or WeChat, or redeem digital codes."}
+{"zh":"单份问卷平均收益 100 分","en":"100 pts average per survey"}
+{"zh":"积分累计至等值五十元后可申请提现，转入支付宝或微信账户；\n          亦可直接兑换 Steam 充值卡、游戏激活码及软件会员等数字兑换码，到账速度快于现金提现。","en":"Once your points reach the equivalent of 50 CNY you can request a payout to Alipay or WeChat, or spend them directly on digital codes — Steam wallet cards, game keys, software subscriptions — which arrive faster than a cash payout."}
+{"zh":"积分累计至等值五十元后即可提交申请。审核通过后十五个工作日内到账，\n          处理记录可在「积分明细」中查询。提现账户须与注册人实名信息一致。","en":"You can apply once your points reach the equivalent of 50 CNY. Approved payouts arrive within fifteen business days, and the record appears in your ledger. The receiving account must match your registered identity."}
+{"zh":"提供 Steam 充值卡、游戏激活码及常用软件年费会员。兑换申请经审核后处理，\n          进度可在「积分明细」中查询。","en":"Steam wallet cards, game keys and annual software subscriptions. Codes are processed after review; the status appears in your ledger."}
+{"zh":"审核","en":"Review"}
+{"zh":"发放 · 进度可在明细查询","en":"then issued · status in ledger"}
+{"zh":"问卷来自真实的研究需求。你花几分钟作答，样本就算进去了。","en":"Every survey comes from a real research need. A few minutes of your time becomes part of the sample."}
+{"zh":"— 关于问卷本身","en":"— about the surveys themselves"}
+{"zh":"© 2026 乘法","en":"© 2026 Chengfa"}
+{"zh":"可以。积分对应委托方已支付的调研费用，并非平台自行发行。五十元提现门槛的设置原因在于，\n          低于该金额的转账手续费与金额本身接近，对双方均不经济。每笔积分的来源、对应问卷与发放时间，\n          均可在「积分明细」中查询。","en":"Yes. Points represent research fees the client has already paid, not currency the platform issues. The 50 CNY payout minimum exists because below that amount the transfer fee approaches the sum itself, which is uneconomic for both sides. Every point's origin, source survey and payout time is listed in the ledger."}
+{"zh":"提现申请提交后金额进入冻结，审核通过后十五个工作日内打款；兑换码类商品即时发放，\n        订阅类商品由人工在两个工作日内开通，结果通过站内消息通知。","en":"Once a payout is requested, the amount is held until it is approved, then paid out within fifteen business days. Gift codes are issued instantly; subscriptions are activated manually within two business days, and you are notified by in-site message."}
