@@ -576,7 +576,6 @@
 /* ---------- 天梯榜 ---------- */
 
 .ld-list {
-  max-width: 780px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -586,7 +585,7 @@
 /* 名次 / 用户名 / UID / LV / 好感 / 分数，六列与前三名完全同一套 */
 .ld-row {
   display: grid;
-  grid-template-columns: 54px minmax(0, 1fr) 76px 72px 84px 128px;
+  grid-template-columns: 0.5fr 3fr 1fr 1fr 1fr 1.5fr;
   align-items: center;
   gap: 14px;
   min-height: 54px;
@@ -835,7 +834,8 @@
   .st-wallet__a { grid-column: 1 / -1; }
   .lg-head, .lg-row { grid-template-columns: 100px 92px minmax(0, 1fr) 108px; }
   .lg-head > :nth-child(5), .lg-row > :nth-child(5) { display: none; }
-  .ld-row { grid-template-columns: 52px minmax(0, 1fr) 80px 108px; }
+  /* 隐藏好感后仍剩名次/用户/UID/等级/金额五列，列数必须给够，否则金额掉到第二行 */
+  .ld-row, .ld-hero__row { grid-template-columns: 52px minmax(0, 1fr) 80px 80px 130px; }
   .ld-af { display: none; }
 }
 
@@ -1017,7 +1017,6 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-width: 780px;
   margin: 26px 0 10px;
   padding: 0;
   list-style: none;
@@ -1028,7 +1027,7 @@
 /* 列宽与 .ld-row 完全一致，所以上下严格对齐 */
 .ld-hero__row {
   display: grid;
-  grid-template-columns: 54px minmax(0, 1fr) 76px 72px 84px 128px;
+  grid-template-columns: 0.5fr 3fr 1fr 1fr 1fr 1.5fr;
   align-items: center;
   gap: 14px;
   min-height: 66px;
@@ -1064,6 +1063,11 @@
 .ld-hero__row .ld-fc i { color: inherit; opacity: .62; }
 .ld-hero__row .ld-me { background: var(--paper); color: var(--ink); }
 .ld-hero__row.is-r3 .ld-me { background: var(--ink); color: var(--paper); }
+
+/* 1000px 档的 hero 列必须写在这里：上面的基础 .ld-hero__row 会覆盖前面的媒体查询 */
+@media (min-width: 761px) and (max-width: 1000px) {
+  .ld-hero__row { grid-template-columns: 52px minmax(0, 1fr) 80px 80px 130px; }
+}
 
 @media (max-width: 760px) {
   .ld-hero__row,
