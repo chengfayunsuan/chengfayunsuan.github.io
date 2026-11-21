@@ -1843,7 +1843,10 @@ async function trSurveyList(request, env) {
   const ip = String(request.headers.get('CF-Connecting-IP') || '').trim();
   if (!ip) return json({ ok: false, error: 'no_ip' }, 400);
 
-  const cc = String((request.cf && request.cf.country) || '').toUpperCase();
+  /* 本地 wrangler 没有 request.cf，用 CF-IPCountry 兜底，两边都能测 */
+  const cc = String(
+    (request.cf && request.cf.country) || request.headers.get('CF-IPCountry') || ''
+  ).toUpperCase();
   const qs = [
     'api_key=' + encodeURIComponent(c.apiKey),
     'user_id=' + Number(session.uid),
@@ -1878,23 +1881,40 @@ async function trSurveyList(request, env) {
 
   const fx = await fxValue(env);
   const list = Array.isArray(payload.surveys) ? payload.surveys : [];
+  const priv = await isPrivileged(env, session.uid);
   const items = [];
+  let demoSeen = 0;
+  let demoHidden = 0;
   for (let i = 0; i < list.length && items.length < 30; i++) {
     const s = list[i];
     const usd = Number(s.cpi) || 0;
     if (usd <= 0) continue;
+
+    /* demo 卷：账号没过审时 TR 拿这批美国测试卷兜底，计数器固定是 999。
+       中国用户点进去只会被按国家 disqualify，等于白搭时间，索性不给他看；
+       站长留着，正好用来跑通「答完 → 回调 → 到账」整条链路。 */
+    const isDemo = Number(s.attempts_count) === 999 && Number(s.completes_count) === 999;
+    if (isDemo) {
+      demoSeen++;
+      if (!priv) {
+        demoHidden++;
+        continue;
+      }
+    }
+
     const entry = await trSignEntry(c, s, session.uid);
     if (!entry) continue;
+    const loi = Number(s.loi) || 0;
     items.push({
       id: 'tr-' + s.campaign_id,
       provider: 'TheoremReach',
       title: '问卷 #' + s.campaign_id,
       /* 上游不给问卷标题，只有 loi/cpi/incidence，用耗时给个粗档位当标签 */
-      topic: (Number(s.loi) || 0) <= 5 ? '快速' : ((Number(s.loi) || 0) <= 12 ? '常规' : '深度'),
+      topic: (isDemo ? '测试 · ' : '') + (loi <= 5 ? '快速' : (loi <= 12 ? '常规' : '深度')),
       /* price 一律 XB 口径（元），前端按当前币种自己换。
          这里只保留到分：问卷报价用不着四位小数，卡片主数字短一点才好看 */
       price: formatFc(Math.round(usd * fx * c.share * 100) * 100),
-      durationMin: Number(s.loi) || 0,
+      durationMin: loi,
       stars: Math.round(Number(s.average_rating) || 0),
       grade: '',
       requirement: '通过率 ' + Math.round(Number(s.incidence) || 0) + '%'
@@ -1906,7 +1926,11 @@ async function trSurveyList(request, env) {
     });
   }
 
-  return json({ ok: true, items: items, count: items.length, country: cc });
+  return json({
+    ok: true, items: items, count: items.length, country: cc,
+    /* demo / demoHidden 只用于排查：上游给了几份测试卷、其中几份被挡在门外 */
+    demo: demoSeen, demoHidden: demoHidden
+  });
 }
 
 /* 自己的广告墙记录 */
