@@ -9,7 +9,7 @@
 <meta name="robots" content="noindex">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/css/style.css?v=16">
-<link rel="stylesheet" href="/css/wall.css?v=1">
+<link rel="stylesheet" href="/css/wall.css?v=2">
 <script src="/js/config.js?v=9"></script>
 </head>
 <body>
@@ -22,11 +22,46 @@
   <p class="wl__d">不算违规，也不扣任何积分，换一份继续就行。部分服务商对「筛选未通过」会给一点补偿，真到账了会在收支明细里出现。</p>
   <p class="wl__en">You did not qualify for this one. Nothing is deducted — just pick another survey.</p>
 
+  <p class="wl__why" id="why" hidden></p>
+
   <div class="wl__a">
     <a class="btn btn--red" href="/earn">回赚积分</a>
     <a class="btn btn--ghost" href="/ledger">看收支明细</a>
   </div>
 </main>
+
+<script>
+/* 服务商跳回来时会带 term_reason / term_reason_code，白拿的信息，别扔 */
+(function () {
+  var q = new URLSearchParams(location.search);
+  var code = (q.get('term_reason') || '').toLowerCase();
+  var num = q.get('term_reason_code') || '';
+  var map = {
+    min_age: ["年龄不在这份卷的目标人群里", "Your age falls outside this survey's target group."],
+    max_age: ["年龄不在这份卷的目标人群里", "Your age falls outside this survey's target group."],
+    country_mismatch: ['地区不符，这份卷只收特定国家或地区的样本', 'This survey only accepts respondents from certain countries.'],
+    quality_score: ['答题质量没通过检测：答得太快、前后矛盾，或被判定敷衍', 'Your answers did not pass the quality check.'],
+    banned: ['这个账号被服务商标记，暂时不能参与', 'This account is currently flagged by the provider.'],
+    diy_duplicate_respondent: ['系统认为你之前已经答过这份调查', 'You have already taken this survey.'],
+    quota_full: ['名额刚好满了', 'The quota filled up.'],
+    security: ['被安全校验拦下', 'Blocked by a security check.']
+  };
+  if (!code && !num) return;
+
+  var hit = map[code];
+  var zh = hit ? hit[0] : '服务商没说明具体原因' + (code ? ' (' + code + ')' : (num ? ' (' + num + ')' : ''));
+  var en = hit ? hit[1] : 'The provider did not specify a reason.';
+
+  var el = document.getElementById('why');
+  var b = document.createElement('b');
+  b.textContent = '原因：' + zh;
+  el.textContent = '';
+  el.appendChild(b);
+  el.appendChild(document.createElement('br'));
+  el.appendChild(document.createTextNode(en));
+  el.hidden = false;
+})();
+</script>
 
 </body>
 </html>

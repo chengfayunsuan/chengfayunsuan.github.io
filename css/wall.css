@@ -65,6 +65,24 @@
   color: var(--gray);
 }
 
+/* 服务商回传的落榜原因：term_reason / term_reason_code，只在有值时露出来 */
+.wl__why {
+  display: inline-block;
+  margin: 16px 0 0;
+  padding: 8px 13px;
+  border: 1px solid var(--hair);
+  background: var(--paper-2);
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: var(--ink);
+  opacity: .82;
+}
+
+.wl__why b {
+  font-weight: 600;
+  opacity: 1;
+}
+
 .wl__amt {
   margin: 18px 0 0;
   padding: 9px 14px;

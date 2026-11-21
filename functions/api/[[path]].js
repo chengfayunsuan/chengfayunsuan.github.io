@@ -1492,7 +1492,10 @@ function trConf(env) {
      exchange_rate 是「1 美元 = 多少个 XD」，必须报分成后的实际值
      （100 × 0.69 = 69）：报 100 就等于墙上标 100、到账只有 69，那是骗人。
      官方下限 10，69 稳稳过线。 */
-  const partnerId = String(env.THEOREMREACH_PARTNER_ID || '').trim();
+  /* partner_id = 面板 APPS 里那个 App ID（2026-11-21 主人确认 26029）。
+     它不是密钥——每个入口 URL 里都明文带着，所以给个默认值就行，
+     不往线上环境变量里塞，少动一次配置少一次把机密写丢的机会。 */
+  const partnerId = String(env.THEOREMREACH_PARTNER_ID || '26029').trim();
   const rateEnv = Number(env.THEOREMREACH_EXCHANGE_RATE || 0);
   const rate = isFinite(rateEnv) && rateEnv >= 10 ? Math.round(rateEnv) : Math.round(XD_PER_USD * share);
   const curName = String(env.THEOREMREACH_CURRENCY || 'XD').trim() || 'XD';
@@ -1580,7 +1583,9 @@ async function trEntryUrl(c, uid, debug) {
       Math.random().toString(36).slice(2, 7)),
     'exchange_rate=' + c.exchangeRate,
     'currency_name_plural=' + encodeURIComponent(c.curName),
-    'currency_name_singular=' + encodeURIComponent(c.curName)
+    'currency_name_singular=' + encodeURIComponent(c.curName),
+    /* 单次会话的显示名，盖掉面板里那个 "Test Display Name"。面板改好以后留着也无害 */
+    'display_name=' + encodeURIComponent('Chengfa')
   ];
   if (c.partnerId) qs.push('partner_id=' + encodeURIComponent(c.partnerId));
   if (debug) qs.push('debug=true');
