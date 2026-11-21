@@ -366,14 +366,13 @@
   color: var(--gray);
 }
 
-/* ---------- 平台卡片：竖长的长方形，跟问卷卡同一套边框语言 ---------- */
+/* ---------- 平台卡片：横向长方形，宽大于高 ---------- */
 
 .plat {
   display: flex;
   flex-direction: column;
   margin-top: 14px;
-  min-height: 396px;
-  padding: 18px 18px 16px;
+  padding: 13px 14px 12px;
   border: 2px solid var(--ink);
   background: var(--paper);
   color: var(--ink);
@@ -387,7 +386,7 @@
 
 .plat__top {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
 }
@@ -396,73 +395,73 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 46px;
-  height: 46px;
+  width: 34px;
+  height: 34px;
   background: var(--ink);
   color: var(--paper);
   font-family: var(--num);
-  font-size: 17px;
+  font-size: 14px;
   letter-spacing: .06em;
   line-height: 1;
 }
 
 .plat__tag {
-  padding: 4px 8px;
+  padding: 3px 7px;
   border: 2px solid var(--ink);
   font-family: var(--num);
-  font-size: 10.5px;
-  letter-spacing: .12em;
+  font-size: 10px;
+  letter-spacing: .1em;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .plat__t {
-  margin: 16px 0 0;
-  font-size: 19px;
+  margin: 10px 0 0;
+  font-size: 16px;
   font-weight: 800;
   letter-spacing: .01em;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
 .plat__d {
-  margin: 9px 0 0;
-  font-size: 12.5px;
-  line-height: 1.7;
-}
-
-.plat__meta {
-  display: grid;
-  gap: 9px;
-  margin: 16px 0 0;
-  padding-top: 13px;
-  border-top: 1px solid var(--paper-2);
-}
-
-.plat__row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 11.5px;
-  letter-spacing: .02em;
+  margin: 5px 0 0;
+  font-size: 12px;
+  line-height: 1.55;
   color: var(--gray);
 }
 
-.plat__row b {
+/* 报酬与耗时并成一行，卡片才能压矮 */
+.plat__meta {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 7px;
+  margin: 9px 0 0;
+  padding-top: 9px;
+  border-top: 1px solid var(--paper-2);
+}
+
+.plat__meta b {
   font-family: var(--num);
   font-size: 13px;
-  letter-spacing: .04em;
+  letter-spacing: .03em;
   color: var(--ink);
   white-space: nowrap;
 }
 
-/* 按钮永远贴底：卡片被拉高也不会浮在半空 */
+.plat__meta i {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--gray);
+}
+
 .plat__go {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-top: auto;
-  padding-top: 15px;
+  margin-top: 9px;
+  padding-top: 10px;
   border-top: 2px solid var(--ink);
   font-size: 12.5px;
   font-weight: 700;
@@ -480,21 +479,39 @@
 .plat:hover .plat__go { color: var(--red); }
 .plat:hover .plat__arrow { transform: translateX(4px); }
 
-/* ---------- 窄屏：入口折到列表上方，卡片压扁成横向一条 ---------- */
+
+/* ---------- 左列问卷排三列 ---------- */
+
+/* 大厅这里要的是「一眼看到货架」，所以桌面上钉死三列，而不是让 auto-fill 自己数 */
+.hl-main .sv-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* 右栏还在、左列只剩 660 出头时，三列每列 210，价格那行会挤，退回两列 */
+@media (min-width: 941px) and (max-width: 1100px) {
+  .hl-main .sv-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* 手机一列，卡片才有地方把价格和标题摆开 */
+@media (max-width: 560px) {
+  .hl-main .sv-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- 窄屏：右栏折回文档流，卡片限宽 ---------- */
 
 @media (max-width: 940px) {
-  /* 折行后按 DOM 顺序排：标题 → 筛选 → 平台入口 → 问卷列表 */
   .hl-aside { margin-top: clamp(22px, 3vw, 30px); }
-  /* 卡片别拉满整屏，竖长方形才立得住 */
   .plat { max-width: 400px; }
   .hl-aside__d { max-width: 420px; }
 }
 
 @media (max-width: 640px) {
-  .plat { min-height: 0; padding: 15px 15px 13px; }
-  .plat__mark { width: 38px; height: 38px; font-size: 14px; }
-  .plat__t { margin-top: 12px; font-size: 17px; }
-  .plat__d { margin-top: 7px; font-size: 12px; }
-  .plat__meta { margin-top: 12px; padding-top: 11px; gap: 7px; }
-  .plat__go { padding-top: 12px; }
+  .plat { padding: 13px 14px 11px; }
+  .plat__mark { width: 34px; height: 34px; font-size: 13px; }
+  .plat__t { margin-top: 10px; font-size: 16px; }
+}
+
+/* 推荐位通常只有两三张：让它按内容数自动铺满，别在第三格留个空洞 */
+.hl-main .hl-sect--feat .sv-grid {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
