@@ -743,3 +743,22 @@
   outline: 2px solid var(--red);
   outline-offset: 2px;
 }
+
+/* 当前所在分区：账户子页面靠这一条知道自己站在哪
+   （home 上的目录都是「去别处」，没有当前项，不加 is-on） */
+.dock__i.is-on {
+  background: var(--red);
+  cursor: default;
+}
+
+.dock__i.is-on .dock__n { color: rgba(var(--paper-rgb), .82); }
+
+/* 八个入口在窄屏排成三行：3 + 3 + 2，比让 flex 自己挤更整齐 */
+@media (max-width: 640px) {
+  .dock__i {
+    flex: 1 1 33.33%;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  .dock__n { font-size: 10px; }
+}
