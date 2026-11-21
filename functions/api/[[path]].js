@@ -1772,19 +1772,36 @@ async function trDecide(env, request, p, seg, url) {
     return { body: 'ok skipped over cap', status: 200, ...ok };
   }
 
+  /* Offer（广告主任务：装应用、注册、打到第 10 关）和问卷走同一个回调口子，靠 offer=true 区分。
+     两条要命的区别：
+       1. 一次点击可能产生多个回调 —— 装完一次、升级再一次，可能隔好几天，各带独立 tx_id，
+          所以去重只能按 tx_id，绝不能按 offer_id 或 user_id
+       2. 它回传的 offer_id 形如 campaign_5123，入库前把 campaign_ 前缀剥掉，
+          不然后台按 id 查任务永远对不上 */
+  const isOffer = /^(1|true|yes)$/i.test(String(p.offer || '').trim());
+  const offerId = String(p.offer_id || p.campaign_id || '').replace(/^campaign_/i, '').trim()
+    || String(p.survey_id || '');
+  const eventName = String(p.event_name || '').trim();
+  const baseName = String(p.offer_name || p.survey_name || '').trim();
+  /* 问卷没有"事件"概念，对账用我们传进去的那次进入编号；任务用 event_id */
+  const eventId = isOffer
+    ? String(p.event_id || '')
+    : String(p.external_transaction_id || p.transaction_id || '');
+
   const res = await mtxApply(env, {
     uid: uid,
     tid: tid,
     status: reversed ? 2 : 1,
     units: units,
     provider: 'theoremreach',
-    label: '问卷墙',
+    kind: isOffer ? 'theoremreach_offer' : 'theoremreach_reward',
+    kindRev: isOffer ? 'theoremreach_offer_reverse' : 'theoremreach_reverse',
+    label: isOffer ? '任务墙' : '问卷墙',
     meta: {
-      offerId: p.offer_id || p.survey_id || '',
-      offerName: p.offer_name || p.survey_name || '',
-      /* 它回传的「本次进入」编号（= 我们 entry 链接里的 transaction_id）。
-         官方回调变量表里叫 {external_transaction_id}，老字段叫 transaction_id */
-      eventId: p.external_transaction_id || p.transaction_id || '',
+      offerId: offerId,
+      /* 有事件名就接在后面，收支明细里能看出是「装完」还是「升到 10 级」那一笔 */
+      offerName: baseName + (eventName ? ' · ' + eventName : ''),
+      eventId: eventId,
       payout: p.currency || '',
       currency: 'XB',
       ip: p.ip || request.headers.get('CF-Connecting-IP') || ''
@@ -1973,7 +1990,8 @@ const LEDGER_KINDS = [
   'withdraw_lock', 'withdraw_refund', 'withdraw_paid',
   'cdk_redeem', 'admin_adjust', 'penalty',
   'moonetix_reward', 'moonetix_reverse',
-  'theoremreach_reward', 'theoremreach_reverse'
+  'theoremreach_reward', 'theoremreach_reverse',
+  'theoremreach_offer', 'theoremreach_offer_reverse'
 ];
 
 async function ledger(request, env, url) {

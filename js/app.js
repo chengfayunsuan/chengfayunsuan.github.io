@@ -187,7 +187,9 @@
     moonetix_reward: '广告墙奖励',
     moonetix_reverse: '广告墙冲正',
     theoremreach_reward: '问卷墙奖励',
-    theoremreach_reverse: '问卷墙冲正'
+    theoremreach_reverse: '问卷墙冲正',
+    theoremreach_offer: '任务墙奖励',
+    theoremreach_offer_reverse: '任务墙冲正'
   };
 
   function kindText(k) { return KIND[k] || k || '其他'; }
