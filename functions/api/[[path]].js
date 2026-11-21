@@ -1467,12 +1467,12 @@ function trConf(env) {
   /* 回调地址末尾那截随机串是第二道门：URL 只有双方知道，且不放仓库 */
   const pathKey = String(env.THEOREMREACH_POSTBACK_KEY || '').trim();
   /* 分给用户的比例（按它实付的美元算）与单笔上限（防止它某个 bug 一次打进天价） */
-  const share = Number(env.THEOREMREACH_SHARE || 0.6);
+  const share = Number(env.THEOREMREACH_SHARE || 0.69);
   const maxXb = Number(env.THEOREMREACH_MAX_XB || 500);
   const per = Number(env.THEOREMREACH_XB_PER || 1);
   return {
     apiKey, token, secretKey, pathKey,
-    share: isFinite(share) && share > 0 && share <= 1 ? share : 0.6,
+    share: isFinite(share) && share > 0 && share <= 1 ? share : 0.69,
     maxXb: isFinite(maxXb) && maxXb > 0 ? maxXb : 500,
     xbPer: isFinite(per) && per > 0 ? per : 1,
     live: !!(token || pathKey || secretKey)
