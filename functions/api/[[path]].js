@@ -1489,19 +1489,68 @@ async function trLink(request, env) {
   });
 }
 
+/* 每个回调都留一条原始记录。用户说「答完了没到账」时先查 hook_log：
+   是根本没打进来，打进来了被拒，还是入账了 —— 三种情况的处理完全不一样。
+   token 类参数只记长度，不记值。 */
+function hookParams(p) {
+  const o = {};
+  Object.keys(p || {}).forEach(function (k) {
+    const v = String(p[k]);
+    o[k] = /token|key|secret/i.test(k) ? '***' + v.length : v.slice(0, 120);
+  });
+  return JSON.stringify(o);
+}
+
+async function hookLog(env, a) {
+  try {
+    await env.DB.prepare(
+      `INSERT INTO hook_log (provider, method, params, token_len, token_ok, result, ip)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
+    ).bind(a.provider, a.method, a.params, a.tokenLen || 0, a.tokenOk ? 1 : 0,
+      String(a.result).slice(0, 200), a.ip || '').run();
+  } catch (e) {
+    /* 表还没建、或写失败，都不能让回调本身挂掉 */
+    console.error('hook_log failed:', e && e.message);
+  }
+}
+
 async function trPostback(request, env, url) {
-  const c = trConf(env);
   const p = await mtxParams(request, url);   /* body 只能读一次，校验和入账共用 */
 
+  let out;
+  try {
+    out = await trDecide(env, request, p);
+  } catch (err) {
+    console.error('tr postback crashed:', err && err.message);
+    out = { body: 'server_error', status: 500 };
+  }
+
+  await hookLog(env, {
+    provider: 'theoremreach',
+    method: request.method,
+    params: hookParams(p),
+    tokenLen: out.tokenLen,
+    tokenOk: out.tokenOk,
+    result: out.status + ' ' + out.body,
+    ip: request.headers.get('CF-Connecting-IP') || ''
+  });
+
+  return mtxText(out.body, out.status);
+}
+
+/* 真正的判定：只看参数，不碰响应对象，方便外面记日志 */
+async function trDecide(env, request, p) {
+  const c = trConf(env);
+
   /* 没配 key 就拒。宁可让它重试，也不能让一个不带校验的回调给谁加钱 */
-  if (!c.live) return mtxText('not configured', 503);
+  if (!c.live) return { body: 'not configured', status: 503 };
 
   const tok = String(p.auth_token || p.authtoken || p.token || '').trim();
   if (tok !== c.token) {
     /* 只打长度和键名，不打值：长度能看出它发的是 Api Key 还是 Secret Key */
     console.error('tr postback bad auth_token, len=' + tok.length +
       ' expectLen=' + c.token.length + ', keys:', Object.keys(p).join(','));
-    return mtxText('bad auth_token', 403);
+    return { body: 'bad auth_token', status: 403, tokenLen: tok.length, tokenOk: 0 };
   }
 
   const uid = Number(p.user_id || p.uid || p.user || 0);
@@ -1510,19 +1559,20 @@ async function trPostback(request, env, url) {
     : (p.amount != null ? p.amount : (p.reward != null ? p.reward : ''));
   const amount = Number(rawAmount);
   const flag = String(p.is_reversal || p.reversal || p.reversed || '').trim();
+  const ok = { tokenLen: tok.length, tokenOk: 1 };
 
-  if (!tid) return mtxText('bad parameters', 400);
-  if (!isFinite(amount)) return mtxText('bad parameters', 400);
+  if (!tid) return { body: 'bad parameters', status: 400, ...ok };
+  if (!isFinite(amount)) return { body: 'bad parameters', status: 400, ...ok };
 
   /* 面板上的 TEST 会拿一个假 user_id 打过来。本站 uid 一定是正整数，
      认不出数字的当测试请求：回 200 让它显示通过，但一分钱都不入账 */
-  if (!Number.isInteger(uid) || uid <= 0) return mtxText('ok ignored test', 200);
+  if (!Number.isInteger(uid) || uid <= 0) return { body: 'ok ignored test', status: 200, ...ok };
 
   const reversed = /^(1|true|yes|reversed)$/i.test(flag) || amount < 0;
   const units = Math.round(Math.abs(amount) * c.xbPer * FC_SCALE);
 
   /* 0 元事件（筛选未通过常见）不写账，但仍回 200，否则它会一直重试 */
-  if (units <= 0) return mtxText('ok ignored', 200);
+  if (units <= 0) return { body: 'ok ignored', status: 200, ...ok };
 
   const res = await mtxApply(env, {
     uid: uid,
@@ -1542,9 +1592,9 @@ async function trPostback(request, env, url) {
 
   if (!res.ok) {
     console.error('tr postback apply failed:', res.error, 'uid=' + uid, 'tid=' + tid);
-    return mtxText(res.error || 'error', 400);
+    return { body: res.error || 'error', status: 400, ...ok };
   }
-  return mtxText('ok', 200);
+  return { body: 'ok', status: 200, ...ok };
 }
 
 /* 自己的广告墙记录 */
