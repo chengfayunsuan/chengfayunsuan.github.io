@@ -1498,8 +1498,9 @@ async function trPostback(request, env, url) {
 
   const tok = String(p.auth_token || p.authtoken || p.token || '').trim();
   if (tok !== c.token) {
-    /* 只打键名不打值 */
-    console.error('tr postback bad auth_token, keys:', Object.keys(p).join(','));
+    /* 只打长度和键名，不打值：长度能看出它发的是 Api Key 还是 Secret Key */
+    console.error('tr postback bad auth_token, len=' + tok.length +
+      ' expectLen=' + c.token.length + ', keys:', Object.keys(p).join(','));
     return mtxText('bad auth_token', 403);
   }
 
