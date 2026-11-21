@@ -1510,8 +1510,12 @@ async function trPostback(request, env, url) {
   const amount = Number(rawAmount);
   const flag = String(p.is_reversal || p.reversal || p.reversed || '').trim();
 
-  if (!(uid > 0) || !tid) return mtxText('bad parameters', 400);
+  if (!tid) return mtxText('bad parameters', 400);
   if (!isFinite(amount)) return mtxText('bad parameters', 400);
+
+  /* 面板上的 TEST 会拿一个假 user_id 打过来。本站 uid 一定是正整数，
+     认不出数字的当测试请求：回 200 让它显示通过，但一分钱都不入账 */
+  if (!Number.isInteger(uid) || uid <= 0) return mtxText('ok ignored test', 200);
 
   const reversed = /^(1|true|yes|reversed)$/i.test(flag) || amount < 0;
   const units = Math.round(Math.abs(amount) * c.xbPer * FC_SCALE);
