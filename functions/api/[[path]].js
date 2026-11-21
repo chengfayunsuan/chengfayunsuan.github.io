@@ -1457,7 +1457,15 @@ async function mtxMockComplete(request, env) {
  *   THEOREMREACH_XB_PER   1 个 reward_amount 折多少 XB，默认 1
  */
 
-const TR_WALL = 'https://theoremreach.com/respondent_entry/direct';
+/* 入口路径看面板里 app 的类型（App Details 页面):
+ *   router    —— Router 类型（Dynamic Payout / Fixed Payout），走 /respondent_entry/router
+ *   offerwall —— Offerwall 类型，走 /respondent_entry/direct
+ * 走错会直接 404。默认 router；要切改 THEOREMREACH_MODE，不用动代码。 */
+const TR_ENTRY = {
+  router: 'https://theoremreach.com/respondent_entry/router',
+  offerwall: 'https://theoremreach.com/respondent_entry/direct'
+};
+const TR_WALL = TR_ENTRY.router;
 
 /* 对外只报 XD。两种币各管一段，别混：
  *   XB —— 站内记账单位，锚人民币，1 XB = 1 元，不出门（台账、明细、余额都它）
@@ -1488,10 +1496,12 @@ function trConf(env) {
   const rateEnv = Number(env.THEOREMREACH_EXCHANGE_RATE || 0);
   const rate = isFinite(rateEnv) && rateEnv >= 10 ? Math.round(rateEnv) : Math.round(XD_PER_USD * share);
   const curName = String(env.THEOREMREACH_CURRENCY || 'XD').trim() || 'XD';
+  const mode = String(env.THEOREMREACH_MODE || 'router').trim().toLowerCase();
   return {
     apiKey, token, secretKey, pathKey, partnerId,
     exchangeRate: rate,
     curName,
+    wall: TR_ENTRY[mode] || TR_ENTRY.router,
     share: share,
     maxXb: isFinite(maxXb) && maxXb > 0 ? maxXb : 500,
     xbPer: isFinite(per) && per > 0 ? per : 1,
@@ -1544,7 +1554,7 @@ async function trLink(request, env) {
   return json({
     ok: true,
     demo: false,
-    url: TR_WALL + '?api_key=' + encodeURIComponent(c.apiKey) + '&user_id=' + Number(session.uid)
+    url: c.wall + '?api_key=' + encodeURIComponent(c.apiKey) + '&user_id=' + Number(session.uid)
   });
 }
 
@@ -1557,7 +1567,7 @@ async function trEntryUrl(c, uid, debug) {
   /* 没有 partner_id 就先别上签名链接：官方标了必填，少了可能被直接拒，
      比现在的裸链接更糟。等面板里拿到 Placements ID 再启用这一段。 */
   if (!c.partnerId) {
-    return TR_WALL + '?api_key=' + encodeURIComponent(c.apiKey) + '&user_id=' + Number(uid);
+    return c.wall + '?api_key=' + encodeURIComponent(c.apiKey) + '&user_id=' + Number(uid);
   }
 
   const qs = [
@@ -1575,7 +1585,7 @@ async function trEntryUrl(c, uid, debug) {
   if (c.partnerId) qs.push('partner_id=' + encodeURIComponent(c.partnerId));
   if (debug) qs.push('debug=true');
 
-  const url = TR_WALL + '?' + qs.join('&');
+  const url = c.wall + '?' + qs.join('&');
   /* 没有 secret 就签不了名，退回裸链接，至少还能进 */
   if (!c.secretKey) return url;
   return url + '&hash=' + (await trHashOf(c.secretKey, url));
@@ -1714,7 +1724,12 @@ async function trDecide(env, request, p, seg, url) {
      一次进入可能答好几份卷，拿它去重会把后面几份奖励全吞掉 */
   const tid = String(p.tx_id || p.txn_id || p.tx || p.tid || '').trim();
   const reward = Number(p.reward != null ? p.reward : (p.reward_amount != null ? p.reward_amount : 0));
-  const usd = Number(p.currency);   /* 官方：currency 是这笔实际付给发布方的美元金额 */
+  /* 美元金额：Router / Postback 文档里的变量名是 {reward_amount_in_dollars}，
+     Offerwall 的老字段叫 currency。两个都认，优先前者（官方现行文档口径）。 */
+  const usd = Number(
+    p.reward_amount_in_dollars != null ? p.reward_amount_in_dollars
+      : (p.currency != null ? p.currency : NaN)
+  );
   const flag = String(p.reversal || p.is_reversal || p.reversed || '').trim();
   const ok = { tokenLen: tok.length, tokenOk: 1, how: how };
 
@@ -1727,15 +1742,17 @@ async function trDecide(env, request, p, seg, url) {
 
   const reversed = /^(1|true|yes|reversal|reversed)$/i.test(flag) || reward < 0;
 
-  /* 结算口径：它实付的 dollars 才是我们的收入，reward 只是它自己那套点数
-     （面板测试里 25 点对应 0.25 美元，即 100 点 = 1 美元）。所以按 currency 算：
-     用户拿 USD × 汇率 × 分成。currency 缺失时才退回按 reward 折。 */
+  /* 结算口径：只认美元，其余全是换算的中间量。
+     - 有美元（{reward_amount_in_dollars} / currency）：用户拿 USD × 汇率 × 分成
+     - 没美元：{reward} 是 app currency（XD，已经含过分成，因为它按 exchange_rate 折的），
+       先除回美元再乘汇率，结果跟上面那条完全一致；旧系数 xbPer 已废，留着只为不炸配置 */
+  const rate = await fxValue(env);
+  const usdAbs = Math.abs(usd);
   let units;
-  if (isFinite(usd) && usd > 0) {
-    const rate = await fxValue(env);
-    units = Math.round(usd * rate * c.share * FC_SCALE);
+  if (isFinite(usdAbs) && usdAbs > 0) {
+    units = Math.round(usdAbs * rate * c.share * FC_SCALE);
   } else {
-    units = Math.round(Math.abs(reward) * c.xbPer * FC_SCALE);
+    units = Math.round(Math.abs(reward) / XD_PER_USD * rate * FC_SCALE);
   }
 
   /* 0 元事件（筛选未通过常见）不写账，但仍回 200，否则它会一直重试 */
@@ -1759,8 +1776,9 @@ async function trDecide(env, request, p, seg, url) {
     meta: {
       offerId: p.offer_id || p.survey_id || '',
       offerName: p.offer_name || p.survey_name || '',
-      /* 它回传的「本次进入」编号（= 我们 entry 链接里的 transaction_id），用来对账 */
-      eventId: p.transaction_id || '',
+      /* 它回传的「本次进入」编号（= 我们 entry 链接里的 transaction_id）。
+         官方回调变量表里叫 {external_transaction_id}，老字段叫 transaction_id */
+      eventId: p.external_transaction_id || p.transaction_id || '',
       payout: p.currency || '',
       currency: 'XB',
       ip: p.ip || request.headers.get('CF-Connecting-IP') || ''
