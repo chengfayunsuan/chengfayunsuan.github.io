@@ -69,6 +69,8 @@ export async function onRequest(context) {
     if (path === 'moonetix/postback') return await mtxPostback(request, env, url);
     if (path === 'moonetix/mock/complete' && request.method === 'POST') return await mtxMockComplete(request, env);
     if (path === 'theoremreach/link' && request.method === 'GET') return await trLink(request, env);
+    /* 直接跳转版：卡片就是个普通链接，不用 JS 也能进墙（中键、右键都能用） */
+    if (path === 'theoremreach/go' && request.method === 'GET') return await trGo(request, env);
     if (path.indexOf('theoremreach/postback') === 0) return await trPostback(request, env, url, path);
     if (path.indexOf('admin/') === 0) return await adminApi(request, env, url, path);
     return json({ ok: false, error: 'not_found' }, 404);
@@ -1525,6 +1527,30 @@ async function trLink(request, env) {
     ok: true,
     demo: false,
     url: TR_WALL + '?api_key=' + encodeURIComponent(c.apiKey) + '&user_id=' + Number(session.uid)
+  });
+}
+
+/* 墙入口的跳转版：登录了就 302 过去，没登录送去登录页。
+   做成跳转而不是 JSON，好处是卡片可以是个普通 <a>，中键新窗口也能用。 */
+async function trGo(request, env) {
+  const origin = new URL(request.url).origin;
+  const session = await currentSession(request, env);
+  if (!session) return Response.redirect(origin + '/login', 302);
+  if (!isActive(session)) return Response.redirect(origin + '/support', 302);
+
+  /* 墙地址靠 api_key 拼，光有 secret 不够 */
+  const c = trConf(env);
+  if (!c.apiKey) return Response.redirect(origin + '/earn', 302);
+
+  const target = TR_WALL + '?api_key=' + encodeURIComponent(c.apiKey) +
+    '&user_id=' + Number(session.uid);
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: target,
+      'Cache-Control': 'no-store',
+      'Referrer-Policy': 'no-referrer-when-downgrade'
+    }
   });
 }
 
